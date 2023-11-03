@@ -1,6 +1,5 @@
 package io.github.kawaiicakes.nobullship.block;
 
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
@@ -14,10 +13,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.ParametersAreNonnullByDefault;
-
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
 public class MultiblockWorkshopBlockEntity extends BlockEntity implements MenuProvider, Container {
 
     public MultiblockWorkshopBlockEntity(BlockEntityType<?> pType, BlockPos pPos, BlockState pBlockState) {
