@@ -1,27 +1,33 @@
 package io.github.kawaiicakes.nobullship.data;
 
+import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.DataProvider;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.resources.ResourceLocation;
 
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
-import static net.minecraft.world.item.Items.DIRT;
-import static net.minecraft.world.item.Items.GRASS_BLOCK;
+import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
+import static net.minecraft.data.DataGenerator.Target.DATA_PACK;
 
-public class MultiblockRecipeProvider extends RecipeProvider {
-    public static void generateTestRecipe(Consumer<FinishedRecipe> writer) {
-        ShapelessRecipeBuilder.shapeless(DIRT).unlockedBy("has_dirt", has(DIRT)).requires(GRASS_BLOCK).save(writer);
-    }
+public class MultiblockRecipeProvider implements DataProvider {
+    protected final DataGenerator.PathProvider path;
 
     public MultiblockRecipeProvider(DataGenerator pGenerator) {
-        super(pGenerator);
+        this.path = pGenerator.createPathProvider(DATA_PACK, "recipes");
     }
 
     @Override
-    protected void buildCraftingRecipes(@NotNull Consumer<FinishedRecipe> pFinishedRecipeConsumer) {
-        generateTestRecipe(pFinishedRecipeConsumer);
+    public void run(CachedOutput pOutput) throws IOException {
+        Set<ResourceLocation> recipeIds = new HashSet<>();
+    }
+
+    @Override
+    public String getName() {
+        return MOD_ID + ":multiblock_recipe_provider";
     }
 }
