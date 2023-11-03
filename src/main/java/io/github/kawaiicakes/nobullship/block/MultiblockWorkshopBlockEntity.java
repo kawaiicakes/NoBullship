@@ -33,7 +33,10 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements MenuPr
 
     @Override
     public boolean isEmpty() {
-        return this.contents.isEmpty();
+        for (ItemStack item : this.contents) {
+            if (!item.isEmpty()) return false;
+        }
+        return true;
     }
 
     @Override
