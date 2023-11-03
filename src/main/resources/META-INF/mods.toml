@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="[43,)"
+license="MIT"
+issueTrackerURL="https://github.com/kawaiicakes/NoBullship/issues"
+
+[[mods]]
+modId="nobullship"
+version="1.19.2-1.0.0"
+displayName="Template Mod 1.19"
+displayURL="https://github.com/kawaiicakes/NoBullship/"
+logoFile="nobullship.png"
+credits="Thanks to ME!"
+authors="kawaiicakes"
+description='''
+This is a template used for my mods so I can just copy paste this for a new 1.19.2 dev environment lol
+'''
+
+[[dependencies.nobullship]]
+    modId="forge"
+    mandatory=true
+    versionRange="[43,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.nobullship]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.19.2,1.20)"
+    ordering="NONE"
+    side="BOTH"
