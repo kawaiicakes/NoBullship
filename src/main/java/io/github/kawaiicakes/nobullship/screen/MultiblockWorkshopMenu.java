@@ -6,6 +6,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -26,6 +27,13 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
         super(WORKSHOP_MENU.get(), pContainerId);
         this.entity = entity;
         this.level = inventory.player.getLevel();
+
+        this.addPlayerInventory(inventory);
+        this.addPlayerHotbar(inventory);
+
+        for (int i = 0; i < 9; ++i) {
+            this.addSlot(new Slot(entity, i, 97 + i * 18, 70));
+        }
     }
 
     @Override
@@ -36,5 +44,19 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
     @Override
     public boolean stillValid(Player pPlayer) {
         return stillValid(ContainerLevelAccess.create(level, this.entity.getBlockPos()), pPlayer, WORKSHOP_BLOCK.get());
+    }
+
+    private void addPlayerInventory(Inventory playerInventory) {
+        for (int i = 0; i < 3; ++i) {
+            for (int l = 0; l < 9; ++l) {
+                this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 97 + l * 18, 86 + i * 18));
+            }
+        }
+    }
+
+    private void addPlayerHotbar(Inventory playerInventory) {
+        for (int i = 0; i < 9; ++i) {
+            this.addSlot(new Slot(playerInventory, i, 97 + i * 18, 195));
+        }
     }
 }
