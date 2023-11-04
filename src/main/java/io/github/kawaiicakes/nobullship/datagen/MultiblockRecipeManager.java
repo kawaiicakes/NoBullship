@@ -28,6 +28,7 @@ import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
     private static final Logger LOGGER = LogUtils.getLogger();
+    protected static MultiblockRecipeManager INSTANCE = null;
 
     /**
      * A map available on the serverside containing the recipe id as a key, and a <code>Pair</code> of the
@@ -35,8 +36,13 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
      */
     private Map<ResourceLocation, Pair<BlockPattern, ResourceLocation>> recipes = ImmutableMap.of();
 
-    public MultiblockRecipeManager() {
+    protected MultiblockRecipeManager() {
         super(GSON, "entity_recipes");
+    }
+
+    public static MultiblockRecipeManager getInstance() {
+        if (INSTANCE == null) INSTANCE = new MultiblockRecipeManager();
+        return INSTANCE;
     }
 
     @Override
@@ -62,6 +68,10 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         this.recipes = builder.build();
         LOGGER.info("Loaded {} recipes", recipes.size());
+    }
+
+    public void printRecipes() {
+        LOGGER.info(this.recipes.toString());
     }
 
     @Nullable
