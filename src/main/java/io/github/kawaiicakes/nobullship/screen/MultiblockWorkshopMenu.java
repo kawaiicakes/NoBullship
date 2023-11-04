@@ -37,6 +37,17 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
     }
 
     @Override
+    public boolean canTakeItemForPickAll(ItemStack pStack, Slot pSlot) {
+        return pSlot.container != this.entity && super.canTakeItemForPickAll(pStack, pSlot);
+    }
+
+    @Override
+    public void removed(Player pPlayer) {
+        super.removed(pPlayer);
+        this.clearContainer(pPlayer, pPlayer.getInventory());
+    }
+
+    @Override
     public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
         return pPlayer.inventoryMenu.quickMoveStack(pPlayer, pIndex);
     }
