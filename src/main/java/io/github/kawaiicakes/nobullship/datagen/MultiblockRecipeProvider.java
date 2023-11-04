@@ -46,7 +46,6 @@ public class MultiblockRecipeProvider implements DataProvider {
     }
 
     protected void buildRecipes(Consumer<FinishedMultiblockRecipe> consumer) {
-        buildDefaults(consumer);
         MultiblockRecipeBuilder
                 .of(new ResourceLocation("creeper"))
                 .where('#', Blocks.REDSTONE_ORE.defaultBlockState())
@@ -64,9 +63,5 @@ public class MultiblockRecipeProvider implements DataProvider {
         } catch (IOException ioexception) {
             LOGGER.error("Couldn't save recipe {}", pPath, ioexception);
         }
-    }
-
-    private static void buildDefaults(Consumer<FinishedMultiblockRecipe> consumer) {
-        ENTITY_TYPES.getKeys().forEach(key -> MultiblockRecipeBuilder.of(key).save(consumer, key));
     }
 }
