@@ -29,7 +29,7 @@ public class MultiblockRecipeProvider implements DataProvider {
     protected final DataGenerator.PathProvider path;
 
     public MultiblockRecipeProvider(DataGenerator pGenerator, ExistingFileHelper fileHelper) {
-        this.path = pGenerator.createPathProvider(DATA_PACK, "multiblock_recipes");
+        this.path = pGenerator.createPathProvider(DATA_PACK, "entity_recipes");
     }
 
     @Override
@@ -47,7 +47,7 @@ public class MultiblockRecipeProvider implements DataProvider {
 
     @Override
     public String getName() {
-        return MOD_ID + ":" + "multiblock_recipe_provider";
+        return "No Bullship! - Entity Recipe Provider";
     }
 
     protected void buildRecipes(Consumer<FinishedMultiblockRecipe> consumer) {
