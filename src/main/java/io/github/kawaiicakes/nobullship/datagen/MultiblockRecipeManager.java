@@ -9,12 +9,22 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
 public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
@@ -65,14 +75,48 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
      */
     @Nullable
     protected static Pair<BlockPattern, ResourceLocation> fromJson(JsonObject json) {
+        JsonObject jsonKeys = json.getAsJsonObject("key");
         JsonObject jsonRecipe = json.getAsJsonObject("recipe");
         ResourceLocation result = new ResourceLocation(json.getAsJsonObject("result").getAsString());
 
         BlockPatternBuilder builder = BlockPatternBuilder.start();
 
-        for (int i = 0; i < json.size(); i++) {
+        for (Map.Entry<String, JsonElement> entry : jsonKeys.entrySet()) {
+            ResourceLocation blockLocation
+                    = new ResourceLocation(entry.getValue().getAsJsonObject().get("block").getAsString());
+            Block block = RegistryObject.create(blockLocation, BLOCKS).get();
+
+            String propertyName = entry.getValue().getAsJsonObject().get("state").getAsJsonObject().get("name").getAsString();
+            String propertyValue = entry.getValue().getAsJsonObject().get("state").getAsJsonObject().get("value").getAsString();
+
+            BlockState state;
+            Property<?> property = block.getStateDefinition().getProperty(propertyName);
+            if (property != null) {
+                state = block.getStateDefinition()
+                        .getPossibleStates()
+                        .stream()
+                        .filter(possibleState -> Objects.equals(possibleState.getValue(property).toString(), propertyValue))
+                        .findFirst()
+                        .orElseThrow();
+            } else {
+                state = null;
+            }
+
+            builder.where(entry.getKey().charAt(0), BlockInWorld.hasState(testState -> testState == state));
+        }
+
+        for (int i = 0; i < jsonRecipe.size(); i++) {
             JsonArray aisle = jsonRecipe.getAsJsonArray("z" + i);
             if (aisle.isEmpty()) return null;
+
+            List<String> strings = new ArrayList<>(aisle.size());
+            aisle.forEach(element -> strings.add(element.getAsString()));
+
+            try {
+                builder.aisle(strings.toArray(String[]::new));
+            } catch (IllegalArgumentException exception) {
+                LOGGER.error(exception.getMessage());
+            }
         }
 
         return new Pair<>(builder.build(), result);
