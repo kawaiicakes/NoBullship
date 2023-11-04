@@ -20,10 +20,7 @@ import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
@@ -88,36 +85,31 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                     = new ResourceLocation(entry.getValue().getAsJsonObject().get("block").getAsString());
             Block block = RegistryObject.create(blockLocation, BLOCKS).get();
 
-            JsonElement blockState = entry.getValue().getAsJsonObject().get("state");
+            JsonObject blockStateJson = entry.getValue().getAsJsonObject().getAsJsonObject("state");
 
-            if (blockState == null) {
+            if (blockStateJson == null) {
                 builder.where(entry.getKey().charAt(0), BlockInWorld.hasState(testState -> testState.is(block)));
                 continue;
             }
 
-            String propertyName = blockState.getAsJsonObject().get("name").getAsString();
-            String propertyValue = blockState.getAsJsonObject().get("value").getAsString();
+            final Map<Property<?>, String> deserializedState = new HashMap<>(blockStateJson.size());
+            for (Map.Entry<String, JsonElement> keyPair : blockStateJson.entrySet()) {
+                Property<?> property = block.getStateDefinition().getProperty(keyPair.getKey());
+                if (property == null) {
+                    LOGGER.error("Property {} does not exist for {}", keyPair.getKey(), blockLocation);
+                    continue;
+                }
 
-            BlockState state;
-            Property<?> property;
-
-            property = block.getStateDefinition().getProperty(propertyName);
-
-            if (property == null) {
-                LOGGER.error("Property {} does not exist for {}", propertyName, blockLocation);
-                builder.where(entry.getKey().charAt(0), BlockInWorld.hasState(testState -> testState.is(block)));
-                continue;
+                String propertyValue = blockStateJson.get(keyPair.getKey()).getAsString();
+                deserializedState.put(property, propertyValue);
             }
 
-            // TODO: allow choosing multiple blockstates; ensure only defining one blockstate implicitly means the others can be whatever
-            state = block.getStateDefinition()
-                    .getPossibleStates()
-                    .stream()
-                    .filter(possibleState -> Objects.equals(possibleState.getValue(property).toString(), propertyValue))
-                    .findFirst()
-                    .orElseThrow();
-
-            builder.where(entry.getKey().charAt(0), BlockInWorld.hasState(testState -> testState == state));
+            builder.where(entry.getKey().charAt(0), BlockInWorld.hasState(testState -> {
+                for (Map.Entry<Property<?>, String> propertyEntry : deserializedState.entrySet()) {
+                    if (!testState.getValue(propertyEntry.getKey()).toString().equals(propertyEntry.getValue())) return false;
+                }
+                return true;
+            }));
         }
 
         for (int i = 0; i < jsonRecipe.size(); i++) {
