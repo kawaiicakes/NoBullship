@@ -58,7 +58,6 @@ public class NoBullship
         MinecraftForge.EVENT_BUS.register(this);
 
         modEventBus.addListener(this::gatherData);
-        // modEventBus.addListener(this::addReloadListener);
 
         BLOCK_REGISTRY.register(modEventBus);
         BLOCK_ENTITY_REGISTRY.register(modEventBus);
@@ -74,12 +73,10 @@ public class NoBullship
         );
     }
 
-    /* This is crashing currently
     @SubscribeEvent
     public void addReloadListener(AddReloadListenerEvent event) {
         event.addListener(new MultiblockRecipeManager());
     }
-     */
 
     @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientSetup {
