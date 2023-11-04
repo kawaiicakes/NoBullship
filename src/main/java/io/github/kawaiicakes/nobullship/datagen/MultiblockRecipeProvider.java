@@ -65,8 +65,6 @@ public class MultiblockRecipeProvider implements DataProvider {
     }
 
     private static void buildDefaults(Consumer<FinishedMultiblockRecipe> consumer) {
-        ENTITY_TYPES.getKeys().forEach(key -> {
-            MultiblockRecipeBuilder.of(key).save(consumer, key);
-        });
+        ENTITY_TYPES.getKeys().forEach(key -> MultiblockRecipeBuilder.of(key).save(consumer, key));
     }
 }
