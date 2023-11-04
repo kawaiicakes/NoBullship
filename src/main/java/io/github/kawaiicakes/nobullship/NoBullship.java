@@ -2,7 +2,7 @@ package io.github.kawaiicakes.nobullship;
 
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
-import io.github.kawaiicakes.nobullship.data.MultiblockRecipeProvider;
+import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
