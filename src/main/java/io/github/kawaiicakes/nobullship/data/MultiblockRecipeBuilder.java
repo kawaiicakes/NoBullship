@@ -60,17 +60,28 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
 
         @Override
         public void serializeRecipeData(JsonObject pJson) {
+            // TODO - add conditional serialization stuff
+            JsonObject keyMappings = new JsonObject();
+            for (Map.Entry<Character, Predicate<BlockInWorld>> entry : this.lookup.entrySet()) {
+                JsonObject mapping = new JsonObject();
+                // TODO - figure out how tf to serialize Predicate<BlockInWorld> then continue this
+                mapping.addProperty();
+                keyMappings.add(String.valueOf(entry.getKey()), mapping);
+            }
+
             JsonObject recipePattern = new JsonObject();
+            for (int i = 0; i < this.recipe.size(); i++) {
+                recipePattern.add("z" + i, new JsonArray(this.recipe.get(i).length));
 
-            for (int i = 0; i < recipe.size(); i++) {
-                recipePattern.add("z" + i, new JsonArray(recipe.get(i).length));
-
-                for (int j = 0; j < recipe.get(i).length; j++) {
-                    recipePattern.getAsJsonArray("z" + i).add(recipe.get(i)[j]);
+                for (int j = 0; j < this.recipe.get(i).length; j++) {
+                    recipePattern.getAsJsonArray("z" + i).add(this.recipe.get(i)[j]);
                 }
             }
 
+            pJson.add("key", keyMappings);
             pJson.add("recipe", recipePattern);
+            pJson.addProperty("height", this.height);
+            pJson.addProperty("width", this.width);
             pJson.addProperty("result", this.result.toString());
         }
 
