@@ -1,0 +1,15 @@
+{
+  "key": {
+    "#": {
+      "blockstate": "Block{minecraft:redstone_ore}[lit=false]"
+    }
+  },
+  "recipe": {
+    "z0": [
+      " # ",
+      " # ",
+      "###"
+    ]
+  },
+  "result": "minecraft:creeper"
+}
