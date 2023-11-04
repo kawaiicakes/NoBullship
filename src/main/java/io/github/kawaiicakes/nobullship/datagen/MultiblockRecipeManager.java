@@ -71,8 +71,9 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         return this.recipes.getOrDefault(recipeId, null).getFirst();
     }
 
+    // TODO: ensure NullPointerExceptions do not occur in local variable declarations.
     /**
-     * Essentially a deserializer.
+     * Essentially a deserializer. Returns null if the argument contains syntax errors.
      */
     @Nullable
     protected static Pair<BlockPattern, ResourceLocation> fromJson(JsonObject json) {

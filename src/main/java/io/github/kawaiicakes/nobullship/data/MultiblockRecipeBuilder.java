@@ -78,7 +78,8 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
                 entry.getValue().getValues().forEach((property, comparable) ->
                         properties.addProperty(property.getName(), comparable.toString()));
 
-                //noinspection DataFlowIssue
+                // Given where this method is being called, it's impossible for the registry to not be loaded... right?
+                // noinspection DataFlowIssue
                 mapping.addProperty("block", BLOCKS.getKey(entry.getValue().getBlock()).toString());
                 if (properties.size() != 0) mapping.add("state", properties);
                 keyMappings.add(String.valueOf(entry.getKey()), mapping);
