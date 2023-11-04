@@ -1,7 +1,10 @@
 {
   "key": {
     "#": {
-      "blockstate": "Block{minecraft:redstone_ore}[lit=false]"
+      "block": "minecraft:redstone_ore",
+      "state": {
+        "lit": "false"
+      }
     }
   },
   "recipe": {

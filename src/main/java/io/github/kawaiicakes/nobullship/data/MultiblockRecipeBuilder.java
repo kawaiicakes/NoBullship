@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
+
 public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     protected final ResourceLocation result;
     protected final Map<String, BlockState> lookupSimple = new HashMap<>();
@@ -71,8 +73,14 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
             for (Map.Entry<String, BlockState> entry : this.lookup.entrySet()) {
                 if (entry.getKey().equals(" ")) continue;
                 JsonObject mapping = new JsonObject();
-                // TODO - figure out how tf to serialize Predicate<BlockInWorld> then continue this
-                mapping.addProperty("blockstate", entry.getValue().toString());
+
+                JsonObject properties = new JsonObject();
+                entry.getValue().getValues().forEach((property, comparable) ->
+                        properties.addProperty(property.getName(), comparable.toString()));
+
+                //noinspection DataFlowIssue
+                mapping.addProperty("block", BLOCKS.getKey(entry.getValue().getBlock()).toString());
+                if (properties.size() != 0) mapping.add("state", properties);
                 keyMappings.add(String.valueOf(entry.getKey()), mapping);
             }
 

@@ -1,10 +1,10 @@
-// 1.19.2	2023-11-04T13:34:32.4926862	No Bullship! - Entity Recipe Provider
+// 1.19.2	2023-11-04T15:13:31.4714829	No Bullship! - Entity Recipe Provider
 31efbe80d39f64a79a7d9c02e6033037b7534f02 data/minecraft/entity_recipes/allay.json
 409b9dfbc7e5e28cd945cc01f5548e38c948f55a data/minecraft/entity_recipes/area_effect_cloud.json
 04e243f9b82732f8e40cb32c7dcc2363d82d2b93 data/minecraft/entity_recipes/armor_stand.json
 f471525d9c7a8eb12a972ba5b3dc136c758ca1c1 data/minecraft/entity_recipes/arrow.json
 f8d48f9277abc15e27b4f86e0c12c6bcd32a22e4 data/minecraft/entity_recipes/axolotl.json
-4484f35fb53595998cabcd349f1afbc1dca719f4 data/minecraft/entity_recipes/ballsmungus.json
+9e2e94d82c051f176d91acfc4636d5698fbb17a8 data/minecraft/entity_recipes/ballsmungus.json
 1fd4e8f4197e70d43283810574a935416c69449d data/minecraft/entity_recipes/bat.json
 5a994ecce6db3ab137cfd48eaca15dc50fac3d9e data/minecraft/entity_recipes/bee.json
 60886f4e1e6e99853c705946939fa0ac3a3a3a24 data/minecraft/entity_recipes/blaze.json
