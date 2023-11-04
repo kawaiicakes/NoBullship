@@ -10,8 +10,6 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
@@ -20,7 +18,10 @@ import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
@@ -68,7 +69,6 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         return this.recipes.getOrDefault(recipeId, null).getFirst();
     }
 
-    // TODO: ensure NullPointerExceptions do not occur in local variable declarations.
     /**
      * Essentially a deserializer. Returns null if the argument contains syntax errors.
      */
@@ -76,13 +76,20 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     protected static Pair<BlockPattern, ResourceLocation> fromJson(JsonObject json) {
         JsonObject jsonKeys = json.getAsJsonObject("key");
         JsonObject jsonRecipe = json.getAsJsonObject("recipe");
-        ResourceLocation result = new ResourceLocation(json.getAsJsonPrimitive("result").getAsString());
+        JsonPrimitive jsonResult = json.getAsJsonPrimitive("result");
+
+        if (jsonKeys == null || jsonRecipe == null || jsonResult == null) return null;
+
+        ResourceLocation result = new ResourceLocation(jsonResult.getAsString());
 
         BlockPatternBuilder builder = BlockPatternBuilder.start();
 
         for (Map.Entry<String, JsonElement> entry : jsonKeys.entrySet()) {
-            ResourceLocation blockLocation
-                    = new ResourceLocation(entry.getValue().getAsJsonObject().get("block").getAsString());
+            JsonElement mappedCharacterBlock = entry.getValue().getAsJsonObject().get("block");
+
+            if (mappedCharacterBlock == null) return null;
+
+            ResourceLocation blockLocation = new ResourceLocation(mappedCharacterBlock.getAsString());
             Block block = RegistryObject.create(blockLocation, BLOCKS).get();
 
             JsonObject blockStateJson = entry.getValue().getAsJsonObject().getAsJsonObject("state");
@@ -100,6 +107,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                     continue;
                 }
 
+                if (blockStateJson.get(keyPair.getKey()) == null) return null;
                 String propertyValue = blockStateJson.get(keyPair.getKey()).getAsString();
                 deserializedState.put(property, propertyValue);
             }
