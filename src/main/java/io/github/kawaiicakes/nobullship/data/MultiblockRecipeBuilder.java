@@ -31,6 +31,16 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
         consumer.accept(new Result(id, this.result, this.pattern, this.lookup, this.height, this.width));
     }
 
+    @Override
+    public MultiblockRecipeBuilder aisle(String... pAisle) {
+        return (MultiblockRecipeBuilder) super.aisle(pAisle);
+    }
+
+    @Override
+    public MultiblockRecipeBuilder where(char pSymbol, Predicate<BlockInWorld> pBlockMatcher) {
+        return (MultiblockRecipeBuilder) super.where(pSymbol, pBlockMatcher);
+    }
+
     public static class Result implements FinishedMultiblockRecipe {
         protected final ResourceLocation id;
         protected final ResourceLocation result;
