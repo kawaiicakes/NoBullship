@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.predicate.BlockStatePredicate;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistry;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -23,12 +25,13 @@ import java.util.function.Consumer;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 import static net.minecraft.data.DataGenerator.Target.DATA_PACK;
+import static net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES;
 
 public class MultiblockRecipeProvider implements DataProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
     protected final DataGenerator.PathProvider path;
 
-    public MultiblockRecipeProvider(DataGenerator pGenerator, ExistingFileHelper fileHelper) {
+    public MultiblockRecipeProvider(DataGenerator pGenerator) {
         this.path = pGenerator.createPathProvider(DATA_PACK, "entity_recipes");
     }
 
@@ -42,7 +45,6 @@ public class MultiblockRecipeProvider implements DataProvider {
                     saveRecipe(pOutput, finishedRecipe.serializeRecipe(), this.path.json(finishedRecipe.getId()));
                 }
         });
-
     }
 
     @Override
@@ -51,7 +53,7 @@ public class MultiblockRecipeProvider implements DataProvider {
     }
 
     protected void buildRecipes(Consumer<FinishedMultiblockRecipe> consumer) {
-        buildCreeper(consumer);
+        buildDefaults(consumer);
     }
 
     private static void saveRecipe(CachedOutput pOutput, JsonObject pRecipeJson, Path pPath) {
@@ -62,13 +64,9 @@ public class MultiblockRecipeProvider implements DataProvider {
         }
     }
 
-    private static void buildCreeper(Consumer<FinishedMultiblockRecipe> consumer) {
-        ((MultiblockRecipeBuilder) MultiblockRecipeBuilder.of(new ResourceLocation("minecraft", "creeper"))
-                .where('#', BlockInWorld.hasState(BlockStatePredicate.forBlock(Blocks.LIME_WOOL)))
-                .aisle(
-                        " # ",
-                        " # ",
-                        "###"
-                )).save(consumer, new ResourceLocation("minecraft", "creeper"));
+    private static void buildDefaults(Consumer<FinishedMultiblockRecipe> consumer) {
+        ENTITY_TYPES.getKeys().forEach(key -> {
+            MultiblockRecipeBuilder.of(key).save(consumer, key);
+        });
     }
 }

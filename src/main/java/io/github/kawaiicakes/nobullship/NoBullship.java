@@ -67,7 +67,7 @@ public class NoBullship
     public void gatherData(GatherDataEvent event) {
         event.getGenerator().addProvider(
                 event.includeServer(),
-                new MultiblockRecipeProvider(event.getGenerator(), event.getExistingFileHelper())
+                new MultiblockRecipeProvider(event.getGenerator())
         );
     }
 
