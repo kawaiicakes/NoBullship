@@ -2,6 +2,7 @@ package io.github.kawaiicakes.nobullship;
 
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
+import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopScreen;
@@ -18,6 +19,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.data.event.GatherDataEvent;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -56,6 +58,7 @@ public class NoBullship
         MinecraftForge.EVENT_BUS.register(this);
 
         modEventBus.addListener(this::gatherData);
+        modEventBus.addListener(this::addReloadListener);
 
         BLOCK_REGISTRY.register(modEventBus);
         BLOCK_ENTITY_REGISTRY.register(modEventBus);
@@ -69,6 +72,11 @@ public class NoBullship
                 event.includeServer(),
                 new MultiblockRecipeProvider(event.getGenerator())
         );
+    }
+
+    @SubscribeEvent
+    public void addReloadListener(AddReloadListenerEvent event) {
+        event.addListener(new MultiblockRecipeManager());
     }
 
     @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
