@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import static net.minecraft.data.DataGenerator.Target.DATA_PACK;
-import static net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES;
 
 public class MultiblockRecipeProvider implements DataProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
