@@ -3,18 +3,18 @@ package io.github.kawaiicakes.nobullship.item;
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
@@ -25,6 +25,7 @@ import net.minecraft.world.phys.HitResult;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
+import static net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES;
 
 /**
  * Care is taken to ensure that using the schematic does not alter the blockstate of the clicked block.
@@ -83,8 +84,13 @@ public class SchematicItem extends Item {
                     level.setBlock(blockinworld.getPos(), Blocks.AIR.defaultBlockState(), 2);
                 }
             }
-            level.getLevel().getServer().getPlayerList().broadcastSystemMessage(Component.literal("AMBATAKUM! \uD83D\uDE2B\uD83D\uDE2B\uD83D\uDCA6\uD83D\uDCA6\uD83D\uDCA6\uD83D\uDCA6"), true);
-            level.explode(null, pos.getX(), pos.getY(), pos.getZ(), 3.2F, true, Explosion.BlockInteraction.DESTROY);
+
+            @SuppressWarnings("DataFlowIssue") Creeper creeper = (Creeper) ENTITY_TYPES.getValue(new ResourceLocation("creeper")).create(level);
+            BlockPos blockpos = match.getBlock(1, 2, 0).getPos();
+            assert creeper != null;
+            creeper.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.55D, (double)blockpos.getZ() + 0.5D, match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F, 0.0F);
+            creeper.yBodyRot = match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F;
+            level.addFreshEntity(creeper);
         }
 
         return InteractionResult.FAIL;
