@@ -46,6 +46,13 @@ public class NoBullship
 {
     public static final String MOD_ID = "nobullship";
 
+    public static final CreativeModeTab NO_BULLSHIP_TAB = new CreativeModeTab("nobullship_tab") {
+        @Override
+        public @NotNull ItemStack makeIcon() {
+            return SCHEMATIC.get().getDefaultInstance();
+        }
+    };
+
     private static final DeferredRegister<Block> BLOCK_REGISTRY = DeferredRegister.create(BLOCKS, MOD_ID);
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_REGISTRY =
             DeferredRegister.create(BLOCK_ENTITY_TYPES, MOD_ID);
@@ -59,18 +66,11 @@ public class NoBullship
     public static final RegistryObject<BlockItem> WORKSHOP_ITEM
             = ITEM_REGISTRY.register(
                     "workshop",
-            () -> new BlockItem(WORKSHOP_BLOCK.get(), new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+            () -> new BlockItem(WORKSHOP_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB)));
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));
 
     public static final RegistryObject<SchematicItem> SCHEMATIC = ITEM_REGISTRY.register("schematic", SchematicItem::new);
-
-    public static final CreativeModeTab NO_BULLSHIP_TAB = new CreativeModeTab("nobullship_tab") {
-        @Override
-        public @NotNull ItemStack makeIcon() {
-            return SCHEMATIC.get().getDefaultInstance();
-        }
-    };
 
     public NoBullship()
     {
