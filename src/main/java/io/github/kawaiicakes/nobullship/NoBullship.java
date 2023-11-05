@@ -85,6 +85,8 @@ public class NoBullship
 
         if (creeperPattern == null) return;
 
+
+        // FIXME: if the blockstate of one of the blocks changes as this matches, that block will not be removed.
         BlockPattern.BlockPatternMatch match = creeperPattern.find(level, event.getPos());
         if (match != null) {
             for (int i = 0; i < creeperPattern.getWidth(); ++i) {
