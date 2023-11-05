@@ -54,6 +54,7 @@ public class SchematicItem extends Item {
     // So long as a claim mod sets $useItem to DENY in RightClickBlock event, this will not bypass claim mods.
     @Override
     public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext pContext) {
+        // TODO: configurable options for cooldown time, whether fake players can use this item...
         // Cooldown is added so spamming this isn't possible. BlockPattern#find is an expensive call.
         if (pContext.getPlayer() != null) pContext.getPlayer().getCooldowns().addCooldown(this, 20);
 
