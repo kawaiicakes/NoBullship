@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.item;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
@@ -10,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -21,6 +23,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.phys.HitResult;
+import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -42,7 +45,7 @@ public class SchematicItem extends Item {
         CompoundTag nbt = pStack.getTag();
         if (nbt == null) return this.getDescriptionId();
 
-        if (!(nbt.getString("product").isEmpty())) return this.getDescriptionId() + ".filled";
+        if (!(nbt.getString("nobullship_recipe").isEmpty())) return this.getDescriptionId() + ".filled";
 
         return this.getDescriptionId();
     }
@@ -66,32 +69,37 @@ public class SchematicItem extends Item {
         if (pContext.getHitResult().getType() != HitResult.Type.BLOCK) return InteractionResult.FAIL;
 
         CompoundTag nbt = stack.getTag();
-        //if (nbt == null) return InteractionResult.FAIL;
+        if (nbt == null) return InteractionResult.FAIL;
+        if (nbt.getString("nobullship_recipe").isEmpty()) return InteractionResult.FAIL;
+
+        Pair<BlockPattern, ResourceLocation> recipePair
+                = MultiblockRecipeManager.getInstance().getRecipePair(new ResourceLocation(nbt.getString("nobullship_recipe")));
+        if (recipePair == null) return InteractionResult.FAIL;
+
+        BlockPattern pattern = recipePair.getFirst();
+        ResourceLocation resultLocation = recipePair.getSecond();
+        if (pattern == null || resultLocation == null) return InteractionResult.FAIL;
 
         BlockPos pos = pContext.getClickedPos();
 
-        BlockPattern pattern
-                = MultiblockRecipeManager.getInstance().checkPattern(new ResourceLocation("ballsmungus"));
-
-        if (pattern == null) return InteractionResult.FAIL;
-
         // FIXME: if the blockstate of one of the blocks changes as this matches, that block will not be removed.
         BlockPattern.BlockPatternMatch match = pattern.find(level, pos);
-        if (match != null) {
-            for (int i = 0; i < pattern.getWidth(); ++i) {
-                for (int j = 0; j < pattern.getHeight(); ++j) {
-                    BlockInWorld blockinworld = match.getBlock(i, j, 0);
-                    level.setBlock(blockinworld.getPos(), Blocks.AIR.defaultBlockState(), 2);
-                }
-            }
+        if (match == null) return InteractionResult.FAIL;
 
-            @SuppressWarnings("DataFlowIssue") Creeper creeper = (Creeper) ENTITY_TYPES.getValue(new ResourceLocation("creeper")).create(level);
-            BlockPos blockpos = match.getBlock(1, 2, 0).getPos();
-            assert creeper != null;
-            creeper.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.55D, (double)blockpos.getZ() + 0.5D, match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F, 0.0F);
-            creeper.yBodyRot = match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F;
-            level.addFreshEntity(creeper);
+        for (int i = 0; i < pattern.getWidth(); ++i) {
+            for (int j = 0; j < pattern.getHeight(); ++j) {
+                BlockInWorld blockinworld = match.getBlock(i, j, 0);
+                level.setBlock(blockinworld.getPos(), Blocks.AIR.defaultBlockState(), 2);
+            }
         }
+
+        Entity entity = RegistryObject.create(resultLocation, ENTITY_TYPES).get().create(level);
+        if (entity == null) return InteractionResult.FAIL;
+
+        BlockPos blockpos = match.getBlock(1, 2, 0).getPos();
+        entity.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.55D, (double)blockpos.getZ() + 0.5D, match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F, 0.0F);
+        entity.setYRot(match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F);
+        level.addFreshEntity(entity);
 
         return InteractionResult.FAIL;
     }
