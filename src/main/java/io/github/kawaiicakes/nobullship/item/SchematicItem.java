@@ -2,10 +2,14 @@ package io.github.kawaiicakes.nobullship.item;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
+import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -47,6 +51,16 @@ public class SchematicItem extends Item {
         if (!(nbt.getString("nobullshipRecipe").isEmpty())) return this.getDescriptionId() + ".filled";
 
         return this.getDescriptionId();
+    }
+
+    // FIXME: redo this
+    @Override
+    public Component getHighlightTip(ItemStack item, Component displayName) {
+        if (item.getTag() == null) return displayName;
+        if (item.getTag().getString("nobullshipRecipe").isEmpty()) return displayName;
+
+        MutableComponent returnComp = displayName.copy().append(" - " + item.getTag().getString("nobullshipRecipe"));
+        return returnComp.withStyle(Style.EMPTY.withColor(ChatFormatting.BLUE));
     }
 
     @Override
