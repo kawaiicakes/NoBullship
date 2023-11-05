@@ -12,7 +12,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -45,7 +44,7 @@ public class SchematicItem extends Item {
         CompoundTag nbt = pStack.getTag();
         if (nbt == null) return this.getDescriptionId();
 
-        if (!(nbt.getString("nobullship_recipe").isEmpty())) return this.getDescriptionId() + ".filled";
+        if (!(nbt.getString("nobullshipRecipe").isEmpty())) return this.getDescriptionId() + ".filled";
 
         return this.getDescriptionId();
     }
@@ -70,10 +69,10 @@ public class SchematicItem extends Item {
 
         CompoundTag nbt = stack.getTag();
         if (nbt == null) return InteractionResult.FAIL;
-        if (nbt.getString("nobullship_recipe").isEmpty()) return InteractionResult.FAIL;
+        if (nbt.getString("nobullshipRecipe").isEmpty()) return InteractionResult.FAIL;
 
         Pair<BlockPattern, ResourceLocation> recipePair
-                = MultiblockRecipeManager.getInstance().getRecipePair(new ResourceLocation(nbt.getString("nobullship_recipe")));
+                = MultiblockRecipeManager.getInstance().getRecipePair(new ResourceLocation(nbt.getString("nobullshipRecipe")));
         if (recipePair == null) return InteractionResult.FAIL;
 
         BlockPattern pattern = recipePair.getFirst();
