@@ -1,6 +1,6 @@
 {
   "item.nobullship.schematic": "Empty Schematic",
-  "item.nobullship.schematic.filled": "",
+  "item.nobullship.schematic.filled": "Filled Schematic",
   "itemGroup.nobullship_tab": "No Bullship!",
   "block.nobullship.workshop": "Workshop"
 }
