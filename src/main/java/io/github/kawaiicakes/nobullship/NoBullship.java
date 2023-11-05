@@ -4,6 +4,7 @@ import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeProvider;
+import io.github.kawaiicakes.nobullship.item.SchematicItem;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -59,6 +60,8 @@ public class NoBullship
             () -> new BlockItem(WORKSHOP_BLOCK.get(), new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));
+
+    public static final RegistryObject<SchematicItem> SCHEMATIC = ITEM_REGISTRY.register("schematic", SchematicItem::new);
 
     public NoBullship()
     {
