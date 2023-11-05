@@ -124,6 +124,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
             builder.where(entry.getKey().charAt(0), BlockInWorld.hasState(testState -> {
                 for (Map.Entry<Property<?>, String> propertyEntry : deserializedState.entrySet()) {
+                    if (!testState.hasProperty(propertyEntry.getKey())) return false;
                     if (!testState.getValue(propertyEntry.getKey()).toString().equals(propertyEntry.getValue())) return false;
                 }
                 return true;
