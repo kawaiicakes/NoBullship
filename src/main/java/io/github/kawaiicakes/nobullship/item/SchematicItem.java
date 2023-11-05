@@ -120,8 +120,8 @@ public class SchematicItem extends Item {
 
     /*
         Overriding the methods below, strictly speaking, is not necessary given that #onItemUseFirst will fire first
-        and then pass a fail. If for some reason the PlayerInteractEvent is overridden such that $useItem is set to
-        ALLOW, these methods will ensure that still nothing will happen.
+        and then pass a fail. If for some reason the PlayerInteractEvent.RightClickBlock is overridden such that
+        $useItem is set to ALLOW, these methods will ensure that still nothing will happen.
      */
 
     @Override
