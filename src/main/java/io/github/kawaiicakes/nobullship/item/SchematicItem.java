@@ -1,6 +1,6 @@
 package io.github.kawaiicakes.nobullship.item;
 
-import com.mojang.datafixers.util.Pair;
+import io.github.kawaiicakes.nobullship.data.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -86,13 +86,12 @@ public class SchematicItem extends Item {
         if (nbt == null) return InteractionResult.FAIL;
         if (nbt.getString("nobullshipRecipe").isEmpty()) return InteractionResult.FAIL;
 
-        Pair<BlockPattern, ResourceLocation> recipePair
-                = MultiblockRecipeManager.getInstance().getRecipePair(new ResourceLocation(nbt.getString("nobullshipRecipe")));
-        if (recipePair == null) return InteractionResult.FAIL;
+        MultiblockRecipe cachedRecipe
+                = MultiblockRecipeManager.getInstance().getRecipe(new ResourceLocation(nbt.getString("nobullshipRecipe")));
+        if (cachedRecipe == null) return InteractionResult.FAIL;
 
-        BlockPattern pattern = recipePair.getFirst();
-        ResourceLocation resultLocation = recipePair.getSecond();
-        if (pattern == null || resultLocation == null) return InteractionResult.FAIL;
+        BlockPattern pattern = cachedRecipe.recipe();
+        ResourceLocation resultLocation = cachedRecipe.result();
 
         BlockPos pos = pContext.getClickedPos();
 
