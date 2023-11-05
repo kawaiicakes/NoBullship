@@ -68,8 +68,9 @@ public class SchematicItem extends Item {
         if (pContext.getPlayer() == null) return InteractionResult.FAIL;
         if (pContext.getPlayer().getCooldowns().isOnCooldown(this)) return InteractionResult.FAIL;
 
-        if (pContext.getLevel().isClientSide) return InteractionResult.FAIL;
+
         if (pContext.getHitResult().getType() != HitResult.Type.BLOCK) return InteractionResult.FAIL;
+        if (pContext.getLevel().isClientSide) return InteractionResult.SUCCESS;
 
         CompoundTag nbt = stack.getTag();
         if (nbt == null) return InteractionResult.FAIL;
@@ -82,14 +83,9 @@ public class SchematicItem extends Item {
         return InteractionResult.FAIL;
     }
 
-    /*
-        Overriding the methods below, strictly speaking, is not necessary given that #onItemUseFirst will fire first
-        and then pass a fail. If for some reason the PlayerInteractEvent.RightClickBlock is overridden such that
-        $useItem is set to ALLOW, these methods will ensure that still nothing will happen.
-     */
-
     @Override
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
+        if (pLevel.isClientSide) return InteractionResultHolder.success(pPlayer.getItemInHand(pUsedHand));
         return InteractionResultHolder.fail(pPlayer.getItemInHand(pUsedHand));
     }
 
