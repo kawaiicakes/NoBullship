@@ -84,7 +84,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             }
         }
 
-        level.playSound(null, pos, CONSTRUCT_SUCCESS.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+        level.playSound(null, pos, CONSTRUCT_SUCCESS.get(), SoundSource.PLAYERS, 0.77F, 1.0F);
 
         Entity entity = RegistryObject.create(resultLocation, ENTITY_TYPES).get().create(level);
         if (entity == null) return;
