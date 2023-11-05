@@ -72,47 +72,21 @@ public class SchematicItem extends Item {
     // So long as a claim mod sets $useItem to DENY in RightClickBlock event, this will not bypass claim mods.
     @Override
     public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext pContext) {
-        // TODO: configurable options for cooldown time, whether fake players can use this item...
+        // TODO: configurable options for cooldown time
         // Cooldown is added so spamming this isn't possible. BlockPattern#find is an expensive call.
         if (pContext.getPlayer() == null) return InteractionResult.FAIL;
         if (pContext.getPlayer().getCooldowns().isOnCooldown(this)) return InteractionResult.FAIL;
 
-        pContext.getPlayer().getCooldowns().addCooldown(this, 20);
-
-        if (!(pContext.getLevel() instanceof ServerLevel level)) return InteractionResult.FAIL;
+        if (pContext.getLevel().isClientSide) return InteractionResult.FAIL;
         if (pContext.getHitResult().getType() != HitResult.Type.BLOCK) return InteractionResult.FAIL;
 
         CompoundTag nbt = stack.getTag();
         if (nbt == null) return InteractionResult.FAIL;
-        if (nbt.getString("nobullshipRecipe").isEmpty()) return InteractionResult.FAIL;
+        String noBsRecipe = nbt.getString("nobullshipRecipe");
+        if (noBsRecipe.isEmpty()) return InteractionResult.FAIL;
 
-        MultiblockRecipe cachedRecipe
-                = MultiblockRecipeManager.getInstance().getRecipe(new ResourceLocation(nbt.getString("nobullshipRecipe")));
-        if (cachedRecipe == null) return InteractionResult.FAIL;
-
-        BlockPattern pattern = cachedRecipe.recipe();
-        ResourceLocation resultLocation = cachedRecipe.result();
-
-        BlockPos pos = pContext.getClickedPos();
-
-        // FIXME: if the blockstate of one of the blocks changes as this matches, that block will not be removed.
-        BlockPattern.BlockPatternMatch match = pattern.find(level, pos);
-        if (match == null) return InteractionResult.FAIL;
-
-        for (int i = 0; i < pattern.getWidth(); ++i) {
-            for (int j = 0; j < pattern.getHeight(); ++j) {
-                BlockInWorld blockinworld = match.getBlock(i, j, 0);
-                level.setBlock(blockinworld.getPos(), Blocks.AIR.defaultBlockState(), 2);
-            }
-        }
-
-        Entity entity = RegistryObject.create(resultLocation, ENTITY_TYPES).get().create(level);
-        if (entity == null) return InteractionResult.FAIL;
-
-        BlockPos blockpos = match.getBlock(1, 2, 0).getPos();
-        entity.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.55D, (double)blockpos.getZ() + 0.5D, match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F, 0.0F);
-        entity.setYRot(match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F);
-        level.addFreshEntity(entity);
+        pContext.getPlayer().getCooldowns().addCooldown(this, 20);
+        MultiblockRecipeManager.getInstance().trySpawn(new ResourceLocation(noBsRecipe), pContext);
 
         return InteractionResult.FAIL;
     }
