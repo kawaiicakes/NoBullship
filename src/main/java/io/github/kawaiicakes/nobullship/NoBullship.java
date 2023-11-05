@@ -7,19 +7,27 @@ import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -63,6 +71,31 @@ public class NoBullship
         BLOCK_ENTITY_REGISTRY.register(modEventBus);
         ITEM_REGISTRY.register(modEventBus);
         MENU_REGISTRY.register(modEventBus);
+    }
+
+    // TODO: THIS SHOULD ONLY BE FOR DEBUG
+    @SubscribeEvent
+    public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
+
+        if (!(event.getItemStack().is(ITEMS.getValue(new ResourceLocation("stick"))))) return;
+
+        BlockPattern creeperPattern
+                = MultiblockRecipeManager.getInstance().checkPattern(new ResourceLocation("ballsmungus"));
+
+        if (creeperPattern == null) return;
+
+        BlockPattern.BlockPatternMatch match = creeperPattern.find(level, event.getPos());
+        if (match != null) {
+            for (int i = 0; i < creeperPattern.getWidth(); ++i) {
+                for (int j = 0; j < creeperPattern.getHeight(); ++j) {
+                    BlockInWorld blockinworld = match.getBlock(i, j, 0);
+                    level.setBlock(blockinworld.getPos(), Blocks.AIR.defaultBlockState(), 2);
+                }
+            }
+            level.getLevel().getServer().getPlayerList().broadcastSystemMessage(Component.literal("AMBATAKUM! \uD83D\uDE2B\uD83D\uDE2B\uD83D\uDCA6\uD83D\uDCA6\uD83D\uDCA6\uD83D\uDCA6"), true);
+            level.explode(null, event.getPos().getX(), event.getPos().getY(), event.getPos().getZ(), 3.2F, true, Explosion.BlockInteraction.DESTROY);
+        }
     }
 
     @SubscribeEvent
