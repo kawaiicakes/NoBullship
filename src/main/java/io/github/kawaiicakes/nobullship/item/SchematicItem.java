@@ -20,6 +20,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.phys.HitResult;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -54,6 +55,7 @@ public class SchematicItem extends Item {
     @Override
     public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext pContext) {
         if (!(pContext.getLevel() instanceof ServerLevel level)) return InteractionResult.FAIL;
+        if (pContext.getHitResult().getType() != HitResult.Type.BLOCK) return InteractionResult.FAIL;
 
         CompoundTag nbt = stack.getTag();
         //if (nbt == null) return InteractionResult.FAIL;
