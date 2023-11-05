@@ -40,6 +40,11 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         super(GSON, "entity_recipes");
     }
 
+    @Nullable
+    public Pair<BlockPattern, ResourceLocation> getRecipePair(ResourceLocation recipeId) {
+        return this.recipes.getOrDefault(recipeId, null);
+    }
+
     public static MultiblockRecipeManager getInstance() {
         if (INSTANCE == null) INSTANCE = new MultiblockRecipeManager();
         return INSTANCE;
@@ -68,15 +73,6 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         this.recipes = builder.build();
         LOGGER.info("Loaded {} recipes", recipes.size());
-    }
-
-    public void printRecipes() {
-        LOGGER.info(this.recipes.toString());
-    }
-
-    @Nullable
-    public BlockPattern checkPattern(ResourceLocation recipeId) {
-        return this.recipes.getOrDefault(recipeId, null).getFirst();
     }
 
     /**
