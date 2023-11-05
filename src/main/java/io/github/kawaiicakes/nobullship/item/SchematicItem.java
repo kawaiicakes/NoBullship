@@ -56,7 +56,10 @@ public class SchematicItem extends Item {
     public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext pContext) {
         // TODO: configurable options for cooldown time, whether fake players can use this item...
         // Cooldown is added so spamming this isn't possible. BlockPattern#find is an expensive call.
-        if (pContext.getPlayer() != null) pContext.getPlayer().getCooldowns().addCooldown(this, 20);
+        if (pContext.getPlayer() == null) return InteractionResult.FAIL;
+        if (pContext.getPlayer().getCooldowns().isOnCooldown(this)) return InteractionResult.FAIL;
+
+        pContext.getPlayer().getCooldowns().addCooldown(this, 20);
 
         if (!(pContext.getLevel() instanceof ServerLevel level)) return InteractionResult.FAIL;
         if (pContext.getHitResult().getType() != HitResult.Type.BLOCK) return InteractionResult.FAIL;
