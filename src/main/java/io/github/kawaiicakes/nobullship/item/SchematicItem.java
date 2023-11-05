@@ -51,7 +51,8 @@ public class SchematicItem extends Item {
 
     @Override
     public boolean isFoil(ItemStack pStack) {
-        return false;
+        if (pStack.getTag() == null) return false;
+        return !(pStack.getTag().getString("nobullshipRecipe").isEmpty());
     }
 
     // So long as a claim mod sets $useItem to DENY in RightClickBlock event, this will not bypass claim mods.
