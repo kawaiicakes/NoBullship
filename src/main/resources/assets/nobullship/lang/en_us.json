@@ -2,5 +2,6 @@
   "item.nobullship.schematic": "Empty Schematic",
   "item.nobullship.schematic.filled": "Filled Schematic",
   "itemGroup.nobullship_tab": "No Bullship!",
-  "block.nobullship.workshop": "Workshop"
+  "block.nobullship.workshop": "Workshop",
+  "sounds.nobullship.construct_success": "[Construction sounds]"
 }

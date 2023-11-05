@@ -8,6 +8,8 @@ import io.github.kawaiicakes.nobullship.item.SchematicItem;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -50,6 +52,7 @@ public class NoBullship
             DeferredRegister.create(BLOCK_ENTITY_TYPES, MOD_ID);
     private static final DeferredRegister<Item> ITEM_REGISTRY = DeferredRegister.create(ITEMS, MOD_ID);
     private static final DeferredRegister<MenuType<?>> MENU_REGISTRY = DeferredRegister.create(MENU_TYPES, MOD_ID);
+    private static final DeferredRegister<SoundEvent> SOUND_REGISTRY = DeferredRegister.create(SOUND_EVENTS, MOD_ID);
 
     public static final RegistryObject<Block> WORKSHOP_BLOCK
             = BLOCK_REGISTRY.register("workshop", () -> new MultiblockWorkshopBlock(BlockBehaviour.Properties.of(Material.STONE)));
@@ -63,6 +66,8 @@ public class NoBullship
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));
 
     public static final RegistryObject<SchematicItem> SCHEMATIC = ITEM_REGISTRY.register("schematic", SchematicItem::new);
+    public static final RegistryObject<SoundEvent> CONSTRUCT_SUCCESS
+            = SOUND_REGISTRY.register("construct_success", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_success")));
 
     public NoBullship()
     {
@@ -75,6 +80,7 @@ public class NoBullship
         BLOCK_ENTITY_REGISTRY.register(modEventBus);
         ITEM_REGISTRY.register(modEventBus);
         MENU_REGISTRY.register(modEventBus);
+        SOUND_REGISTRY.register(modEventBus);
     }
 
     @SubscribeEvent

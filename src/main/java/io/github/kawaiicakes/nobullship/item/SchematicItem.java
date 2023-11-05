@@ -9,6 +9,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -22,7 +24,9 @@ import net.minecraft.world.phys.HitResult;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import static io.github.kawaiicakes.nobullship.NoBullship.CONSTRUCT_SUCCESS;
 import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
+import static net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN;
 
 /**
  * Care is taken to ensure that using the schematic does not alter the blockstate of the clicked block.
@@ -78,7 +82,9 @@ public class SchematicItem extends Item {
         if (noBsRecipe.isEmpty()) return InteractionResult.FAIL;
 
         pContext.getPlayer().getCooldowns().addCooldown(this, 20);
-        MultiblockRecipeManager.getInstance().trySpawn(new ResourceLocation(noBsRecipe), pContext);
+        SoundEvent sound = BOOK_PAGE_TURN;
+        if (MultiblockRecipeManager.getInstance().trySpawn(new ResourceLocation(noBsRecipe), pContext)) sound = CONSTRUCT_SUCCESS.get();
+        pContext.getLevel().playSound(null, pContext.getClickedPos(), sound, SoundSource.PLAYERS, 1.0F, 1.0F);
 
         return InteractionResult.FAIL;
     }

@@ -1,0 +1,8 @@
+{
+  "construct_success": {
+    "subtitle": "sounds.nobullship.construct_success",
+    "sounds": [
+      "nobullship:construct_success"
+    ]
+  }
+}
