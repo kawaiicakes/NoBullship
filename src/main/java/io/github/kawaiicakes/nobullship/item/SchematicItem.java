@@ -1,37 +1,28 @@
 package io.github.kawaiicakes.nobullship.item;
 
-import io.github.kawaiicakes.nobullship.data.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.registries.RegistryObject;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
-import static net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES;
 
 /**
  * Care is taken to ensure that using the schematic does not alter the blockstate of the clicked block.
