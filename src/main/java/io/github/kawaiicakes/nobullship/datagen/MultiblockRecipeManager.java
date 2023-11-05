@@ -75,7 +75,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             return;
         }
 
-        // FIXME: 3D checks, other checks, missing logic (see CarvedPumpkinBlock)
+        // FIXME: 3D checks, other checks, missing logic & optimizations (see CarvedPumpkinBlock)
         for (int i = 0; i < pattern.getWidth(); ++i) {
             for (int j = 0; j < pattern.getHeight(); ++j) {
                 BlockInWorld blockinworld = match.getBlock(i, j, 0);
@@ -93,6 +93,14 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         entity.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.55D, (double)blockpos.getZ() + 0.5D, match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F, 0.0F);
         entity.setYRot(match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F);
         level.addFreshEntity(entity);
+
+        // This doesn't seem to do anything on the server... is this intended for the client?
+        for(int i1 = 0; i1 < pattern.getWidth(); ++i1) {
+            for(int j1 = 0; j1 < pattern.getHeight(); ++j1) {
+                BlockInWorld blockInWorld = match.getBlock(i1, j1, 0);
+                level.blockUpdated(blockInWorld.getPos(), Blocks.AIR);
+            }
+        }
     }
 
     public static MultiblockRecipeManager getInstance() {
