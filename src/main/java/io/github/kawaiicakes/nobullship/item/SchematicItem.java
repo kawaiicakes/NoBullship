@@ -54,6 +54,9 @@ public class SchematicItem extends Item {
     // So long as a claim mod sets $useItem to DENY in RightClickBlock event, this will not bypass claim mods.
     @Override
     public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext pContext) {
+        // Cooldown is added so spamming this isn't possible. BlockPattern#find is an expensive call.
+        if (pContext.getPlayer() != null) pContext.getPlayer().getCooldowns().addCooldown(this, 20);
+
         if (!(pContext.getLevel() instanceof ServerLevel level)) return InteractionResult.FAIL;
         if (pContext.getHitResult().getType() != HitResult.Type.BLOCK) return InteractionResult.FAIL;
 
