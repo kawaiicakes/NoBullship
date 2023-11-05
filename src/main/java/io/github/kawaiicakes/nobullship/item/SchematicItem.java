@@ -7,11 +7,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
@@ -45,14 +50,15 @@ public class SchematicItem extends Item {
         return false;
     }
 
-    // FIXME: account for claim mods as this might be able to bypass them
+    // So long as a claim mod sets $useItem to DENY in RightClickBlock event, this will not bypass claim mods.
     @Override
-    public InteractionResult useOn(UseOnContext pContext) {
+    public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext pContext) {
         if (!(pContext.getLevel() instanceof ServerLevel level)) return InteractionResult.FAIL;
-        BlockPos pos = pContext.getClickedPos();
 
-        CompoundTag nbt = pContext.getItemInHand().getTag();
+        CompoundTag nbt = stack.getTag();
         //if (nbt == null) return InteractionResult.FAIL;
+
+        BlockPos pos = pContext.getClickedPos();
 
         BlockPattern pattern
                 = MultiblockRecipeManager.getInstance().checkPattern(new ResourceLocation("ballsmungus"));
@@ -73,5 +79,26 @@ public class SchematicItem extends Item {
         }
 
         return InteractionResult.FAIL;
+    }
+
+    /*
+        Overriding the methods below, strictly speaking, is not necessary given that #onItemUseFirst will fire first
+        and then pass a fail. If for some reason the PlayerInteractEvent is overridden such that $useItem is set to
+        ALLOW, these methods will ensure that still nothing will happen.
+     */
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
+        return InteractionResultHolder.fail(pPlayer.getItemInHand(pUsedHand));
+    }
+
+    @Override
+    public InteractionResult useOn(UseOnContext pContext) {
+        return InteractionResult.FAIL;
+    }
+
+    @Override
+    public boolean doesSneakBypassUse(ItemStack stack, LevelReader level, BlockPos pos, Player player) {
+        return true;
     }
 }
