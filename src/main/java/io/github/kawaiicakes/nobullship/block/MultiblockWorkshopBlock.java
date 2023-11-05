@@ -33,7 +33,7 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
         if (level.getBlockEntity(blockPos) instanceof MultiblockWorkshopBlockEntity castedEntity) {
             NetworkHooks.openScreen((ServerPlayer) player, castedEntity, blockPos);
         } else {
-            throw new IllegalStateException("Missing Container provider for BloomeryBlockEntity!");
+            throw new IllegalStateException("Missing Container provider for Workshop!");
         }
 
         return InteractionResult.sidedSuccess(false);
