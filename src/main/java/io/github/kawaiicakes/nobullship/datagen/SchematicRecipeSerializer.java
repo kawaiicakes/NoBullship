@@ -7,7 +7,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import org.jetbrains.annotations.Nullable;
 
+import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
+
 public class SchematicRecipeSerializer implements RecipeSerializer<SchematicRecipe> {
+    public static final SchematicRecipeSerializer INSTANCE = new SchematicRecipeSerializer();
+    public static final ResourceLocation ID = new ResourceLocation(MOD_ID, "schematic_serializer");
+
     @Override
     public SchematicRecipe fromJson(ResourceLocation pRecipeId, JsonObject pSerializedRecipe) {
         return null;

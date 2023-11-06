@@ -35,6 +35,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
 
+import static io.github.kawaiicakes.nobullship.datagen.SchematicRecipeSerializer.INSTANCE;
 import static net.minecraftforge.registries.ForgeRegistries.*;
 
 @Mod(NoBullship.MOD_ID)
@@ -73,7 +74,7 @@ public class NoBullship
     public static final RegistryObject<SoundEvent> CONSTRUCT_SUCCESS
             = SOUND_REGISTRY.register("construct_success", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_success")));
 
-    public static final RegistryObject<SchematicRecipeSerializer> SCHEMATIC_SERIALIZER = RECIPE_SERIALIZER_REGISTRY.register("schematic_serializer", SchematicRecipeSerializer::new);
+    public static final RegistryObject<SchematicRecipeSerializer> SCHEMATIC_SERIALIZER = RECIPE_SERIALIZER_REGISTRY.register("schematic_serializer", () -> INSTANCE);
 
     public NoBullship()
     {
