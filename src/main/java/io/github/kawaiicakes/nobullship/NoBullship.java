@@ -74,7 +74,7 @@ public class NoBullship
     public static final RegistryObject<SoundEvent> CONSTRUCT_SUCCESS
             = SOUND_REGISTRY.register("construct_success", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_success")));
 
-    public static final RegistryObject<SchematicRecipeSerializer> SCHEMATIC_SERIALIZER = RECIPE_SERIALIZER_REGISTRY.register("schematic_serializer", () -> INSTANCE);
+    public static final RegistryObject<SchematicRecipeSerializer> SCHEMATIC_SERIALIZER = RECIPE_SERIALIZER_REGISTRY.register("schematic_workbench", () -> INSTANCE);
 
     public NoBullship()
     {

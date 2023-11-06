@@ -11,7 +11,7 @@ import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 
 public class SchematicRecipeSerializer implements RecipeSerializer<SchematicRecipe> {
     public static final SchematicRecipeSerializer INSTANCE = new SchematicRecipeSerializer();
-    public static final ResourceLocation ID = new ResourceLocation(MOD_ID, "schematic_serializer");
+    public static final ResourceLocation ID = new ResourceLocation(MOD_ID, "schematic_workbench");
 
     @Override
     public SchematicRecipe fromJson(ResourceLocation pRecipeId, JsonObject pSerializedRecipe) {
