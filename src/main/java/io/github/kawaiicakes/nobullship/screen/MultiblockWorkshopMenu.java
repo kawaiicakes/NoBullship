@@ -5,6 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -38,6 +39,9 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
         for (int i = 0; i < 9; ++i) {
             this.addSlot(new Slot(this.entity, i + 9, 97 + i * 18, 102));
         }
+
+        this.addSlot(new Slot(this.entity, 18, 169, 48));
+        this.addSlot(new Slot(this.entity, 19, 169, 26));
     }
 
     // TODO
@@ -51,7 +55,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
         return this.entity.stillValid(pPlayer);
     }
 
-    private void addPlayerInventory(Inventory playerInventory) {
+    protected void addPlayerInventory(Inventory playerInventory) {
         for (int i = 0; i < 3; ++i) {
             for (int l = 0; l < 9; ++l) {
                 this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 97 + l * 18, (i * 18) + 137));
@@ -59,7 +63,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
         }
     }
 
-    private void addPlayerHotbar(Inventory playerInventory) {
+    protected void addPlayerHotbar(Inventory playerInventory) {
         for (int i = 0; i < 9; ++i) {
             this.addSlot(new Slot(playerInventory, i, 97 + i * 18, 195));
         }
