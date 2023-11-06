@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import java.util.Map;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.CONSTRUCT_SUCCESS;
+import static net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE;
 import static net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN;
 import static net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES;
 
@@ -84,8 +85,8 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             }
         }
 
-        // TODO: particles!
         level.playSound(null, pos, CONSTRUCT_SUCCESS.get(), SoundSource.PLAYERS, 0.77F, 1.0F);
+        level.sendParticles(LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 7, 0.2, 0.2, 0.2, 0.3);
 
         Entity entity = RegistryObject.create(resultLocation, ENTITY_TYPES).get().create(level);
         if (entity == null) return;
