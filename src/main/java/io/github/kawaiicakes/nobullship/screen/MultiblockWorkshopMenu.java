@@ -6,6 +6,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -36,17 +37,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
         }
     }
 
-    @Override
-    public boolean canTakeItemForPickAll(ItemStack pStack, Slot pSlot) {
-        return pSlot.container != this.entity && super.canTakeItemForPickAll(pStack, pSlot);
-    }
-
-    @Override
-    public void removed(Player pPlayer) {
-        super.removed(pPlayer);
-        this.clearContainer(pPlayer, pPlayer.getInventory());
-    }
-
+    // TODO
     @Override
     public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
         return pPlayer.inventoryMenu.quickMoveStack(pPlayer, pIndex);
@@ -54,7 +45,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player pPlayer) {
-        return stillValid(ContainerLevelAccess.create(level, this.entity.getBlockPos()), pPlayer, WORKSHOP_BLOCK.get());
+        return this.entity.stillValid(pPlayer);
     }
 
     private void addPlayerInventory(Inventory playerInventory) {

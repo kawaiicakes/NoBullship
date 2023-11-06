@@ -14,22 +14,29 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 
 public class MultiblockWorkshopScreen extends AbstractContainerScreen<MultiblockWorkshopMenu> {
+    // TODO: contingencies for screen widths under 379 px
     public static final ResourceLocation TEXTURE = new ResourceLocation(MOD_ID, "textures/gui/workbench_gui.png");
 
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
-        this.imageWidth = 340;
+        this.imageWidth = 352;
         this.imageHeight = 219;
     }
 
     @Override
     protected void renderBg(PoseStack pPoseStack, float pPartialTick, int pMouseX, int pMouseY) {
+        this.renderBackground(pPoseStack);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, TEXTURE);
         int x = (width - imageWidth) / 2;
         int y = (height - imageHeight) / 2;
 
-        blit(pPoseStack, x, y, 0, 0, imageWidth, imageHeight, 512, 512);
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableBlend();
+        blit(pPoseStack, x, y, 0, 0, 0, imageWidth, imageHeight, 512, 512);
+        blit(pPoseStack, ((width - 16) / 2) + 1, y+48, 1, 352, 0, 16, 16, 512, 512);
+        RenderSystem.disableBlend();
+        RenderSystem.disableDepthTest();
     }
 }
