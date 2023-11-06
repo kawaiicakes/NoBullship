@@ -29,6 +29,7 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
     public static final ResourceLocation ID = new ResourceLocation(MOD_ID, "schematic_workbench");
 
     // TODO: redo error checking... see vanilla examples maybe? also redo NBT checking on shaped/shapeless inputs better
+    // TODO: optimize... see SharedRecipe
     @SuppressWarnings("SpellCheckingInspection")
     @Override
     public SchematicRecipe fromJson(ResourceLocation pRecipeId, JsonObject pSerializedRecipe) throws IllegalArgumentException {
@@ -92,12 +93,24 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
 
     @Override
     public @Nullable SchematicRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
-        return null;
+        String resultId = pBuffer.readUtf();
+
+        NonNullList<Ingredient> shapedList = NonNullList.withSize(9, Ingredient.EMPTY);
+        shapedList.replaceAll(_ignored -> Ingredient.fromNetwork(pBuffer));
+
+        NonNullList<ItemStack> shapelessList = NonNullList.withSize(9, ItemStack.EMPTY);
+        shapelessList.replaceAll(_ignored -> pBuffer.readItem());
+
+        return new SchematicRecipe(new ResourceLocation(resultId), shapedList, shapelessList);
     }
 
     @Override
     public void toNetwork(FriendlyByteBuf pBuffer, SchematicRecipe pRecipe) {
+        pBuffer.writeUtf(pRecipe.getId().toString());
 
+        pRecipe.getShapedIngredients().forEach(ingredient -> ingredient.toNetwork(pBuffer));
+
+        pRecipe.getShapelessIngredients().forEach(pBuffer::writeItem);
     }
 
     protected static IllegalArgumentException throwNewSyntaxError(ResourceLocation pRecipeId, String message) {
