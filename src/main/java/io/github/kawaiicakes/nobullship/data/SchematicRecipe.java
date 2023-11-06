@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.data;
 
+import com.google.common.collect.ImmutableList;
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.datagen.SchematicRecipeSerializer;
 import net.minecraft.core.NonNullList;
@@ -11,6 +12,11 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 
@@ -23,6 +29,14 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         this.resultId = resultId;
         this.declaration = declaration;
         this.ingredients = ingredients;
+    }
+
+    public ImmutableList<Ingredient> getShapedIngredients() {
+        return ImmutableList.copyOf(declaration);
+    }
+
+    public ImmutableList<ItemStack> getShapelessIngredients() {
+        return ImmutableList.copyOf(ingredients);
     }
 
     /**
@@ -94,6 +108,19 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     @Override
     public RecipeType<?> getType() {
         return Type.INSTANCE;
+    }
+
+    @Override
+    public boolean isSpecial() {
+        return true;
+    }
+
+    /**
+     * Don't use this
+     */
+    @Override
+    public NonNullList<Ingredient> getIngredients() {
+        return NonNullList.create();
     }
 
     public static class Type implements RecipeType<SchematicRecipe> {
