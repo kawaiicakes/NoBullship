@@ -15,12 +15,12 @@ import net.minecraft.world.level.Level;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 
 public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
-    private final ResourceLocation id;
+    private final ResourceLocation resultId;
     private final NonNullList<Ingredient> declaration;
     private final NonNullList<ItemStack> ingredients;
 
-    public SchematicRecipe(ResourceLocation id, NonNullList<Ingredient> declaration, NonNullList<ItemStack> ingredients) {
-        this.id = id;
+    public SchematicRecipe(ResourceLocation resultId, NonNullList<Ingredient> declaration, NonNullList<ItemStack> ingredients) {
+        this.resultId = resultId;
         this.declaration = declaration;
         this.ingredients = ingredients;
     }
@@ -62,7 +62,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         if (copyOfInputSchematic.isEmpty()) return ItemStack.EMPTY;
 
         if (copyOfInputSchematic.getTag() == null) copyOfInputSchematic.setTag(new CompoundTag());
-        copyOfInputSchematic.getTag().putString("nobullshipRecipe", this.id.toString());
+        copyOfInputSchematic.getTag().putString("nobullshipRecipe", this.resultId.toString());
 
         return copyOfInputSchematic;
     }
@@ -83,7 +83,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
 
     @Override
     public ResourceLocation getId() {
-        return this.id;
+        return this.resultId;
     }
 
     @Override
