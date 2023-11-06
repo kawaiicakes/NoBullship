@@ -1,9 +1,6 @@
 package io.github.kawaiicakes.nobullship.datagen;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
 import net.minecraft.core.NonNullList;
@@ -19,7 +16,6 @@ import org.slf4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 
@@ -27,6 +23,44 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
     protected static final Logger LOGGER = LogUtils.getLogger();
     public static final SchematicRecipeSerializer INSTANCE = new SchematicRecipeSerializer();
     public static final ResourceLocation ID = new ResourceLocation(MOD_ID, "schematic_workbench");
+
+    public static Map<Character, ItemStack> itemstackKeyFromJson(JsonObject keySet) {
+        Map<Character, ItemStack> map = new HashMap<>(keySet.size());
+
+        for(Map.Entry<String, JsonElement> entry : keySet.entrySet()) {
+            if (entry.getKey().length() != 1) {
+                throw new JsonSyntaxException("Invalid key entry: '" + entry.getKey() + "' is an invalid symbol (must be 1 character only).");
+            }
+
+            if (" ".equals(entry.getKey())) {
+                throw new JsonSyntaxException("Invalid key entry: ' ' is a reserved symbol.");
+            }
+
+            map.put(entry.getKey().charAt(0), ShapedRecipe.itemStackFromJson(entry.getValue().getAsJsonObject()));
+        }
+
+        map.put(' ', ItemStack.EMPTY);
+        return map;
+    }
+
+    public static Map<Character, Ingredient> ingredientKeyFromJson(JsonObject keySet) {
+        Map<Character, Ingredient> map = new HashMap<>(keySet.size());
+
+        for(Map.Entry<String, JsonElement> entry : keySet.entrySet()) {
+            if (entry.getKey().length() != 1) {
+                throw new JsonSyntaxException("Invalid key entry: '" + entry.getKey() + "' is an invalid symbol (must be 1 character only).");
+            }
+
+            if (" ".equals(entry.getKey())) {
+                throw new JsonSyntaxException("Invalid key entry: ' ' is a reserved symbol.");
+            }
+
+            map.put(entry.getKey().charAt(0), Ingredient.fromJson(entry.getValue()));
+        }
+
+        map.put(' ', Ingredient.EMPTY);
+        return map;
+    }
 
     // TODO: redo error checking... see vanilla examples maybe? also redo NBT checking on shaped/shapeless inputs better
     // TODO: optimize... see SharedRecipe
@@ -37,22 +71,16 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
             throw throwNewSyntaxError(pRecipeId, "recipe type");
 
         JsonObject keyson = pSerializedRecipe.getAsJsonObject("key");
-        if (keyson == null) throw throwNewSyntaxError(pRecipeId, "key");
-
-        Set<Map.Entry<String, JsonElement>> keysonMembers = keyson.entrySet();
-        if (keysonMembers.isEmpty()) throw throwNewSyntaxError(pRecipeId, "key");
-
-        Map<Character, ItemStack> charToItemMap = new HashMap<>(keysonMembers.size());
-        for (Map.Entry<String, JsonElement> entry : keysonMembers) {
-            final char charKey = entry.getKey().charAt(0);
-
-            if (!(entry.getValue() instanceof JsonObject entryObject)) throw throwNewSyntaxError(pRecipeId, "key has invalid item");
-
-            charToItemMap.put(charKey, ShapedRecipe.itemStackFromJson(entryObject));
-        }
+        if (keyson == null) throw throwNewSyntaxError(pRecipeId, "shapeless input key");
 
         JsonObject declarason = pSerializedRecipe.getAsJsonObject("declaration");
         if (declarason == null) throw throwNewSyntaxError(pRecipeId, "declaration");
+
+        JsonObject shapedKeyson = declarason.getAsJsonObject("key");
+        if (shapedKeyson == null) throw throwNewSyntaxError(pRecipeId, "declaration key");
+
+        Map<Character, ItemStack> charToItemMap = itemstackKeyFromJson(keyson);
+        Map<Character, Ingredient> charToIngredientMap = ingredientKeyFromJson(shapedKeyson);
 
         if (declarason.getAsJsonPrimitive("output_id") == null) throw throwNewSyntaxError(pRecipeId, "output_id");
         ResourceLocation resultId = new ResourceLocation(declarason.getAsJsonPrimitive("output_id").getAsString());
@@ -71,10 +99,10 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
             final char[] charset = element.getAsString().toCharArray();
 
             for (byte j = 0; j < 3; j++) {
-                ItemStack stackAtChar = charToItemMap.get(charset[j]);
-                if (stackAtChar == null || stackAtChar.isEmpty()) throw throwNewSyntaxError(pRecipeId, "no such key exists");
+                Ingredient ingredientAtChar = charToIngredientMap.get(charset[j]);
+                if (ingredientAtChar == null || ingredientAtChar.isEmpty()) throw throwNewSyntaxError(pRecipeId, "no such key exists");
 
-                shapedInput.add(i + j, Ingredient.of(stackAtChar));
+                shapedInput.add(i + j, ingredientAtChar);
             }
         }
 
