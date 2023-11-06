@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.block;
 
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
+import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -23,16 +24,15 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
 
 public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, StackedContentsCompatible {
-    protected static final int[] SHAPED_SLOTS = {0,1,2,3,4,5,6,7,8};
-    protected static final int[] SHAPELESS_SLOTS = {9,10,11,12,13,14,15,16,17};
-    protected static final int[] CRAFTING_SLOTS = ArrayUtils.addAll(SHAPED_SLOTS, SHAPELESS_SLOTS);
-    protected static final byte EMPTY_SCHEM_SLOT = 18;
-    protected static final byte FILLED_SCHEM_SLOT = 19;
+    public static final IntImmutableList SHAPED_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8);
+    public static final IntImmutableList SHAPELESS_SLOTS = IntImmutableList.of(9, 10, 11, 12, 13, 14, 15, 16, 17);
+    public static final IntImmutableList CRAFTING_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);
+    public static final byte EMPTY_SCHEM_SLOT = 18;
+    public static final byte FILLED_SCHEM_SLOT = 19;
+
     protected NonNullList<ItemStack> contents = NonNullList.withSize(20, ItemStack.EMPTY);
 
     public MultiblockWorkshopBlockEntity(BlockPos pPos, BlockState pBlockState) {
@@ -55,16 +55,16 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
     @Override
     public int[] getSlotsForFace(Direction pSide) {
         if (pSide == Direction.DOWN) {
-            return ArrayUtils.add(CRAFTING_SLOTS, FILLED_SCHEM_SLOT);
+            return ArrayUtils.add(CRAFTING_SLOTS.toIntArray(), FILLED_SCHEM_SLOT);
         } else {
-            return pSide == Direction.UP ? new int[]{EMPTY_SCHEM_SLOT} : CRAFTING_SLOTS;
+            return pSide == Direction.UP ? new int[]{EMPTY_SCHEM_SLOT} : CRAFTING_SLOTS.toIntArray();
         }
     }
 
     @Override
     public boolean canPlaceItem(int pIndex, ItemStack pStack) {
         if (pIndex == EMPTY_SCHEM_SLOT) return true;
-        return Arrays.stream(CRAFTING_SLOTS).anyMatch(integer -> integer == pIndex);
+        return CRAFTING_SLOTS.intStream().anyMatch(integer -> integer == pIndex);
     }
 
     // TODO
@@ -76,7 +76,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
     // TODO
     @Override
     public boolean canTakeItemThroughFace(int pIndex, ItemStack pStack, Direction pDirection) {
-        if (pDirection == Direction.DOWN && Arrays.stream(SHAPED_SLOTS).anyMatch(i -> i == pIndex)) {
+        if (pDirection == Direction.DOWN && SHAPED_SLOTS.intStream().anyMatch(i -> i == pIndex)) {
             return pStack.is(Items.BUCKET);
         } else {
             return true;
