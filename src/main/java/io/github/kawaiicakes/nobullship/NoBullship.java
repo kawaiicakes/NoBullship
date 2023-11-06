@@ -2,8 +2,10 @@ package io.github.kawaiicakes.nobullship;
 
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
+import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeProvider;
+import io.github.kawaiicakes.nobullship.datagen.SchematicRecipeSerializer;
 import io.github.kawaiicakes.nobullship.item.SchematicItem;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopScreen;
@@ -15,6 +17,8 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -53,6 +57,9 @@ public class NoBullship
     private static final DeferredRegister<Item> ITEM_REGISTRY = DeferredRegister.create(ITEMS, MOD_ID);
     private static final DeferredRegister<MenuType<?>> MENU_REGISTRY = DeferredRegister.create(MENU_TYPES, MOD_ID);
     private static final DeferredRegister<SoundEvent> SOUND_REGISTRY = DeferredRegister.create(SOUND_EVENTS, MOD_ID);
+    private static final DeferredRegister<RecipeType<?>> RECIPE_REGISTRY = DeferredRegister.create(RECIPE_TYPES, MOD_ID);
+    private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER_REGISTRY
+            = DeferredRegister.create(RECIPE_SERIALIZERS, MOD_ID);
 
     public static final RegistryObject<Block> WORKSHOP_BLOCK
             = BLOCK_REGISTRY.register("workshop", () -> new MultiblockWorkshopBlock(BlockBehaviour.Properties.of(Material.STONE)));
@@ -69,6 +76,9 @@ public class NoBullship
     public static final RegistryObject<SoundEvent> CONSTRUCT_SUCCESS
             = SOUND_REGISTRY.register("construct_success", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_success")));
 
+    public static final RegistryObject<SchematicRecipe.Type> SCHEMATIC_RECIPE = RECIPE_REGISTRY.register("schematic", SchematicRecipe.Type::new);
+    public static final RegistryObject<SchematicRecipeSerializer> SCHEMATIC_SERIALIZER = RECIPE_SERIALIZER_REGISTRY.register("schematic_serializer", SchematicRecipeSerializer::new);
+
     public NoBullship()
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -81,6 +91,8 @@ public class NoBullship
         ITEM_REGISTRY.register(modEventBus);
         MENU_REGISTRY.register(modEventBus);
         SOUND_REGISTRY.register(modEventBus);
+        RECIPE_REGISTRY.register(modEventBus);
+        RECIPE_SERIALIZER_REGISTRY.register(modEventBus);
     }
 
     @SubscribeEvent
