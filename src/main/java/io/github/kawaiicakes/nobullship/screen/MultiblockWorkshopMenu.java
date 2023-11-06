@@ -5,15 +5,12 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import java.util.Objects;
 
-import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK;
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_MENU;
 
 public class MultiblockWorkshopMenu extends AbstractContainerMenu {
@@ -32,8 +29,14 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
         this.addPlayerInventory(inventory);
         this.addPlayerHotbar(inventory);
 
+        for(int i = 0; i < 3; ++i) {
+            for(int j = 0; j < 3; ++j) {
+                this.addSlot(new Slot(this.entity, j + i * 3, 97 + j * 18, 30 + i * 18));
+            }
+        }
+
         for (int i = 0; i < 9; ++i) {
-            this.addSlot(new Slot(entity, i, 97 + i * 18, 70));
+            this.addSlot(new Slot(this.entity, i + 9, 97 + i * 18, 102));
         }
     }
 
@@ -51,7 +54,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
     private void addPlayerInventory(Inventory playerInventory) {
         for (int i = 0; i < 3; ++i) {
             for (int l = 0; l < 9; ++l) {
-                this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 97 + l * 18, 86 + i * 18));
+                this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 97 + l * 18, (i * 18) + 137));
             }
         }
     }
