@@ -29,7 +29,8 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
     @SuppressWarnings("SpellCheckingInspection")
     @Override
     public SchematicRecipe fromJson(ResourceLocation pRecipeId, JsonObject pSerializedRecipe) throws IllegalArgumentException {
-        if (!Objects.equals(pSerializedRecipe.getAsString(), "nobullship:schematic_workbench"))
+        JsonElement mikeTypeson = pSerializedRecipe.get("type");
+        if (mikeTypeson == null || !Objects.equals(mikeTypeson.getAsString(), "nobullship:schematic_workbench"))
             throw throwNewSyntaxError(pRecipeId, "recipe type");
 
         JsonObject keyson = pSerializedRecipe.getAsJsonObject("key");
