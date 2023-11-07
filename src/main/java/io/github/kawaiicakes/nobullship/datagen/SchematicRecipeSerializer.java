@@ -186,19 +186,20 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
     }
 
     public static int firstNonSpace(String pEntry) {
-        for (int i = 0; i < pEntry.length(); i++) {
-            if (pEntry.charAt(i) == ' ') return i;
+        int i;
+        for(i = 0; i < pEntry.length() && pEntry.charAt(i) == ' '; ++i) {
         }
-        return 0;
+        return i;
     }
 
     // I would have done --i, but IntelliJ would give me an out-of-bounds error for #charAt...
     // Addendum 1: Oh? Does --i and i-- do the same thing in these loops?
+    // Addendum 2: what the fuck am I doing...
     public static int lastNonSpace(String pEntry) {
-        for (int i = pEntry.length() - 1; i >= 0; i--) {
-            if (pEntry.charAt(i) == ' ') return i;
+        int i;
+        for(i = pEntry.length() - 1; i >= 0 && pEntry.charAt(i) == ' '; --i) {
         }
-        return 0;
+        return i;
     }
 
     public static NonNullList<ItemStack> itemsFromJson(JsonArray jsonArray) {
