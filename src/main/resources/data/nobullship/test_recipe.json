@@ -1,0 +1,18 @@
+{
+  "type": "nobullship:schematic_workbench",
+  "declaration": {
+    "output_id": "ballsmungus",
+    "key": {
+      "#": "diamond"
+    },
+    "shaped_input": [
+      "###"
+    ]
+  },
+  "key": {
+
+  },
+  "shapeless_input": [
+
+  ]
+}
