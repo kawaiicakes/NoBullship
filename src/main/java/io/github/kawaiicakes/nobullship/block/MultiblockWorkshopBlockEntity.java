@@ -5,45 +5,59 @@ import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
-import org.apache.commons.lang3.ArrayUtils;
-import org.jetbrains.annotations.Nullable;
+import net.minecraftforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
 
-public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, StackedContentsCompatible {
+/**
+ * I am merely implementing <code>Container</code> via <code>BaseContainerBlockEntity</code> so that this is a valid
+ * type parameter for <code>Recipe</code>. That being said accessing the 'inventory' of this block entity should
+ * preferentially be done through the capability as that is where I am more certain things will behave nicely.
+ * <br><br>
+ * Edit: In retrospect, maybe this will function better than anticipated. It's probably fine to use the
+ * <code>Container</code> implementations given that I've taken care to avoid using anything which would
+ * mutate the <code>ItemStack</code>s in the <code>ItemStackHandler</code>.
+ */
+public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity implements StackedContentsCompatible {
     public static final IntImmutableList SHAPED_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8);
     public static final IntImmutableList SHAPELESS_SLOTS = IntImmutableList.of(9, 10, 11, 12, 13, 14, 15, 16, 17);
     public static final IntImmutableList CRAFTING_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);
     public static final byte EMPTY_SCHEM_SLOT = 18;
     public static final byte FILLED_SCHEM_SLOT = 19;
 
+    // I don't like the idea of this block having to tick
     protected boolean hasRecipe = false;
+    protected LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
+    protected final ItemStackHandler itemHandler = new ItemStackHandler(20) {
+        @Override
+        protected void onContentsChanged(int slot) {
+            MultiblockWorkshopBlockEntity.this.contentsUpdated();
+            MultiblockWorkshopBlockEntity.this.setChanged();
+        }
 
-    LazyOptional<? extends net.minecraftforge.items.IItemHandler>[] handlers =
-            SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
-
-    protected NonNullList<ItemStack> contents = NonNullList.withSize(20, ItemStack.EMPTY);
+        @Override
+        public boolean isItemValid(int slot, @NotNull ItemStack stack) {
+            return MultiblockWorkshopBlockEntity.this.canPlaceItem(slot, stack);
+        }
+    };
 
     public MultiblockWorkshopBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(WORKSHOP_BLOCK_ENTITY.get(), pPos, pBlockState);
@@ -52,47 +66,22 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
     @Override
     public void load(CompoundTag pTag) {
         super.load(pTag);
-        this.contents = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(pTag, this.contents);
+        this.lazyItemHandler = LazyOptional.of(() -> itemHandler);
+        this.itemHandler.deserializeNBT(pTag.getCompound("inventory"));
         this.contentsUpdated();
     }
 
     @Override
     protected void saveAdditional(CompoundTag pTag) {
+        pTag.put("inventory", this.itemHandler.serializeNBT());
         super.saveAdditional(pTag);
-        ContainerHelper.saveAllItems(pTag, this.contents);
-    }
-
-    @Override
-    public int[] getSlotsForFace(Direction pSide) {
-        if (pSide == Direction.DOWN) {
-            return ArrayUtils.add(CRAFTING_SLOTS.toIntArray(), FILLED_SCHEM_SLOT);
-        } else {
-            return pSide == Direction.UP ? new int[]{EMPTY_SCHEM_SLOT} : CRAFTING_SLOTS.toIntArray();
-        }
     }
 
     @Override
     public boolean canPlaceItem(int pIndex, ItemStack pStack) {
         if (pIndex == FILLED_SCHEM_SLOT) return false;
-        if (pIndex == EMPTY_SCHEM_SLOT) return true;
+        if (pStack.is(SCHEMATIC.get()) && pIndex == EMPTY_SCHEM_SLOT) return true;
         return CRAFTING_SLOTS.intStream().anyMatch(integer -> integer == pIndex);
-    }
-
-    // TODO
-    @Override
-    public boolean canPlaceItemThroughFace(int pIndex, ItemStack pItemStack, @Nullable Direction pDirection) {
-        return this.canPlaceItem(pIndex, pItemStack);
-    }
-
-    // TODO
-    @Override
-    public boolean canTakeItemThroughFace(int pIndex, ItemStack pStack, Direction pDirection) {
-        if (pDirection == Direction.DOWN && SHAPED_SLOTS.intStream().anyMatch(i -> i == pIndex)) {
-            return pStack.is(Items.BUCKET);
-        } else {
-            return true;
-        }
     }
 
     @Override
@@ -107,40 +96,60 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
 
     @Override
     public int getContainerSize() {
-        return this.contents.size();
+        return this.itemHandler.getSlots();
     }
 
     @Override
     public boolean isEmpty() {
-        for(ItemStack itemstack : this.contents) {
-            if (!itemstack.isEmpty()) return false;
+        for (int i = 0; i < this.itemHandler.getSlots(); i++) {
+            // DO NOT MODIFY THE STACK FROM THE ITEM HANDLER
+            if (!this.itemHandler.getStackInSlot(i).isEmpty()) return false;
         }
 
         return true;
     }
 
+    /** This returns a copy of a value that should be treated as immutable to avoid problems. If there are issues with
+     *  this inventory, this is a good place to start looking for clues
+     */
     @Override
     public ItemStack getItem(int pSlot) {
-        return this.contents.get(pSlot);
+        return this.itemHandler.getStackInSlot(pSlot).copy();
     }
 
     @Override
     public ItemStack removeItem(int pSlot, int pAmount) {
-        return ContainerHelper.removeItem(this.contents, pSlot, pAmount);
+        boolean testValidity =
+                pSlot >= 0 && pSlot < this.itemHandler.getSlots() && !this.getItem(pSlot).isEmpty() && pAmount > 0;
+
+        ItemStack toReturn = ItemStack.EMPTY;
+        // #extractItem returns a stack which may be safely modified
+        if (testValidity) toReturn = this.itemHandler.extractItem(pSlot, pAmount, false);
+
+        return toReturn;
     }
 
     @Override
     public ItemStack removeItemNoUpdate(int pSlot) {
-        return ContainerHelper.takeItem(this.contents, pSlot);
+        final int stackSize = this.getItem(pSlot).getCount();
+
+        return pSlot >= 0 && pSlot < this.itemHandler.getSlots()
+                ? this.itemHandler.extractItem(pSlot, stackSize, false)
+                : ItemStack.EMPTY;
     }
 
     @Override
     public void setItem(int pSlot, ItemStack pStack) {
-        this.contents.set(pSlot, pStack);
+        if (pSlot <  0 || pSlot > this.itemHandler.getSlots()) return;
+
         if (pStack.getCount() > this.getMaxStackSize()) {
             pStack.setCount(this.getMaxStackSize());
         }
-        this.contentsUpdated();
+
+        // Calling ItemStackHandler#setStackInSlot is dubious
+        final int stackSize = this.getItem(pSlot).getCount();
+        this.itemHandler.extractItem(pSlot, stackSize, false);
+        this.itemHandler.insertItem(pSlot, pStack, false);
     }
 
     @Override
@@ -155,85 +164,90 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
 
     @Override
     public void clearContent() {
-        this.contents.clear();
+        // Again, calling ItemStackHandler#setStackInSlot is dubious.
+        // This is just taken from the implementation of #clear() in NonNullList lol
+        for (int i = 0; i < this.itemHandler.getSlots(); i++) {
+            final int count = this.getItem(i).getCount();
+            this.itemHandler.extractItem(i, count, false);
+        }
     }
 
     @Override
     public void fillStackedContents(StackedContents pHelper) {
-        for(ItemStack itemstack : this.contents) {
-            pHelper.accountStack(itemstack);
+        for (int i = 0; i < this.itemHandler.getSlots(); i++) {
+            pHelper.accountStack(this.getItem(i));
         }
     }
 
     @Override
     public <T> LazyOptional<T> getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @javax.annotation.Nullable Direction facing) {
-        if (!this.remove && facing != null && capability == net.minecraftforge.common.capabilities.ForgeCapabilities.ITEM_HANDLER) {
-            if (facing == Direction.UP)
-                return handlers[0].cast();
-            else if (facing == Direction.DOWN)
-                return handlers[1].cast();
-            else
-                return handlers[2].cast();
+        if (capability == ForgeCapabilities.ITEM_HANDLER) {
+            return this.lazyItemHandler.cast();
         }
+
         return super.getCapability(capability, facing);
     }
 
     @Override
     public void invalidateCaps() {
         super.invalidateCaps();
-        for (LazyOptional<? extends IItemHandler> handler : handlers)
-            handler.invalidate();
+        this.lazyItemHandler.invalidate();
     }
 
     @Override
     public void reviveCaps() {
         super.reviveCaps();
-        this.handlers = net.minecraftforge.items.wrapper.SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
+        this.lazyItemHandler = LazyOptional.of(() -> itemHandler);
     }
 
     public void contentsUpdated() {
-        if (this.level == null) return;
-        if (!(this.level instanceof ServerLevel serverLevel)) return;
+        if (this.level == null || !(this.level instanceof ServerLevel serverLevel)) return;
 
         Optional<SchematicRecipe> recipe = serverLevel.getRecipeManager()
                 .getRecipeFor(SchematicRecipe.Type.INSTANCE, this, serverLevel);
 
-        this.hasRecipe = recipe.isPresent() && canInsertAmountIntoOutputSlot(this.contents) && canInsertItemIntoOutputSlot(this.contents);
+        this.hasRecipe = recipe.isPresent() && canInsertAmountIntoOutputSlot(this) && canInsertItemIntoOutputSlot(this);
 
         if (this.hasRecipe) this.doCraft(recipe.get());
     }
 
     protected void doCraft(SchematicRecipe recipe) {
         for (int i : SHAPELESS_SLOTS) {
-            int difference = this.contents.get(i).getCount() - recipe.getShapelessIngredients().get(i).getCount();
+            int difference = this.getItem(i).getCount() - recipe.getShapelessIngredients().get(i).getCount();
 
             if (difference <= 0) {
-                this.contents.set(i, ItemStack.EMPTY);
+                this.setItem(i, ItemStack.EMPTY);
                 continue;
             }
 
-            this.contents.get(i).setCount(difference);
+            final ItemStack newAmount = this.getItem(i);
+            newAmount.setCount(difference);
+            this.setItem(i, newAmount);
         }
 
-        int schemDifference = this.contents.get(EMPTY_SCHEM_SLOT).getCount() - 1;
+        int schemDifference = this.getItem(EMPTY_SCHEM_SLOT).getCount() - 1;
         if (schemDifference <= 0) {
-            this.contents.set(EMPTY_SCHEM_SLOT, ItemStack.EMPTY);
+            this.setItem(EMPTY_SCHEM_SLOT, ItemStack.EMPTY);
         } else {
-            this.contents.get(EMPTY_SCHEM_SLOT).setCount(schemDifference);
+            final ItemStack newAmount = this.getItem(EMPTY_SCHEM_SLOT);
+            newAmount.setCount(schemDifference);
+            this.setItem(EMPTY_SCHEM_SLOT, newAmount);
         }
 
-        if (this.contents.get(FILLED_SCHEM_SLOT).isEmpty()) {
-            this.contents.set(FILLED_SCHEM_SLOT, recipe.assemble(this));
+        if (this.getItem(FILLED_SCHEM_SLOT).isEmpty()) {
+            this.setItem(FILLED_SCHEM_SLOT, recipe.assemble(this));
         } else {
-            this.contents.get(FILLED_SCHEM_SLOT).setCount(this.contents.get(FILLED_SCHEM_SLOT).getCount() + 1);
+            final ItemStack newCount = this.getItem(FILLED_SCHEM_SLOT);
+            newCount.grow(1);
+            this.setItem(FILLED_SCHEM_SLOT, newCount);
         }
     }
 
-    protected static boolean canInsertItemIntoOutputSlot(NonNullList<ItemStack> contents) {
-        return contents.get(FILLED_SCHEM_SLOT).getItem() == SCHEMATIC.get() || contents.get(FILLED_SCHEM_SLOT).isEmpty();
+    protected static boolean canInsertItemIntoOutputSlot(MultiblockWorkshopBlockEntity container) {
+        return container.getItem(FILLED_SCHEM_SLOT).getItem() == SCHEMATIC.get() || container.getItem(FILLED_SCHEM_SLOT).isEmpty();
     }
 
-    protected static boolean canInsertAmountIntoOutputSlot(NonNullList<ItemStack> contents) {
-        return contents.get(FILLED_SCHEM_SLOT).getMaxStackSize() > contents.get(FILLED_SCHEM_SLOT).getCount();
+    protected static boolean canInsertAmountIntoOutputSlot(MultiblockWorkshopBlockEntity container) {
+        return container.getItem(FILLED_SCHEM_SLOT).getMaxStackSize() > container.getItem(FILLED_SCHEM_SLOT).getCount();
     }
 }

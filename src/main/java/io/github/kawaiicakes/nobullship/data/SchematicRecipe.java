@@ -12,11 +12,6 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 
@@ -71,7 +66,9 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public ItemStack assemble(MultiblockWorkshopBlockEntity workshop) {
         // contents inside the Container MUST be treated as though immutable as per Forge docs
         // Why? idfk lmao. Do I want to find out? No.
-        ItemStack copyOfInputSchematic = workshop.getItem(EMPTY_SCHEM_SLOT).copy();
+        // Comments are being left here as a reminder in case the implementation changes again;
+        // but now #getItem returns an ItemStack which is safe to modify.
+        ItemStack copyOfInputSchematic = workshop.getItem(EMPTY_SCHEM_SLOT);
 
         if (copyOfInputSchematic.isEmpty()) return ItemStack.EMPTY;
 
