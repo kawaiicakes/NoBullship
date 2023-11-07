@@ -53,7 +53,7 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
         String[] shapedPattern = shrink(patternFromJsonArray(shapedson));
 
         JsonArray shapelesson = pSerializedRecipe.getAsJsonArray("shapeless_input");
-        if (shapelesson == null || shapelesson.size() > 9 || shapelesson.isEmpty()) throw throwNewSyntaxError(pRecipeId, "shapeless_input");
+        if (shapelesson == null || shapelesson.size() > 9) throw throwNewSyntaxError(pRecipeId, "shapeless_input");
 
         NonNullList<Ingredient> shapedInput = dissolvePattern(shapedPattern, charToIngredientMap);
         NonNullList<ItemStack> shapelessInput = NonNullList.withSize(9, ItemStack.EMPTY);
