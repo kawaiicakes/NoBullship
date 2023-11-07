@@ -131,7 +131,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
                     }
                 }
 
-                if (!ingredient.test(entity.getItem(i + j * pWidth))) {
+                if (!ingredient.test(entity.getItem(i + j * 3))) {
                     return false;
                 }
             }
