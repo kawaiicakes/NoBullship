@@ -17,21 +17,21 @@ import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEnti
 
 public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     private final ResourceLocation resultId;
-    private final NonNullList<Ingredient> declaration;
-    private final NonNullList<ItemStack> ingredients;
+    private final NonNullList<Ingredient> shaped;
+    private final NonNullList<ItemStack> shapeless;
 
-    public SchematicRecipe(ResourceLocation resultId, NonNullList<Ingredient> declaration, NonNullList<ItemStack> ingredients) {
+    public SchematicRecipe(ResourceLocation resultId, NonNullList<Ingredient> shaped, NonNullList<ItemStack> shapeless) {
         this.resultId = resultId;
-        this.declaration = declaration;
-        this.ingredients = ingredients;
+        this.shaped = shaped;
+        this.shapeless = shapeless;
     }
 
     public ImmutableList<Ingredient> getShapedIngredients() {
-        return ImmutableList.copyOf(declaration);
+        return ImmutableList.copyOf(shaped);
     }
 
     public ImmutableList<ItemStack> getShapelessIngredients() {
-        return ImmutableList.copyOf(ingredients);
+        return ImmutableList.copyOf(shapeless);
     }
 
     /**
@@ -40,7 +40,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
      */
     public boolean declarationMatches(MultiblockWorkshopBlockEntity workshop) {
         for (int i = 0; i < 9; i++) {
-            if (!(this.declaration.get(i).test(workshop.getItem(i)))) return false;
+            if (!(this.shaped.get(i).test(workshop.getItem(i)))) return false;
         }
 
         return true;
@@ -55,7 +55,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         // TODO: more sophisticated comparison
         for (int i = 9; i < 18; i++) {
             final int finalI = i;
-            if (this.ingredients.stream()
+            if (this.shapeless.stream()
                     .noneMatch(item -> item.equals(workshop.getItem(finalI), false))) return false;
         }
 
