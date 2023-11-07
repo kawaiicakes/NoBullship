@@ -22,6 +22,9 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
@@ -115,6 +118,20 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
     @Override
     public ItemStack getItem(int pSlot) {
         return this.itemHandler.getStackInSlot(pSlot).copy();
+    }
+
+    /**
+     * The returned contents are safe to modify and are not tied to the values in the <code>ItemHandler</code>,
+     * which should be treated as immutable.
+     * @return a <code>List</code> of the <code>ItemStack</code>s present in the shapeless slots of the workbench.
+     */
+    @NotNull
+    public List<ItemStack> getShapelessContents() {
+        List<ItemStack> toReturn = new ArrayList<>(SHAPELESS_SLOTS.size());
+        for (int i : SHAPELESS_SLOTS) {
+            toReturn.add(this.getItem(i));
+        }
+        return toReturn;
     }
 
     @Override
@@ -211,10 +228,24 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
         if (this.hasRecipe) this.doCraft(recipe.get());
     }
 
+    /**
+     * When called, the contents of this entity are consumed and the result is added to the filled schematic slot.
+     * No checks are made as to the validity of the recipe inside this method. Be sure of this prior to calling.
+     * @param recipe    the <code>SchematicRecipe</code> describing what to deduct from/add to this entity.
+     */
     protected void doCraft(SchematicRecipe recipe) {
         for (int i : SHAPELESS_SLOTS) {
             final ItemStack newAmount = this.getItem(i);
-            newAmount.shrink(recipe.getShapelessIngredients().get(i).getCount());
+            // The following nonsense is to account for if a recipe has the same ItemStack but with different counts
+            // spread out in different slots...
+            final int recipeAmount = recipe.getShapelessIngredients()
+                    .stream()
+                    .filter(standard -> SchematicRecipe.itemMatchesStandard(standard, newAmount))
+                    .map(ItemStack::getCount)
+                    .max(Comparator.naturalOrder())
+                    .orElseThrow();
+
+            newAmount.shrink(recipeAmount);
             this.setItem(i, newAmount);
         }
 
