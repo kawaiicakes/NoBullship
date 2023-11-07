@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.block;
 
+import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import net.minecraft.core.BlockPos;
@@ -7,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -24,6 +26,9 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
+import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
 
 public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, StackedContentsCompatible {
@@ -32,6 +37,11 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
     public static final IntImmutableList CRAFTING_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);
     public static final byte EMPTY_SCHEM_SLOT = 18;
     public static final byte FILLED_SCHEM_SLOT = 19;
+
+    protected boolean hasRecipe = false;
+
+    LazyOptional<? extends net.minecraftforge.items.IItemHandler>[] handlers =
+            SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
 
     protected NonNullList<ItemStack> contents = NonNullList.withSize(20, ItemStack.EMPTY);
 
@@ -44,6 +54,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
         super.load(pTag);
         this.contents = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         ContainerHelper.loadAllItems(pTag, this.contents);
+        this.contentsUpdated();
     }
 
     @Override
@@ -63,6 +74,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
 
     @Override
     public boolean canPlaceItem(int pIndex, ItemStack pStack) {
+        if (pIndex == FILLED_SCHEM_SLOT) return false;
         if (pIndex == EMPTY_SCHEM_SLOT) return true;
         return CRAFTING_SLOTS.intStream().anyMatch(integer -> integer == pIndex);
     }
@@ -128,6 +140,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
         if (pStack.getCount() > this.getMaxStackSize()) {
             pStack.setCount(this.getMaxStackSize());
         }
+        this.contentsUpdated();
     }
 
     @Override
@@ -151,9 +164,6 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
             pHelper.accountStack(itemstack);
         }
     }
-
-    LazyOptional<? extends net.minecraftforge.items.IItemHandler>[] handlers =
-            SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
 
     @Override
     public <T> LazyOptional<T> getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @javax.annotation.Nullable Direction facing) {
@@ -179,5 +189,51 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
     public void reviveCaps() {
         super.reviveCaps();
         this.handlers = net.minecraftforge.items.wrapper.SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
+    }
+
+    public void contentsUpdated() {
+        if (this.level == null) return;
+        if (!(this.level instanceof ServerLevel serverLevel)) return;
+
+        Optional<SchematicRecipe> recipe = serverLevel.getRecipeManager()
+                .getRecipeFor(SchematicRecipe.Type.INSTANCE, this, serverLevel);
+
+        this.hasRecipe = recipe.isPresent() && canInsertAmountIntoOutputSlot(this.contents) && canInsertItemIntoOutputSlot(this.contents);
+
+        if (this.hasRecipe) this.doCraft(recipe.get());
+    }
+
+    protected void doCraft(SchematicRecipe recipe) {
+        for (int i : SHAPELESS_SLOTS) {
+            int difference = this.contents.get(i).getCount() - recipe.getShapelessIngredients().get(i).getCount();
+
+            if (difference <= 0) {
+                this.contents.set(i, ItemStack.EMPTY);
+                continue;
+            }
+
+            this.contents.get(i).setCount(difference);
+        }
+
+        int schemDifference = this.contents.get(EMPTY_SCHEM_SLOT).getCount() - 1;
+        if (schemDifference <= 0) {
+            this.contents.set(EMPTY_SCHEM_SLOT, ItemStack.EMPTY);
+        } else {
+            this.contents.get(EMPTY_SCHEM_SLOT).setCount(schemDifference);
+        }
+
+        if (this.contents.get(FILLED_SCHEM_SLOT).isEmpty()) {
+            this.contents.set(FILLED_SCHEM_SLOT, recipe.assemble(this));
+        } else {
+            this.contents.get(FILLED_SCHEM_SLOT).setCount(this.contents.get(FILLED_SCHEM_SLOT).getCount() + 1);
+        }
+    }
+
+    protected static boolean canInsertItemIntoOutputSlot(NonNullList<ItemStack> contents) {
+        return contents.get(FILLED_SCHEM_SLOT).getItem() == SCHEMATIC.get() || contents.get(FILLED_SCHEM_SLOT).isEmpty();
+    }
+
+    protected static boolean canInsertAmountIntoOutputSlot(NonNullList<ItemStack> contents) {
+        return contents.get(FILLED_SCHEM_SLOT).getMaxStackSize() > contents.get(FILLED_SCHEM_SLOT).getCount();
     }
 }
