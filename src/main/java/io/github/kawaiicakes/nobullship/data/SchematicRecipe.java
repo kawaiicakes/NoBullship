@@ -13,6 +13,8 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 
+import java.util.Arrays;
+
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 
 public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
@@ -35,12 +37,48 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     }
 
     /**
+     * Tests for "crafting equality" between standard to item. Equality is defined as follows:<br>
+     * <ul>
+     *     <li>standard and item are of the same <code>Item</code></li>
+     *     <li>item contains all the NBT data standard has.</li>
+     *     <ul>
+     *         <li>if standard has no NBT data, item may have any NBT data.</li>
+     *     </ul>
+     *     <li>the count of item is greater or equal to standard.</li>
+     * </ul>
+     */
+    public static boolean itemMatchesStandard(ItemStack standard, ItemStack item) {
+        if (!standard.is(item.getItem())) return false;
+
+        if (item.getCount() < standard.getCount()) return false;
+
+        final CompoundTag stag = standard.getTag();
+        if (stag == null) return true;
+
+        final CompoundTag itemTag = item.getTag();
+        if (itemTag == null) return false;
+        if (stag.equals(itemTag)) return true;
+
+        if (stag.getAllKeys().stream().noneMatch(itemTag::contains)) return false;
+
+        for (String key : stag.getAllKeys()) {
+            if (stag.getTagType(key) != itemTag.getTagType(key)) return false;
+            //noinspection DataFlowIssue
+            if (!stag.get(key).equals(itemTag.get(key))) return false;
+        }
+
+        return true;
+    }
+
+    /**
      * ONLY CALL THIS FROM THE SERVERSIDE. This method is used to determine if an entity should be rendered to the
      * workbench if a matching declaration exists; regardless of whether it can actually be crafted at present.
      */
     public boolean declarationMatches(MultiblockWorkshopBlockEntity workshop) {
         for (int i = 0; i < 9; i++) {
-            if (!(this.shaped.get(i).test(workshop.getItem(i)))) return false;
+            int finalI = i;
+            if (Arrays.stream(this.shaped.get(i).getItems())
+                    .noneMatch(standard -> itemMatchesStandard(standard, workshop.getItem(finalI)))) return false;
         }
 
         return true;
@@ -52,11 +90,11 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
 
         if (!this.declarationMatches(workshop)) return false;
 
-        // TODO: more sophisticated comparison
+        if (this.shapeless.isEmpty()) return false;
         for (int i = 9; i < 18; i++) {
             final int finalI = i;
             if (this.shapeless.stream()
-                    .noneMatch(item -> item.equals(workshop.getItem(finalI), false))) return false;
+                    .noneMatch(standard -> itemMatchesStandard(standard, workshop.getItem(finalI)))) return false;
         }
 
         return true;
