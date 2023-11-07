@@ -129,7 +129,9 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
                 throw new JsonSyntaxException("Invalid key entry: ' ' is a reserved symbol.");
             }
 
-            map.put(entry.getKey().charAt(0), Ingredient.fromJson(entry.getValue()));
+            if (!entry.getValue().isJsonObject()) throw new JsonSyntaxException("Expected ingredient to be an object");
+
+            map.put(entry.getKey().charAt(0), Ingredient.fromJson(entry.getValue().getAsJsonObject()));
         }
 
         map.put(' ', Ingredient.EMPTY);

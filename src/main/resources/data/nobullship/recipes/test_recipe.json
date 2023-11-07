@@ -3,7 +3,9 @@
   "declaration": {
     "output_id": "ballsmungus",
     "key": {
-      "#": "diamond"
+      "#": {
+        "item": "diamond"
+      }
     },
     "shaped_input": [
       "###"
