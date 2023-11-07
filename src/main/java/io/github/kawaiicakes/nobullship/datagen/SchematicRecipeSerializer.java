@@ -30,7 +30,7 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
     @Override
     public SchematicRecipe fromJson(ResourceLocation pRecipeId, JsonObject pSerializedRecipe) throws IllegalArgumentException {
         JsonElement mikeTypeson = pSerializedRecipe.get("type");
-        if (mikeTypeson == null || !Objects.equals(mikeTypeson.getAsString(), "nobullship:schematic_workbench"))
+        if (mikeTypeson == null || !Objects.equals(mikeTypeson.getAsString(), ID.toString()))
             throw throwNewSyntaxError(pRecipeId, "recipe type");
 
         JsonObject keyson = pSerializedRecipe.getAsJsonObject("key");
@@ -68,7 +68,7 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
             shapelessInput.add(character, stackAtChar);
         }
 
-        return new SchematicRecipe(resultId, shapedInput, shapelessInput, (byte) shapedPattern[0].length(), (byte) shapedson.size());
+        return new SchematicRecipe(pRecipeId, resultId, shapedInput, shapelessInput, (byte) shapedPattern[0].length(), (byte) shapedson.size());
     }
 
     @Override
@@ -84,7 +84,7 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
         byte width = pBuffer.readByte();
         byte height = pBuffer.readByte();
 
-        return new SchematicRecipe(new ResourceLocation(resultId), shapedList, shapelessList, width, height);
+        return new SchematicRecipe(pRecipeId, new ResourceLocation(resultId), shapedList, shapelessList, width, height);
     }
 
     @Override

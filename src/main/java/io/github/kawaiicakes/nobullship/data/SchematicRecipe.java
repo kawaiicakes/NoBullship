@@ -18,13 +18,15 @@ import java.util.Arrays;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 
 public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
+    private final ResourceLocation recipeId;
     private final ResourceLocation resultId;
     private final NonNullList<Ingredient> shaped;
     private final NonNullList<ItemStack> shapeless;
     public final byte actualShapedWidth;
     public final byte actualShapedHeight;
 
-    public SchematicRecipe(ResourceLocation resultId, NonNullList<Ingredient> shaped, NonNullList<ItemStack> shapeless, byte actualShapedWidth, byte actualShapedHeight) {
+    public SchematicRecipe(ResourceLocation recipeId, ResourceLocation resultId, NonNullList<Ingredient> shaped, NonNullList<ItemStack> shapeless, byte actualShapedWidth, byte actualShapedHeight) {
+        this.recipeId = recipeId;
         this.resultId = resultId;
         this.shaped = shaped;
         this.shapeless = shapeless;
@@ -100,11 +102,12 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
 
         if (!this.declarationMatches(workshop)) return false;
 
-        if (this.shapeless.isEmpty()) return false;
-        for (int i = 9; i < 18; i++) {
-            final int finalI = i;
-            if (this.shapeless.stream()
-                    .noneMatch(standard -> itemMatchesStandard(standard, workshop.getItem(finalI)))) return false;
+        if (!this.shapeless.isEmpty()) {
+            for (int i = 9; i < 18; i++) {
+                final int finalI = i;
+                if (this.shapeless.stream()
+                        .noneMatch(standard -> itemMatchesStandard(standard, workshop.getItem(finalI)))) return false;
+            }
         }
 
         return true;
@@ -171,7 +174,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
 
     @Override
     public ResourceLocation getId() {
-        return this.resultId;
+        return this.recipeId;
     }
 
     @Override
@@ -200,6 +203,6 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public static class Type implements RecipeType<SchematicRecipe> {
         private Type() {}
         public static final Type INSTANCE = new Type();
-        public static final String ID = "schematic";
+        public static final String ID = "schematic_workbench";
     }
 }
