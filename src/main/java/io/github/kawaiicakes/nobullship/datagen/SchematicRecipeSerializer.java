@@ -38,7 +38,7 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
         ResourceLocation resultId = new ResourceLocation(declarason.getAsJsonPrimitive("output_id").getAsString());
 
         Map<String, Ingredient> charToIngredientMap = ingredientKeyFromJson(GsonHelper.getAsJsonObject(declarason, "key"));
-        String[] shaped = shrink(patternFromJsonArray(GsonHelper.getAsJsonArray(pSerializedRecipe, "shaped_input")));
+        String[] shaped = shrink(patternFromJsonArray(GsonHelper.getAsJsonArray(declarason, "shaped_input")));
         byte recipeWidth = (byte) shaped[0].length();
         byte recipeHeight = (byte) shaped.length;
         NonNullList<Ingredient> shapedInput = dissolvePattern(shaped, charToIngredientMap, recipeWidth, recipeHeight);
