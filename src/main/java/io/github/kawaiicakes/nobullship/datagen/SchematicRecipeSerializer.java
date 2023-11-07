@@ -68,7 +68,7 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
             shapelessInput.add(character, stackAtChar);
         }
 
-        return new SchematicRecipe(resultId, shapedInput, shapelessInput);
+        return new SchematicRecipe(resultId, shapedInput, shapelessInput, (byte) shapedPattern[0].length(), (byte) shapedson.size());
     }
 
     @Override
@@ -81,7 +81,10 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
         NonNullList<ItemStack> shapelessList = NonNullList.withSize(9, ItemStack.EMPTY);
         shapelessList.replaceAll(_ignored -> pBuffer.readItem());
 
-        return new SchematicRecipe(new ResourceLocation(resultId), shapedList, shapelessList);
+        byte width = pBuffer.readByte();
+        byte height = pBuffer.readByte();
+
+        return new SchematicRecipe(new ResourceLocation(resultId), shapedList, shapelessList, width, height);
     }
 
     @Override
@@ -91,6 +94,9 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
         pRecipe.getShapedIngredients().forEach(ingredient -> ingredient.toNetwork(pBuffer));
 
         pRecipe.getShapelessIngredients().forEach(pBuffer::writeItem);
+
+        pBuffer.writeByte(pRecipe.actualShapedWidth);
+        pBuffer.writeByte(pRecipe.actualShapedHeight);
     }
 
     protected static JsonSyntaxException throwNewSyntaxError(ResourceLocation pRecipeId, String message) {

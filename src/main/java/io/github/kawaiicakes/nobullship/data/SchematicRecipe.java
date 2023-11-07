@@ -21,11 +21,15 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     private final ResourceLocation resultId;
     private final NonNullList<Ingredient> shaped;
     private final NonNullList<ItemStack> shapeless;
+    public final byte actualShapedWidth;
+    public final byte actualShapedHeight;
 
-    public SchematicRecipe(ResourceLocation resultId, NonNullList<Ingredient> shaped, NonNullList<ItemStack> shapeless) {
+    public SchematicRecipe(ResourceLocation resultId, NonNullList<Ingredient> shaped, NonNullList<ItemStack> shapeless, byte actualShapedWidth, byte actualShapedHeight) {
         this.resultId = resultId;
         this.shaped = shaped;
         this.shapeless = shapeless;
+        this.actualShapedWidth = actualShapedWidth;
+        this.actualShapedHeight = actualShapedHeight;
     }
 
     public ImmutableList<Ingredient> getShapedIngredients() {
@@ -75,13 +79,19 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
      * workbench if a matching declaration exists; regardless of whether it can actually be crafted at present.
      */
     public boolean declarationMatches(MultiblockWorkshopBlockEntity workshop) {
-        for (int i = 0; i < 9; i++) {
-            int finalI = i;
-            if (Arrays.stream(this.shaped.get(i).getItems())
-                    .noneMatch(standard -> itemMatchesStandard(standard, workshop.getItem(finalI)))) return false;
+        for(byte i = 0; i <= 3 - this.actualShapedWidth; i++) {
+            for(byte j = 0; j <= 3 - this.actualShapedHeight; j++) {
+                if (this.declarationMatches(workshop, i, j, true)) {
+                    return true;
+                }
+
+                if (this.declarationMatches(workshop, i, j, false)) {
+                    return true;
+                }
+            }
         }
 
-        return true;
+        return false;
     }
 
     @Override
@@ -95,6 +105,35 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
             final int finalI = i;
             if (this.shapeless.stream()
                     .noneMatch(standard -> itemMatchesStandard(standard, workshop.getItem(finalI)))) return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if a region of the shaped input matches
+     */
+    protected boolean declarationMatches(MultiblockWorkshopBlockEntity entity, byte pWidth, byte pHeight, boolean mirrored) {
+        for(int i = 0; i < 3; ++i) {
+            for(int j = 0; j < 3; ++j) {
+                int k = i - pWidth;
+                int l = j - pHeight;
+                Ingredient ingredient = Ingredient.EMPTY;
+                if (k >= 0 && l >= 0 && k < this.actualShapedWidth && l < this.actualShapedHeight) {
+                    if (mirrored) {
+                        ingredient = this.shaped.get(this.actualShapedWidth - k - 1 + l * this.actualShapedWidth);
+                    } else {
+                        ingredient = this.shaped.get(k + l * this.actualShapedWidth);
+                    }
+                }
+
+                int finalJ = j;
+                int finalI = i;
+                if (Arrays
+                        .stream(ingredient.getItems())
+                        .noneMatch(standard -> itemMatchesStandard(standard, entity.getItem(finalI + finalJ * 3)))
+                ) return false;
+            }
         }
 
         return true;
