@@ -8,14 +8,18 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
@@ -40,7 +44,7 @@ import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
  * <code>Container</code> implementations given that I've taken care to avoid using anything which would
  * mutate the <code>ItemStack</code>s in the <code>ItemStackHandler</code>.
  */
-public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity implements StackedContentsCompatible {
+public class MultiblockWorkshopBlockEntity extends BlockEntity implements Container, MenuProvider, Nameable, StackedContentsCompatible {
     public static final IntImmutableList SHAPED_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8);
     public static final IntImmutableList SHAPELESS_SLOTS = IntImmutableList.of(9, 10, 11, 12, 13, 14, 15, 16, 17);
     public static final IntImmutableList CRAFTING_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);
@@ -68,9 +72,14 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
     }
 
     @Override
+    public void onLoad() {
+        super.onLoad();
+        this.lazyItemHandler = LazyOptional.of(() -> itemHandler);
+    }
+
+    @Override
     public void load(CompoundTag pTag) {
         super.load(pTag);
-        this.lazyItemHandler = LazyOptional.of(() -> itemHandler);
         this.itemHandler.deserializeNBT(pTag.getCompound("inventory"));
         this.contentsUpdated();
     }
@@ -89,13 +98,8 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
     }
 
     @Override
-    protected Component getDefaultName() {
-        return Component.translatable("block.nobullship.workshop");
-    }
-
-    @Override
-    protected AbstractContainerMenu createMenu(int pContainerId, Inventory pInventory) {
-        return new MultiblockWorkshopMenu(pContainerId, pInventory, this);
+    public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
+        return new MultiblockWorkshopMenu(pContainerId, pPlayerInventory, this);
     }
 
     @Override
@@ -198,7 +202,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable Direction facing) {
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
         if (capability == ForgeCapabilities.ITEM_HANDLER) {
             return this.lazyItemHandler.cast();
         }
@@ -270,5 +274,15 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
 
     protected static boolean canInsertAmountIntoOutputSlot(MultiblockWorkshopBlockEntity container) {
         return container.getItem(FILLED_SCHEM_SLOT).getMaxStackSize() > container.getItem(FILLED_SCHEM_SLOT).getCount();
+    }
+
+    @Override
+    public Component getName() {
+        return Component.translatable("block.nobullship.workshop");
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("block.nobullship.workshop");
     }
 }

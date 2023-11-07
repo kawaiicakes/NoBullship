@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
 
@@ -17,16 +17,15 @@ import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_MENU;
 
 public class MultiblockWorkshopMenu extends AbstractContainerMenu {
     public final MultiblockWorkshopBlockEntity entity;
-    private final Level level;
 
     public MultiblockWorkshopMenu(int pContainerId, Inventory inventory, FriendlyByteBuf data) {
-        this(pContainerId, inventory, (MultiblockWorkshopBlockEntity) Objects.requireNonNull(inventory.player.level.getBlockEntity(data.readBlockPos())));
+        this(pContainerId, inventory, Objects.requireNonNull(inventory.player.level.getBlockEntity(data.readBlockPos())));
     }
 
-    public MultiblockWorkshopMenu(int pContainerId, Inventory inventory, MultiblockWorkshopBlockEntity entity) {
+    public MultiblockWorkshopMenu(int pContainerId, Inventory inventory, BlockEntity entity) {
         super(WORKSHOP_MENU.get(), pContainerId);
-        this.entity = entity;
-        this.level = inventory.player.getLevel();
+        checkContainerSize(inventory, 20);
+        this.entity = (MultiblockWorkshopBlockEntity) entity;
 
         this.addPlayerInventory(inventory);
         this.addPlayerHotbar(inventory);
