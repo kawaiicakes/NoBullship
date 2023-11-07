@@ -213,26 +213,14 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
 
     protected void doCraft(SchematicRecipe recipe) {
         for (int i : SHAPELESS_SLOTS) {
-            int difference = this.getItem(i).getCount() - recipe.getShapelessIngredients().get(i).getCount();
-
-            if (difference <= 0) {
-                this.setItem(i, ItemStack.EMPTY);
-                continue;
-            }
-
             final ItemStack newAmount = this.getItem(i);
-            newAmount.setCount(difference);
+            newAmount.shrink(recipe.getShapelessIngredients().get(i).getCount());
             this.setItem(i, newAmount);
         }
 
-        int schemDifference = this.getItem(EMPTY_SCHEM_SLOT).getCount() - 1;
-        if (schemDifference <= 0) {
-            this.setItem(EMPTY_SCHEM_SLOT, ItemStack.EMPTY);
-        } else {
-            final ItemStack newAmount = this.getItem(EMPTY_SCHEM_SLOT);
-            newAmount.setCount(schemDifference);
-            this.setItem(EMPTY_SCHEM_SLOT, newAmount);
-        }
+        final ItemStack newAmount = this.getItem(EMPTY_SCHEM_SLOT);
+        newAmount.shrink(1);
+        this.setItem(EMPTY_SCHEM_SLOT, newAmount);
 
         if (this.getItem(FILLED_SCHEM_SLOT).isEmpty()) {
             this.setItem(FILLED_SCHEM_SLOT, recipe.assemble(this));
