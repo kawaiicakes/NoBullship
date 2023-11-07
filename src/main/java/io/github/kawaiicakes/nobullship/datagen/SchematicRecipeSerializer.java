@@ -1,6 +1,5 @@
 package io.github.kawaiicakes.nobullship.datagen;
 
-import com.google.common.collect.Sets;
 import com.google.gson.*;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
@@ -24,8 +23,6 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
     public static final SchematicRecipeSerializer INSTANCE = new SchematicRecipeSerializer();
     public static final ResourceLocation ID = new ResourceLocation(MOD_ID, "schematic_workbench");
 
-    // TODO: redo error checking... see vanilla examples maybe? also redo NBT checking on shaped/shapeless inputs better
-    // TODO: optimize... see SharedRecipe
     @SuppressWarnings("SpellCheckingInspection")
     @Override
     public SchematicRecipe fromJson(ResourceLocation pRecipeId, JsonObject pSerializedRecipe) throws IllegalArgumentException {
@@ -33,70 +30,51 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
         if (mikeTypeson == null || !Objects.equals(mikeTypeson.getAsString(), ID.toString()))
             throw throwNewSyntaxError(pRecipeId, "recipe type");
 
-        JsonObject keyson = pSerializedRecipe.getAsJsonObject("key");
-        if (keyson == null) throw throwNewSyntaxError(pRecipeId, "shapeless input key");
-
+        if (pSerializedRecipe.getAsJsonObject("declaration") == null)
+            throw throwNewSyntaxError(pRecipeId, "declaration");
         JsonObject declarason = pSerializedRecipe.getAsJsonObject("declaration");
-        if (declarason == null) throw throwNewSyntaxError(pRecipeId, "declaration");
-
-        JsonObject shapedKeyson = declarason.getAsJsonObject("key");
-        if (shapedKeyson == null) throw throwNewSyntaxError(pRecipeId, "declaration key");
-
-        Map<Character, ItemStack> charToItemMap = itemstackKeyFromJson(keyson);
-        Map<Character, Ingredient> charToIngredientMap = ingredientKeyFromJson(shapedKeyson);
 
         if (declarason.getAsJsonPrimitive("output_id") == null) throw throwNewSyntaxError(pRecipeId, "output_id");
         ResourceLocation resultId = new ResourceLocation(declarason.getAsJsonPrimitive("output_id").getAsString());
 
-        JsonArray shapedson = declarason.getAsJsonArray("shaped_input");
-        if (shapedson == null || shapedson.size() > 3 || shapedson.isEmpty()) throw throwNewSyntaxError(pRecipeId, "shaped_input");
-        String[] shapedPattern = shrink(patternFromJsonArray(shapedson));
+        Map<String, Ingredient> charToIngredientMap = ingredientKeyFromJson(GsonHelper.getAsJsonObject(declarason, "key"));
+        String[] shaped = shrink(patternFromJsonArray(GsonHelper.getAsJsonArray(pSerializedRecipe, "shaped_input")));
+        byte recipeWidth = (byte) shaped[0].length();
+        byte recipeHeight = (byte) shaped.length;
+        NonNullList<Ingredient> shapedInput = dissolvePattern(shaped, charToIngredientMap, recipeWidth, recipeHeight);
 
-        JsonArray shapelesson = pSerializedRecipe.getAsJsonArray("shapeless_input");
-        if (shapelesson == null || shapelesson.size() > 9) throw throwNewSyntaxError(pRecipeId, "shapeless_input");
+        NonNullList<ItemStack> shapelessInput = itemsFromJson(GsonHelper.getAsJsonArray(pSerializedRecipe, "shapeless_input"));
+        if (shapelessInput.size() > 9) throw new JsonParseException("Too many ingredients for shapeless recipe. The maximum is 9");
 
-        NonNullList<Ingredient> shapedInput = dissolvePattern(shapedPattern, charToIngredientMap);
-        NonNullList<ItemStack> shapelessInput = NonNullList.withSize(9, ItemStack.EMPTY);
-
-        for (JsonElement jsonElement : shapelesson) {
-            if (!(jsonElement instanceof JsonPrimitive element)) throw throwNewSyntaxError(pRecipeId, "shapeless_input entries");
-            final char character = element.getAsCharacter();
-
-            ItemStack stackAtChar = charToItemMap.get(character);
-            if (stackAtChar == null || stackAtChar.isEmpty()) throw throwNewSyntaxError(pRecipeId, "no such key exists");
-
-            shapelessInput.add(character, stackAtChar);
-        }
-
-        return new SchematicRecipe(pRecipeId, resultId, shapedInput, shapelessInput, (byte) shapedPattern[0].length(), (byte) shapedson.size());
+        return new SchematicRecipe(pRecipeId, resultId, shapedInput, shapelessInput, recipeWidth, recipeHeight);
     }
 
     @Override
     public @Nullable SchematicRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
+        byte width = pBuffer.readByte();
+        byte height = pBuffer.readByte();
+
         String resultId = pBuffer.readUtf();
 
-        NonNullList<Ingredient> shapedList = NonNullList.withSize(9, Ingredient.EMPTY);
+        NonNullList<Ingredient> shapedList = NonNullList.withSize(width * height, Ingredient.EMPTY);
         shapedList.replaceAll(_ignored -> Ingredient.fromNetwork(pBuffer));
 
         NonNullList<ItemStack> shapelessList = NonNullList.withSize(9, ItemStack.EMPTY);
         shapelessList.replaceAll(_ignored -> pBuffer.readItem());
-
-        byte width = pBuffer.readByte();
-        byte height = pBuffer.readByte();
 
         return new SchematicRecipe(pRecipeId, new ResourceLocation(resultId), shapedList, shapelessList, width, height);
     }
 
     @Override
     public void toNetwork(FriendlyByteBuf pBuffer, SchematicRecipe pRecipe) {
+        pBuffer.writeByte(pRecipe.actualShapedWidth);
+        pBuffer.writeByte(pRecipe.actualShapedHeight);
+
         pBuffer.writeUtf(pRecipe.getId().toString());
 
         pRecipe.getShapedIngredients().forEach(ingredient -> ingredient.toNetwork(pBuffer));
 
         pRecipe.getShapelessIngredients().forEach(pBuffer::writeItem);
-
-        pBuffer.writeByte(pRecipe.actualShapedWidth);
-        pBuffer.writeByte(pRecipe.actualShapedHeight);
     }
 
     protected static JsonSyntaxException throwNewSyntaxError(ResourceLocation pRecipeId, String message) {
@@ -104,8 +82,8 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
         return new JsonSyntaxException("Recipe " + pRecipeId + " has invalid JSON syntax: " + message + "!");
     }
 
-    public static Map<Character, ItemStack> itemstackKeyFromJson(JsonObject keySet) {
-        Map<Character, ItemStack> map = new HashMap<>(keySet.size());
+    public static Map<String, Ingredient> ingredientKeyFromJson(JsonObject keySet) {
+        Map<String, Ingredient> map = new HashMap<>(keySet.size());
 
         for(Map.Entry<String, JsonElement> entry : keySet.entrySet()) {
             if (entry.getKey().length() != 1) {
@@ -116,49 +94,28 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
                 throw new JsonSyntaxException("Invalid key entry: ' ' is a reserved symbol.");
             }
 
-            map.put(entry.getKey().charAt(0), ShapedRecipe.itemStackFromJson(entry.getValue().getAsJsonObject()));
+            map.put(entry.getKey(), Ingredient.fromJson(entry.getValue()));
         }
 
-        map.put(' ', ItemStack.EMPTY);
+        map.put(" ", Ingredient.EMPTY);
         return map;
     }
 
-    public static Map<Character, Ingredient> ingredientKeyFromJson(JsonObject keySet) {
-        Map<Character, Ingredient> map = new HashMap<>(keySet.size());
-
-        for(Map.Entry<String, JsonElement> entry : keySet.entrySet()) {
-            if (entry.getKey().length() != 1) {
-                throw new JsonSyntaxException("Invalid key entry: '" + entry.getKey() + "' is an invalid symbol (must be 1 character only).");
-            }
-
-            if (" ".equals(entry.getKey())) {
-                throw new JsonSyntaxException("Invalid key entry: ' ' is a reserved symbol.");
-            }
-
-            if (!entry.getValue().isJsonObject()) throw new JsonSyntaxException("Expected ingredient to be an object");
-
-            map.put(entry.getKey().charAt(0), Ingredient.fromJson(entry.getValue().getAsJsonObject()));
-        }
-
-        map.put(' ', Ingredient.EMPTY);
-        return map;
-    }
-
-    public static NonNullList<Ingredient> dissolvePattern(String[] pPattern, Map<Character, Ingredient> pKeys) {
-        NonNullList<Ingredient> nonnulllist = NonNullList.withSize(9, Ingredient.EMPTY);
-        Set<Character> set = Sets.newHashSet(pKeys.keySet());
-        set.remove(' ');
+    public static NonNullList<Ingredient> dissolvePattern(String[] pPattern, Map<String, Ingredient> pKeys, byte actualWidth, byte actualHeight) {
+        NonNullList<Ingredient> nonnulllist = NonNullList.withSize(actualWidth * actualHeight, Ingredient.EMPTY);
+        Set<String> set = new HashSet<>(pKeys.keySet());
+        set.remove(" ");
 
         for(int i = 0; i < pPattern.length; i++) {
             for(int j = 0; j < pPattern[i].length(); j++) {
-                Character character = pPattern[i].charAt(j);
+                String character = pPattern[i].substring(j, j + 1);
                 Ingredient ingredient = pKeys.get(character);
                 if (ingredient == null) {
                     throw new JsonSyntaxException("Pattern references symbol '" + character + "' but it's not defined in the key");
                 }
 
                 set.remove(character);
-                nonnulllist.set(j + 3 * i, ingredient);
+                nonnulllist.set(j + actualWidth * i, ingredient);
             }
         }
 
@@ -172,14 +129,14 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
     public static String[] patternFromJsonArray(JsonArray pPatternArray) {
         String[] astring = new String[pPatternArray.size()];
         if (astring.length > 3) {
-            throw new JsonSyntaxException("Invalid pattern: too many rows, " + 3 + " is maximum");
+            throw new JsonSyntaxException("Invalid pattern: too many rows, 3 is maximum");
         } else if (astring.length == 0) {
             throw new JsonSyntaxException("Invalid pattern: empty pattern not allowed");
         } else {
             for(int i = 0; i < astring.length; ++i) {
                 String s = GsonHelper.convertToString(pPatternArray.get(i), "pattern[" + i + "]");
                 if (s.length() > 3) {
-                    throw new JsonSyntaxException("Invalid pattern: too many columns, " + 3 + " is maximum");
+                    throw new JsonSyntaxException("Invalid pattern: too many columns, 3 is maximum");
                 }
 
                 if (i > 0 && astring[0].length() != s.length()) {
@@ -224,7 +181,6 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
                 astring[k1] = pToShrink[k1 + k].substring(i, j + 1);
             }
 
-            LOGGER.info(Arrays.toString(astring));
             return astring;
         }
     }
@@ -243,5 +199,18 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
             if (pEntry.charAt(i) == ' ') return i;
         }
         return 0;
+    }
+
+    public static NonNullList<ItemStack> itemsFromJson(JsonArray jsonArray) {
+        NonNullList<ItemStack> nonnulllist = NonNullList.create();
+
+        // TODO: Shapeless can take Ingredients with a count greater than 1? One can dream...
+        // Perhaps a Map containing the Ingredient and a short for the count?
+        for (int i = 0; i < jsonArray.size(); ++i) {
+            ItemStack ingredient = ShapedRecipe.itemStackFromJson(jsonArray.get(i).getAsJsonObject());
+            nonnulllist.add(ingredient);
+        }
+
+        return nonnulllist;
     }
 }
