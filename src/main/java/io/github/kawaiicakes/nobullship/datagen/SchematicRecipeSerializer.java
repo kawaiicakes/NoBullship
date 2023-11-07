@@ -231,9 +231,11 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
     }
 
     // I would have done --i, but IntelliJ would give me an out-of-bounds error for #charAt...
+    // Addendum 1: Oh? Does --i and i-- do the same thing in these loops?
     public static int lastNonSpace(String pEntry) {
-        for (int i = pEntry.length(); true; i--) {
-            if (pEntry.charAt(i - 1) == ' ') return i - 1;
+        for (int i = pEntry.length() - 1; i >= 0; i--) {
+            if (pEntry.charAt(i) == ' ') return i;
         }
+        return 0;
     }
 }
