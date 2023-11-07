@@ -241,7 +241,8 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity impl
             // spread out in different slots...
             final int recipeAmount = recipe.getShapelessIngredients()
                     .stream()
-                    .filter(standard -> SchematicRecipe.itemMatchesStandard(standard, newAmount))
+                    .filter(standard -> standard.is(this.getItem(i).getItem())
+                            && this.getItem(i).getCount() >= standard.getCount())
                     .map(ItemStack::getCount)
                     .max(Comparator.naturalOrder())
                     .orElseThrow();

@@ -43,6 +43,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     }
 
     /**
+     * This method is defunct and not to be used until I add NBT compatibility to crafting.
      * Tests for "crafting equality" between standard to item. Equality is defined as follows:<br>
      * <ul>
      *     <li>standard and item are of the same <code>Item</code></li>
@@ -76,18 +77,37 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         return true;
     }
 
+    @Override
+    public boolean matches(MultiblockWorkshopBlockEntity workshop, Level pLevel) {
+        if (pLevel.isClientSide) return false;
+
+        if (!this.shapedMatches(workshop)) return false;
+
+        if (!this.shapeless.isEmpty()) {
+            for (int i = 9; i < 18; i++) {
+                final int finalI = i;
+                if (this.shapeless.stream()
+                        .noneMatch(standard -> standard.is(workshop.getItem(finalI).getItem())
+                                        && workshop.getItem(finalI).getCount() >= standard.getCount())
+                ) return false;
+            }
+        }
+
+        return true;
+    }
+
     /**
      * ONLY CALL THIS FROM THE SERVERSIDE. This method is used to determine if an entity should be rendered to the
      * workbench if a matching declaration exists; regardless of whether it can actually be crafted at present.
      */
-    public boolean declarationMatches(MultiblockWorkshopBlockEntity workshop) {
-        for(byte i = 0; i <= 3 - this.actualShapedWidth; i++) {
-            for(byte j = 0; j <= 3 - this.actualShapedHeight; j++) {
-                if (this.declarationMatches(workshop, i, j, true)) {
+    public boolean shapedMatches(MultiblockWorkshopBlockEntity workshop) {
+        for (byte i = 0; i <= 3 - this.actualShapedWidth; i++) {
+            for (byte j = 0; j <= 3 - this.actualShapedHeight; j++) {
+                if (this.shapedMatches(workshop, i, j, true)) {
                     return true;
                 }
 
-                if (this.declarationMatches(workshop, i, j, false)) {
+                if (this.shapedMatches(workshop, i, j, false)) {
                     return true;
                 }
             }
@@ -96,29 +116,12 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         return false;
     }
 
-    @Override
-    public boolean matches(MultiblockWorkshopBlockEntity workshop, Level pLevel) {
-        if (pLevel.isClientSide) return false;
-
-        if (!this.declarationMatches(workshop)) return false;
-
-        if (!this.shapeless.isEmpty()) {
-            for (int i = 9; i < 18; i++) {
-                final int finalI = i;
-                if (this.shapeless.stream()
-                        .noneMatch(standard -> itemMatchesStandard(standard, workshop.getItem(finalI)))) return false;
-            }
-        }
-
-        return true;
-    }
-
     /**
      * Checks if a region of the shaped input matches
      */
-    protected boolean declarationMatches(MultiblockWorkshopBlockEntity entity, byte pWidth, byte pHeight, boolean mirrored) {
-        for(int i = 0; i < 3; ++i) {
-            for(int j = 0; j < 3; ++j) {
+    protected boolean shapedMatches(MultiblockWorkshopBlockEntity entity, byte pWidth, byte pHeight, boolean mirrored) {
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < 3; j++) {
                 int k = i - pWidth;
                 int l = j - pHeight;
                 Ingredient ingredient = Ingredient.EMPTY;
@@ -130,12 +133,9 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
                     }
                 }
 
-                int finalJ = j;
-                int finalI = i;
-                if (Arrays
-                        .stream(ingredient.getItems())
-                        .noneMatch(standard -> itemMatchesStandard(standard, entity.getItem(finalI + finalJ * 3)))
-                ) return false;
+                if (!ingredient.test(entity.getItem(i + j * pWidth))) {
+                    return false;
+                }
             }
         }
 
