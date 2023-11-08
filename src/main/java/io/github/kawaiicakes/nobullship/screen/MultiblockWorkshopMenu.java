@@ -1,13 +1,12 @@
 package io.github.kawaiicakes.nobullship.screen;
 
-import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -22,24 +21,16 @@ import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_MENU;
 public class MultiblockWorkshopMenu extends AbstractContainerMenu {
     public final MultiblockWorkshopBlockEntity entity;
     protected final Level level;
-    public final ContainerListener listener = new ContainerListener() {
-        @Override
-        public void slotChanged(AbstractContainerMenu pContainerToSend, int pDataSlotIndex, ItemStack pStack) {
-            if (!(MultiblockWorkshopMenu.this.level instanceof ServerLevel serverLevel)) return;
-            MultiblockWorkshopMenu.this.contentsUpdated();
-        }
-
-        @Override
-        public void dataChanged(AbstractContainerMenu pContainerMenu, int pDataSlotIndex, int pValue) {}
-    };
+    protected ContainerLevelAccess access;
 
     public MultiblockWorkshopMenu(int pContainerId, Inventory inventory, FriendlyByteBuf data) {
-        this(pContainerId, inventory, Objects.requireNonNull(inventory.player.level.getBlockEntity(data.readBlockPos())));
+        this(pContainerId, inventory, Objects.requireNonNull(inventory.player.level.getBlockEntity(data.readBlockPos())), ContainerLevelAccess.NULL);
     }
 
-    public MultiblockWorkshopMenu(int pContainerId, Inventory inventory, BlockEntity entity) {
+    public MultiblockWorkshopMenu(int pContainerId, Inventory inventory, BlockEntity entity, ContainerLevelAccess access) {
         super(WORKSHOP_MENU.get(), pContainerId);
         checkContainerSize(inventory, 20);
+        this.access = access;
         this.entity = (MultiblockWorkshopBlockEntity) entity;
         this.level = inventory.player.getLevel();
 
@@ -60,12 +51,10 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
             this.addSlot(new SlotItemHandler(handler, 18, 169, 48));
             this.addSlot(new SlotItemHandler(handler, 19, 169, 26){});
         });
-
-        this.addSlotListener(this.listener);
     }
-
-    public void contentsUpdated() {
-        LogUtils.getLogger().info("HAIII");
+    @Override
+    public void slotsChanged(Container pContainer) {
+        super.slotsChanged(pContainer);
     }
 
     // TODO

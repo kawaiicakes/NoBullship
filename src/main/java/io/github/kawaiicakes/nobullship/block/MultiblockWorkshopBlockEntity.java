@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -101,7 +102,8 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
     @Override
     public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
-        return new MultiblockWorkshopMenu(pContainerId, pPlayerInventory, this);
+        if (this.level == null) return new MultiblockWorkshopMenu(pContainerId, pPlayerInventory, this, ContainerLevelAccess.NULL);
+        return new MultiblockWorkshopMenu(pContainerId, pPlayerInventory, this, ContainerLevelAccess.create(this.level, this.worldPosition));
     }
 
     @Override
