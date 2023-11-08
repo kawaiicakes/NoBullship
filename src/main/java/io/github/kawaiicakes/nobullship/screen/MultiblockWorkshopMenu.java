@@ -97,9 +97,11 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         final MultiblockWorkshopBlockEntity pEntity = ((MultiblockWorkshopBlockEntity) pContainer);
         if (!(pEntity.getLevel() instanceof ServerLevel serverLevel)) return;
 
+        ItemStack output = ItemStack.EMPTY;
         Optional<SchematicRecipe> optional = serverLevel.getServer().getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, pEntity, serverLevel);
-        if (optional.isEmpty()) return;
-        final ItemStack output = optional.get().assemble(pEntity);
+        if (optional.isPresent()) {
+            output = optional.get().assemble(pEntity);
+        }
 
         this.slots.get(this.filledSchemSlotID).set(output);
     }
