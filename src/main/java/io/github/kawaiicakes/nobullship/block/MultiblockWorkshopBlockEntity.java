@@ -50,6 +50,7 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     public static final byte EMPTY_SCHEM_SLOT = 18;
     public static final byte FILLED_SCHEM_SLOT = 19;
 
+    protected MultiblockWorkshopMenu menu;
     protected LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     protected final ItemStackHandler itemHandler = new ItemStackHandler(20) {
         @Override
@@ -65,6 +66,11 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
     public MultiblockWorkshopBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(WORKSHOP_BLOCK_ENTITY.get(), pPos, pBlockState);
+    }
+
+    public void setMenu(MultiblockWorkshopMenu menu) {
+        if (this.menu != null) return;
+        this.menu = menu;
     }
 
     @Override
@@ -142,7 +148,10 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
         ItemStack toReturn = ItemStack.EMPTY;
         // #extractItem returns a stack which may be safely modified
-        if (testValidity) toReturn = this.itemHandler.extractItem(pSlot, pAmount, false);
+        if (testValidity) {
+            toReturn = this.itemHandler.extractItem(pSlot, pAmount, false);
+            this.menu.slotsChanged(this);
+        }
 
         return toReturn;
     }
@@ -165,6 +174,7 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
         }
 
         this.itemHandler.setStackInSlot(pSlot, pStack);
+        this.menu.slotsChanged(this);
     }
 
     @Override
