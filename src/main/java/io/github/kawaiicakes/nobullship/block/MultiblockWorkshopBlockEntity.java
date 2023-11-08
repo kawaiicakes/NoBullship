@@ -234,6 +234,7 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
      */
     public void doCraft(@Nullable final SchematicRecipe recipe) {
         if (recipe == null) return;
+        final ItemStack output = recipe.assemble(this);
 
         for (int i : SHAPELESS_SLOTS) {
             if (recipe.getShapelessIngredients().isEmpty()) break;
@@ -252,6 +253,8 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
         }
 
         this.itemHandler.extractItem(EMPTY_SCHEM_SLOT, 1, false);
+
+        this.itemHandler.insertItem(FILLED_SCHEM_SLOT, output, false);
     }
 
     protected static boolean canInsertItemIntoOutputSlot(MultiblockWorkshopBlockEntity container) {

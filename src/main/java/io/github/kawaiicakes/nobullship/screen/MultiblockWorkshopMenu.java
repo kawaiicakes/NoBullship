@@ -106,13 +106,9 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
         if (!(pPlayer instanceof ServerPlayer)) return;
         if (pLevel.getServer() == null) return;
 
-        ItemStack itemstack;
         Optional<SchematicRecipe> optional = pLevel.getServer().getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, pMenu.entity, pLevel);
-        itemstack = optional.map(schematicRecipe -> schematicRecipe.assemble(pMenu.entity)).orElse(ItemStack.EMPTY);
+        if (optional.isEmpty()) return;
 
-        pMenu.entity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
-            pMenu.entity.doCraft(optional.orElse(null));
-            pMenu.entity.setItem(FILLED_SCHEM_SLOT, itemstack);
-        });
+        pMenu.entity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> pMenu.entity.doCraft(optional.get()));
     }
 }
