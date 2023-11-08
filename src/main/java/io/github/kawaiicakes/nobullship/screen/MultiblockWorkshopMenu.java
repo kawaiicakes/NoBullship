@@ -26,6 +26,7 @@ import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEnti
 public class MultiblockWorkshopMenu extends AbstractContainerMenu implements ContainerListener {
     public final MultiblockWorkshopBlockEntity entity;
     protected Player player;
+    protected int filledSchemSlotID;
 
     public MultiblockWorkshopMenu(int pContainerId, Inventory inventory, FriendlyByteBuf data) {
         this(pContainerId, inventory, Objects.requireNonNull(inventory.player.level.getBlockEntity(data.readBlockPos())));
@@ -52,7 +53,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
             }
 
             this.addSlot(new SlotItemHandler(handler, EMPTY_SCHEM_SLOT, 169, 48));
-            this.addSlot(new SchematicResultSlot(this.entity, this.player, FILLED_SCHEM_SLOT, 169, 26));
+            this.filledSchemSlotID = this.addSlot(new SchematicResultSlot(this.entity, handler, this.player, FILLED_SCHEM_SLOT, 169, 26)).index;
         });
 
         this.addSlotListener(this);
@@ -86,8 +87,6 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
     @Override
     public void slotChanged(AbstractContainerMenu pContainerToSend, int slot, ItemStack pStack) {
         if (pContainerToSend != this) return;
-        if (slot == FILLED_SCHEM_SLOT) return;
-        if (slot <= 17) return;
 
         this.slotsChanged(this.entity);
     }
@@ -102,7 +101,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         if (optional.isEmpty()) return;
         final ItemStack output = optional.get().assemble(pEntity);
 
-        this.slots.get(FILLED_SCHEM_SLOT).set(output);
+        this.slots.get(this.filledSchemSlotID).set(output);
     }
 
     @Override
