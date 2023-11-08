@@ -105,26 +105,26 @@ public class SchematicResultSlot extends Slot {
     @Override
     public void onTake(Player pPlayer, ItemStack pStack) {
         if (blockEntity.getLevel() == null) return;
-        NonNullList<ItemStack> remainingItems = getRemainingItemsForRecipe(this.blockEntity, blockEntity.getLevel());
+        NonNullList<ItemStack> remainingItems = getRemainingItemsForRecipe(this.blockEntity, (IItemHandlerModifiable) this.itemHandler, blockEntity.getLevel());
 
         for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
             int j = i - 9;
 
-            ItemStack itemstack = this.blockEntity.getItem(i);
+            ItemStack itemstack = this.itemHandler.getStackInSlot(i);
             ItemStack itemstack1 = remainingItems.get(j);
 
             if (!itemstack.isEmpty()) {
-                this.blockEntity.removeItem(i, 1);
-                itemstack = this.blockEntity.getItem(i);
+                this.itemHandler.extractItem(i, 1, false);
+                itemstack = this.itemHandler.getStackInSlot(i);
             }
 
             if (itemstack1.isEmpty()) continue;
 
             if (itemstack.isEmpty()) {
-                this.blockEntity.setItem(i, itemstack1);
+                ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(i, itemstack1);
             } else if (ItemStack.isSame(itemstack, itemstack1) && ItemStack.tagMatches(itemstack, itemstack1)) {
                 itemstack1.grow(itemstack.getCount());
-                this.blockEntity.setItem(i, itemstack1);
+                ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(i, itemstack1);
             } else if (!this.player.getInventory().add(itemstack1)) {
                 this.player.drop(itemstack1, false);
             }
@@ -136,7 +136,7 @@ public class SchematicResultSlot extends Slot {
         return this.itemHandler.getSlotLimit(this.getContainerSlot());
     }
 
-    protected static NonNullList<ItemStack> getRemainingItemsForRecipe(MultiblockWorkshopBlockEntity entity, Level pLevel) {
+    protected static NonNullList<ItemStack> getRemainingItemsForRecipe(MultiblockWorkshopBlockEntity entity, IItemHandlerModifiable handler, Level pLevel) {
         Optional<SchematicRecipe> optional = pLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, entity, pLevel);
 
         if (optional.isPresent()) {
@@ -146,7 +146,7 @@ public class SchematicResultSlot extends Slot {
         NonNullList<ItemStack> nonnulllist = NonNullList.withSize(entity.getContainerSize(), ItemStack.EMPTY);
 
         for(int i : ArrayUtils.add(SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
-            nonnulllist.set(i - 9, entity.getItem(i));
+            nonnulllist.set(i - 9, handler.getStackInSlot(i));
         }
 
         return nonnulllist;
