@@ -22,8 +22,6 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
@@ -41,7 +39,6 @@ import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
  * I can see that the "forbidden" methods mentioned above are actually being used. Welp, no harm in trying.
  */
 public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
-    public static final IntImmutableList SHAPED_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8);
     public static final IntImmutableList SHAPELESS_SLOTS = IntImmutableList.of(9, 10, 11, 12, 13, 14, 15, 16, 17);
     public static final IntImmutableList CRAFTING_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);
     public static final byte EMPTY_SCHEM_SLOT = 18;
@@ -122,20 +119,6 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     @Override
     public ItemStack getItem(int pSlot) {
         return this.itemHandler.getStackInSlot(pSlot).copy();
-    }
-
-    /**
-     * The returned contents are safe to modify and are not tied to the values in the <code>ItemHandler</code>,
-     * which should be treated as immutable.
-     * @return a <code>List</code> of the <code>ItemStack</code>s present in the shapeless slots of the workbench.
-     */
-    @NotNull
-    public List<ItemStack> getShapelessContents() {
-        List<ItemStack> toReturn = new ArrayList<>(SHAPELESS_SLOTS.size());
-        for (int i : SHAPELESS_SLOTS) {
-            toReturn.add(this.getItem(i));
-        }
-        return toReturn;
     }
 
     @Override
