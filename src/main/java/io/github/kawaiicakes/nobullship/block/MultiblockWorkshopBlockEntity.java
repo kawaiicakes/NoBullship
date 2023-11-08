@@ -51,9 +51,6 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     public static final byte EMPTY_SCHEM_SLOT = 18;
     public static final byte FILLED_SCHEM_SLOT = 19;
 
-    // I don't like the idea of this block having to tick
-    protected boolean hasRecipe = false;
-    protected SchematicRecipe currentRecipe;
     protected LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     protected final ItemStackHandler itemHandler = new ItemStackHandler(20) {
         @Override
@@ -236,17 +233,15 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     /**
      * When called, the contents of this entity are consumed and the result is added to the filled schematic slot.
      */
-    protected void doCraft() {
-        final SchematicRecipe immutableRecipe = this.currentRecipe;
-        if (!this.hasRecipe || immutableRecipe == null) return;
+    public void doCraft(@Nullable final SchematicRecipe recipe) {
+        if (recipe == null) return;
 
         for (int i : SHAPELESS_SLOTS) {
-            if (immutableRecipe.getShapelessIngredients().isEmpty()) break;
+            if (recipe.getShapelessIngredients().isEmpty()) break;
 
-            final ItemStack newAmount = this.getItem(i);
             // The following nonsense is to account for if a recipe has the same ItemStack but with different counts
             // spread out in different slots...
-            final int recipeAmount = immutableRecipe.getShapelessIngredients()
+            final int recipeAmount = recipe.getShapelessIngredients()
                     .stream()
                     .filter(standard -> standard.is(this.getItem(i).getItem())
                             && this.getItem(i).getCount() >= standard.getCount())
@@ -254,33 +249,10 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
                     .max(Comparator.naturalOrder())
                     .orElseThrow();
 
-            newAmount.shrink(recipeAmount);
-            this.itemHandler.setStackInSlot(i, newAmount);
+            this.itemHandler.extractItem(i, recipeAmount, false);
         }
 
-        final ItemStack newAmount = this.getItem(EMPTY_SCHEM_SLOT);
-        newAmount.shrink(1);
-        this.itemHandler.setStackInSlot(EMPTY_SCHEM_SLOT, newAmount);
-
-        if (this.getItem(FILLED_SCHEM_SLOT).isEmpty()) {
-            this.itemHandler.setStackInSlot(FILLED_SCHEM_SLOT, immutableRecipe.assemble(this));
-        } else {
-            final ItemStack newCount = this.getItem(FILLED_SCHEM_SLOT);
-            newCount.grow(1);
-            this.itemHandler.setStackInSlot(FILLED_SCHEM_SLOT, newCount);
-        }
-    }
-
-    public static void tick(Level level, BlockPos pos, BlockState state, MultiblockWorkshopBlockEntity pEntity) {
-        /*
-        if (level.isClientSide()) return;
-
-
-        if (pEntity.hasRecipe) {
-            pEntity.doCraft();
-        }
-
-         */
+        this.itemHandler.extractItem(EMPTY_SCHEM_SLOT, 1, false);
     }
 
     protected static boolean canInsertItemIntoOutputSlot(MultiblockWorkshopBlockEntity container) {
