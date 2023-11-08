@@ -15,10 +15,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_MENU;
+import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.FILLED_SCHEM_SLOT;
 
 public class MultiblockWorkshopMenu extends AbstractContainerMenu {
@@ -26,6 +28,15 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
     public final MultiblockWorkshopBlockEntity entity;
     protected final Level level;
     protected Player player;
+    public final ContainerListener listener = new ContainerListener() {
+        @Override
+        public void slotChanged(AbstractContainerMenu pContainerToSend, int pDataSlotIndex, ItemStack pStack) {
+            MultiblockWorkshopMenu.this.slotsChanged(null);
+        }
+
+        @Override
+        public void dataChanged(AbstractContainerMenu pContainerMenu, int pDataSlotIndex, int pValue) {}
+    };
 
     public MultiblockWorkshopMenu(int pContainerId, Inventory inventory, FriendlyByteBuf data) {
         this(pContainerId, inventory, Objects.requireNonNull(inventory.player.level.getBlockEntity(data.readBlockPos())), ContainerLevelAccess.NULL);
@@ -53,12 +64,14 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
                 this.addSlot(new SlotItemHandler(handler, i + 9, 97 + i * 18, 102));
             }
 
-            this.addSlot(new SlotItemHandler(handler, 18, 169, 48));
-            this.addSlot(new SlotItemHandler(handler, 19, 169, 26){});
+            this.addSlot(new SlotItemHandler(handler, EMPTY_SCHEM_SLOT, 169, 48));
+            this.addSlot(new SlotItemHandler(handler, FILLED_SCHEM_SLOT, 169, 26){});
         });
+
+        this.addSlotListener(this.listener);
     }
     @Override
-    public void slotsChanged(Container pContainer) {
+    public void slotsChanged(@Nullable Container pContainer) {
         this.access.execute((lvl, pos) -> slotChanged(this, lvl, this.player));
     }
 
