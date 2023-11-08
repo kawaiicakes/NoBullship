@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -30,7 +29,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
@@ -60,7 +58,6 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     protected final ItemStackHandler itemHandler = new ItemStackHandler(20) {
         @Override
         protected void onContentsChanged(int slot) {
-            MultiblockWorkshopBlockEntity.this.contentsUpdated();
             MultiblockWorkshopBlockEntity.this.setChanged();
         }
 
@@ -84,7 +81,6 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     public void load(CompoundTag pTag) {
         super.load(pTag);
         this.itemHandler.deserializeNBT(pTag.getCompound("inventory"));
-        this.contentsUpdated();
     }
 
     @Override
@@ -237,15 +233,6 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
         Containers.dropContents(this.level, this.worldPosition, inventory);
     }
 
-    public void contentsUpdated() {
-        if (this.level == null || !(this.level instanceof ServerLevel serverLevel)) return;
-
-        Optional<SchematicRecipe> recipe = serverLevel.getRecipeManager()
-                .getRecipeFor(SchematicRecipe.Type.INSTANCE, this, serverLevel);
-
-        this.hasRecipe = recipe.isPresent() && canInsertAmountIntoOutputSlot(this) && canInsertItemIntoOutputSlot(this);
-    }
-
     /**
      * When called, the contents of this entity are consumed and the result is added to the filled schematic slot.
      */
@@ -285,11 +272,15 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     }
 
     public static void tick(Level level, BlockPos pos, BlockState state, MultiblockWorkshopBlockEntity pEntity) {
+        /*
         if (level.isClientSide()) return;
+
 
         if (pEntity.hasRecipe) {
             pEntity.doCraft();
         }
+
+         */
     }
 
     protected static boolean canInsertItemIntoOutputSlot(MultiblockWorkshopBlockEntity container) {
