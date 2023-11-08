@@ -12,6 +12,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import org.apache.commons.lang3.ArrayUtils;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
@@ -218,7 +219,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public NonNullList<ItemStack> getRemainingItems(MultiblockWorkshopBlockEntity pContainer) {
         NonNullList<ItemStack> contents = NonNullList.withSize(pContainer.getContainerSize(), ItemStack.EMPTY);
 
-        for (int i : SHAPELESS_SLOTS) {
+        for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
             ItemStack item = pContainer.getItem(i);
             if (item.hasCraftingRemainingItem()) {
                 contents.set(i - 9, item.getCraftingRemainingItem());
