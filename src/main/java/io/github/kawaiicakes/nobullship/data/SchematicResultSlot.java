@@ -2,28 +2,22 @@ package io.github.kawaiicakes.nobullship.data;
 
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
 import net.minecraft.core.NonNullList;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import org.jetbrains.annotations.NotNull;
 
 public class SchematicResultSlot extends Slot {
-    protected static Container emptyInventory = new SimpleContainer(0);
+    protected static ResultContainer resultHolder = new ResultContainer();
     protected final MultiblockWorkshopBlockEntity blockEntity;
     protected Player player;
-    protected final IItemHandler itemHandler;
     protected final int index;
     protected int removeCount;
 
-    public SchematicResultSlot(MultiblockWorkshopBlockEntity blockEntity, Player player, IItemHandler itemHandler, int index, int xPosition, int yPosition) {
-        super(emptyInventory, index, xPosition, yPosition);
+    public SchematicResultSlot(MultiblockWorkshopBlockEntity blockEntity, Player player, int index, int xPosition, int yPosition) {
+        super(resultHolder, index, xPosition, yPosition);
         this.blockEntity = blockEntity;
         this.player = player;
-        this.itemHandler = itemHandler;
         this.index = index;
     }
 
@@ -76,61 +70,7 @@ public class SchematicResultSlot extends Slot {
     }
 
     @Override
-    public ItemStack getItem() {
-        return this.getItemHandler().getStackInSlot(index);
-    }
-
-    @Override
-    public void set(@NotNull ItemStack stack) {
-        ((IItemHandlerModifiable) this.getItemHandler()).setStackInSlot(index, stack);
-        this.setChanged();
-    }
-
-    @Override
-    public void initialize(ItemStack stack) {
-        ((IItemHandlerModifiable) this.getItemHandler()).setStackInSlot(index, stack);
-        this.setChanged();
-    }
-
-    @Override
     public int getMaxStackSize() {
-        return this.itemHandler.getSlotLimit(this.index);
-    }
-
-    @Override
-    public int getMaxStackSize(@NotNull ItemStack stack)
-    {
-        ItemStack maxAdd = stack.copy();
-        int maxInput = stack.getMaxStackSize();
-        maxAdd.setCount(maxInput);
-
-        IItemHandler handler = this.getItemHandler();
-        ItemStack currentStack = handler.getStackInSlot(index);
-        if (handler instanceof IItemHandlerModifiable handlerModifiable) {
-            handlerModifiable.setStackInSlot(index, ItemStack.EMPTY);
-
-            ItemStack remainder = handlerModifiable.insertItem(index, maxAdd, true);
-
-            handlerModifiable.setStackInSlot(index, currentStack);
-
-            return maxInput - remainder.getCount();
-        }
-        else
-        {
-            ItemStack remainder = handler.insertItem(index, maxAdd, true);
-
-            int current = currentStack.getCount();
-            int added = maxInput - remainder.getCount();
-            return current + added;
-        }
-    }
-
-    @Override
-    public boolean mayPickup(Player playerIn) {
-        return !this.getItemHandler().extractItem(index, 1, true).isEmpty();
-    }
-
-    public IItemHandler getItemHandler() {
-        return this.itemHandler;
+        return this.getItem().getMaxStackSize();
     }
 }

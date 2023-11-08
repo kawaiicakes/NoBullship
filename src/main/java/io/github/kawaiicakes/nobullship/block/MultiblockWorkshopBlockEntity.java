@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -241,35 +240,8 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
         Optional<SchematicRecipe> optional = serverLevel.getServer().getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, pEntity, serverLevel);
         if (optional.isEmpty()) return;
+        final ItemStack output = optional.get().assemble(pEntity);
 
-        pEntity.doCraft(optional.get());
-    }
-
-    /**
-     * When called, the contents of this entity are consumed and the result is added to the filled schematic slot.
-     */
-    public void doCraft(@Nullable final SchematicRecipe recipe) {
-        if (recipe == null) return;
-        final ItemStack output = recipe.assemble(this);
-
-        for (int i : SHAPELESS_SLOTS) {
-            if (recipe.getShapelessIngredients().isEmpty()) break;
-
-            // The following nonsense is to account for if a recipe has the same ItemStack but with different counts
-            // spread out in different slots...
-            final int recipeAmount = recipe.getShapelessIngredients()
-                    .stream()
-                    .filter(standard -> standard.is(this.getItem(i).getItem())
-                            && this.getItem(i).getCount() >= standard.getCount())
-                    .map(ItemStack::getCount)
-                    .max(Comparator.naturalOrder())
-                    .orElseThrow();
-
-            this.itemHandler.extractItem(i, recipeAmount, false);
-        }
-
-        this.itemHandler.extractItem(EMPTY_SCHEM_SLOT, 1, false);
-
-        this.itemHandler.insertItem(FILLED_SCHEM_SLOT, output, false);
+        pEntity.setItem(FILLED_SCHEM_SLOT, output);
     }
 }

@@ -51,7 +51,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
             }
 
             this.addSlot(new SlotItemHandler(handler, EMPTY_SCHEM_SLOT, 169, 48));
-            this.addSlot(new SchematicResultSlot(this.entity, this.player, handler, FILLED_SCHEM_SLOT, 169, 26));
+            this.addSlot(new SchematicResultSlot(this.entity, this.player, FILLED_SCHEM_SLOT, 169, 26));
         });
     }
 
