@@ -100,7 +100,7 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
     @Override
     public int getContainerSize() {
-        return this.itemHandler.getSlots();
+        return SHAPELESS_SLOTS.size();
     }
 
     @Override
@@ -255,13 +255,5 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
         this.itemHandler.extractItem(EMPTY_SCHEM_SLOT, 1, false);
 
         this.itemHandler.insertItem(FILLED_SCHEM_SLOT, output, false);
-    }
-
-    protected static boolean canInsertItemIntoOutputSlot(MultiblockWorkshopBlockEntity container) {
-        return container.getItem(FILLED_SCHEM_SLOT).getItem() == SCHEMATIC.get() || container.getItem(FILLED_SCHEM_SLOT).isEmpty();
-    }
-
-    protected static boolean canInsertAmountIntoOutputSlot(MultiblockWorkshopBlockEntity container) {
-        return container.getItem(FILLED_SCHEM_SLOT).getMaxStackSize() > container.getItem(FILLED_SCHEM_SLOT).getCount();
     }
 }
