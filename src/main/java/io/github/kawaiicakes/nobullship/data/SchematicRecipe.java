@@ -166,9 +166,17 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     // it would be unwise to assume that the resulting item is a default SchematicItem ItemStack with the attached tag.
     // Mods which rely on rendering shit based on ItemStack NBT would not like this and could imply to the player that
     // the rendering would break after having a recipe written into it, as one example.
+    // Addendum 1: ah fuck it whatever lol the mod doesn't even support NBT crafting at the moment; neither does vanilla.
+    // I'll worry about this later since returning an empty ItemStack probably does more harm than good at this stage
     @Override
     public ItemStack getResultItem() {
-        return ItemStack.EMPTY;
+        CompoundTag resultTag = new CompoundTag();
+        resultTag.putString("nobullshipRecipe", this.resultId.toString());
+
+        ItemStack toReturn = SCHEMATIC.get().getDefaultInstance().copy();
+        toReturn.setTag(resultTag);
+
+        return toReturn;
     }
 
     @Override
