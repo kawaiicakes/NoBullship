@@ -1,43 +1,30 @@
 package io.github.kawaiicakes.nobullship.screen;
 
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
+import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
 import io.github.kawaiicakes.nobullship.data.SchematicResultSlot;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.SlotItemHandler;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_MENU;
-import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
-import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.FILLED_SCHEM_SLOT;
+import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.*;
 
-public class MultiblockWorkshopMenu extends AbstractContainerMenu {
+public class MultiblockWorkshopMenu extends AbstractContainerMenu implements ContainerListener {
     public final MultiblockWorkshopBlockEntity entity;
-    protected final Level level;
     protected Player player;
-    public final ContainerListener listener = new ContainerListener() {
-        @Override
-        public void slotChanged(AbstractContainerMenu pMenu, int pDataSlotIndex, ItemStack pStack) {
-            if (pDataSlotIndex != FILLED_SCHEM_SLOT) return;
-            if (!(player instanceof ServerPlayer serverPlayer)) return;
-
-            serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(pMenu.containerId, pMenu.incrementStateId(), FILLED_SCHEM_SLOT, pStack));
-        }
-
-        @Override
-        public void dataChanged(AbstractContainerMenu pContainerMenu, int pDataSlotIndex, int pValue) {}
-    };
 
     public MultiblockWorkshopMenu(int pContainerId, Inventory inventory, FriendlyByteBuf data) {
         this(pContainerId, inventory, Objects.requireNonNull(inventory.player.level.getBlockEntity(data.readBlockPos())));
@@ -47,9 +34,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
         super(WORKSHOP_MENU.get(), pContainerId);
         checkContainerSize(inventory, 20);
         this.entity = (MultiblockWorkshopBlockEntity) entity;
-        this.level = inventory.player.getLevel();
         this.player = inventory.player;
-        this.entity.setMenu(this);
 
         this.addPlayerInventory(inventory);
         this.addPlayerHotbar(inventory);
@@ -69,7 +54,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
             this.addSlot(new SchematicResultSlot(this.entity, this.player, FILLED_SCHEM_SLOT, 169, 26));
         });
 
-        this.addSlotListener(this.listener);
+        this.addSlotListener(this);
     }
 
     // TODO
@@ -96,4 +81,29 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
             this.addSlot(new Slot(playerInventory, i, 97 + i * 18, 195));
         }
     }
+
+    @Override
+    public void slotChanged(AbstractContainerMenu pContainerToSend, int slot, ItemStack pStack) {
+        if (pContainerToSend != this) return;
+        if (slot == FILLED_SCHEM_SLOT) return;
+        if (slot <= 17) return;
+
+        this.slotsChanged(this.entity);
+    }
+
+    @Override
+    public void slotsChanged(Container pContainer) {
+        if (pContainer != this.entity) return;
+        final MultiblockWorkshopBlockEntity pEntity = ((MultiblockWorkshopBlockEntity) pContainer);
+        if (!(pEntity.getLevel() instanceof ServerLevel serverLevel)) return;
+
+        Optional<SchematicRecipe> optional = serverLevel.getServer().getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, pEntity, serverLevel);
+        if (optional.isEmpty()) return;
+        final ItemStack output = optional.get().assemble(pEntity);
+
+        pEntity.setItem(FILLED_SCHEM_SLOT, output);
+    }
+
+    @Override
+    public void dataChanged(AbstractContainerMenu pContainerMenu, int pDataSlotIndex, int pValue) {}
 }
