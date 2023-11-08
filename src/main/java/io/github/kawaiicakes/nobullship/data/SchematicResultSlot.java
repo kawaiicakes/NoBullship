@@ -26,18 +26,18 @@ public class SchematicResultSlot extends Slot {
 
     @Override
     public ItemStack getItem() {
-        return this.blockEntity.getItem(index);
+        return this.blockEntity.getItem(this.getContainerSlot());
     }
 
     @Override
     public void set(ItemStack stack) {
-        ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(index, stack);
+        ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(this.getContainerSlot(), stack);
         this.setChanged();
     }
 
     @Override
     public void initialize(ItemStack stack) {
-        ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(index, stack);
+        ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(this.getContainerSlot(), stack);
         this.setChanged();
     }
 
@@ -48,20 +48,20 @@ public class SchematicResultSlot extends Slot {
         maxAdd.setCount(maxInput);
 
         IItemHandler handler = this.itemHandler;
-        ItemStack currentStack = handler.getStackInSlot(index);
+        ItemStack currentStack = handler.getStackInSlot(this.getContainerSlot());
         if (handler instanceof IItemHandlerModifiable handlerModifiable) {
 
-            handlerModifiable.setStackInSlot(index, ItemStack.EMPTY);
+            handlerModifiable.setStackInSlot(this.getContainerSlot(), ItemStack.EMPTY);
 
-            ItemStack remainder = handlerModifiable.insertItem(index, maxAdd, true);
+            ItemStack remainder = handlerModifiable.insertItem(this.getContainerSlot(), maxAdd, true);
 
-            handlerModifiable.setStackInSlot(index, currentStack);
+            handlerModifiable.setStackInSlot(this.getContainerSlot(), currentStack);
 
             return maxInput - remainder.getCount();
         }
         else
         {
-            ItemStack remainder = handler.insertItem(index, maxAdd, true);
+            ItemStack remainder = handler.insertItem(this.getContainerSlot(), maxAdd, true);
 
             int current = currentStack.getCount();
             int added = maxInput - remainder.getCount();
@@ -76,7 +76,7 @@ public class SchematicResultSlot extends Slot {
 
     @Override
     public ItemStack remove(int amount) {
-        return this.itemHandler.extractItem(index, amount, false);
+        return this.itemHandler.extractItem(this.getContainerSlot(), amount, false);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class SchematicResultSlot extends Slot {
 
     @Override
     public boolean mayPickup(Player playerIn) {
-        return !this.itemHandler.extractItem(index, 1, true).isEmpty();
+        return !this.itemHandler.extractItem(this.getContainerSlot(), 1, true).isEmpty();
     }
 
     @Override
@@ -121,6 +121,6 @@ public class SchematicResultSlot extends Slot {
 
     @Override
     public int getMaxStackSize() {
-        return this.itemHandler.getSlotLimit(this.index);
+        return this.itemHandler.getSlotLimit(this.getContainerSlot());
     }
 }
