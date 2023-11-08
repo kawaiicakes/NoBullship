@@ -39,9 +39,11 @@ import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
  * type parameter for <code>Recipe</code>. That being said accessing the 'inventory' of this block entity should
  * preferentially be done through the capability as that is where I am more certain things will behave nicely.
  * <br><br>
- * Edit: In retrospect, maybe this will function better than anticipated. It's probably fine to use the
+ * Addendum 1: In retrospect, maybe this will function better than anticipated. It's probably fine to use the
  * <code>Container</code> implementations given that I've taken care to avoid using anything which would
  * mutate the <code>ItemStack</code>s in the <code>ItemStackHandler</code>.
+ * Addendum 2: Okay, some weird shit is happening, and I'm attributing it to desync. Looking through a tutorial
+ * I can see that the "forbidden" methods mentioned above are actually being used. Welp, no harm in trying.
  */
 public class MultiblockWorkshopBlockEntity extends BlockEntity implements Container, MenuProvider, Nameable, StackedContentsCompatible {
     public static final IntImmutableList SHAPED_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8);
@@ -168,10 +170,7 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
             pStack.setCount(this.getMaxStackSize());
         }
 
-        // Calling ItemStackHandler#setStackInSlot is dubious
-        final int stackSize = this.getItem(pSlot).getCount();
-        this.itemHandler.extractItem(pSlot, stackSize, false);
-        this.itemHandler.insertItem(pSlot, pStack, false);
+        this.itemHandler.setStackInSlot(pSlot, pStack);
     }
 
     @Override
@@ -214,12 +213,6 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     public void invalidateCaps() {
         super.invalidateCaps();
         this.lazyItemHandler.invalidate();
-    }
-
-    @Override
-    public void reviveCaps() {
-        super.reviveCaps();
-        this.lazyItemHandler = LazyOptional.of(() -> itemHandler);
     }
 
     @Override
@@ -273,19 +266,19 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
                     .orElseThrow();
 
             newAmount.shrink(recipeAmount);
-            this.setItem(i, newAmount);
+            this.itemHandler.setStackInSlot(i, newAmount);
         }
 
         final ItemStack newAmount = this.getItem(EMPTY_SCHEM_SLOT);
         newAmount.shrink(1);
-        this.setItem(EMPTY_SCHEM_SLOT, newAmount);
+        this.itemHandler.setStackInSlot(EMPTY_SCHEM_SLOT, newAmount);
 
         if (this.getItem(FILLED_SCHEM_SLOT).isEmpty()) {
-            this.setItem(FILLED_SCHEM_SLOT, immutableRecipe.assemble(this));
+            this.itemHandler.setStackInSlot(FILLED_SCHEM_SLOT, immutableRecipe.assemble(this));
         } else {
             final ItemStack newCount = this.getItem(FILLED_SCHEM_SLOT);
             newCount.grow(1);
-            this.setItem(FILLED_SCHEM_SLOT, newCount);
+            this.itemHandler.setStackInSlot(FILLED_SCHEM_SLOT, newCount);
         }
     }
 
