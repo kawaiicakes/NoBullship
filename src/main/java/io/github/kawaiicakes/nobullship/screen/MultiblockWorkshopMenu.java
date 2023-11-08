@@ -3,12 +3,14 @@ package io.github.kawaiicakes.nobullship.screen;
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.*;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -101,15 +103,14 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
     }
 
     protected static void slotChanged(MultiblockWorkshopMenu pMenu, Level pLevel, Player pPlayer) {
-        if (!(pPlayer instanceof ServerPlayer player)) return;
+        if (!(pPlayer instanceof ServerPlayer)) return;
         if (pLevel.getServer() == null) return;
 
-        ItemStack itemstack = ItemStack.EMPTY;
+        ItemStack itemstack;
         Optional<SchematicRecipe> optional = pLevel.getServer().getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, pMenu.entity, pLevel);
-        if (optional.isPresent()) itemstack = optional.get().assemble(pMenu.entity);
+        itemstack = optional.map(schematicRecipe -> schematicRecipe.assemble(pMenu.entity)).orElse(ItemStack.EMPTY);
 
-        pMenu.setItem(FILLED_SCHEM_SLOT, 0, itemstack);
-        pMenu.setRemoteSlot(FILLED_SCHEM_SLOT, itemstack);
-        player.connection.send(new ClientboundContainerSetSlotPacket(pMenu.containerId, pMenu.incrementStateId(), FILLED_SCHEM_SLOT, itemstack));
+        pMenu.entity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler
+                -> pMenu.entity.setItem(FILLED_SCHEM_SLOT, itemstack));
     }
 }
