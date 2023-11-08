@@ -1,13 +1,11 @@
 package io.github.kawaiicakes.nobullship.block;
 
-import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
 import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -22,7 +20,6 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
@@ -44,12 +41,10 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     public static final byte EMPTY_SCHEM_SLOT = 18;
     public static final byte FILLED_SCHEM_SLOT = 19;
 
-    protected MultiblockWorkshopMenu menu;
     protected LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     protected final ItemStackHandler itemHandler = new ItemStackHandler(20) {
         @Override
         protected void onContentsChanged(int slot) {
-            if (slot != FILLED_SCHEM_SLOT) MultiblockWorkshopBlockEntity.slotChanged(MultiblockWorkshopBlockEntity.this);
             MultiblockWorkshopBlockEntity.this.setChanged();
         }
 
@@ -61,11 +56,6 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
 
     public MultiblockWorkshopBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(WORKSHOP_BLOCK_ENTITY.get(), pPos, pBlockState);
-    }
-
-    public void setMenu(MultiblockWorkshopMenu menu) {
-        if (this.menu != null) return;
-        this.menu = menu;
     }
 
     @Override
@@ -191,15 +181,5 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     @Override
     protected Component getDefaultName() {
         return Component.translatable("block.nobullship.workshop");
-    }
-
-    protected static void slotChanged(MultiblockWorkshopBlockEntity pEntity) {
-        if (!(pEntity.getLevel() instanceof ServerLevel serverLevel)) return;
-
-        Optional<SchematicRecipe> optional = serverLevel.getServer().getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, pEntity, serverLevel);
-        if (optional.isEmpty()) return;
-        final ItemStack output = optional.get().assemble(pEntity);
-
-        pEntity.itemHandler.setStackInSlot(FILLED_SCHEM_SLOT, output);
     }
 }
