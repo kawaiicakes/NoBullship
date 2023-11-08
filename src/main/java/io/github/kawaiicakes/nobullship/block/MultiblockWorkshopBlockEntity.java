@@ -8,14 +8,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -43,7 +40,7 @@ import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
  * Addendum 2: Okay, some weird shit is happening, and I'm attributing it to desync. Looking through a tutorial
  * I can see that the "forbidden" methods mentioned above are actually being used. Welp, no harm in trying.
  */
-public class MultiblockWorkshopBlockEntity extends BlockEntity implements Container, MenuProvider, Nameable, StackedContentsCompatible {
+public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     public static final IntImmutableList SHAPED_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8);
     public static final IntImmutableList SHAPELESS_SLOTS = IntImmutableList.of(9, 10, 11, 12, 13, 14, 15, 16, 17);
     public static final IntImmutableList CRAFTING_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);
@@ -100,8 +97,8 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     }
 
     @Override
-    public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
-        return new MultiblockWorkshopMenu(pContainerId, pPlayerInventory, this);
+    protected AbstractContainerMenu createMenu(int pContainerId, Inventory pInventory) {
+        return new MultiblockWorkshopMenu(pContainerId, pInventory, this);
     }
 
     @Override
@@ -194,13 +191,6 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     }
 
     @Override
-    public void fillStackedContents(StackedContents pHelper) {
-        for (int i = 0; i < this.itemHandler.getSlots(); i++) {
-            pHelper.accountStack(this.getItem(i));
-        }
-    }
-
-    @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
         if (capability == ForgeCapabilities.ITEM_HANDLER) {
             return this.lazyItemHandler.cast();
@@ -216,23 +206,8 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     }
 
     @Override
-    public Component getName() {
+    protected Component getDefaultName() {
         return Component.translatable("block.nobullship.workshop");
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.translatable("block.nobullship.workshop");
-    }
-
-    public void dropContents() {
-        SimpleContainer inventory = new SimpleContainer(itemHandler.getSlots());
-        for (int i = 0; i < itemHandler.getSlots(); i++) {
-            inventory.setItem(i, itemHandler.getStackInSlot(i));
-        }
-
-        assert this.level != null;
-        Containers.dropContents(this.level, this.worldPosition, inventory);
     }
 
     protected static void slotChanged(MultiblockWorkshopBlockEntity pEntity) {
@@ -242,6 +217,6 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
         if (optional.isEmpty()) return;
         final ItemStack output = optional.get().assemble(pEntity);
 
-        pEntity.setItem(FILLED_SCHEM_SLOT, output);
+        pEntity.itemHandler.setStackInSlot(FILLED_SCHEM_SLOT, output);
     }
 }
