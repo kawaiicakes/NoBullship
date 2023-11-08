@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.screen;
 
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
+import io.github.kawaiicakes.nobullship.data.SchematicResultSlot;
 import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -67,7 +68,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
             }
 
             this.addSlot(new SlotItemHandler(handler, EMPTY_SCHEM_SLOT, 169, 48));
-            this.addSlot(new SlotItemHandler(handler, FILLED_SCHEM_SLOT, 169, 26){});
+            this.addSlot(new SchematicResultSlot(this.entity, this.player, handler, FILLED_SCHEM_SLOT, 169, 26));
         });
 
         this.addSlotListener(this.listener);
