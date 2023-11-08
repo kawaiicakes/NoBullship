@@ -2,23 +2,71 @@ package io.github.kawaiicakes.nobullship.data;
 
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
 import net.minecraft.core.NonNullList;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
 public class SchematicResultSlot extends Slot {
-    protected static ResultContainer resultHolder = new ResultContainer();
+    protected static Container EMPTY = new SimpleContainer(0);
     protected final MultiblockWorkshopBlockEntity blockEntity;
+    protected final IItemHandler itemHandler;
     protected Player player;
-    protected final int index;
     protected int removeCount;
 
-    public SchematicResultSlot(MultiblockWorkshopBlockEntity blockEntity, Player player, int index, int xPosition, int yPosition) {
-        super(resultHolder, index, xPosition, yPosition);
+    public SchematicResultSlot(MultiblockWorkshopBlockEntity blockEntity, IItemHandler handler, Player player, int slot, int xPosition, int yPosition) {
+        super(EMPTY, slot, xPosition, yPosition);
         this.blockEntity = blockEntity;
+        this.itemHandler = handler;
         this.player = player;
-        this.index = index;
+    }
+
+    @Override
+    public ItemStack getItem() {
+        return this.blockEntity.getItem(index);
+    }
+
+    @Override
+    public void set(ItemStack stack) {
+        ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(index, stack);
+        this.setChanged();
+    }
+
+    @Override
+    public void initialize(ItemStack stack) {
+        ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(index, stack);
+        this.setChanged();
+    }
+
+    @Override
+    public int getMaxStackSize(ItemStack stack) {
+        ItemStack maxAdd = stack.copy();
+        int maxInput = stack.getMaxStackSize();
+        maxAdd.setCount(maxInput);
+
+        IItemHandler handler = this.itemHandler;
+        ItemStack currentStack = handler.getStackInSlot(index);
+        if (handler instanceof IItemHandlerModifiable handlerModifiable) {
+
+            handlerModifiable.setStackInSlot(index, ItemStack.EMPTY);
+
+            ItemStack remainder = handlerModifiable.insertItem(index, maxAdd, true);
+
+            handlerModifiable.setStackInSlot(index, currentStack);
+
+            return maxInput - remainder.getCount();
+        }
+        else
+        {
+            ItemStack remainder = handler.insertItem(index, maxAdd, true);
+
+            int current = currentStack.getCount();
+            int added = maxInput - remainder.getCount();
+            return current + added;
+        }
     }
 
     @Override
@@ -27,12 +75,8 @@ public class SchematicResultSlot extends Slot {
     }
 
     @Override
-    public ItemStack remove(int pAmount) {
-        if (this.hasItem()) {
-            this.removeCount += Math.min(pAmount, this.getItem().getCount());
-        }
-
-        return super.remove(pAmount);
+    public ItemStack remove(int amount) {
+        return this.itemHandler.extractItem(index, amount, false);
     }
 
     @Override
@@ -46,8 +90,14 @@ public class SchematicResultSlot extends Slot {
     }
 
     @Override
+    public boolean mayPickup(Player playerIn) {
+        return !this.itemHandler.extractItem(index, 1, true).isEmpty();
+    }
+
+    @Override
     public void onTake(Player pPlayer, ItemStack pStack) {
-        NonNullList<ItemStack> nonnulllist = pPlayer.level.getRecipeManager().getRemainingItemsFor(SchematicRecipe.Type.INSTANCE, this.blockEntity, pPlayer.level);
+        if (blockEntity.getLevel() == null) return;
+        NonNullList<ItemStack> nonnulllist = blockEntity.getLevel().getRecipeManager().getRemainingItemsFor(SchematicRecipe.Type.INSTANCE, this.blockEntity, blockEntity.getLevel());
         for(int i = 0; i < nonnulllist.size(); ++i) {
             ItemStack itemstack = this.blockEntity.getItem(i);
             ItemStack itemstack1 = nonnulllist.get(i);
@@ -71,6 +121,6 @@ public class SchematicResultSlot extends Slot {
 
     @Override
     public int getMaxStackSize() {
-        return this.getItem().getMaxStackSize();
+        return this.itemHandler.getSlotLimit(this.index);
     }
 }
