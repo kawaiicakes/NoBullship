@@ -3,9 +3,12 @@ package io.github.kawaiicakes.nobullship.screen;
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.data.SchematicResultSlot;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -23,6 +26,18 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
     public final MultiblockWorkshopBlockEntity entity;
     protected final Level level;
     protected Player player;
+    public final ContainerListener listener = new ContainerListener() {
+        @Override
+        public void slotChanged(AbstractContainerMenu pMenu, int pDataSlotIndex, ItemStack pStack) {
+            if (pDataSlotIndex != FILLED_SCHEM_SLOT) return;
+            if (!(player instanceof ServerPlayer serverPlayer)) return;
+
+            serverPlayer.connection.send(new ClientboundContainerSetSlotPacket(pMenu.containerId, pMenu.incrementStateId(), FILLED_SCHEM_SLOT, pStack));
+        }
+
+        @Override
+        public void dataChanged(AbstractContainerMenu pContainerMenu, int pDataSlotIndex, int pValue) {}
+    };
 
     public MultiblockWorkshopMenu(int pContainerId, Inventory inventory, FriendlyByteBuf data) {
         this(pContainerId, inventory, Objects.requireNonNull(inventory.player.level.getBlockEntity(data.readBlockPos())));
@@ -53,6 +68,8 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu {
             this.addSlot(new SlotItemHandler(handler, EMPTY_SCHEM_SLOT, 169, 48));
             this.addSlot(new SchematicResultSlot(this.entity, this.player, FILLED_SCHEM_SLOT, 169, 26));
         });
+
+        this.addSlotListener(this.listener);
     }
 
     // TODO
