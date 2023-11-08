@@ -153,6 +153,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
 
         if (copyOfInputSchematic.getTag() == null) copyOfInputSchematic.setTag(new CompoundTag());
         copyOfInputSchematic.getTag().putString("nobullshipRecipe", this.resultId.toString());
+        copyOfInputSchematic.setCount(1);
 
         return copyOfInputSchematic;
     }
