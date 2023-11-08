@@ -15,6 +15,7 @@ import net.minecraft.world.level.Level;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
+import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
 
 public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     private final ResourceLocation recipeId;
@@ -206,6 +207,25 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     @Override
     public NonNullList<Ingredient> getIngredients() {
         return NonNullList.create();
+    }
+
+    /**
+     * Returns a <code>NonNullList</code> of size 10 whose first 9 indices correspond to
+     * the shapeless inputs of the workbench. The last index is the empty schematic slot.
+     * @return the meaningful remaining contents of this container within the context of the caller.
+     */
+    @Override
+    public NonNullList<ItemStack> getRemainingItems(MultiblockWorkshopBlockEntity pContainer) {
+        NonNullList<ItemStack> contents = NonNullList.withSize(pContainer.getContainerSize(), ItemStack.EMPTY);
+
+        for (int i : SHAPELESS_SLOTS) {
+            ItemStack item = pContainer.getItem(i);
+            if (item.hasCraftingRemainingItem()) {
+                contents.set(i - 9, item.getCraftingRemainingItem());
+            }
+        }
+
+        return contents;
     }
 
     public static class Type implements RecipeType<SchematicRecipe> {
