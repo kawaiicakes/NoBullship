@@ -9,6 +9,9 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
+import org.apache.commons.lang3.ArrayUtils;
+
+import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 
 public class SchematicResultSlot extends Slot {
     protected static Container EMPTY = new SimpleContainer(0);
@@ -94,13 +97,15 @@ public class SchematicResultSlot extends Slot {
         return !this.itemHandler.extractItem(this.getContainerSlot(), 1, true).isEmpty();
     }
 
+    // TODO: I took this from vanilla lol clean it up
     @Override
     public void onTake(Player pPlayer, ItemStack pStack) {
         if (blockEntity.getLevel() == null) return;
-        NonNullList<ItemStack> nonnulllist = blockEntity.getLevel().getRecipeManager().getRemainingItemsFor(SchematicRecipe.Type.INSTANCE, this.blockEntity, blockEntity.getLevel());
-        for(int i = 0; i < nonnulllist.size(); ++i) {
+        NonNullList<ItemStack> remainingItems = blockEntity.getLevel().getRecipeManager().getRemainingItemsFor(SchematicRecipe.Type.INSTANCE, this.blockEntity, blockEntity.getLevel());
+
+        for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
             ItemStack itemstack = this.blockEntity.getItem(i);
-            ItemStack itemstack1 = nonnulllist.get(i);
+            ItemStack itemstack1 = remainingItems.get(i);
             if (!itemstack.isEmpty()) {
                 this.blockEntity.removeItem(i, 1);
                 itemstack = this.blockEntity.getItem(i);
