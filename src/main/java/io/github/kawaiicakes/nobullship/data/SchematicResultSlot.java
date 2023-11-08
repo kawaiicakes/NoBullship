@@ -7,11 +7,15 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.Optional;
+
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
+import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
 
 public class SchematicResultSlot extends Slot {
     protected static Container EMPTY = new SimpleContainer(0);
@@ -101,25 +105,28 @@ public class SchematicResultSlot extends Slot {
     @Override
     public void onTake(Player pPlayer, ItemStack pStack) {
         if (blockEntity.getLevel() == null) return;
-        NonNullList<ItemStack> remainingItems = blockEntity.getLevel().getRecipeManager().getRemainingItemsFor(SchematicRecipe.Type.INSTANCE, this.blockEntity, blockEntity.getLevel());
+        NonNullList<ItemStack> remainingItems = getRemainingItemsForRecipe(this.blockEntity, blockEntity.getLevel());
 
         for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
+            int j = i - 9;
+
             ItemStack itemstack = this.blockEntity.getItem(i);
-            ItemStack itemstack1 = remainingItems.get(i);
+            ItemStack itemstack1 = remainingItems.get(j);
+
             if (!itemstack.isEmpty()) {
                 this.blockEntity.removeItem(i, 1);
                 itemstack = this.blockEntity.getItem(i);
             }
 
-            if (!itemstack1.isEmpty()) {
-                if (itemstack.isEmpty()) {
-                    this.blockEntity.setItem(i, itemstack1);
-                } else if (ItemStack.isSame(itemstack, itemstack1) && ItemStack.tagMatches(itemstack, itemstack1)) {
-                    itemstack1.grow(itemstack.getCount());
-                    this.blockEntity.setItem(i, itemstack1);
-                } else if (!this.player.getInventory().add(itemstack1)) {
-                    this.player.drop(itemstack1, false);
-                }
+            if (itemstack1.isEmpty()) continue;
+
+            if (itemstack.isEmpty()) {
+                this.blockEntity.setItem(i, itemstack1);
+            } else if (ItemStack.isSame(itemstack, itemstack1) && ItemStack.tagMatches(itemstack, itemstack1)) {
+                itemstack1.grow(itemstack.getCount());
+                this.blockEntity.setItem(i, itemstack1);
+            } else if (!this.player.getInventory().add(itemstack1)) {
+                this.player.drop(itemstack1, false);
             }
         }
     }
@@ -127,5 +134,21 @@ public class SchematicResultSlot extends Slot {
     @Override
     public int getMaxStackSize() {
         return this.itemHandler.getSlotLimit(this.getContainerSlot());
+    }
+
+    protected static NonNullList<ItemStack> getRemainingItemsForRecipe(MultiblockWorkshopBlockEntity entity, Level pLevel) {
+        Optional<SchematicRecipe> optional = pLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, entity, pLevel);
+
+        if (optional.isPresent()) {
+            return optional.get().getRemainingItems(entity);
+        }
+
+        NonNullList<ItemStack> nonnulllist = NonNullList.withSize(entity.getContainerSize(), ItemStack.EMPTY);
+
+        for(int i : ArrayUtils.add(SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
+            nonnulllist.set(i - 9, entity.getItem(i));
+        }
+
+        return nonnulllist;
     }
 }
