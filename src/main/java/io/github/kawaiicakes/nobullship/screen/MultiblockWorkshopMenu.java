@@ -20,7 +20,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_MENU;
-import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.*;
+import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
+import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.FILLED_SCHEM_SLOT;
 
 public class MultiblockWorkshopMenu extends AbstractContainerMenu implements ContainerListener {
     public final MultiblockWorkshopBlockEntity entity;
@@ -101,7 +102,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         if (optional.isEmpty()) return;
         final ItemStack output = optional.get().assemble(pEntity);
 
-        pEntity.setItem(FILLED_SCHEM_SLOT, output);
+        this.slots.get(FILLED_SCHEM_SLOT).set(output);
     }
 
     @Override
