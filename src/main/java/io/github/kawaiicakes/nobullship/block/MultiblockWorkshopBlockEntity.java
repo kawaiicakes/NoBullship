@@ -8,15 +8,14 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Container;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.Nameable;
+import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
@@ -53,6 +52,7 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
     // I don't like the idea of this block having to tick
     protected boolean hasRecipe = false;
+    protected SchematicRecipe currentRecipe;
     protected LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     protected final ItemStackHandler itemHandler = new ItemStackHandler(20) {
         @Override
@@ -222,6 +222,26 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
         this.lazyItemHandler = LazyOptional.of(() -> itemHandler);
     }
 
+    @Override
+    public Component getName() {
+        return Component.translatable("block.nobullship.workshop");
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("block.nobullship.workshop");
+    }
+
+    public void dropContents() {
+        SimpleContainer inventory = new SimpleContainer(itemHandler.getSlots());
+        for (int i = 0; i < itemHandler.getSlots(); i++) {
+            inventory.setItem(i, itemHandler.getStackInSlot(i));
+        }
+
+        assert this.level != null;
+        Containers.dropContents(this.level, this.worldPosition, inventory);
+    }
+
     public void contentsUpdated() {
         if (this.level == null || !(this.level instanceof ServerLevel serverLevel)) return;
 
@@ -229,21 +249,22 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
                 .getRecipeFor(SchematicRecipe.Type.INSTANCE, this, serverLevel);
 
         this.hasRecipe = recipe.isPresent() && canInsertAmountIntoOutputSlot(this) && canInsertItemIntoOutputSlot(this);
-
-        if (this.hasRecipe) this.doCraft(recipe.get());
     }
 
     /**
      * When called, the contents of this entity are consumed and the result is added to the filled schematic slot.
-     * No checks are made as to the validity of the recipe inside this method. Be sure of this prior to calling.
-     * @param recipe    the <code>SchematicRecipe</code> describing what to deduct from/add to this entity.
      */
-    protected void doCraft(SchematicRecipe recipe) {
+    protected void doCraft() {
+        final SchematicRecipe immutableRecipe = this.currentRecipe;
+        if (!this.hasRecipe || immutableRecipe == null) return;
+
         for (int i : SHAPELESS_SLOTS) {
+            if (immutableRecipe.getShapelessIngredients().isEmpty()) break;
+
             final ItemStack newAmount = this.getItem(i);
             // The following nonsense is to account for if a recipe has the same ItemStack but with different counts
             // spread out in different slots...
-            final int recipeAmount = recipe.getShapelessIngredients()
+            final int recipeAmount = immutableRecipe.getShapelessIngredients()
                     .stream()
                     .filter(standard -> standard.is(this.getItem(i).getItem())
                             && this.getItem(i).getCount() >= standard.getCount())
@@ -260,11 +281,21 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
         this.setItem(EMPTY_SCHEM_SLOT, newAmount);
 
         if (this.getItem(FILLED_SCHEM_SLOT).isEmpty()) {
-            this.setItem(FILLED_SCHEM_SLOT, recipe.assemble(this));
+            this.setItem(FILLED_SCHEM_SLOT, immutableRecipe.assemble(this));
         } else {
             final ItemStack newCount = this.getItem(FILLED_SCHEM_SLOT);
             newCount.grow(1);
             this.setItem(FILLED_SCHEM_SLOT, newCount);
+        }
+    }
+
+    public static void tick(Level level, BlockPos pos, BlockState state, MultiblockWorkshopBlockEntity pEntity) {
+        if (level.isClientSide()) return;
+
+        if (pEntity.hasRecipe) {
+            pEntity.doCraft();
+            pEntity.contentsUpdated();
+            setChanged(level, pos, state);
         }
     }
 
@@ -274,15 +305,5 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
     protected static boolean canInsertAmountIntoOutputSlot(MultiblockWorkshopBlockEntity container) {
         return container.getItem(FILLED_SCHEM_SLOT).getMaxStackSize() > container.getItem(FILLED_SCHEM_SLOT).getCount();
-    }
-
-    @Override
-    public Component getName() {
-        return Component.translatable("block.nobullship.workshop");
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.translatable("block.nobullship.workshop");
     }
 }
