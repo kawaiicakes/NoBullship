@@ -91,7 +91,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
 
     @Override
     public int getContainerSize() {
-        return SHAPELESS_SLOTS.size();
+        return SHAPELESS_SLOTS.size() + 1;
     }
 
     @Override
