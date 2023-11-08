@@ -287,8 +287,6 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
         if (pEntity.hasRecipe) {
             pEntity.doCraft();
-            pEntity.contentsUpdated();
-            setChanged(level, pos, state);
         }
     }
 
