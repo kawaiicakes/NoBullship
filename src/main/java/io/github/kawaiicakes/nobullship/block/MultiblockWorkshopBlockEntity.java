@@ -7,12 +7,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
@@ -55,6 +56,7 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
     protected final ItemStackHandler itemHandler = new ItemStackHandler(20) {
         @Override
         protected void onContentsChanged(int slot) {
+            if (slot != FILLED_SCHEM_SLOT) MultiblockWorkshopBlockEntity.slotChanged(MultiblockWorkshopBlockEntity.this);
             MultiblockWorkshopBlockEntity.this.setChanged();
         }
 
@@ -100,8 +102,7 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
     @Override
     public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
-        if (this.level == null) return new MultiblockWorkshopMenu(pContainerId, pPlayerInventory, this, ContainerLevelAccess.NULL);
-        return new MultiblockWorkshopMenu(pContainerId, pPlayerInventory, this, ContainerLevelAccess.create(this.level, this.worldPosition));
+        return new MultiblockWorkshopMenu(pContainerId, pPlayerInventory, this);
     }
 
     @Override
@@ -148,10 +149,7 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
         ItemStack toReturn = ItemStack.EMPTY;
         // #extractItem returns a stack which may be safely modified
-        if (testValidity) {
-            toReturn = this.itemHandler.extractItem(pSlot, pAmount, false);
-            this.menu.slotsChanged(this);
-        }
+        if (testValidity) toReturn = this.itemHandler.extractItem(pSlot, pAmount, false);
 
         return toReturn;
     }
@@ -174,7 +172,6 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
         }
 
         this.itemHandler.setStackInSlot(pSlot, pStack);
-        this.menu.slotsChanged(this);
     }
 
     @Override
@@ -237,6 +234,15 @@ public class MultiblockWorkshopBlockEntity extends BlockEntity implements Contai
 
         assert this.level != null;
         Containers.dropContents(this.level, this.worldPosition, inventory);
+    }
+
+    protected static void slotChanged(MultiblockWorkshopBlockEntity pEntity) {
+        if (!(pEntity.getLevel() instanceof ServerLevel serverLevel)) return;
+
+        Optional<SchematicRecipe> optional = serverLevel.getServer().getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, pEntity, serverLevel);
+        if (optional.isEmpty()) return;
+
+        pEntity.doCraft(optional.get());
     }
 
     /**
