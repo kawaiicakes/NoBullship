@@ -45,7 +45,6 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     protected final ItemStackHandler itemHandler = new ItemStackHandler(20) {
         @Override
         protected void onContentsChanged(int slot) {
-            if (slot == FILLED_SCHEM_SLOT) return;
             MultiblockWorkshopBlockEntity.this.setChanged();
         }
 
