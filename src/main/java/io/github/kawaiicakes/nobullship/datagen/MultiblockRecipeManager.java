@@ -99,10 +99,12 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         level.addFreshEntity(entity);
 
         // This doesn't seem to do anything on the server... is this intended for the client?
-        for(int i1 = 0; i1 < pattern.getWidth(); ++i1) {
-            for(int j1 = 0; j1 < pattern.getHeight(); ++j1) {
-                BlockInWorld blockInWorld = match.getBlock(i1, j1, 0);
-                level.blockUpdated(blockInWorld.getPos(), Blocks.AIR);
+        for (int i1 = 0; i1 < pattern.getDepth(); ++i1) {
+            for (int j1 = 0; j1 < pattern.getWidth(); ++j1) {
+                for (int k1 = 0; k1 < pattern.getHeight(); ++k1) {
+                    BlockInWorld blockInWorld = match.getBlock(j1, k1, i1);
+                    level.blockUpdated(blockInWorld.getPos(), Blocks.AIR);
+                }
             }
         }
     }
