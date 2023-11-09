@@ -1,7 +1,7 @@
 {
   "type": "nobullship:schematic_workbench",
   "declaration": {
-    "output_id": "giant_big",
+    "output_id": "nobullship:giant_big",
     "key": {
       "#": {
         "item": "bedrock"
