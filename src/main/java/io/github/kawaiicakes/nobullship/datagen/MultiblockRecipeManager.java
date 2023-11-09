@@ -17,11 +17,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -90,8 +92,21 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         level.playSound(null, pos, CONSTRUCT_SUCCESS.get(), SoundSource.PLAYERS, 0.77F, 1.0F);
         level.sendParticles(LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 7, 0.2, 0.2, 0.2, 0.3);
 
-        Entity entity = RegistryObject.create(resultLocation, ENTITY_TYPES).get().create(level);
-        if (entity == null) return;
+        EntityType<?> type = ENTITY_TYPES.getValue(resultLocation);
+        if (type == null) {
+            if (!RegistryObject.create(resultLocation, ENTITY_TYPES).isPresent()) {
+                LOGGER.error("Entity type {} does not exist!", resultLocation);
+                throw new RuntimeException("Entity type " + resultLocation + " does not exist!");
+            }
+
+            type = RegistryObject.create(resultLocation, ENTITY_TYPES).get();
+        }
+
+        Entity entity = type.create(level);
+        if (entity == null) {
+            LOGGER.error("Unable to spawn entity {}!", resultLocation);
+            throw new RuntimeException("Unable to spawn entity " + resultLocation + "!");
+        }
 
         BlockPos blockpos = match.getBlock(1, 2, 0).getPos();
         entity.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.55D, (double)blockpos.getZ() + 0.5D, match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F, 0.0F);

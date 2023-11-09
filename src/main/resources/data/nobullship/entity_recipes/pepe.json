@@ -1,0 +1,23 @@
+{
+  "key": {
+    "#": {
+      "block": "minecraft:acacia_planks"
+    }
+  },
+  "recipe": {
+    "z0": [
+      "####",
+      "####"
+    ],
+    "z1": [
+      "#  #",
+      "####"
+    ],
+    "z2": [
+      "   ",
+      "####",
+      "####"
+    ]
+  },
+  "result": "minecraft:acacia_boat"
+}

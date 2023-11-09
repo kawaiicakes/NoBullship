@@ -1,0 +1,17 @@
+{
+  "type": "nobullship:schematic_workbench",
+  "declaration": {
+    "output_id": "nobullship:pepe",
+    "key": {
+      "#": {
+        "item": "dirt"
+      }
+    },
+    "shaped_input": [
+      "##"
+    ]
+  },
+  "shapeless_input": [
+
+  ]
+}
