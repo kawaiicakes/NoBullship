@@ -83,7 +83,16 @@ public class SchematicResultSlot extends Slot {
 
     @Override
     public ItemStack remove(int amount) {
+        if (this.hasItem()) {
+            this.removeCount += Math.min(amount, this.getItem().getCount());
+        }
+
         return this.itemHandler.extractItem(this.getContainerSlot(), amount, false);
+    }
+
+    @Override
+    public boolean hasItem() {
+        return !this.itemHandler.getStackInSlot(this.getContainerSlot()).isEmpty();
     }
 
     @Override
