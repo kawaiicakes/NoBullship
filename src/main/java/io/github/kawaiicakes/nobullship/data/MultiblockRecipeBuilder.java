@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import static net.minecraft.world.level.block.Blocks.AIR;
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
 public class MultiblockRecipeBuilder extends BlockPatternBuilder {
@@ -25,7 +26,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     }
 
     public static MultiblockRecipeBuilder of(ResourceLocation result) {
-        return new MultiblockRecipeBuilder(result);
+        return (MultiblockRecipeBuilder) (new MultiblockRecipeBuilder(result)).where(' ', AIR.defaultBlockState()).where('$', (state) -> true);
     }
 
     public ResourceLocation getResult() {
