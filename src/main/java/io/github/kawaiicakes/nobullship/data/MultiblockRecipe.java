@@ -10,17 +10,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
-import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
@@ -49,9 +45,14 @@ public record MultiblockRecipe(
 
         ResourceLocation result = new ResourceLocation(jsonResult.getAsString());
 
-        BlockPatternBuilder builder = BlockPatternBuilder.start();
+        MultiblockRecipeBuilder builder = MultiblockRecipeBuilder.of(result);
 
         for (Map.Entry<String, JsonElement> entry : jsonKeys.entrySet()) {
+            if (Objects.equals(entry.getKey(), " ") || Objects.equals(entry.getKey(), "$")) {
+                LOGGER.error("{} is a reserved character", entry.getKey());
+                return null;
+            }
+
             JsonElement mappedCharacterBlock = entry.getValue().getAsJsonObject().get("block");
 
             if (mappedCharacterBlock == null) return null;

@@ -2,10 +2,12 @@ package io.github.kawaiicakes.nobullship.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
+import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +19,7 @@ import static net.minecraft.world.level.block.Blocks.AIR;
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
 public class MultiblockRecipeBuilder extends BlockPatternBuilder {
+    protected final Logger LOGGER = LogUtils.getLogger();
     protected final ResourceLocation result;
     protected final Map<String, BlockState> lookupSimple = new HashMap<>();
 
@@ -26,7 +29,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     }
 
     public static MultiblockRecipeBuilder of(ResourceLocation result) {
-        return (MultiblockRecipeBuilder) (new MultiblockRecipeBuilder(result)).where(' ', AIR.defaultBlockState()).where('$', (state) -> true);
+        return (MultiblockRecipeBuilder) (new MultiblockRecipeBuilder(result)).where(' ', (state) -> state.getState().is(AIR)).where('$', (state) -> true);
     }
 
     public ResourceLocation getResult() {
@@ -46,6 +49,11 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * This method must be used if a proper lookup key mapping is to be generated.
      */
     public MultiblockRecipeBuilder where(char pSymbol, BlockState state) {
+        if (pSymbol == ' ' || pSymbol == '$') {
+            LOGGER.error("{} is a reserved character!", pSymbol);
+            throw new IllegalArgumentException(pSymbol + " is a reserved character!");
+        }
+
         this.lookupSimple.put(String.valueOf(pSymbol), state);
         return (MultiblockRecipeBuilder) this.where(pSymbol, BlockInWorld.hasState(testState -> Objects.equals(testState, state)));
     }
