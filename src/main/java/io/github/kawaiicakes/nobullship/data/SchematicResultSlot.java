@@ -87,6 +87,11 @@ public class SchematicResultSlot extends Slot {
     }
 
     @Override
+    public void onQuickCraft(ItemStack pOldStack, ItemStack pNewStack) {
+        super.onQuickCraft(pOldStack, pNewStack);
+    }
+
+    @Override
     protected void onQuickCraft(ItemStack pStack, int pAmount) {
         this.removeCount += pAmount;
     }

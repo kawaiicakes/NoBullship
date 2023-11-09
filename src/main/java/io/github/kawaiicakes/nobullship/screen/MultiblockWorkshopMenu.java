@@ -62,7 +62,50 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
     // TODO
     @Override
     public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
-        return pPlayer.inventoryMenu.quickMoveStack(pPlayer, pIndex);
+        Slot slot = this.slots.get(pIndex);
+        if (!slot.hasItem()) return ItemStack.EMPTY;
+
+        ItemStack stackInSlot = slot.getItem();
+        ItemStack toReturn = stackInSlot.copy();
+
+        if (pIndex == this.filledSchemSlotID) {
+            if (!this.moveItemStackTo(stackInSlot, 0, 36, true)) {
+                return ItemStack.EMPTY;
+            }
+
+            slot.onQuickCraft(stackInSlot, toReturn);
+        }
+
+        if (pIndex >= 0 && pIndex <= 35) {
+            if (!this.moveItemStackTo(stackInSlot, 45, this.filledSchemSlotID, false)) {
+                if (pIndex < 26) {
+                    if (!this.moveItemStackTo(stackInSlot, 26, 36, false))
+                        return ItemStack.EMPTY;
+                }
+
+                if (!this.moveItemStackTo(stackInSlot, 0, 27, false))
+                    return ItemStack.EMPTY;
+            }
+        }
+
+        if (!this.moveItemStackTo(stackInSlot, 0, 36, false)) {
+            return ItemStack.EMPTY;
+        }
+
+        if (stackInSlot.isEmpty()) {
+            slot.set(ItemStack.EMPTY);
+        } else {
+            slot.setChanged();
+        }
+
+        if (stackInSlot.getCount() == toReturn.getCount()) return ItemStack.EMPTY;
+
+        slot.onTake(pPlayer, stackInSlot);
+        if (pIndex == 0) {
+            pPlayer.drop(stackInSlot, false);
+        }
+
+        return toReturn;
     }
 
     @Override
