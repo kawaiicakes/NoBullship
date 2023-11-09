@@ -76,12 +76,14 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             return;
         }
 
-        // FIXME: 3D checks, other checks, missing logic & optimizations (see CarvedPumpkinBlock)
-        for (int i = 0; i < pattern.getWidth(); ++i) {
-            for (int j = 0; j < pattern.getHeight(); ++j) {
-                BlockInWorld blockinworld = match.getBlock(i, j, 0);
-                level.setBlock(blockinworld.getPos(), Blocks.AIR.defaultBlockState(), 2);
-                level.levelEvent(2001, blockinworld.getPos(), Block.getId(blockinworld.getState()));
+        // FIXME: other checks, missing logic & optimizations (see CarvedPumpkinBlock)
+        for (int i = 0; i < pattern.getDepth(); ++i) {
+            for (int j = 0; j < pattern.getWidth(); ++j) {
+                for (int k = 0; k < pattern.getHeight(); ++k) {
+                    BlockInWorld blockinworld = match.getBlock(j, k, i);
+                    level.setBlock(blockinworld.getPos(), Blocks.AIR.defaultBlockState(), 2);
+                    level.levelEvent(2001, blockinworld.getPos(), Block.getId(blockinworld.getState()));
+                }
             }
         }
 
