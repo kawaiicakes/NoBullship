@@ -1,0 +1,29 @@
+{
+  "key": {
+    "A": {
+      "block": "minecraft:redstone_ore",
+      "state": {
+        "lit": "false"
+      }
+    },
+    "S": {
+      "block": "minecraft:netherite_block"
+    },
+    "H": {
+      "block": "minecraft:stone"
+    }
+  },
+  "recipe": {
+    "z0": [
+      "AAA",
+      "   ",
+      "SSS"
+    ],
+    "z1": [
+      "HHH",
+      "   ",
+      "ASH"
+    ]
+  },
+  "result": "minecraft:creeper"
+}

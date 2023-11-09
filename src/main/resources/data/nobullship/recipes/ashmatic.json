@@ -1,0 +1,17 @@
+{
+  "type": "nobullship:schematic_workbench",
+  "declaration": {
+    "output_id": "nobullship:ash",
+    "key": {
+      "#": {
+        "item": "emerald_block"
+      }
+    },
+    "shaped_input": [
+      "##"
+    ]
+  },
+  "shapeless_input": [
+
+  ]
+}
