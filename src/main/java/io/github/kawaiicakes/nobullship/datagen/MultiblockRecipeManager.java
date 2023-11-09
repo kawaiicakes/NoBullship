@@ -23,7 +23,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -56,7 +55,6 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
     /**
      * Pass a recipe ID and the context using it into here to attempt to spawn the result.
-     * @return <code>true</code> if the entity is spawned. <code>false</code> otherwise.
      */
     public void trySpawn(ResourceLocation recipeId, UseOnContext context) {
         // TODO: config whether fake players can use this item...
