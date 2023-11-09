@@ -1,0 +1,17 @@
+{
+  "type": "nobullship:schematic_workbench",
+  "declaration": {
+    "output_id": "giant_big",
+    "key": {
+      "#": {
+        "item": "bedrock"
+      }
+    },
+    "shaped_input": [
+      "##"
+    ]
+  },
+  "shapeless_input": [
+
+  ]
+}

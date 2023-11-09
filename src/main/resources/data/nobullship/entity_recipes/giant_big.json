@@ -1,0 +1,15 @@
+{
+  "key": {
+    "#": {
+      "block": "minecraft:diamond_block"
+    }
+  },
+  "recipe": {
+    "z0": [
+      " # ",
+      "###",
+      "###"
+    ]
+  },
+  "result": "minecraft:giant"
+}
