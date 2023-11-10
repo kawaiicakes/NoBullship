@@ -17,6 +17,25 @@ public class MultiblockPattern extends BlockPattern {
     }
 
     /**
+     * Checks that the given pattern & rotation is at the block coordinates.
+     */
+    @Nullable
+    @Override
+    protected BlockPattern.BlockPatternMatch matches(BlockPos pPos, Direction pFinger, Direction pThumb, LoadingCache<BlockPos, BlockInWorld> pCache) {
+        for(int i = 0; i < this.width; ++i) {
+            for(int j = 0; j < this.height; ++j) {
+                for(int k = 0; k < this.depth; ++k) {
+                    if (!this.pattern[k][j][i].test(pCache.getUnchecked(translateAndRotate(pPos, pFinger, pThumb, i, j, k)))) {
+                        return null;
+                    }
+                }
+            }
+        }
+
+        return new BlockPattern.BlockPatternMatch(pPos, pFinger, pThumb, pCache, this.width, this.height, this.depth);
+    }
+
+    /**
      * In the superclass, this method creates an <code>Iterator</code> containing all the <code>BlockPos</code> inside
      * a volume specified by the positions of its furthest-apart corners. This volume is equal to a cube of a length
      * equal to the longest side of the <code>BlockPattern</code>. For every position in this volume, and for every
