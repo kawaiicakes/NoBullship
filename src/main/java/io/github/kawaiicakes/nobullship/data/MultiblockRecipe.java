@@ -9,7 +9,6 @@ import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
