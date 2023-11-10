@@ -16,13 +16,22 @@ public class MultiblockPattern extends BlockPattern {
         super(pPattern);
     }
 
+    /**
+     * In the superclass, this method creates an <code>Iterator</code> containing all the <code>BlockPos</code> inside
+     * a volume specified by the positions of its furthest-apart corners. This volume is equal to a cube of a length
+     * equal to the longest side of the <code>BlockPattern</code>. For every position in this volume, and for every
+     * possible direction the pattern may be facing, a test is conducted to see if the pattern exists there.
+     * <br><br>
+     * This is explained in detail here to be referenced when I optimize this logic... For now, I've actually made the
+     * performance worse since the previous volume was too small to properly account for asymmetric 3D patterns.
+     */
     @Nullable
     @Override
     public BlockPatternMatch find(LevelReader pLevel, BlockPos pPos) {
         LoadingCache<BlockPos, BlockInWorld> loadingcache = createLevelCache(pLevel, false);
         int i = Math.max(Math.max(this.getWidth(), this.getHeight()), this.getDepth());
 
-        for(BlockPos blockpos : BlockPos.betweenClosed(pPos.offset(-i + 1, 0, -i + 1), pPos.offset(i - 1, i - 1, i - 1))) {
+        for(BlockPos blockpos : BlockPos.betweenClosed(pPos.offset(-i + 1, -i + 1, -i + 1), pPos.offset(i - 1, i - 1, i - 1))) {
             for(Direction direction : Direction.values()) {
                 for(Direction direction1 : Direction.values()) {
                     if (direction1 != direction && direction1 != direction.getOpposite()) {
