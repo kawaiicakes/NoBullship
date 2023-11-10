@@ -14,12 +14,12 @@
     }
   },
   "recipe": {
-    "z0": [
+    "layer0": [
       "AAA",
       "   ",
       "SSS"
     ],
-    "z1": [
+    "layer1": [
       "HHH",
       "   ",
       "ASH"

@@ -96,10 +96,10 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
 
             JsonObject recipePattern = new JsonObject();
             for (int i = 0; i < this.recipe.size(); i++) {
-                recipePattern.add("z" + i, new JsonArray(this.recipe.get(i).length));
+                recipePattern.add("layer" + i, new JsonArray(this.recipe.get(i).length));
 
                 for (int j = 0; j < this.recipe.get(i).length; j++) {
-                    recipePattern.getAsJsonArray("z" + i).add(this.recipe.get(i)[j]);
+                    recipePattern.getAsJsonArray("layer" + i).add(this.recipe.get(i)[j]);
                 }
             }
 

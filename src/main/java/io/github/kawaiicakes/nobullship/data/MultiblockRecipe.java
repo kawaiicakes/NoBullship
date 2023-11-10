@@ -89,8 +89,8 @@ public record MultiblockRecipe(
             }));
         }
 
-        for (int i = 0; i < jsonRecipe.size(); i++) {
-            JsonArray aisle = jsonRecipe.getAsJsonArray("z" + i);
+        for (int i = jsonRecipe.size() - 1; i >= 0 ; i--) {
+            JsonArray aisle = jsonRecipe.getAsJsonArray("layer" + i);
             if (aisle.isEmpty()) return null;
 
             List<String> strings = new ArrayList<>(aisle.size());
