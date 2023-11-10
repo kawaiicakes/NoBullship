@@ -27,7 +27,7 @@ import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 @ParametersAreNonnullByDefault
 @FieldsAreNonnullByDefault
 public record MultiblockRecipe(
-        BlockPattern recipe,
+        MultiblockPattern recipe,
         ResourceLocation result
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();

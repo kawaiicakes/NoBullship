@@ -6,14 +6,17 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
 import org.slf4j.Logger;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static net.minecraft.world.level.block.Blocks.AIR;
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
@@ -34,6 +37,11 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
 
     public ResourceLocation getResult() {
         return this.result;
+    }
+
+    @Override
+    public MultiblockPattern build() {
+        return new MultiblockPattern(this.createPattern());
     }
 
     public void save(Consumer<FinishedMultiblockRecipe> consumer, ResourceLocation id) {
