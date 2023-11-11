@@ -19,6 +19,7 @@ import net.minecraftforge.items.SlotItemHandler;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_MENU;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.FILLED_SCHEM_SLOT;
@@ -75,7 +76,13 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
 
             slot.onQuickCraft(stackInSlot, toReturn);
         } else if (pIndex >= 0 && pIndex <= 35) {
+            if (stackInSlot.is(SCHEMATIC.get())) {
+                if (!this.moveItemStackTo(stackInSlot, this.filledSchemSlotID - 1, this.filledSchemSlotID, false))
+                    return ItemStack.EMPTY;
+            }
+
             if (!this.moveItemStackTo(stackInSlot, 45, this.filledSchemSlotID, false)) {
+
                 if (pIndex < 26) {
                     if (!this.moveItemStackTo(stackInSlot, 26, 36, false))
                         return ItemStack.EMPTY;
