@@ -103,6 +103,9 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         if (stackInSlot.getCount() == toReturn.getCount()) return ItemStack.EMPTY;
 
         slot.onTake(pPlayer, stackInSlot);
+
+        // TODO: make a call to this whenever an update is made and if it's appropriate...
+        this.slotsChanged(this.entity);
         if (pIndex == this.filledSchemSlotID) {
             pPlayer.drop(stackInSlot, false);
         }
