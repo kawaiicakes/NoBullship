@@ -45,6 +45,11 @@ public class SchematicResultSlot extends Slot {
     }
 
     @Override
+    public void setChanged() {
+        this.blockEntity.setChanged();
+    }
+
+    @Override
     public void initialize(ItemStack stack) {
         ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(this.getContainerSlot(), stack);
         this.setChanged();
