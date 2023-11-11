@@ -42,7 +42,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     public static final byte FILLED_SCHEM_SLOT = 19;
 
     protected LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
-    protected final ItemStackHandler itemHandler = new ItemStackHandler(20) {
+    public final ItemStackHandler itemHandler = new ItemStackHandler(20) {
         @Override
         protected void onContentsChanged(int slot) {
             MultiblockWorkshopBlockEntity.this.setChanged();

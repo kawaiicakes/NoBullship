@@ -154,7 +154,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
             output = optional.get().assemble(pEntity);
         }
 
-        this.slots.get(this.filledSchemSlotID).set(output);
+        this.entity.itemHandler.setStackInSlot(FILLED_SCHEM_SLOT, output);
     }
 
     @Override
