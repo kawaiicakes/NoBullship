@@ -74,9 +74,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
             }
 
             slot.onQuickCraft(stackInSlot, toReturn);
-        }
-
-        if (pIndex >= 0 && pIndex <= 35) {
+        } else if (pIndex >= 0 && pIndex <= 35) {
             if (!this.moveItemStackTo(stackInSlot, 45, this.filledSchemSlotID, false)) {
                 if (pIndex < 26) {
                     if (!this.moveItemStackTo(stackInSlot, 26, 36, false))
@@ -86,9 +84,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
                 if (!this.moveItemStackTo(stackInSlot, 0, 27, false))
                     return ItemStack.EMPTY;
             }
-        }
-
-        if (!this.moveItemStackTo(stackInSlot, 0, 36, false)) {
+        } else if (!this.moveItemStackTo(stackInSlot, 0, 36, false)) {
             return ItemStack.EMPTY;
         }
 
