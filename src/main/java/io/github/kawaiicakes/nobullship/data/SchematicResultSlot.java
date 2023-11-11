@@ -33,7 +33,7 @@ public class SchematicResultSlot extends Slot {
 
     @Override
     public ItemStack getItem() {
-        return this.blockEntity.getItem(this.getContainerSlot());
+        return this.itemHandler.getStackInSlot(this.getContainerSlot());
     }
 
     @Override

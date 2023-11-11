@@ -105,6 +105,11 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
     }
 
     @Override
+    public boolean canTakeItemForPickAll(ItemStack pStack, Slot pSlot) {
+        return pSlot.getSlotIndex() != this.filledSchemSlotID;
+    }
+
+    @Override
     public boolean stillValid(Player pPlayer) {
         return this.entity.stillValid(pPlayer);
     }
