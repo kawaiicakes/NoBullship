@@ -103,7 +103,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         if (stackInSlot.getCount() == toReturn.getCount()) return ItemStack.EMPTY;
 
         slot.onTake(pPlayer, stackInSlot);
-        if (pIndex == 0) {
+        if (pIndex == this.filledSchemSlotID) {
             pPlayer.drop(stackInSlot, false);
         }
 
