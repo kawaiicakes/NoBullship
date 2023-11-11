@@ -80,8 +80,6 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
 
     @Override
     public boolean matches(MultiblockWorkshopBlockEntity workshop, Level pLevel) {
-        if (pLevel.isClientSide) return false;
-
         if (!this.shapedMatches(workshop)) return false;
 
         if (!this.shapeless.isEmpty()) {
