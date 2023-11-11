@@ -49,34 +49,6 @@ public class SchematicResultSlot extends Slot {
     }
 
     @Override
-    public int getMaxStackSize(ItemStack stack) {
-        ItemStack maxAdd = stack.copy();
-        int maxInput = stack.getMaxStackSize();
-        maxAdd.setCount(maxInput);
-
-        IItemHandler handler = this.itemHandler;
-        ItemStack currentStack = handler.getStackInSlot(this.getContainerSlot());
-        if (handler instanceof IItemHandlerModifiable handlerModifiable) {
-
-            handlerModifiable.setStackInSlot(this.getContainerSlot(), ItemStack.EMPTY);
-
-            ItemStack remainder = handlerModifiable.insertItem(this.getContainerSlot(), maxAdd, true);
-
-            handlerModifiable.setStackInSlot(this.getContainerSlot(), currentStack);
-
-            return maxInput - remainder.getCount();
-        }
-        else
-        {
-            ItemStack remainder = handler.insertItem(this.getContainerSlot(), maxAdd, true);
-
-            int current = currentStack.getCount();
-            int added = maxInput - remainder.getCount();
-            return current + added;
-        }
-    }
-
-    @Override
     public boolean mayPlace(ItemStack stack) {
         return false;
     }
