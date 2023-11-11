@@ -219,6 +219,8 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
 
         for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
             ItemStack item = pContainer.getItem(i);
+            if (!this.shapeless.contains(item)) continue;
+
             if (item.hasCraftingRemainingItem()) {
                 contents.set(i - 9, item.getCraftingRemainingItem());
             }

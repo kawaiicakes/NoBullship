@@ -14,6 +14,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.ArrayUtils;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
@@ -111,14 +112,22 @@ public class SchematicResultSlot extends Slot {
         if (blockEntity.getLevel() == null) return;
 
         this.checkTakeAchievements(pStack);
+
+        Optional<SchematicRecipe> optional = getCurrentRecipe(this.blockEntity.getLevel(), this.blockEntity);
+
         ForgeHooks.setCraftingPlayer(pPlayer);
-        NonNullList<ItemStack> remainingItems = getRemainingItemsForRecipe(this.blockEntity, (IItemHandlerModifiable) this.itemHandler, blockEntity.getLevel());
+        NonNullList<ItemStack> remainingItems = getRemainingItemsForRecipe(optional.orElse(null), this.blockEntity, (IItemHandlerModifiable) this.itemHandler);
         ForgeHooks.setCraftingPlayer(null);
 
         for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
             int j = i - 9;
 
             ItemStack itemstack = this.itemHandler.getStackInSlot(i);
+            final ItemStack finalItemstack = itemstack;
+            if (SHAPELESS_SLOTS.contains(i)
+                    && optional.isPresent()
+                    && optional.get().getShapelessIngredients().stream().noneMatch(stack -> stack.is(finalItemstack.getItem()))) continue;
+
             ItemStack itemstack1 = remainingItems.get(j);
 
             if (!itemstack.isEmpty()) {
@@ -144,11 +153,9 @@ public class SchematicResultSlot extends Slot {
         return this.itemHandler.getSlotLimit(this.getContainerSlot());
     }
 
-    protected static NonNullList<ItemStack> getRemainingItemsForRecipe(MultiblockWorkshopBlockEntity entity, IItemHandlerModifiable handler, Level pLevel) {
-        Optional<SchematicRecipe> optional = pLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, entity, pLevel);
-
-        if (optional.isPresent()) {
-            return optional.get().getRemainingItems(entity);
+    protected static NonNullList<ItemStack> getRemainingItemsForRecipe(@Nullable SchematicRecipe recipe, MultiblockWorkshopBlockEntity entity, IItemHandlerModifiable handler) {
+        if (recipe != null) {
+            return recipe.getRemainingItems(entity);
         }
 
         NonNullList<ItemStack> nonnulllist = NonNullList.withSize(entity.getContainerSize(), ItemStack.EMPTY);
@@ -158,5 +165,9 @@ public class SchematicResultSlot extends Slot {
         }
 
         return nonnulllist;
+    }
+
+    protected Optional<SchematicRecipe> getCurrentRecipe(Level pLevel, MultiblockWorkshopBlockEntity entity) {
+        return pLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, entity, pLevel);
     }
 }
