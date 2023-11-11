@@ -60,7 +60,6 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         this.addSlotListener(this);
     }
 
-    // TODO
     @Override
     public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
         Slot slot = this.slots.get(pIndex);
