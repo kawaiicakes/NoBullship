@@ -5,9 +5,12 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.RecipeHolder;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.ArrayUtils;
@@ -75,6 +78,7 @@ public class SchematicResultSlot extends Slot {
     @Override
     protected void onQuickCraft(ItemStack pStack, int pAmount) {
         this.removeCount += pAmount;
+        this.checkTakeAchievements(pStack);
     }
 
     @Override
@@ -87,11 +91,25 @@ public class SchematicResultSlot extends Slot {
         return !this.itemHandler.extractItem(this.getContainerSlot(), 1, true).isEmpty();
     }
 
+    @Override
+    protected void checkTakeAchievements(ItemStack pStack) {
+        if (this.removeCount > 0) {
+            pStack.onCraftedBy(this.player.level, this.player, this.removeCount);
+            ForgeEventFactory.firePlayerCraftingEvent(this.player, pStack, this.blockEntity);
+        }
+
+        this.removeCount = 0;
+    }
+
     // TODO: I took this from vanilla lol clean it up
     @Override
     public void onTake(Player pPlayer, ItemStack pStack) {
         if (blockEntity.getLevel() == null) return;
+
+        this.checkTakeAchievements(pStack);
+        ForgeHooks.setCraftingPlayer(pPlayer);
         NonNullList<ItemStack> remainingItems = getRemainingItemsForRecipe(this.blockEntity, (IItemHandlerModifiable) this.itemHandler, blockEntity.getLevel());
+        ForgeHooks.setCraftingPlayer(null);
 
         for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
             int j = i - 9;
