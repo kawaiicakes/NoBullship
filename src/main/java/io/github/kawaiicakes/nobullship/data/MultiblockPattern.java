@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.data;
 
 import com.google.common.cache.LoadingCache;
+import com.mojang.math.Quaternion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -12,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 
 public class MultiblockPattern extends BlockPattern {
+
     public MultiblockPattern(Predicate<BlockInWorld>[][][] pPattern) {
         super(pPattern);
     }
@@ -80,6 +82,14 @@ public class MultiblockPattern extends BlockPattern {
                 thumbNormal.getX() * -pThumbOffset + palmNormal.getX() * pPalmOffset + fingerNormal.getX() * pFingerOffset,
                 thumbNormal.getY() * -pThumbOffset + palmNormal.getY() * pPalmOffset + fingerNormal.getY() * pFingerOffset,
                 thumbNormal.getZ() * -pThumbOffset + palmNormal.getZ() * pPalmOffset + fingerNormal.getZ() * pFingerOffset
+        );
+    }
+
+    protected static BlockPos rotatePoint(Quaternion rot, BlockPos pos) {
+        return new BlockPos(
+                (rot.r() * pos.getX()) - (rot.j() * pos.getZ()) + (rot.k() * pos.getY()),
+                (rot.r() * pos.getY()) + (rot.i() * pos.getZ()) - (rot.k() * pos.getX()),
+                (rot.r() * pos.getZ()) - (rot.i() * pos.getY()) + (rot.j() * pos.getZ())
         );
     }
 }
