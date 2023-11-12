@@ -33,6 +33,8 @@ import static net.minecraft.ChatFormatting.*;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class SchematicItem extends Item {
+    public static final MutableComponent DIVIDER = Component.literal("---------").withStyle(BOLD);
+
     public SchematicItem() {
         super(new Properties().tab(NO_BULLSHIP_TAB));
     }
@@ -52,11 +54,11 @@ public class SchematicItem extends Item {
         }
         final String recipeName = pStack.getTag().getString("nobullshipRecipe");
         if (recipeName.isEmpty()) {
-            pTooltipComponents.add((Component) Component.EMPTY);
+            pTooltipComponents.add(DIVIDER);
             pTooltipComponents.add(Component.translatable("tooltip.nobullship.blank_schematic").withStyle(Style.EMPTY.withColor(GOLD)));
         }
 
-        pTooltipComponents.add((Component) Component.EMPTY);
+        pTooltipComponents.add(DIVIDER);
         pTooltipComponents.add(Component.translatable("tooltip.nobullship.filled_schematic", recipeName).withStyle(Style.EMPTY.withColor(GOLD)));
     }
 
