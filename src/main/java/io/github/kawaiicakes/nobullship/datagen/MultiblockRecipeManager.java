@@ -9,6 +9,7 @@ import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.data.MultiblockRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -26,10 +27,10 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraftforge.event.ForgeEventFactory;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.CONSTRUCT_SUCCESS;
 import static net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE;
@@ -49,11 +50,6 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         super(GSON, "entity_recipes");
     }
 
-    @Nullable
-    public MultiblockRecipe getRecipe(ResourceLocation recipeId) {
-        return this.recipes.getOrDefault(recipeId, null);
-    }
-
     /**
      * Pass a recipe ID and the context using it into here to attempt to spawn the result.
      */
@@ -71,10 +67,10 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         BlockPos pos = context.getClickedPos();
 
-        // FIXME: if the blockstate of one of the blocks changes as this matches, that block will not be removed.
         BlockPattern.BlockPatternMatch match = pattern.find(level, pos);
         if (match == null) {
             level.playSound(null, pos, BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
+            Objects.requireNonNull(context.getPlayer()).sendSystemMessage(Component.translatable("chat.nobullship.fail"));
             return;
         }
 

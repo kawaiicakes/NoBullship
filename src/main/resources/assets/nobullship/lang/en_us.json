@@ -3,5 +3,6 @@
   "item.nobullship.schematic.filled": "Filled Schematic",
   "itemGroup.nobullship_tab": "No Bullship!",
   "block.nobullship.workshop": "Workshop",
-  "sounds.nobullship.construct_success": "[Construction sounds]"
+  "sounds.nobullship.construct_success": "[Construction sounds]",
+  "chat.nobullship.fail": "Construction failed!"
 }

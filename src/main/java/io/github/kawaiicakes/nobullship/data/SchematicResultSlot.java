@@ -20,6 +20,8 @@ import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
+import static net.minecraft.sounds.SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT;
+import static net.minecraft.sounds.SoundSource.PLAYERS;
 
 public class SchematicResultSlot extends Slot {
     protected static Container EMPTY = new SimpleContainer(0);
@@ -175,6 +177,8 @@ public class SchematicResultSlot extends Slot {
                 this.player.drop(itemstack1, false);
             }
         }
+
+        this.blockEntity.getLevel().playSound(pPlayer, this.blockEntity.getBlockPos(), UI_CARTOGRAPHY_TABLE_TAKE_RESULT, PLAYERS, 1.0F, 0.9F);
     }
 
     @Override
