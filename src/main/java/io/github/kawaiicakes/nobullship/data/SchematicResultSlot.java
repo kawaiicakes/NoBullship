@@ -115,35 +115,48 @@ public class SchematicResultSlot extends Slot {
         this.checkTakeAchievements(pStack);
 
         Optional<SchematicRecipe> optional = getCurrentRecipe(this.blockEntity.getLevel(), this.blockEntity);
+        SchematicRecipe recipe = optional.orElse(null);
+        if (recipe == null) throw new IllegalStateException("Attempted to take a crafted schematic when no recipe exists!");
 
         ForgeHooks.setCraftingPlayer(pPlayer);
         NonNullList<ItemStack> remainingItems = getRemainingItemsForRecipe(optional.orElse(null), this.blockEntity, (IItemHandlerModifiable) this.itemHandler);
         ForgeHooks.setCraftingPlayer(null);
+
+        NonNullList<ItemStack> shapelessRequirements = NonNullList.createWithCapacity(recipe.getShapelessIngredients().size());
+        shapelessRequirements.addAll(recipe.getShapelessIngredients());
 
         for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
             int j = i - 9;
 
             ItemStack itemstack = this.itemHandler.getStackInSlot(i);
             final ItemStack finalItemstack = itemstack;
-            if (i != EMPTY_SCHEM_SLOT && SHAPELESS_SLOTS.contains(i)
-                    && optional.isPresent()
-                    && optional.get().getShapelessIngredients().stream().noneMatch(stack -> stack.is(finalItemstack.getItem()))) continue;
+            if (SHAPELESS_SLOTS.contains(i)
+                    && shapelessRequirements.stream().noneMatch(stack -> stack.is(finalItemstack.getItem()))) continue;
 
             ItemStack itemstack1 = remainingItems.get(j);
 
             int decrement = 1;
-            if (i != EMPTY_SCHEM_SLOT && optional.isPresent()) {
-                final ItemStack finalStack = itemstack;
-
+            if (i != EMPTY_SCHEM_SLOT) {
                 // by this point in the code, there MUST be at least one element of the same item in the shapeless
                 // recipe whose count is less than the count of finalStack; so #orElseThrow is okay
-                decrement = optional.get().getShapelessIngredients()
+                decrement = shapelessRequirements
                         .stream()
-                        .filter(standard -> standard.is(finalStack.getItem()))
+                        .filter(standard -> standard.is(finalItemstack.getItem()))
                         .map(ItemStack::getCount)
-                        .filter(standard -> standard <= finalStack.getCount())
+                        .filter(standard -> standard <= finalItemstack.getCount())
                         .max(Comparator.naturalOrder())
                         .orElseThrow();
+
+                byte indexOfRequirement = 0;
+                for (byte index = 0; index < shapelessRequirements.size(); index++) {
+                    ItemStack requirement = shapelessRequirements.get(index);
+
+                    if (!requirement.is(finalItemstack.getItem()) || requirement.getCount() != decrement) continue;
+                    indexOfRequirement = index;
+                    break;
+                }
+
+                shapelessRequirements.remove(indexOfRequirement);
             }
 
             if (!itemstack.isEmpty()) {
