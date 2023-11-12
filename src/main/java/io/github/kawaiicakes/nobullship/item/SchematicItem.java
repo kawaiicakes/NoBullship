@@ -2,8 +2,11 @@ package io.github.kawaiicakes.nobullship.item;
 
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
 import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -25,6 +28,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
@@ -80,6 +85,7 @@ public class SchematicItem extends Item {
 
     @SubscribeEvent
     public static void onRenderTooltip(ItemTooltipEvent event) {
+        if (!(event.getEntity() instanceof LocalPlayer player)) return;
         ItemStack stack = event.getItemStack();
         if (!stack.is(SCHEMATIC.get())) return;
         if (!event.getToolTip().contains(ITEM_LIST)) return;
@@ -90,13 +96,39 @@ public class SchematicItem extends Item {
         insertionIndex++;
 
         //noinspection DataFlowIssue
-        for (Tag requisite : event.getItemStack().getTag().getList("nobullshipRequisites", TAG_COMPOUND)) {
+        ListTag list = event.getItemStack().getTag().getList("nobullshipRequisites", TAG_COMPOUND);
+        List<Component> toAdd = new ArrayList<>(list.size());
+        NonNullList<ItemStack> requirements = NonNullList.createWithCapacity(list.size());
+        for (Tag requisite : list) {
             CompoundTag compoundRequisite = (CompoundTag) requisite;
             ItemStack required = ItemStack.of(compoundRequisite);
+            requirements.add(required);
 
-            event.getToolTip().add(insertionIndex, fromStack(required).withStyle(Style.EMPTY.withColor(RED)));
-            insertionIndex++;
+            toAdd.add(fromStack(required).withStyle(Style.EMPTY.withColor(RED)));
         }
+
+        for (ItemStack contents : player.getInventory().items) {
+            int largestMatchingCount = requirements
+                    .stream()
+                    .filter(standard -> standard.is(contents.getItem()))
+                    .map(ItemStack::getCount)
+                    .filter(standard -> standard <= contents.getCount())
+                    .max(Comparator.naturalOrder())
+                    .orElse(-1);
+
+            if (largestMatchingCount < 0) continue;
+
+            for (ItemStack requiredStack : requirements) {
+                if (!requiredStack.is(contents.getItem()) || requiredStack.getCount() != largestMatchingCount) continue;
+                requirements.remove(requiredStack);
+                int replaceAtIndex = toAdd.indexOf(fromStack(requiredStack).withStyle(Style.EMPTY.withColor(RED)));
+
+                toAdd.set(replaceAtIndex, fromStack(requiredStack).withStyle(Style.EMPTY.withColor(GREEN)));
+                break;
+            }
+        }
+
+        event.getToolTip().addAll(insertionIndex, toAdd);
     }
 
     public static MutableComponent fromStack(ItemStack stack) {
