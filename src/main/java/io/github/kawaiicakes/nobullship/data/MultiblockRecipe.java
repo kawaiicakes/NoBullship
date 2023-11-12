@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 
-import static net.minecraftforge.common.crafting.CraftingHelper.getNBT;
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
 /**
