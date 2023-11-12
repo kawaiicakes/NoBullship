@@ -14,6 +14,8 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.Comparator;
+
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
@@ -89,17 +91,35 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public boolean shapelessMatches(MultiblockWorkshopBlockEntity workshop) {
         if (this.shapeless.isEmpty()) return true;
 
-        NonNullList<ItemStack> contents = NonNullList.createWithCapacity(SHAPELESS_SLOTS.size());
+        NonNullList<ItemStack> workshopContents = NonNullList.createWithCapacity(SHAPELESS_SLOTS.size());
         for (int i: SHAPELESS_SLOTS) {
-            contents.add(workshop.getItem(i));
-        }
-        final ImmutableList<ItemStack> workshopContents = ImmutableList.copyOf(contents);
-
-        for (ItemStack standard : this.shapeless) {
-            if (workshopContents.stream().noneMatch(stack -> standard.is(stack.getItem()) && stack.getCount() >= standard.getCount())) return false;
+            workshopContents.add(workshop.getItem(i));
         }
 
-        return true;
+        if (workshopContents.size() < this.shapeless.size()) return false;
+
+        NonNullList<ItemStack> requirements = NonNullList.createWithCapacity(this.shapeless.size());
+        requirements.addAll(this.shapeless);
+
+        for (ItemStack workshopStack : workshopContents) {
+            int largestMatchingCount = requirements
+                    .stream()
+                    .filter(standard -> standard.is(workshopStack.getItem()))
+                    .map(ItemStack::getCount)
+                    .filter(standard -> standard <= workshopStack.getCount())
+                    .max(Comparator.naturalOrder())
+                    .orElse(-1);
+
+            if (largestMatchingCount < 0) continue;
+
+            for (ItemStack requirement : requirements) {
+                if (!requirement.is(workshopStack.getItem()) || requirement.getCount() != largestMatchingCount) continue;
+                requirements.remove(requirement);
+                break;
+            }
+        }
+
+        return requirements.isEmpty();
     }
 
     /**
