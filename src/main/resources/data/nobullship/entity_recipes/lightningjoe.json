@@ -12,7 +12,9 @@
   "result": {
     "entity": "minecraft:lightning_bolt",
     "nbt": {
-      "CustomName": "Lightning Joe",
+      "CustomName": {
+        "text":"Lightning Joe"
+      },
       "CustomNameVisible": true
     }
   }
