@@ -1,7 +1,6 @@
 package io.github.kawaiicakes.nobullship.item;
 
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
-import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -15,14 +14,19 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
+import static net.minecraft.ChatFormatting.DARK_AQUA;
+import static net.minecraft.ChatFormatting.GOLD;
 
 /**
  * Care is taken to ensure that using the schematic does not alter the blockstate of the clicked block.
@@ -32,6 +36,17 @@ import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
 public class SchematicItem extends Item {
     public SchematicItem() {
         super(new Properties().tab(NO_BULLSHIP_TAB));
+    }
+
+    @Override
+    public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
+        if (pStack.getTag() == null) super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
+        final String recipeName = pStack.getTag().getString("nobullshipRecipe");
+        if (recipeName.isEmpty()) {
+            pTooltipComponents.add(Component.translatable("tooltip.nobullship.blank_schematic").withStyle(Style.EMPTY.withColor(GOLD)));
+        }
+
+        pTooltipComponents.add(Component.translatable("tooltip.nobullship.filled_schematic", recipeName).withStyle(Style.EMPTY.withColor(GOLD)));
     }
 
     @Override
@@ -51,7 +66,7 @@ public class SchematicItem extends Item {
         if (item.getTag().getString("nobullshipRecipe").isEmpty()) return displayName;
 
         MutableComponent returnComp = displayName.copy().append(" - " + item.getTag().getString("nobullshipRecipe"));
-        return returnComp.withStyle(Style.EMPTY.withColor(ChatFormatting.BLUE));
+        return returnComp.withStyle(Style.EMPTY.withColor(DARK_AQUA));
     }
 
     @Override

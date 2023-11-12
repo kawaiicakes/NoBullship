@@ -4,5 +4,7 @@
   "itemGroup.nobullship_tab": "No Bullship!",
   "block.nobullship.workshop": "Workshop",
   "sounds.nobullship.construct_success": "[Construction sounds]",
-  "chat.nobullship.fail": "Construction failed!"
+  "chat.nobullship.fail": "Construction failed!",
+  "tooltip.nobullship.blank_schematic": "Schematic is blank.",
+  "tooltip.nobullship.filled_schematic": "Schematic details making %1$s."
 }
