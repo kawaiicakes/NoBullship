@@ -12,6 +12,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.sounds.SoundSource;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.CONSTRUCT_SUCCESS;
+import static net.minecraft.ChatFormatting.RED;
 import static net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE;
 import static net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN;
 
@@ -70,7 +72,8 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         BlockPattern.BlockPatternMatch match = pattern.find(level, pos);
         if (match == null) {
             level.playSound(null, pos, BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
-            Objects.requireNonNull(context.getPlayer()).sendSystemMessage(Component.translatable("chat.nobullship.fail"));
+            Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
+                    .sendSystemMessage(Component.translatable("chat.nobullship.fail").withStyle(RED), true);
             return;
         }
 
