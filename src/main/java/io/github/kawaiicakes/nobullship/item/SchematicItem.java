@@ -25,8 +25,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
-import static net.minecraft.ChatFormatting.DARK_AQUA;
-import static net.minecraft.ChatFormatting.GOLD;
+import static net.minecraft.ChatFormatting.*;
 
 /**
  * Care is taken to ensure that using the schematic does not alter the blockstate of the clicked block.
@@ -36,6 +35,13 @@ import static net.minecraft.ChatFormatting.GOLD;
 public class SchematicItem extends Item {
     public SchematicItem() {
         super(new Properties().tab(NO_BULLSHIP_TAB));
+    }
+
+    @Override
+    public Component getName(ItemStack pStack) {
+        MutableComponent toReturn = Component.translatable(this.getDescriptionId(pStack));
+        return pStack.getTag() != null && !pStack.getTag().getString("nobullshipRecipe").isEmpty()
+                ? toReturn.withStyle(AQUA) : toReturn;
     }
 
     @Override
