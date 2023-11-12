@@ -8,7 +8,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.data.MultiblockRecipe;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -18,12 +18,14 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -32,7 +34,6 @@ import java.util.Map;
 import static io.github.kawaiicakes.nobullship.NoBullship.CONSTRUCT_SUCCESS;
 import static net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE;
 import static net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN;
-import static net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES;
 
 public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
@@ -66,6 +67,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         BlockPattern pattern = cachedRecipe.recipe();
         ResourceLocation resultLocation = cachedRecipe.result();
+        CompoundTag nbt = cachedRecipe.nbt();
 
         BlockPos pos = context.getClickedPos();
 
@@ -91,26 +93,28 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         level.playSound(null, pos, CONSTRUCT_SUCCESS.get(), SoundSource.PLAYERS, 0.77F, 1.0F);
         level.sendParticles(LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 7, 0.2, 0.2, 0.2, 0.3);
 
-        EntityType<?> type = ENTITY_TYPES.getValue(resultLocation);
-        if (type == null) {
-            if (!RegistryObject.create(resultLocation, ENTITY_TYPES).isPresent()) {
-                LOGGER.error("Entity type {} does not exist!", resultLocation);
-                throw new RuntimeException("Entity type " + resultLocation + " does not exist!");
-            }
+        if (nbt == null) nbt = new CompoundTag();
+        nbt.putString("id", cachedRecipe.result().toString());
+        BlockPos blockpos = match.getBlock(1, 2, 0).getPos();
 
-            type = RegistryObject.create(resultLocation, ENTITY_TYPES).get();
-        }
+        Entity entity = EntityType.loadEntityRecursive(nbt, level, (entityType) -> {
+            entityType.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.55D, (double)blockpos.getZ() + 0.5D, entityType.getYRot(), entityType.getXRot());
+            return entityType;
+        });
 
-        Entity entity = type.create(level);
         if (entity == null) {
             LOGGER.error("Unable to spawn entity {}!", resultLocation);
             throw new RuntimeException("Unable to spawn entity " + resultLocation + "!");
-        }
+        } else {
+            if (entity instanceof Mob mob) {
+                if (!ForgeEventFactory.doSpecialSpawn(mob, level, (float)entity.getX(), (float)entity.getY(), (float)entity.getZ(), null, MobSpawnType.MOB_SUMMONED))
+                    mob.finalizeSpawn(level, level.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null, null);
+            }
 
-        BlockPos blockpos = match.getBlock(1, 2, 0).getPos();
-        entity.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.55D, (double)blockpos.getZ() + 0.5D, match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F, 0.0F);
-        entity.setYRot(match.getForwards().getAxis() == Direction.Axis.X ? 0.0F : 90.0F);
-        level.addFreshEntity(entity);
+            if (!level.tryAddFreshEntityWithPassengers(entity)) {
+                throw new IllegalArgumentException("Entity " + entity.getName() + " has a duplicate UUID!");
+            }
+        }
 
         // This doesn't seem to do anything on the server... is this intended for the client?
         for (int i1 = 0; i1 < pattern.getDepth(); ++i1) {

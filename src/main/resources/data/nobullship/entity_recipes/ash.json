@@ -25,5 +25,7 @@
       "ASH"
     ]
   },
-  "result": "minecraft:creeper"
+  "result": {
+    "entity": "minecraft:creeper"
+  }
 }

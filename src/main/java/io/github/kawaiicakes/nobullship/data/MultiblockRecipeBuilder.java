@@ -3,20 +3,21 @@ package io.github.kawaiicakes.nobullship.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import static net.minecraft.world.level.block.Blocks.AIR;
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
@@ -24,15 +25,22 @@ import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     protected final Logger LOGGER = LogUtils.getLogger();
     protected final ResourceLocation result;
+    @Nullable
+    protected CompoundTag nbt = null;
     protected final Map<String, BlockState> lookupSimple = new HashMap<>();
 
-    protected MultiblockRecipeBuilder(ResourceLocation result) {
+    protected MultiblockRecipeBuilder(ResourceLocation result, @Nullable CompoundTag nbt) {
         super();
         this.result = result;
+        this.nbt = nbt;
     }
 
     public static MultiblockRecipeBuilder of(ResourceLocation result) {
-        return (MultiblockRecipeBuilder) (new MultiblockRecipeBuilder(result)).where(' ', (state) -> state.getState().is(AIR)).where('$', (state) -> true);
+        return (MultiblockRecipeBuilder) (new MultiblockRecipeBuilder(result, null)).where(' ', (state) -> state.getState().is(AIR)).where('$', (state) -> true);
+    }
+
+    public static MultiblockRecipeBuilder of(ResourceLocation result, CompoundTag nbt) {
+        return (MultiblockRecipeBuilder) (new MultiblockRecipeBuilder(result, nbt)).where(' ', (state) -> state.getState().is(AIR)).where('$', (state) -> true);
     }
 
     public ResourceLocation getResult() {
@@ -45,7 +53,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     }
 
     public void save(Consumer<FinishedMultiblockRecipe> consumer, ResourceLocation id) {
-        consumer.accept(new Result(id, this.result, this.pattern, this.lookupSimple, this.height, this.width));
+        consumer.accept(new Result(id, this.result, this.nbt, this.pattern, this.lookupSimple, this.height, this.width));
     }
 
     @Override
@@ -69,14 +77,17 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     public static class Result implements FinishedMultiblockRecipe {
         protected final ResourceLocation id;
         protected final ResourceLocation result;
+        @Nullable
+        protected final CompoundTag nbt;
         protected final List<String[]> recipe;
         protected final Map<String, BlockState> lookup;
         protected final int height;
         protected final int width;
 
-        public Result(ResourceLocation id, ResourceLocation result, List<String[]> recipe, Map<String, BlockState> lookup, int height, int width) {
+        public Result(ResourceLocation id, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, Map<String, BlockState> lookup, int height, int width) {
             this.id = id;
             this.result = result;
+            this.nbt = nbt;
             this.recipe = recipe;
             this.lookup = lookup;
             this.height = height;
@@ -111,9 +122,13 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
                 }
             }
 
+            JsonObject jsonResult = new JsonObject();
+            jsonResult.addProperty("entity", this.result.toString());
+            if (this.nbt != null) jsonResult.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, this.nbt));
+
             pJson.add("key", keyMappings);
             pJson.add("recipe", recipePattern);
-            pJson.addProperty("result", this.result.toString());
+            pJson.add("result", jsonResult);
         }
 
         @Override

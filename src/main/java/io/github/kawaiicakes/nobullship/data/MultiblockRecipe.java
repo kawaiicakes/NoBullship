@@ -3,9 +3,9 @@ package io.github.kawaiicakes.nobullship.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.mojang.logging.LogUtils;
 import net.minecraft.FieldsAreNonnullByDefault;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 
+import static net.minecraftforge.common.crafting.CraftingHelper.getNBT;
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
 /**
@@ -27,7 +28,8 @@ import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 @FieldsAreNonnullByDefault
 public record MultiblockRecipe(
         MultiblockPattern recipe,
-        ResourceLocation result
+        ResourceLocation result,
+        @Nullable CompoundTag nbt
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -38,11 +40,31 @@ public record MultiblockRecipe(
     public static MultiblockRecipe fromJson(JsonObject json) {
         JsonObject jsonKeys = json.getAsJsonObject("key");
         JsonObject jsonRecipe = json.getAsJsonObject("recipe");
-        JsonPrimitive jsonResult = json.getAsJsonPrimitive("result");
+        JsonObject jsonResult = json.getAsJsonObject("result");
 
-        if (jsonKeys == null || jsonRecipe == null || jsonResult == null) return null;
+        if (jsonKeys == null || jsonRecipe == null || jsonResult == null) {
+            LOGGER.error("Sussy JSON syntax!");
+            return null;
+        }
 
-        ResourceLocation result = new ResourceLocation(jsonResult.getAsString());
+        ResourceLocation result = new ResourceLocation(jsonResult.getAsJsonPrimitive("entity").getAsString());
+
+
+        CompoundTag nbt = null;
+        if (jsonResult.has("nbt")) {
+            CompoundTag nbtFromJson = getNBT(json.get("nbt"));
+            nbt = new CompoundTag();
+
+            if (nbtFromJson.contains("ForgeCaps")) {
+                //noinspection DataFlowIssue
+                nbt.put("ForgeCaps", nbtFromJson.get("ForgeCaps"));
+                nbtFromJson.remove("ForgeCaps");
+            }
+
+            nbt.put("tag", nbtFromJson);
+            // nbt.putString("id", itemName);
+            // nbt.putInt("Count", GsonHelper.getAsInt(json, "count", 1));
+        }
 
         MultiblockRecipeBuilder builder = MultiblockRecipeBuilder.of(result);
 
@@ -102,6 +124,6 @@ public record MultiblockRecipe(
             }
         }
 
-        return new MultiblockRecipe(builder.build(), result);
+        return new MultiblockRecipe(builder.build(), result, nbt);
     }
 }

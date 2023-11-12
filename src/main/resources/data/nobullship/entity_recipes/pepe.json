@@ -18,5 +18,7 @@
       "####"
     ]
   },
-  "result": "minecraft:boat"
+  "result": {
+    "entity": "minecraft:boat"
+  }
 }
