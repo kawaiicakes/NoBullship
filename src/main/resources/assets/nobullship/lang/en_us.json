@@ -6,5 +6,5 @@
   "sounds.nobullship.construct_success": "[Construction sounds]",
   "chat.nobullship.fail": "Construction failed!",
   "tooltip.nobullship.blank_schematic": "Schematic is blank.",
-  "tooltip.nobullship.filled_schematic": "Schematic details making %1$s."
+  "tooltip.nobullship.filled_schematic": "Contains %1$s."
 }

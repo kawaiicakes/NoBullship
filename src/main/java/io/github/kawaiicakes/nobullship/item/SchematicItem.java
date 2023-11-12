@@ -52,9 +52,11 @@ public class SchematicItem extends Item {
         }
         final String recipeName = pStack.getTag().getString("nobullshipRecipe");
         if (recipeName.isEmpty()) {
+            pTooltipComponents.add((Component) Component.EMPTY);
             pTooltipComponents.add(Component.translatable("tooltip.nobullship.blank_schematic").withStyle(Style.EMPTY.withColor(GOLD)));
         }
 
+        pTooltipComponents.add((Component) Component.EMPTY);
         pTooltipComponents.add(Component.translatable("tooltip.nobullship.filled_schematic", recipeName).withStyle(Style.EMPTY.withColor(GOLD)));
     }
 
