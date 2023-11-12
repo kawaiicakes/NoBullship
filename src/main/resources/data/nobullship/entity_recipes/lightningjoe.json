@@ -10,7 +10,7 @@
     ]
   },
   "result": {
-    "entity": "minecraft:lightning",
+    "entity": "minecraft:lightning_bolt",
     "nbt": {
       "CustomName": "Lightning Joe",
       "CustomNameVisible": true
