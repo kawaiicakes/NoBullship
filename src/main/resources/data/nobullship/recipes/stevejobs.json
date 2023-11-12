@@ -1,0 +1,16 @@
+{
+  "type": "nobullship:schematic_workbench",
+  "declaration": {
+    "output_id": "nobullship:lightningjoe",
+    "key": {
+      "#": {
+        "item": "granite"
+      }
+    },
+    "shaped_input": [
+      "#"
+    ]
+  },
+  "shapeless_input": [
+  ]
+}

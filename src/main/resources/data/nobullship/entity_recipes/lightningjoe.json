@@ -1,0 +1,19 @@
+{
+  "key": {
+    "#": {
+      "block": "minecraft:diamond_block"
+    }
+  },
+  "recipe": {
+    "layer0": [
+      "#"
+    ]
+  },
+  "result": {
+    "entity": "minecraft:lightning",
+    "nbt": {
+      "CustomName": "Lightning Joe",
+      "CustomNameVisible": true
+    }
+  }
+}
