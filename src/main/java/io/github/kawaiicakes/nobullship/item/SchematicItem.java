@@ -94,7 +94,7 @@ public class SchematicItem extends Item {
             CompoundTag compoundRequisite = (CompoundTag) requisite;
             ItemStack required = ItemStack.of(compoundRequisite);
 
-            event.getToolTip().add(insertionIndex, fromStack(required));
+            event.getToolTip().add(insertionIndex, fromStack(required).withStyle(Style.EMPTY.withColor(RED)));
             insertionIndex++;
         }
     }
