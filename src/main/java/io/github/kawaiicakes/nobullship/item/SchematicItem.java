@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.item;
 
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
+import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -79,7 +80,7 @@ public class SchematicItem extends Item {
         if (item.getTag().getString("nobullshipRecipe").isEmpty()) return displayName;
 
         MutableComponent returnComp = displayName.copy().append(" - " + item.getTag().getString("nobullshipRecipe"));
-        return returnComp.withStyle(Style.EMPTY.withColor(DARK_AQUA));
+        return returnComp.withStyle(Style.EMPTY.withColor(GOLD));
     }
 
     @Override
