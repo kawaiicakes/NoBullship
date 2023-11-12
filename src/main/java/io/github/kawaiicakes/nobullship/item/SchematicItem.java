@@ -46,7 +46,10 @@ public class SchematicItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
-        if (pStack.getTag() == null) super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
+        if (pStack.getTag() == null) {
+            super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
+            return;
+        }
         final String recipeName = pStack.getTag().getString("nobullshipRecipe");
         if (recipeName.isEmpty()) {
             pTooltipComponents.add(Component.translatable("tooltip.nobullship.blank_schematic").withStyle(Style.EMPTY.withColor(GOLD)));
