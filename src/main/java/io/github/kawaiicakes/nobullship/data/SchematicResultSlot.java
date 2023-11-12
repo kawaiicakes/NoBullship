@@ -15,6 +15,7 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;
+import java.util.Comparator;
 import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
@@ -130,8 +131,23 @@ public class SchematicResultSlot extends Slot {
 
             ItemStack itemstack1 = remainingItems.get(j);
 
+            int decrement = 1;
+            if (optional.isPresent()) {
+                final ItemStack finalStack = itemstack;
+
+                // by this point in the code, there MUST be at least one element of the same item in the shapeless
+                // recipe whose count is less than the count of finalStack; so #orElseThrow is okay
+                decrement = optional.get().getShapelessIngredients()
+                        .stream()
+                        .filter(standard -> standard.is(finalStack.getItem()))
+                        .map(ItemStack::getCount)
+                        .filter(standard -> standard <= finalStack.getCount())
+                        .max(Comparator.naturalOrder())
+                        .orElseThrow();
+            }
+
             if (!itemstack.isEmpty()) {
-                this.itemHandler.extractItem(i, 1, false);
+                this.itemHandler.extractItem(i, decrement, false);
                 itemstack = this.itemHandler.getStackInSlot(i);
             }
 

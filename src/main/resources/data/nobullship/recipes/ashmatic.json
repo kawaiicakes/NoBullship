@@ -12,6 +12,21 @@
     ]
   },
   "shapeless_input": [
-
+    {
+      "item": "dirt",
+      "count": 64
+    },
+    {
+      "item": "dirt",
+      "count": 64
+    },
+    {
+      "item": "dirt",
+      "count": 64
+    },
+    {
+      "item": "diamond",
+      "count": 10
+    }
   ]
 }

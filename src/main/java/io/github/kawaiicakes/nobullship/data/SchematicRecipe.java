@@ -16,7 +16,6 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
-import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
 
 public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     private final ResourceLocation recipeId;
@@ -81,18 +80,23 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     @Override
     public boolean matches(MultiblockWorkshopBlockEntity workshop, Level pLevel) {
         if (!this.shapedMatches(workshop)) return false;
-
-        if (!this.shapeless.isEmpty()) {
-            for (int i = 9; i < 18; i++) {
-                final int finalI = i;
-                if (this.shapeless.stream()
-                        .noneMatch(standard -> standard.is(workshop.getItem(finalI).getItem())
-                                        && workshop.getItem(finalI).getCount() >= standard.getCount())
-                ) return false;
-            }
-        }
+        if (!this.shapelessMatches(workshop)) return false;
 
         return workshop.getItem(EMPTY_SCHEM_SLOT).is(SCHEMATIC.get());
+    }
+
+    public boolean shapelessMatches(MultiblockWorkshopBlockEntity workshop) {
+        if (this.shapeless.isEmpty()) return true;
+
+        for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
+            final int finalI = i;
+            if (this.shapeless.stream()
+                    .noneMatch(standard -> standard.is(workshop.getItem(finalI).getItem())
+                            && workshop.getItem(finalI).getCount() >= standard.getCount())
+            ) return false;
+        }
+
+        return true;
     }
 
     /**

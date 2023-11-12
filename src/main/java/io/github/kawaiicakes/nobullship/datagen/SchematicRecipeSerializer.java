@@ -203,7 +203,7 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
     }
 
     public static NonNullList<ItemStack> itemsFromJson(JsonArray jsonArray) {
-        NonNullList<ItemStack> nonnulllist = NonNullList.create();
+        NonNullList<ItemStack> nonnulllist = NonNullList.createWithCapacity(jsonArray.size());
 
         // TODO: Shapeless can take Ingredients with a count greater than 1? One can dream...
         // Perhaps a Map containing the Ingredient and a short for the count?
