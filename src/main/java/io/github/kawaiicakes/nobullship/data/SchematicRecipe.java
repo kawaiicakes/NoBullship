@@ -89,12 +89,14 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public boolean shapelessMatches(MultiblockWorkshopBlockEntity workshop) {
         if (this.shapeless.isEmpty()) return true;
 
-        for (int i : SHAPELESS_SLOTS) {
-            final int finalI = i;
-            if (this.shapeless.stream()
-                    .noneMatch(standard -> standard.is(workshop.getItem(finalI).getItem())
-                            && workshop.getItem(finalI).getCount() >= standard.getCount())
-            ) return false;
+        NonNullList<ItemStack> contents = NonNullList.createWithCapacity(SHAPELESS_SLOTS.size());
+        for (int i: SHAPELESS_SLOTS) {
+            contents.add(workshop.getItem(i));
+        }
+        final ImmutableList<ItemStack> workshopContents = ImmutableList.copyOf(contents);
+
+        for (ItemStack standard : this.shapeless) {
+            if (workshopContents.stream().noneMatch(stack -> standard.is(stack.getItem()) && stack.getCount() >= standard.getCount())) return false;
         }
 
         return true;
