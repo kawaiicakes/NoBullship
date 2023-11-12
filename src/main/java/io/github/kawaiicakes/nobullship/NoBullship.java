@@ -80,6 +80,7 @@ public class NoBullship
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(SchematicItem.class);
 
         modEventBus.addListener(this::gatherData);
 
