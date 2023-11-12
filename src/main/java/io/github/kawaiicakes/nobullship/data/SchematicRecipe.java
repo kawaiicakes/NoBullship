@@ -16,6 +16,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
+import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
 
 public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     private final ResourceLocation recipeId;
@@ -88,7 +89,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public boolean shapelessMatches(MultiblockWorkshopBlockEntity workshop) {
         if (this.shapeless.isEmpty()) return true;
 
-        for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
+        for (int i : SHAPELESS_SLOTS) {
             final int finalI = i;
             if (this.shapeless.stream()
                     .noneMatch(standard -> standard.is(workshop.getItem(finalI).getItem())
@@ -221,7 +222,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public NonNullList<ItemStack> getRemainingItems(MultiblockWorkshopBlockEntity pContainer) {
         NonNullList<ItemStack> contents = NonNullList.withSize(pContainer.getContainerSize(), ItemStack.EMPTY);
 
-        for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
+        for (int i : ArrayUtils.add(SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
             ItemStack item = pContainer.getItem(i);
             if (!this.shapeless.contains(item)) continue;
 

@@ -125,14 +125,14 @@ public class SchematicResultSlot extends Slot {
 
             ItemStack itemstack = this.itemHandler.getStackInSlot(i);
             final ItemStack finalItemstack = itemstack;
-            if (SHAPELESS_SLOTS.contains(i)
+            if (i != EMPTY_SCHEM_SLOT && SHAPELESS_SLOTS.contains(i)
                     && optional.isPresent()
                     && optional.get().getShapelessIngredients().stream().noneMatch(stack -> stack.is(finalItemstack.getItem()))) continue;
 
             ItemStack itemstack1 = remainingItems.get(j);
 
             int decrement = 1;
-            if (optional.isPresent()) {
+            if (i != EMPTY_SCHEM_SLOT && optional.isPresent()) {
                 final ItemStack finalStack = itemstack;
 
                 // by this point in the code, there MUST be at least one element of the same item in the shapeless
