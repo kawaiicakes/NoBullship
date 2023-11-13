@@ -14,11 +14,14 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
+import static net.minecraft.world.item.Items.AIR;
 
 public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     private final ResourceLocation recipeId;
@@ -91,35 +94,16 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public boolean shapelessMatches(MultiblockWorkshopBlockEntity workshop) {
         if (this.shapeless.isEmpty()) return true;
 
-        NonNullList<ItemStack> workshopContents = NonNullList.createWithCapacity(SHAPELESS_SLOTS.size());
+        NonNullList<ItemStack> unsortedContents = NonNullList.createWithCapacity(0);
         for (int i: SHAPELESS_SLOTS) {
-            workshopContents.add(workshop.getItem(i));
+            if (workshop.getItem(i).is(AIR)) continue;
+            unsortedContents.add(workshop.getItem(i));
         }
 
-        if (workshopContents.size() < this.shapeless.size()) return false;
+        List<ItemStack> summedContents = getSummedContents(unsortedContents);
+        List<ItemStack> requirementContents = getSummedContents(this.shapeless);
 
-        NonNullList<ItemStack> requirements = NonNullList.createWithCapacity(this.shapeless.size());
-        requirements.addAll(this.shapeless);
-
-        for (ItemStack workshopStack : workshopContents) {
-            int largestMatchingCount = requirements
-                    .stream()
-                    .filter(standard -> standard.is(workshopStack.getItem()))
-                    .map(ItemStack::getCount)
-                    .filter(standard -> standard <= workshopStack.getCount())
-                    .max(Comparator.naturalOrder())
-                    .orElse(-1);
-
-            if (largestMatchingCount < 0) continue;
-
-            for (ItemStack requirement : requirements) {
-                if (!requirement.is(workshopStack.getItem()) || requirement.getCount() != largestMatchingCount) continue;
-                requirements.remove(requirement);
-                break;
-            }
-        }
-
-        return requirements.isEmpty();
+        return compareSummedContents(requirementContents, summedContents);
     }
 
     /**
@@ -254,6 +238,55 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         }
 
         return contents;
+    }
+
+    /**
+     * Utility method for returning the summed contents of the <code>ItemStack</code>s in the passed
+     * <code>List</code>. Useful for shapeless crafting checks. Does not modify stacks in the passed
+     * <code>List</code>.
+     */
+    public static List<ItemStack> getSummedContents(List<ItemStack> rawContents) {
+        List<ItemStack> toReturn = new ArrayList<>(rawContents.size());
+
+        for (ItemStack content : rawContents) {
+            if (content.isEmpty()) continue;
+
+            int newCount = rawContents.stream()
+                    .filter(standard -> ItemStack.isSameItemSameTags(standard, content))
+                    .mapToInt(ItemStack::getCount)
+                    .sum();
+
+            ItemStack newStack = content.copy();
+            newStack.setCount(newCount);
+            toReturn.add(newStack);
+
+            rawContents.replaceAll((param) -> {
+                if (ItemStack.isSameItemSameTags(content, param)) return ItemStack.EMPTY;
+                return param;
+            });
+        }
+
+        return toReturn;
+    }
+
+    /**
+     * Utility comparison method. The contents in requirements are compared against those in container. If none of the
+     * contents match the given type of <code>ItemStack</code>, or if the count is less than the requirement, returns
+     * false.
+     * @param requirements A <code>List</code> representing the summed contents of a container whose contents correspond
+     *                     to the required items and number of items being compared against.
+     * @param container     A <code>List</code> representing the summed contents of a container whose contents
+     *                      are to be scrutinized.
+     * @return true if the container has all items in requirements equal to or greater than the associated count.
+     */
+    public static boolean compareSummedContents(List<ItemStack> requirements, List<ItemStack> container) {
+        for (ItemStack requirement: requirements) {
+            if (container.stream().noneMatch(content
+                    -> ItemStack.isSameItemSameTags(content, requirement)
+                    && content.getCount() >= requirement.getCount())
+            ) return false;
+        }
+        return true;
     }
 
     public static class Type implements RecipeType<SchematicRecipe> {

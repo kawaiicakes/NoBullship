@@ -15,11 +15,12 @@ import net.minecraftforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nullable;
-import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
+import static io.github.kawaiicakes.nobullship.data.SchematicRecipe.getSummedContents;
 import static net.minecraft.sounds.SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT;
 import static net.minecraft.sounds.SoundSource.PLAYERS;
 
@@ -121,49 +122,33 @@ public class SchematicResultSlot extends Slot {
         if (recipe == null) throw new IllegalStateException("Attempted to take a crafted schematic when no recipe exists!");
 
         ForgeHooks.setCraftingPlayer(pPlayer);
-        NonNullList<ItemStack> remainingItems = getRemainingItemsForRecipe(optional.orElse(null), this.blockEntity, (IItemHandlerModifiable) this.itemHandler);
+        List<ItemStack> remainingItems
+                = getRemainingItemsForRecipe(recipe, this.blockEntity, (IItemHandlerModifiable) this.itemHandler);
         ForgeHooks.setCraftingPlayer(null);
 
-        NonNullList<ItemStack> shapelessRequirements = NonNullList.createWithCapacity(recipe.getShapelessIngredients().size());
-        shapelessRequirements.addAll(recipe.getShapelessIngredients());
+        List<ItemStack> requiredItemMap
+                = getSummedContents(recipe.getShapelessIngredients());
 
         for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
-            int j = i - 9;
-
             ItemStack itemstack = this.itemHandler.getStackInSlot(i);
-            final ItemStack finalItemstack = itemstack;
-            if (SHAPELESS_SLOTS.contains(i)
-                    && shapelessRequirements.stream().noneMatch(stack -> stack.is(finalItemstack.getItem()))) continue;
+            ItemStack itemstack1 = remainingItems.get(i - 9);
 
-            ItemStack itemstack1 = remainingItems.get(j);
+            final ItemStack finalItemstack = itemstack;
+            ItemStack requiredItemRemaining = requiredItemMap.stream()
+                    .filter(standard -> ItemStack.isSameItemSameTags(standard, finalItemstack))
+                    .findFirst()
+                    .orElse(null);
+
+            if (SHAPELESS_SLOTS.contains(i) && requiredItemRemaining == null) continue;
 
             int decrement = 1;
-            if (i != EMPTY_SCHEM_SLOT) {
-                // by this point in the code, there MUST be at least one element of the same item in the shapeless
-                // recipe whose count is less than the count of finalStack; so #orElseThrow is okay
-                decrement = shapelessRequirements
-                        .stream()
-                        .filter(standard -> standard.is(finalItemstack.getItem()))
-                        .map(ItemStack::getCount)
-                        .filter(standard -> standard <= finalItemstack.getCount())
-                        .max(Comparator.naturalOrder())
-                        .orElseThrow();
-
-                byte indexOfRequirement = 0;
-                for (byte index = 0; index < shapelessRequirements.size(); index++) {
-                    ItemStack requirement = shapelessRequirements.get(index);
-
-                    if (!requirement.is(finalItemstack.getItem()) || requirement.getCount() != decrement) continue;
-                    indexOfRequirement = index;
-                    break;
-                }
-
-                shapelessRequirements.remove(indexOfRequirement);
-            }
+            if (requiredItemRemaining != null) decrement
+                    = Math.min(itemstack.getMaxStackSize(), requiredItemRemaining.getCount());
 
             if (!itemstack.isEmpty()) {
                 this.itemHandler.extractItem(i, decrement, false);
                 itemstack = this.itemHandler.getStackInSlot(i);
+                itemstack1.shrink(decrement);
             }
 
             if (itemstack1.isEmpty()) continue;
