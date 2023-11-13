@@ -16,7 +16,6 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
@@ -101,7 +100,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         }
 
         List<ItemStack> summedContents = getSummedContents(unsortedContents);
-        List<ItemStack> requirementContents = getSummedContents(this.shapeless);
+        List<ItemStack> requirementContents = getSummedContents(this.getShapelessIngredients());
 
         return compareSummedContents(requirementContents, summedContents);
     }
@@ -245,13 +244,18 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
      * <code>List</code>. Useful for shapeless crafting checks. Does not modify stacks in the passed
      * <code>List</code>.
      */
-    public static List<ItemStack> getSummedContents(List<ItemStack> rawContents) {
-        List<ItemStack> toReturn = new ArrayList<>(rawContents.size());
+    public static List<ItemStack> getSummedContents(List<ItemStack> rawItems) {
+        NonNullList<ItemStack> copiedItems = NonNullList.createWithCapacity(rawItems.size());
+        for (ItemStack item : rawItems) {
+            copiedItems.add(item.copy());
+        }
 
-        for (ItemStack content : rawContents) {
+        List<ItemStack> toReturn = new ArrayList<>(rawItems.size());
+
+        for (ItemStack content : copiedItems) {
             if (content.isEmpty()) continue;
 
-            int newCount = rawContents.stream()
+            int newCount = copiedItems.stream()
                     .filter(standard -> ItemStack.isSameItemSameTags(standard, content))
                     .mapToInt(ItemStack::getCount)
                     .sum();
@@ -260,7 +264,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
             newStack.setCount(newCount);
             toReturn.add(newStack);
 
-            rawContents.replaceAll((param) -> {
+            copiedItems.replaceAll((param) -> {
                 if (ItemStack.isSameItemSameTags(content, param)) return ItemStack.EMPTY;
                 return param;
             });
