@@ -75,7 +75,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
 
             slot.onQuickCraft(stackInSlot, toReturn);
         } else if (pIndex >= 0 && pIndex <= 35) {
-            if (stackInSlot.is(SCHEMATIC.get())) {
+            if (ItemStack.isSameItemSameTags(stackInSlot, SCHEMATIC.get().getDefaultInstance())) {
                 if (!this.moveItemStackTo(stackInSlot, this.filledSchemSlotID - 1, this.filledSchemSlotID, false))
                     return ItemStack.EMPTY;
             }
