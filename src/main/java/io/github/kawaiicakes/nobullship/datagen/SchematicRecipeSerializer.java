@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.datagen;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.*;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
@@ -41,9 +42,9 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
         String[] shaped = shrink(patternFromJsonArray(GsonHelper.getAsJsonArray(declarason, "shaped_input")));
         byte recipeWidth = (byte) shaped[0].length();
         byte recipeHeight = (byte) shaped.length;
-        NonNullList<Ingredient> shapedInput = dissolvePattern(shaped, charToIngredientMap, recipeWidth, recipeHeight);
+        ImmutableList<Ingredient> shapedInput = ImmutableList.copyOf(dissolvePattern(shaped, charToIngredientMap, recipeWidth, recipeHeight));
 
-        NonNullList<ItemStack> shapelessInput = itemsFromJson(GsonHelper.getAsJsonArray(pSerializedRecipe, "shapeless_input"));
+        ImmutableList<ItemStack> shapelessInput = ImmutableList.copyOf(itemsFromJson(GsonHelper.getAsJsonArray(pSerializedRecipe, "shapeless_input")));
         if (shapelessInput.size() > 9) throw new JsonParseException("Too many ingredients for shapeless recipe. The maximum is 9");
 
         return new SchematicRecipe(pRecipeId, resultId, shapedInput, shapelessInput, recipeWidth, recipeHeight);
@@ -62,7 +63,7 @@ public class SchematicRecipeSerializer implements RecipeSerializer<SchematicReci
         NonNullList<ItemStack> shapelessList = NonNullList.withSize(9, ItemStack.EMPTY);
         shapelessList.replaceAll(_ignored -> pBuffer.readItem());
 
-        return new SchematicRecipe(pRecipeId, new ResourceLocation(resultId), shapedList, shapelessList, width, height);
+        return new SchematicRecipe(pRecipeId, new ResourceLocation(resultId), ImmutableList.copyOf(shapedList), ImmutableList.copyOf(shapelessList), width, height);
     }
 
     @Override

@@ -25,12 +25,12 @@ import static net.minecraft.world.item.Items.AIR;
 public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     private final ResourceLocation recipeId;
     private final ResourceLocation resultId;
-    private final NonNullList<Ingredient> shaped;
-    private final NonNullList<ItemStack> shapeless;
+    private final ImmutableList<Ingredient> shaped;
+    private final ImmutableList<ItemStack> shapeless;
     public final byte actualShapedWidth;
     public final byte actualShapedHeight;
 
-    public SchematicRecipe(ResourceLocation recipeId, ResourceLocation resultId, NonNullList<Ingredient> shaped, NonNullList<ItemStack> shapeless, byte actualShapedWidth, byte actualShapedHeight) {
+    public SchematicRecipe(ResourceLocation recipeId, ResourceLocation resultId, ImmutableList<Ingredient> shaped, ImmutableList<ItemStack> shapeless, byte actualShapedWidth, byte actualShapedHeight) {
         this.recipeId = recipeId;
         this.resultId = resultId;
         this.shaped = shaped;
