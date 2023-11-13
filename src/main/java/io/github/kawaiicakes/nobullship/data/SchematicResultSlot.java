@@ -130,10 +130,10 @@ public class SchematicResultSlot extends Slot {
                 = getSummedContents(recipe.getShapelessIngredients());
 
         for (int i : ArrayUtils.add(MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS.toIntArray(), EMPTY_SCHEM_SLOT)) {
-            ItemStack itemstack = this.itemHandler.getStackInSlot(i);
-            ItemStack itemstack1 = remainingItems.get(i - 9);
+            ItemStack stackInSlot = this.itemHandler.getStackInSlot(i);
+            ItemStack craftingRemaining = remainingItems.get(i - 9);
 
-            final ItemStack finalItemstack = itemstack;
+            final ItemStack finalItemstack = stackInSlot;
             ItemStack requiredItemRemaining = requiredItemMap.stream()
                     .filter(standard -> ItemStack.isSameItemSameTags(standard, finalItemstack))
                     .findFirst()
@@ -143,23 +143,24 @@ public class SchematicResultSlot extends Slot {
 
             int decrement = 1;
             if (requiredItemRemaining != null) decrement
-                    = Math.min(itemstack.getMaxStackSize(), requiredItemRemaining.getCount());
+                    = Math.min(stackInSlot.getCount(), requiredItemRemaining.getCount());
 
-            if (!itemstack.isEmpty()) {
+            if (!stackInSlot.isEmpty()) {
                 this.itemHandler.extractItem(i, decrement, false);
-                itemstack = this.itemHandler.getStackInSlot(i);
-                itemstack1.shrink(decrement);
+                stackInSlot = this.itemHandler.getStackInSlot(i);
+
+                if (requiredItemRemaining != null) requiredItemRemaining.shrink(decrement);
             }
 
-            if (itemstack1.isEmpty()) continue;
+            if (craftingRemaining.isEmpty()) continue;
 
-            if (itemstack.isEmpty()) {
-                ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(i, itemstack1);
-            } else if (ItemStack.isSame(itemstack, itemstack1) && ItemStack.tagMatches(itemstack, itemstack1)) {
-                itemstack1.grow(itemstack.getCount());
-                ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(i, itemstack1);
-            } else if (!this.player.getInventory().add(itemstack1)) {
-                this.player.drop(itemstack1, false);
+            if (stackInSlot.isEmpty()) {
+                ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(i, craftingRemaining);
+            } else if (ItemStack.isSame(stackInSlot, craftingRemaining) && ItemStack.tagMatches(stackInSlot, craftingRemaining)) {
+                craftingRemaining.grow(stackInSlot.getCount());
+                ((IItemHandlerModifiable) this.itemHandler).setStackInSlot(i, craftingRemaining);
+            } else if (!this.player.getInventory().add(craftingRemaining)) {
+                this.player.drop(craftingRemaining, false);
             }
         }
 
