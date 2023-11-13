@@ -77,7 +77,8 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         } else if (pIndex >= 0 && pIndex <= 35) {
             if (ItemStack.isSameItemSameTags(stackInSlot, SCHEMATIC.get().getDefaultInstance())) {
                 if (!this.moveItemStackTo(stackInSlot, this.filledSchemSlotID - 1, this.filledSchemSlotID, false))
-                    return ItemStack.EMPTY;
+                    if (!this.moveItemStackTo(stackInSlot, 45, this.filledSchemSlotID, false))
+                        return ItemStack.EMPTY;
             }
 
             if (!this.moveItemStackTo(stackInSlot, 45, this.filledSchemSlotID, false)) {
