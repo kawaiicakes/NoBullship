@@ -281,10 +281,19 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
      */
     public static boolean compareSummedContents(List<ItemStack> requirements, List<ItemStack> container) {
         for (ItemStack requirement: requirements) {
-            if (container.stream().noneMatch(content
-                    -> ItemStack.isSameItemSameTags(content, requirement)
-                    && content.getCount() >= requirement.getCount())
-            ) return false;
+            ItemStack scrutinizedStack = container
+                    .stream()
+                    .filter(contentStandard -> ItemStack.isSameItemSameTags(contentStandard, requirement))
+                    .findAny()
+                    .orElse(null);
+            if (scrutinizedStack == null) return false;
+
+            int contentCount = container.stream()
+                    .filter(standard -> ItemStack.isSameItemSameTags(standard, requirement))
+                    .mapToInt(ItemStack::getCount)
+                    .sum();
+
+            if (contentCount < requirement.getCount()) return false;
         }
         return true;
     }
