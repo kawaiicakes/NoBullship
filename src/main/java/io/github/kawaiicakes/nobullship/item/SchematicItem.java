@@ -1,13 +1,12 @@
 package io.github.kawaiicakes.nobullship.item;
 
 import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
+import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -29,11 +28,11 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
+import static io.github.kawaiicakes.nobullship.data.SchematicRecipe.getSummedContents;
 import static net.minecraft.ChatFormatting.*;
 import static net.minecraft.nbt.Tag.TAG_COMPOUND;
 import static net.minecraft.nbt.Tag.TAG_LIST;
@@ -96,36 +95,24 @@ public class SchematicItem extends Item {
         insertionIndex++;
 
         //noinspection DataFlowIssue
-        ListTag list = event.getItemStack().getTag().getList("nobullshipRequisites", TAG_COMPOUND);
+        ListTag list = event.getItemStack().getTag().getList("nobullshipRequisites", TAG_COMPOUND).copy();
         List<Component> toAdd = new ArrayList<>(list.size());
-        NonNullList<ItemStack> requirements = NonNullList.createWithCapacity(list.size());
-        for (Tag requisite : list) {
-            CompoundTag compoundRequisite = (CompoundTag) requisite;
-            ItemStack required = ItemStack.of(compoundRequisite);
-            requirements.add(required);
 
-            toAdd.add(fromStack(required).withStyle(Style.EMPTY.withColor(RED)));
-        }
+        List<ItemStack> nonSumRequirements = list.stream()
+                .map(tag -> (CompoundTag) tag)
+                .map(ItemStack::of)
+                .toList();
 
-        for (ItemStack contents : player.getInventory().items) {
-            int largestMatchingCount = requirements
-                    .stream()
-                    .filter(standard -> standard.is(contents.getItem()))
-                    .map(ItemStack::getCount)
-                    .filter(standard -> standard <= contents.getCount())
-                    .max(Comparator.naturalOrder())
-                    .orElse(-1);
+        List<ItemStack> requirements = getSummedContents(nonSumRequirements);
+        List<ItemStack> playerContents = getSummedContents(player.getInventory().items);
 
-            if (largestMatchingCount < 0) continue;
+        for (ItemStack requirement : requirements) {
+            ChatFormatting colour = GREEN;
+            if (playerContents.stream().noneMatch(content ->
+                ItemStack.isSameItemSameTags(content, requirement) && content.getCount() >= requirement.getCount()
+            )) colour = RED;
 
-            for (ItemStack requiredStack : requirements) {
-                if (!requiredStack.is(contents.getItem()) || requiredStack.getCount() != largestMatchingCount) continue;
-                requirements.remove(requiredStack);
-                int replaceAtIndex = toAdd.indexOf(fromStack(requiredStack).withStyle(Style.EMPTY.withColor(RED)));
-
-                toAdd.set(replaceAtIndex, fromStack(requiredStack).withStyle(Style.EMPTY.withColor(GREEN)));
-                break;
-            }
+            toAdd.add(fromStack(requirement).withStyle(Style.EMPTY.withColor(colour)));
         }
 
         event.getToolTip().addAll(insertionIndex, toAdd);
