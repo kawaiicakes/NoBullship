@@ -47,14 +47,14 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         blit(pPoseStack, x, y, 0, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
         blit(pPoseStack, (this.width - 16) / 2, y + 35, 1, 202, 0, 16, 16, 256, 256);
 
-        blit(pPoseStack, x - 54, y - 4, 202, 16, 54, 106);
+        blit(pPoseStack, x - 52, y - 4, -2, 202, 16, 54, 106, 256, 256);
 
         blit(pPoseStack, x + 202, y + 110, 0, 206, 49, 50);
         blit(pPoseStack, x + 202, y + 60, 49, 206, 49, 50);
         blit(pPoseStack, x + 234, y + 54, 98, 206, 49, 6);
 
         pPoseStack.pushPose();
-        pPoseStack.translate(x + 4, y + 209, -3);
+        pPoseStack.translate(x, y + 209, -3);
         pPoseStack.mulPose(ROTATE_180);
         blit(pPoseStack, 0, 0, 202, 122, 54, 106);
         pPoseStack.popPose();
