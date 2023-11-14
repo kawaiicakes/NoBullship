@@ -11,13 +11,17 @@ import net.minecraft.world.entity.player.Inventory;
 import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 
 public class MultiblockWorkshopScreen extends AbstractContainerScreen<MultiblockWorkshopMenu> {
-    // TODO: contingencies for screen widths under 379 px
     public static final ResourceLocation TEXTURE = new ResourceLocation(MOD_ID, "textures/gui/workbench_gui.png");
 
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
-        this.imageWidth = 352;
-        this.imageHeight = 219;
+        this.imageWidth = 202;
+        this.imageHeight = 206;
+
+        this.titleLabelX += 12;
+        this.inventoryLabelX += 16;
+        // this.titleLabelY -= 4;
+        this.inventoryLabelY += 36;
     }
 
     @Override
@@ -32,13 +36,13 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, TEXTURE);
-        int x = (width - imageWidth) / 2;
-        int y = (height - imageHeight) / 2;
+        int x = (this.width - this.imageWidth) / 2;
+        int y = (this.height - this.imageHeight) / 2;
 
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
-        blit(pPoseStack, x, y, 0, 0, 0, imageWidth, imageHeight, 512, 512);
-        blit(pPoseStack, ((width - 16) / 2) + 1, y+48, 1, 352, 0, 16, 16, 512, 512);
+        blit(pPoseStack, x, y, 0, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
+        blit(pPoseStack, (this.width - 16) / 2, y+35, 1, 202, 0, 16, 16, 256, 256);
         RenderSystem.disableBlend();
         RenderSystem.disableDepthTest();
     }

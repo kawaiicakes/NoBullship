@@ -45,16 +45,16 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         this.entity.getCapability(ForgeCapabilities.ITEM_HANDLER).ifPresent(handler -> {
             for(int i = 0; i < 3; ++i) {
                 for(int j = 0; j < 3; ++j) {
-                    this.addSlot(new SlotItemHandler(handler, j + i * 3, 97 + j * 18, 30 + i * 18));
+                    this.addSlot(new SlotItemHandler(handler, j + i * 3, 21 + j * 18, 17 + i * 18));
                 }
             }
 
             for (int i = 0; i < 9; ++i) {
-                this.addSlot(new SlotItemHandler(handler, i + 9, 97 + i * 18, 102));
+                this.addSlot(new SlotItemHandler(handler, i + 9, 21 + i * 18, 89));
             }
 
-            this.addSlot(new SlotItemHandler(handler, EMPTY_SCHEM_SLOT, 169, 48));
-            this.filledSchemSlotID = this.addSlot(new SchematicResultSlot(this.entity, handler, this.player, FILLED_SCHEM_SLOT, 169, 26)).index;
+            this.addSlot(new SlotItemHandler(handler, EMPTY_SCHEM_SLOT, 93, 35));
+            this.filledSchemSlotID = this.addSlot(new SchematicResultSlot(this.entity, handler, this.player, FILLED_SCHEM_SLOT, 93, 13)).index;
         });
 
         this.addSlotListener(this);
@@ -127,14 +127,14 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
     protected void addPlayerInventory(Inventory playerInventory) {
         for (int i = 0; i < 3; ++i) {
             for (int l = 0; l < 9; ++l) {
-                this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 97 + l * 18, (i * 18) + 137));
+                this.addSlot(new Slot(playerInventory, l + i * 9 + 9, 21 + l * 18, (i * 18) + 124));
             }
         }
     }
 
     protected void addPlayerHotbar(Inventory playerInventory) {
         for (int i = 0; i < 9; ++i) {
-            this.addSlot(new Slot(playerInventory, i, 97 + i * 18, 195));
+            this.addSlot(new Slot(playerInventory, i, 21 + i * 18, 182));
         }
     }
 
