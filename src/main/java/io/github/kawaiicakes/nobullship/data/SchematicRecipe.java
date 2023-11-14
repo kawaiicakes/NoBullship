@@ -106,8 +106,8 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     }
 
     /**
-     * ONLY CALL THIS FROM THE SERVERSIDE. This method is used to determine if an entity should be rendered to the
-     * workbench if a matching declaration exists; regardless of whether it can actually be crafted at present.
+     * This method is used to determine if an entity should be rendered to the workbench if a matching
+     * declaration exists; regardless of whether it can actually be crafted at present.
      */
     public boolean shapedMatches(MultiblockWorkshopBlockEntity workshop) {
         for (byte i = 0; i <= 3 - this.actualShapedWidth; i++) {
