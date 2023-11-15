@@ -70,6 +70,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         if (recipe == null) return null;
 
         CompoundTag nbt = recipe.nbt() == null ? new CompoundTag() : recipe.nbt();
+        //noinspection DataFlowIssue
         nbt.putString("id", recipe.result().toString());
 
         return EntityType.loadEntityRecursive(nbt, level, (type) -> type);

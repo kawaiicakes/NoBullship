@@ -39,11 +39,31 @@ public record MultiblockRecipe(
         @Nullable ImmutableList<ItemStack> requisites
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();
+    @Override
+    public MultiblockPattern recipe() {
+        return new MultiblockPattern(this.recipe.getPattern());
+    }
+
+    @Override
+    public ResourceLocation result() {
+        return new ResourceLocation(this.result.toString());
+    }
+
+    @Nullable
+    @Override
+    public CompoundTag nbt() {
+        return this.nbt != null ? this.nbt.copy() : null;
+    }
+
+    /**
+     * This shit is made like this to ensure I return a shallow copy; it kept returning mutable values
+     */
     @Nullable
     @Override
     public ImmutableList<ItemStack> requisites() {
         if (this.requisites == null) return null;
-        return ImmutableList.copyOf(this.requisites);
+        ArrayList<ItemStack> temp = new ArrayList<>(this.requisites);
+        return ImmutableList.copyOf(temp);
     }
 
     /**
