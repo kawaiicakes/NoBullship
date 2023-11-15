@@ -3,6 +3,7 @@ package io.github.kawaiicakes.nobullship.screen;
 import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
 import io.github.kawaiicakes.nobullship.data.SchematicResultSlot;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
@@ -75,7 +76,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
 
             slot.onQuickCraft(stackInSlot, toReturn);
         } else if (pIndex >= 0 && pIndex <= 35) {
-            if (ItemStack.isSameItemSameTags(stackInSlot, SCHEMATIC.get().getDefaultInstance())) {
+            if (this.validEmptySchematic(stackInSlot)) {
                 if (!this.moveItemStackTo(stackInSlot, this.filledSchemSlotID - 1, this.filledSchemSlotID, false))
                     if (!this.moveItemStackTo(stackInSlot, 45, this.filledSchemSlotID, false))
                         return ItemStack.EMPTY;
@@ -112,6 +113,13 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         }
 
         return toReturn;
+    }
+
+    public boolean validEmptySchematic(ItemStack stack) {
+        if (!stack.is(SCHEMATIC.get())) return false;
+        if (!stack.hasTag()) return true;
+        //noinspection DataFlowIssue
+        return !stack.getTag().contains("nobullshipRecipe", Tag.TAG_STRING);
     }
 
     @Override

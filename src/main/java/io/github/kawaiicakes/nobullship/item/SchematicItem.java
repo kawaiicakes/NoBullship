@@ -53,6 +53,16 @@ public class SchematicItem extends Item {
     }
 
     @Override
+    public ItemStack getDefaultInstance() {
+        ItemStack toReturn = super.getDefaultInstance();
+
+        if (toReturn.hasTag()) return toReturn;
+
+        toReturn.setTag(new CompoundTag());
+        return toReturn;
+    }
+
+    @Override
     public Component getName(ItemStack pStack) {
         MutableComponent toReturn = Component.translatable(this.getDescriptionId(pStack));
         return pStack.getTag() != null && !pStack.getTag().getString("nobullshipRecipe").isEmpty()
@@ -61,13 +71,7 @@ public class SchematicItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
-        if (pStack.getTag() == null) {
-            super.appendHoverText(pStack, pLevel, pTooltipComponents, pIsAdvanced);
-            return;
-        }
-
-        final String recipeName = pStack.getTag().getString("nobullshipRecipe");
-        if (recipeName.isEmpty()) {
+        if (pStack.getTag() == null || pStack.getTag().getString("nobullshipRecipe").isEmpty()) {
             pTooltipComponents.add(DIVIDER);
             pTooltipComponents.add(Component.translatable("tooltip.nobullship.blank_schematic").withStyle(GOLD_STANDARD));
             return;
@@ -79,7 +83,10 @@ public class SchematicItem extends Item {
         }
 
         pTooltipComponents.add(DIVIDER);
-        pTooltipComponents.add(Component.translatable("tooltip.nobullship.filled_schematic", recipeName).withStyle(GOLD_STANDARD));
+        pTooltipComponents.add(Component.translatable(
+                "tooltip.nobullship.filled_schematic",
+                pStack.getTag().getString("nobullshipRecipe"))
+                .withStyle(GOLD_STANDARD));
     }
 
     @SubscribeEvent
