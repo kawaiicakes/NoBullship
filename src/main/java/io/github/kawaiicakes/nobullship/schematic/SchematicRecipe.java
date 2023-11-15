@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.schematic;
 
 import com.google.common.collect.ImmutableList;
+import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeSerializer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;

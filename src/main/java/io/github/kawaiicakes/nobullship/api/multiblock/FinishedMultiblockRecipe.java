@@ -1,4 +1,4 @@
-package io.github.kawaiicakes.nobullship.multiblock;
+package io.github.kawaiicakes.nobullship.api.multiblock;
 
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;

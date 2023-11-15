@@ -1,4 +1,4 @@
-package io.github.kawaiicakes.nobullship.multiblock;
+package io.github.kawaiicakes.nobullship.api.multiblock;
 
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
