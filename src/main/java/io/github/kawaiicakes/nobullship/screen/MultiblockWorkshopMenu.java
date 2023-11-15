@@ -160,7 +160,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         if (!(pEntity.getLevel() instanceof ServerLevel serverLevel)) return;
 
         ItemStack output = ItemStack.EMPTY;
-        Optional<SchematicRecipe> optional = serverLevel.getServer().getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, pEntity, serverLevel);
+        Optional<SchematicRecipe> optional = serverLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, pEntity, serverLevel);
         if (optional.isPresent()) {
             output = optional.get().assemble(pEntity);
         }
