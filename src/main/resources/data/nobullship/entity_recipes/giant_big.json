@@ -23,5 +23,14 @@
   },
   "result": {
     "entity": "minecraft:giant"
-  }
+  },
+  "requisites": [
+    {
+      "item": "minecraft:gunpowder",
+      "count": 3
+    },
+    {
+      "item": "minecraft:oak_planks"
+    }
+  ]
 }

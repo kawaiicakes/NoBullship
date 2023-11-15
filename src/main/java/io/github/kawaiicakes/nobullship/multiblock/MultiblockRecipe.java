@@ -7,9 +7,12 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeBuilder;
 import net.minecraft.FieldsAreNonnullByDefault;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -31,7 +34,8 @@ import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 public record MultiblockRecipe(
         MultiblockPattern recipe,
         ResourceLocation result,
-        @Nullable CompoundTag nbt
+        @Nullable CompoundTag nbt,
+        @Nullable NonNullList<ItemStack> requisites
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -43,6 +47,7 @@ public record MultiblockRecipe(
         JsonObject jsonKeys = json.getAsJsonObject("key");
         JsonObject jsonRecipe = json.getAsJsonObject("recipe");
         JsonObject jsonResult = json.getAsJsonObject("result");
+        JsonArray jsonRequisites = json.getAsJsonArray("requisites");
 
         if (jsonKeys == null || jsonRecipe == null || jsonResult == null) {
             LOGGER.error("Sussy JSON syntax!");
@@ -115,6 +120,12 @@ public record MultiblockRecipe(
             }
         }
 
-        return new MultiblockRecipe(builder.build(), result, nbt);
+        if (jsonRequisites == null) return new MultiblockRecipe(builder.build(), result, nbt, null);
+
+        NonNullList<ItemStack> requisites = NonNullList.createWithCapacity(jsonRequisites.size());
+        for (JsonElement element : jsonRequisites) {
+            if (element.isJsonObject()) requisites.add(ShapedRecipe.itemStackFromJson(element.getAsJsonObject()));
+        }
+        return new MultiblockRecipe(builder.build(), result, nbt, requisites);
     }
 }

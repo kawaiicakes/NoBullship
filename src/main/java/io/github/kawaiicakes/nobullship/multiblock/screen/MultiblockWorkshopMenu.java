@@ -1,8 +1,11 @@
 package io.github.kawaiicakes.nobullship.multiblock.screen;
 
+import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
+import io.github.kawaiicakes.nobullship.api.SchematicResultSlot;
+import io.github.kawaiicakes.nobullship.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
-import io.github.kawaiicakes.nobullship.api.SchematicResultSlot;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -161,11 +164,30 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
 
         ItemStack output = ItemStack.EMPTY;
         Optional<SchematicRecipe> optional = serverLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, pEntity, serverLevel);
-        if (optional.isPresent()) {
-            output = optional.get().assemble(pEntity);
+
+        if (optional.isEmpty()) {
+            this.setResult(output);
+            return;
         }
 
-        this.entity.itemHandler.setStackInSlot(FILLED_SCHEM_SLOT, output);
+        output = optional.get().assemble(pEntity);
+        Optional<MultiblockRecipe> multiblockRecipeOptional
+                = MultiblockRecipeManager.getInstance().getRecipe(optional.get().getResultId());
+
+        if (multiblockRecipeOptional.isPresent() && multiblockRecipeOptional.get().requisites() != null) {
+            ListTag requisiteList = new ListTag();
+            for (ItemStack item : multiblockRecipeOptional.get().requisites()) {
+                requisiteList.add(item.serializeNBT());
+            }
+            //noinspection DataFlowIssue (output is guaranteed to have a tag here since a recipe match is present)
+            output.getTag().put("nobullshipRequisites", requisiteList);
+        }
+
+        this.setResult(output);
+    }
+
+    public void setResult(ItemStack result) {
+        this.entity.itemHandler.setStackInSlot(FILLED_SCHEM_SLOT, result);
     }
 
     @Override

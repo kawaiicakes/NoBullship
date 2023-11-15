@@ -5,6 +5,7 @@
   "block.nobullship.workshop": "Workshop",
   "sounds.nobullship.construct_success": "[Construction sounds]",
   "chat.nobullship.fail": "Construction failed!",
+  "chat.nobullship.fail2": "You do not have enough items!",
   "tooltip.nobullship.blank_schematic": "Schematic is blank.",
   "tooltip.nobullship.filled_schematic": "Contains %1$s.",
   "tooltip.nobullship.items": "Required items:",
