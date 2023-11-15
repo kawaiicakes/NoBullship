@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
+import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -92,17 +93,26 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         AABB entityHitbox = this.menu.player.getBoundingBox();
         double longestSide = Math.max(entityHitbox.getXsize(), Math.max(entityHitbox.getYsize(), entityHitbox.getZsize()));
 
-        int entityHeightOffset = (int) (50 / (longestSide / 1.8));
+        int entityHeightOffset = (int) (54 / (longestSide / 1.8));
 
         float f = (float) Math.atan(((x + 155) - pMouseX) / 40.0F);
         float f1 = (float) Math.atan(((y + 64 - entityHeightOffset) - pMouseY) / 40.0F);
 
         int scale = (int) (22 / (longestSide / 1.8));
 
-        renderEntity(x + 155, y + 64, scale, f, f1, this.menu.player);
+        Entity resultEntity =
+            MultiblockRecipeManager.getInstance().getEntityForRecipe(matchingRecipe.get().getResultId(), clientLevel);
+        if (resultEntity == null) return;
+
+        if (resultEntity instanceof LivingEntity livingResult) {
+            renderLivingEntity(x + 155, y + 64, scale, f, f1, livingResult);
+            return;
+        }
+
+        renderEntity(x + 155, y + 64, scale, f, f1, resultEntity);
     }
 
-    protected static void renderEntity(int pPosX, int pPosY, int pScale, float angleXComponent, float angleYComponent, LivingEntity pLivingEntity) {
+    protected static void renderLivingEntity(int pPosX, int pPosY, int pScale, float angleXComponent, float angleYComponent, LivingEntity pLivingEntity) {
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
         posestack.translate(pPosX, pPosY, 1050.0D);

@@ -23,11 +23,13 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraftforge.event.ForgeEventFactory;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.Map;
@@ -50,6 +52,17 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
     protected MultiblockRecipeManager() {
         super(GSON, "entity_recipes");
+    }
+
+    @Nullable
+    public Entity getEntityForRecipe(ResourceLocation id, Level level) {
+        MultiblockRecipe recipe = this.recipes.getOrDefault(id, null);
+        if (recipe == null) return null;
+
+        CompoundTag nbt = recipe.nbt() == null ? new CompoundTag() : recipe.nbt();
+        nbt.putString("id", recipe.result().toString());
+
+        return EntityType.loadEntityRecursive(nbt, level, (type) -> type);
     }
 
     /**
@@ -93,7 +106,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         level.sendParticles(LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 7, 0.2, 0.2, 0.2, 0.3);
 
         if (nbt == null) nbt = new CompoundTag();
-        nbt.putString("id", cachedRecipe.result().toString());
+        nbt.putString("id", resultLocation.toString());
         BlockPos blockpos = match.getBlock(1, 2, 0).getPos();
 
         Entity entity = EntityType.loadEntityRecursive(nbt, level, (entityType) -> {

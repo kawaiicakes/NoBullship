@@ -82,6 +82,10 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         return true;
     }
 
+    public ResourceLocation getResultId() {
+        return this.resultId;
+    }
+
     @Override
     public boolean matches(MultiblockWorkshopBlockEntity workshop, Level pLevel) {
         if (!this.shapedMatches(workshop)) return false;
