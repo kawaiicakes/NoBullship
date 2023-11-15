@@ -92,7 +92,10 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         BlockPattern pattern = cachedRecipe.recipe();
         ResourceLocation resultLocation = cachedRecipe.result();
         CompoundTag nbt = cachedRecipe.nbt();
-        NonNullList<ItemStack> requisites = cachedRecipe.requisites();
+        NonNullList<ItemStack> requisites = NonNullList.create();
+        if (cachedRecipe.requisites() != null) {
+            requisites.addAll(cachedRecipe.requisites());
+        }
 
         BlockPos pos = context.getClickedPos();
 
@@ -100,7 +103,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         List<ItemStack> summedContents;
         List<ItemStack> requirementContents;
         boolean satisfiesRequirements;
-        if (requisites != null && !requisites.isEmpty()) {
+        if (!requisites.isEmpty()) {
             if (context.getPlayer() != null) {
                 player = context.getPlayer();
                 summedContents = getSummedContents(context.getPlayer().getInventory().items);

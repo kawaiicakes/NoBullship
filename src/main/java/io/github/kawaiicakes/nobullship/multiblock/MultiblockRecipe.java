@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.multiblock;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -35,7 +36,7 @@ public record MultiblockRecipe(
         MultiblockPattern recipe,
         ResourceLocation result,
         @Nullable CompoundTag nbt,
-        @Nullable NonNullList<ItemStack> requisites
+        @Nullable ImmutableList<ItemStack> requisites
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -126,6 +127,6 @@ public record MultiblockRecipe(
         for (JsonElement element : jsonRequisites) {
             if (element.isJsonObject()) requisites.add(ShapedRecipe.itemStackFromJson(element.getAsJsonObject()));
         }
-        return new MultiblockRecipe(builder.build(), result, nbt, requisites);
+        return new MultiblockRecipe(builder.build(), result, nbt, ImmutableList.copyOf(requisites));
     }
 }
