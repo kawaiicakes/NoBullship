@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.api;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,7 +9,6 @@ import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockRecipe;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -35,10 +35,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.CONSTRUCT_SUCCESS;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.compareSummedContents;
@@ -92,22 +89,17 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         BlockPattern pattern = cachedRecipe.recipe();
         ResourceLocation resultLocation = cachedRecipe.result();
         CompoundTag nbt = cachedRecipe.nbt();
-        NonNullList<ItemStack> requisites = NonNullList.create();
-        if (cachedRecipe.requisites() != null) {
-            requisites.addAll(cachedRecipe.requisites());
-        }
 
         BlockPos pos = context.getClickedPos();
 
         Player player = null;
-        List<ItemStack> summedContents;
-        List<ItemStack> requirementContents;
         boolean satisfiesRequirements;
-        if (!requisites.isEmpty()) {
+        ImmutableList<ItemStack> requisites = cachedRecipe.requisites();
+        if (requisites != null && requisites.isEmpty()) {
             if (context.getPlayer() != null && !context.getPlayer().isCreative()) {
                 player = context.getPlayer();
-                summedContents = getSummedContents(context.getPlayer().getInventory().items);
-                requirementContents = getSummedContents(requisites);
+                List<ItemStack> summedContents = getSummedContents(context.getPlayer().getInventory().items);
+                List<ItemStack> requirementContents = getSummedContents(requisites);
                 satisfiesRequirements = compareSummedContents(requirementContents, summedContents);
                 if (!satisfiesRequirements) {
                     level.playSound(null, pos, BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -142,12 +134,14 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         level.sendParticles(LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 7, 0.2, 0.2, 0.2, 0.3);
 
         if (player != null && !player.isCreative()) {
+            ArrayList<ItemStack> temporaryRequisites = new ArrayList<>(requisites);
+
             for (int i = 0; i < player.getInventory().items.size(); i++) {
                 ItemStack stackInSlot = player.getInventory().items.get(i);
                 ItemStack craftingRemaining = stackInSlot.getCraftingRemainingItem();
 
                 final ItemStack finalItemstack = stackInSlot;
-                ItemStack requiredItemRemaining = requisites.stream()
+                ItemStack requiredItemRemaining = temporaryRequisites.stream()
                         .filter(standard -> ItemStack.isSameItemSameTags(standard, finalItemstack))
                         .findFirst()
                         .orElse(null);

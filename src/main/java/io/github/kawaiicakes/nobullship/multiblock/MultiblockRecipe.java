@@ -39,6 +39,12 @@ public record MultiblockRecipe(
         @Nullable ImmutableList<ItemStack> requisites
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();
+    @Nullable
+    @Override
+    public ImmutableList<ItemStack> requisites() {
+        if (this.requisites == null) return null;
+        return ImmutableList.copyOf(this.requisites);
+    }
 
     /**
      * Essentially a Json deserializer. Returns null if the argument contains syntax errors.
