@@ -95,7 +95,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         Player player = null;
         boolean satisfiesRequirements;
         ImmutableList<ItemStack> requisites = cachedRecipe.requisites();
-        if (requisites != null && requisites.isEmpty()) {
+        if (requisites != null && !requisites.isEmpty()) {
             if (context.getPlayer() != null && !context.getPlayer().isCreative()) {
                 player = context.getPlayer();
                 List<ItemStack> summedContents = getSummedContents(context.getPlayer().getInventory().items);
