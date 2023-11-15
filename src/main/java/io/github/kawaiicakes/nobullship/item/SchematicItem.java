@@ -47,6 +47,7 @@ public class SchematicItem extends Item {
     public static final Style GOLD_STANDARD = Style.EMPTY.withColor(GOLD);
     public static final MutableComponent ITEM_LIST = Component.translatable("tooltip.nobullship.items").withStyle(ITALIC);
     public static final MutableComponent BLANK = Component.literal("");
+    public static final MutableComponent BLANK_SCHEMATIC = Component.translatable("tooltip.nobullship.blank_schematic").withStyle(GOLD_STANDARD);
 
     public SchematicItem() {
         super(new Properties().tab(NO_BULLSHIP_TAB));
@@ -73,7 +74,7 @@ public class SchematicItem extends Item {
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         if (pStack.getTag() == null || pStack.getTag().getString("nobullshipRecipe").isEmpty()) {
             pTooltipComponents.add(DIVIDER);
-            pTooltipComponents.add(Component.translatable("tooltip.nobullship.blank_schematic").withStyle(GOLD_STANDARD));
+            pTooltipComponents.add(BLANK_SCHEMATIC);
             return;
         }
 

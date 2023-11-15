@@ -40,6 +40,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     public static final IntImmutableList CRAFTING_SLOTS = IntImmutableList.of(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17);
     public static final byte EMPTY_SCHEM_SLOT = 18;
     public static final byte FILLED_SCHEM_SLOT = 19;
+    public static final Component DEFAULT_NAME = Component.translatable("block.nobullship.workshop");
 
     protected LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     public final ItemStackHandler itemHandler = new ItemStackHandler(20) {
@@ -181,6 +182,6 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
 
     @Override
     protected Component getDefaultName() {
-        return Component.translatable("block.nobullship.workshop");
+        return DEFAULT_NAME;
     }
 }

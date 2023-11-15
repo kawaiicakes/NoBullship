@@ -26,6 +26,7 @@ import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
 
 public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe> {
     public static final ResourceLocation UID = new ResourceLocation(MOD_ID, ID);
+    public static final Component TITLE = Component.translatable("block.nobullship.workshop");
 
     protected final IDrawable background;
     protected final IDrawable icon;
@@ -42,7 +43,7 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
 
     @Override
     public Component getTitle() {
-        return Component.translatable("block.nobullship.workshop");
+        return TITLE;
     }
 
     @Override

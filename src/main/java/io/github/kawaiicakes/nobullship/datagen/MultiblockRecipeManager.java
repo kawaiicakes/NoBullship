@@ -43,6 +43,7 @@ import static net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN;
 public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
     private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Component FAIL = Component.translatable("chat.nobullship.fail").withStyle(RED);
     protected static MultiblockRecipeManager INSTANCE = null;
 
     /**
@@ -86,7 +87,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         if (match == null) {
             level.playSound(null, pos, BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
             Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
-                    .sendSystemMessage(Component.translatable("chat.nobullship.fail").withStyle(RED), true);
+                    .sendSystemMessage(FAIL, true);
             return;
         }
 
