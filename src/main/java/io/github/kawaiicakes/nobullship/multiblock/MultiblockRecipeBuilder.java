@@ -1,9 +1,10 @@
-package io.github.kawaiicakes.nobullship.data;
+package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
+import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockPattern;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +27,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     protected final Logger LOGGER = LogUtils.getLogger();
     protected final ResourceLocation result;
     @Nullable
-    protected CompoundTag nbt = null;
+    protected CompoundTag nbt;
     protected final Map<String, BlockState> lookupSimple = new HashMap<>();
 
     protected MultiblockRecipeBuilder(ResourceLocation result, @Nullable CompoundTag nbt) {

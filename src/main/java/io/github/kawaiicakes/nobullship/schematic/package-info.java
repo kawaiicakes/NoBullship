@@ -1,6 +1,6 @@
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package io.github.kawaiicakes.nobullship.screen;
+@MethodsReturnNonnullByDefault
+package io.github.kawaiicakes.nobullship.schematic;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

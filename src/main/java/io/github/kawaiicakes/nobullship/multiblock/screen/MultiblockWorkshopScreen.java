@@ -1,12 +1,12 @@
-package io.github.kawaiicakes.nobullship.screen;
+package io.github.kawaiicakes.nobullship.multiblock.screen;
 
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
-import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
-import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
+import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
+import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -119,7 +119,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
 
         if (resultEntity instanceof LivingEntity livingResult) {
             renderLivingEntity(x + 155, y + 64, scale, f, f1, livingResult);
-            drawNoResultString(pPoseStack, x + 155, y + 72);
+            drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 72, 8453920);
             return;
         }
 

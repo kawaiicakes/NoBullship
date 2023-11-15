@@ -1,6 +1,7 @@
-package io.github.kawaiicakes.nobullship.data;
+package io.github.kawaiicakes.nobullship.api;
 
-import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
+import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
+import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -18,9 +19,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
-import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
-import static io.github.kawaiicakes.nobullship.data.SchematicRecipe.getSummedContents;
+import static io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
+import static io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
+import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSummedContents;
 import static net.minecraft.sounds.SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT;
 import static net.minecraft.sounds.SoundSource.PLAYERS;
 

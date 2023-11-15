@@ -1,13 +1,13 @@
 package io.github.kawaiicakes.nobullship;
 
-import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlock;
-import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
-import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
-import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeProvider;
-import io.github.kawaiicakes.nobullship.datagen.SchematicRecipeSerializer;
-import io.github.kawaiicakes.nobullship.item.SchematicItem;
-import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
-import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopScreen;
+import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
+import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
+import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
+import io.github.kawaiicakes.nobullship.multiblock.MultiblockRecipeProvider;
+import io.github.kawaiicakes.nobullship.schematic.SchematicRecipeSerializer;
+import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
+import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
+import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -35,7 +35,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.kawaiicakes.nobullship.datagen.SchematicRecipeSerializer.INSTANCE;
+import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipeSerializer.INSTANCE;
 import static net.minecraftforge.registries.ForgeRegistries.*;
 
 @Mod(NoBullship.MOD_ID)

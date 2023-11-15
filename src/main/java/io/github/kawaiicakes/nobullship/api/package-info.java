@@ -1,6 +1,6 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-package io.github.kawaiicakes.nobullship.block;
+package io.github.kawaiicakes.nobullship.api;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

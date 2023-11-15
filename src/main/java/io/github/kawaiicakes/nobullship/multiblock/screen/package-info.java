@@ -1,6 +1,6 @@
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package io.github.kawaiicakes.nobullship.api.jei;
+package io.github.kawaiicakes.nobullship.multiblock.screen;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

@@ -1,6 +1,6 @@
-package io.github.kawaiicakes.nobullship.item;
+package io.github.kawaiicakes.nobullship.schematic;
 
-import io.github.kawaiicakes.nobullship.datagen.MultiblockRecipeManager;
+import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.player.LocalPlayer;
@@ -32,7 +32,7 @@ import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
-import static io.github.kawaiicakes.nobullship.data.SchematicRecipe.getSummedContents;
+import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSummedContents;
 import static net.minecraft.ChatFormatting.*;
 import static net.minecraft.nbt.Tag.TAG_COMPOUND;
 import static net.minecraft.nbt.Tag.TAG_LIST;

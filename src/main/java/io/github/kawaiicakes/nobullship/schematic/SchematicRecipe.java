@@ -1,8 +1,7 @@
-package io.github.kawaiicakes.nobullship.data;
+package io.github.kawaiicakes.nobullship.schematic;
 
 import com.google.common.collect.ImmutableList;
-import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
-import io.github.kawaiicakes.nobullship.datagen.SchematicRecipeSerializer;
+import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -18,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
-import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
-import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
+import static io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
+import static io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
 import static net.minecraft.world.item.Items.AIR;
 
 public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
@@ -49,14 +48,14 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
 
     /**
      * This method is defunct and not to be used until I add NBT compatibility to crafting.
-     * Tests for "crafting equality" between standard to item. Equality is defined as follows:<br>
+     * Tests for "crafting equality" between standard to schematic. Equality is defined as follows:<br>
      * <ul>
-     *     <li>standard and item are of the same <code>Item</code></li>
-     *     <li>item contains all the NBT data standard has.</li>
+     *     <li>standard and schematic are of the same <code>Item</code></li>
+     *     <li>schematic contains all the NBT data standard has.</li>
      *     <ul>
-     *         <li>if standard has no NBT data, item may have any NBT data.</li>
+     *         <li>if standard has no NBT data, schematic may have any NBT data.</li>
      *     </ul>
-     *     <li>the count of item is greater or equal to standard.</li>
+     *     <li>the count of schematic is greater or equal to standard.</li>
      * </ul>
      */
     public static boolean itemMatchesStandard(ItemStack standard, ItemStack item) {
@@ -178,7 +177,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     }
 
     // Since an empty schematic with arbitrary NBT data may be put in, and come out with the same data + a new tag,
-    // it would be unwise to assume that the resulting item is a default SchematicItem ItemStack with the attached tag.
+    // it would be unwise to assume that the resulting schematic is a default SchematicItem ItemStack with the attached tag.
     // Mods which rely on rendering shit based on ItemStack NBT would not like this and could imply to the player that
     // the rendering would break after having a recipe written into it, as one example.
     // Addendum 1: ah fuck it whatever lol the mod doesn't even support NBT crafting at the moment; neither does vanilla.

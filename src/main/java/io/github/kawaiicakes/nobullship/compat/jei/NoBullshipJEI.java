@@ -1,6 +1,6 @@
-package io.github.kawaiicakes.nobullship.api.jei;
+package io.github.kawaiicakes.nobullship.compat.jei;
 
-import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
+import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.recipe.RecipeType;

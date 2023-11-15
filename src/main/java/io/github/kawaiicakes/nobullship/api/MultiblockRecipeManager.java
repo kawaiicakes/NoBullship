@@ -1,4 +1,4 @@
-package io.github.kawaiicakes.nobullship.datagen;
+package io.github.kawaiicakes.nobullship.api;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -6,7 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
-import io.github.kawaiicakes.nobullship.data.MultiblockRecipe;
+import io.github.kawaiicakes.nobullship.multiblock.MultiblockRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -70,7 +70,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
      * Pass a recipe ID and the context using it into here to attempt to spawn the result.
      */
     public void trySpawn(ResourceLocation recipeId, UseOnContext context) {
-        // TODO: config whether fake players can use this item...
+        // TODO: config whether fake players can use this schematic...
         if (!(context.getLevel() instanceof ServerLevel level)) return;
 
         MultiblockRecipe cachedRecipe

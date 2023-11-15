@@ -1,8 +1,8 @@
-package io.github.kawaiicakes.nobullship.screen;
+package io.github.kawaiicakes.nobullship.multiblock.screen;
 
-import io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity;
-import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
-import io.github.kawaiicakes.nobullship.data.SchematicResultSlot;
+import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
+import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
+import io.github.kawaiicakes.nobullship.api.SchematicResultSlot;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -22,8 +22,8 @@ import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_MENU;
-import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
-import static io.github.kawaiicakes.nobullship.block.MultiblockWorkshopBlockEntity.FILLED_SCHEM_SLOT;
+import static io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
+import static io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity.FILLED_SCHEM_SLOT;
 
 public class MultiblockWorkshopMenu extends AbstractContainerMenu implements ContainerListener {
     public final MultiblockWorkshopBlockEntity entity;

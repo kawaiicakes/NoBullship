@@ -1,6 +1,6 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-package io.github.kawaiicakes.nobullship.data;
+package io.github.kawaiicakes.nobullship.multiblock;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

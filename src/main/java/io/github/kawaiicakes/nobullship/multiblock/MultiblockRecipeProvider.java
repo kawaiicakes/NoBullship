@@ -1,10 +1,8 @@
-package io.github.kawaiicakes.nobullship.datagen;
+package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
-import io.github.kawaiicakes.nobullship.data.FinishedMultiblockRecipe;
-import io.github.kawaiicakes.nobullship.data.MultiblockRecipeBuilder;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;

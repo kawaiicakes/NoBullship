@@ -1,7 +1,7 @@
-package io.github.kawaiicakes.nobullship.api.jei;
+package io.github.kawaiicakes.nobullship.compat.jei;
 
 import com.google.common.collect.ImmutableList;
-import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
+import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -16,10 +16,9 @@ import net.minecraft.world.item.crafting.Ingredient;
 import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.*;
-import static io.github.kawaiicakes.nobullship.api.jei.NoBullshipJEI.SCHEMATIC_TYPE;
-import static io.github.kawaiicakes.nobullship.data.SchematicRecipe.Type.ID;
-import static io.github.kawaiicakes.nobullship.data.SchematicRecipe.getSummedContents;
-import static io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopScreen.TEXTURE;
+import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.Type.ID;
+import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSummedContents;
+import static io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen.TEXTURE;
 import static mezz.jei.api.constants.VanillaTypes.ITEM_STACK;
 import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
 import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
@@ -38,7 +37,7 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
 
     @Override
     public RecipeType<SchematicRecipe> getRecipeType() {
-        return SCHEMATIC_TYPE;
+        return NoBullshipJEI.SCHEMATIC_TYPE;
     }
 
     @Override

@@ -1,10 +1,11 @@
-package io.github.kawaiicakes.nobullship.data;
+package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
+import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockPattern;
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;

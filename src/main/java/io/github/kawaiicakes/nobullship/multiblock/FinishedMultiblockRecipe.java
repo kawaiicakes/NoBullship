@@ -1,4 +1,4 @@
-package io.github.kawaiicakes.nobullship.data;
+package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
@@ -13,7 +13,7 @@ public interface FinishedMultiblockRecipe {
         JsonObject jsonobject = new JsonObject();
         this.serializeRecipeData(jsonobject);
         return jsonobject;
-    };
+    }
 
     /**
      * Gets the ID for the recipe.

@@ -1,6 +1,6 @@
-@ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-package io.github.kawaiicakes.nobullship.datagen;
+@ParametersAreNonnullByDefault
+package io.github.kawaiicakes.nobullship.compat.jei;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

@@ -1,9 +1,8 @@
-package io.github.kawaiicakes.nobullship.datagen;
+package io.github.kawaiicakes.nobullship.schematic;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.*;
 import com.mojang.logging.LogUtils;
-import io.github.kawaiicakes.nobullship.data.SchematicRecipe;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;

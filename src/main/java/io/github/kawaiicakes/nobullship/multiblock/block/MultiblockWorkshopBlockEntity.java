@@ -1,6 +1,6 @@
-package io.github.kawaiicakes.nobullship.block;
+package io.github.kawaiicakes.nobullship.multiblock.block;
 
-import io.github.kawaiicakes.nobullship.screen.MultiblockWorkshopMenu;
+import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

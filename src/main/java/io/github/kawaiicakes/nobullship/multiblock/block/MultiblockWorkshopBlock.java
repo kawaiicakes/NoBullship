@@ -1,4 +1,4 @@
-package io.github.kawaiicakes.nobullship.block;
+package io.github.kawaiicakes.nobullship.multiblock.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
