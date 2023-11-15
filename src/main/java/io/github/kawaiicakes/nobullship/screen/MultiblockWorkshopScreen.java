@@ -27,6 +27,7 @@ import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 
 public class MultiblockWorkshopScreen extends AbstractContainerScreen<MultiblockWorkshopMenu> {
     public static final ResourceLocation TEXTURE = new ResourceLocation(MOD_ID, "textures/gui/workbench_gui.png");
+    public static final Component NO_RESULT = Component.translatable("gui.nobullship.no_recipe");
     public static final Quaternion ROTATE_180 = Vector3f.ZP.rotationDegrees(-180F);
 
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
@@ -75,10 +76,16 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         RenderSystem.disableDepthTest();
 
         if (!(this.menu.player.level instanceof ClientLevel clientLevel)) return;
-        if (this.menu.entity.isEmpty()) return;
+        if (this.menu.entity.isEmpty()) {
+            drawNoResultString(pPoseStack, x + 155, y + 72);
+            return;
+        }
         List<SchematicRecipe> recipeList
                 = clientLevel.getRecipeManager().getAllRecipesFor(SchematicRecipe.Type.INSTANCE);
-        if (recipeList.isEmpty()) return;
+        if (recipeList.isEmpty()) {
+            drawNoResultString(pPoseStack, x + 155, y + 72);
+            return;
+        }
 
         List<SchematicRecipe> shapedMatches = recipeList.stream()
                 .filter(recipe -> recipe.shapedMatches(this.menu.entity))
@@ -88,7 +95,10 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         if (shapedMatches.size() > 1)
             matchingRecipe = shapedMatches.stream().filter(recipe -> recipe.shapelessMatches(this.menu.entity)).findFirst();
 
-        if (matchingRecipe.isEmpty()) return;
+        if (matchingRecipe.isEmpty()) {
+            drawNoResultString(pPoseStack, x + 155, y + 72);
+            return;
+        }
 
         AABB entityHitbox = this.menu.player.getBoundingBox();
         double longestSide = Math.max(entityHitbox.getXsize(), Math.max(entityHitbox.getYsize(), entityHitbox.getZsize()));
@@ -102,14 +112,24 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
 
         Entity resultEntity =
             MultiblockRecipeManager.getInstance().getEntityForRecipe(matchingRecipe.get().getResultId(), clientLevel);
-        if (resultEntity == null) return;
+        if (resultEntity == null) {
+            drawNoResultString(pPoseStack, x + 155, y + 72);
+            return;
+        }
 
         if (resultEntity instanceof LivingEntity livingResult) {
             renderLivingEntity(x + 155, y + 64, scale, f, f1, livingResult);
+            drawNoResultString(pPoseStack, x + 155, y + 72);
             return;
         }
 
         renderEntity(x + 155, y + 64, scale, f, f1, resultEntity);
+
+        drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 72, 8453920);
+    }
+
+    protected void drawNoResultString(PoseStack pPoseStack, int x, int y) {
+        drawCenteredString(pPoseStack, this.font, NO_RESULT, x, y, 16736352);
     }
 
     protected static void renderLivingEntity(int pPosX, int pPosY, int pScale, float angleXComponent, float angleYComponent, LivingEntity pLivingEntity) {

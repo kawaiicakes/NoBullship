@@ -7,5 +7,6 @@
   "chat.nobullship.fail": "Construction failed!",
   "tooltip.nobullship.blank_schematic": "Schematic is blank.",
   "tooltip.nobullship.filled_schematic": "Contains %1$s.",
-  "tooltip.nobullship.items": "Required items:"
+  "tooltip.nobullship.items": "Required items:",
+  "gui.nobullship.no_recipe": "No schematic!"
 }
