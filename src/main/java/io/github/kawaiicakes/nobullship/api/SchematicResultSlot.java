@@ -1,4 +1,4 @@
-package io.github.kawaiicakes.nobullship.api.schematic;
+package io.github.kawaiicakes.nobullship.api;
 
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
@@ -25,6 +25,12 @@ import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSumm
 import static net.minecraft.sounds.SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT;
 import static net.minecraft.sounds.SoundSource.PLAYERS;
 
+/**
+ * <code>Slot</code> implementation designed to work with an <code>ItemStackHandler</code> but functioning like
+ * the vanilla crafting <code>ResultSlot</code>. Simply access the item handler of whatever is associated with
+ * this slot and set the item in the handler at the same index as the <code>int</code> slot passed in the
+ * constructor.
+ */
 public class SchematicResultSlot extends Slot {
     protected static Container EMPTY = new SimpleContainer(0);
     protected final MultiblockWorkshopBlockEntity blockEntity;

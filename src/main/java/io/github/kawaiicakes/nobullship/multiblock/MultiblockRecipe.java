@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeBuilder;
-import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockPattern;
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;

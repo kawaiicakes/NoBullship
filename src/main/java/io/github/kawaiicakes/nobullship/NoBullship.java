@@ -1,13 +1,13 @@
 package io.github.kawaiicakes.nobullship;
 
-import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
-import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
-import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeSerializer;
-import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
+import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
+import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen;
+import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
+import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -35,7 +35,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeSerializer.INSTANCE;
+import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.Serializer.INSTANCE;
 import static net.minecraftforge.registries.ForgeRegistries.*;
 
 @Mod(NoBullship.MOD_ID)
@@ -74,7 +74,7 @@ public class NoBullship
     public static final RegistryObject<SoundEvent> CONSTRUCT_SUCCESS
             = SOUND_REGISTRY.register("construct_success", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_success")));
 
-    public static final RegistryObject<SchematicRecipeSerializer> SCHEMATIC_SERIALIZER = RECIPE_SERIALIZER_REGISTRY.register("schematic_workbench", () -> INSTANCE);
+    public static final RegistryObject<SchematicRecipe.Serializer> SCHEMATIC_SERIALIZER = RECIPE_SERIALIZER_REGISTRY.register("schematic_workbench", () -> INSTANCE);
 
     public NoBullship()
     {

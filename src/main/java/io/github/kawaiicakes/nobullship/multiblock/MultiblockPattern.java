@@ -1,4 +1,4 @@
-package io.github.kawaiicakes.nobullship.api.multiblock;
+package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.common.cache.LoadingCache;
 import com.mojang.math.Quaternion;

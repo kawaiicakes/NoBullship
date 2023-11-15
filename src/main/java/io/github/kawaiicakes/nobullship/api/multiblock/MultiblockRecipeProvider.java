@@ -3,6 +3,7 @@ package io.github.kawaiicakes.nobullship.api.multiblock;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
+import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
