@@ -94,15 +94,13 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         BlockPos pos = context.getClickedPos();
 
         Player player = null;
-        boolean satisfiesRequirements;
         ImmutableList<ItemStack> requisites = cachedRecipe.requisites();
         if (requisites != null && !requisites.isEmpty()) {
             if (context.getPlayer() != null && !context.getPlayer().isCreative()) {
                 player = context.getPlayer();
                 List<ItemStack> summedContents = getSummedContents(context.getPlayer().getInventory().items);
                 List<ItemStack> requirementContents = getSummedContents(requisites);
-                satisfiesRequirements = compareSummedContents(requirementContents, summedContents);
-                if (!satisfiesRequirements) {
+                if (!compareSummedContents(requirementContents, summedContents)) {
                     level.playSound(null, pos, BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
                     Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
                             .sendSystemMessage(FAIL2, true);
@@ -135,14 +133,12 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         level.sendParticles(LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 7, 0.2, 0.2, 0.2, 0.3);
 
         if (player != null && !player.isCreative()) {
-            ArrayList<ItemStack> temporaryRequisites = new ArrayList<>(requisites);
-
             for (int i = 0; i < player.getInventory().items.size(); i++) {
                 ItemStack stackInSlot = player.getInventory().items.get(i);
                 ItemStack craftingRemaining = stackInSlot.getCraftingRemainingItem();
 
                 final ItemStack finalItemstack = stackInSlot;
-                ItemStack requiredItemRemaining = temporaryRequisites.stream()
+                ItemStack requiredItemRemaining = requisites.stream()
                         .filter(standard -> ItemStack.isSameItemSameTags(standard, finalItemstack))
                         .findFirst()
                         .orElse(null);

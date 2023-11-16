@@ -62,8 +62,11 @@ public record MultiblockRecipe(
     @Override
     public ImmutableList<ItemStack> requisites() {
         if (this.requisites == null) return null;
-        ArrayList<ItemStack> temp = new ArrayList<>(this.requisites);
-        return ImmutableList.copyOf(temp);
+        ImmutableList.Builder<ItemStack> toReturn = ImmutableList.builder();
+        for (ItemStack stack : this.requisites) {
+            toReturn.add(stack.copy());
+        }
+        return toReturn.build();
     }
 
     /**
