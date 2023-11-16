@@ -117,7 +117,6 @@ public class SchematicResultSlot extends Slot {
         this.removeCount = 0;
     }
 
-    // TODO: I took this from vanilla lol clean it up
     @Override
     public void onTake(Player pPlayer, ItemStack pStack) {
         if (blockEntity.getLevel() == null) return;
