@@ -13,5 +13,6 @@
   },
   "shapeless_input": [
 
-  ]
+  ],
+  "max_usages": 3
 }

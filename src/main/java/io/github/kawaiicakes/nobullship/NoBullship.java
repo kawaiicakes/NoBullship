@@ -73,6 +73,10 @@ public class NoBullship
     public static final RegistryObject<SchematicItem> SCHEMATIC = ITEM_REGISTRY.register("schematic", SchematicItem::new);
     public static final RegistryObject<SoundEvent> CONSTRUCT_SUCCESS
             = SOUND_REGISTRY.register("construct_success", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_success")));
+    public static final RegistryObject<SoundEvent> CONSTRUCT_FAILED
+            = SOUND_REGISTRY.register("construct_failed", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_failed")));
+    public static final RegistryObject<SoundEvent> CONSTRUCT_EXPENDED
+            = SOUND_REGISTRY.register("construct_expended", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_expended")));
 
     public static final RegistryObject<SchematicRecipe.Serializer> SCHEMATIC_SERIALIZER = RECIPE_SERIALIZER_REGISTRY.register("schematic_workbench", () -> INSTANCE);
 

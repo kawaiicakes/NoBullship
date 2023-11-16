@@ -35,14 +35,17 @@ import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
-import static io.github.kawaiicakes.nobullship.NoBullship.CONSTRUCT_SUCCESS;
+import static io.github.kawaiicakes.nobullship.NoBullship.*;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.compareSummedContents;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSummedContents;
 import static net.minecraft.ChatFormatting.RED;
 import static net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE;
-import static net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN;
+import static net.minecraft.nbt.Tag.TAG_INT;
 
 public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
@@ -101,7 +104,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                 List<ItemStack> summedContents = getSummedContents(context.getPlayer().getInventory().items);
                 List<ItemStack> requirementContents = getSummedContents(requisites);
                 if (!compareSummedContents(requirementContents, summedContents)) {
-                    level.playSound(null, pos, BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
+                    level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.87F, 1.0F);
                     Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
                             .sendSystemMessage(FAIL2, true);
                     return;
@@ -111,7 +114,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         BlockPattern.BlockPatternMatch match = pattern.find(level, pos);
         if (match == null) {
-            level.playSound(null, pos, BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0F, 1.0F);
+            level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.87F, 1.0F);
             Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
                     .sendSystemMessage(FAIL, true);
             return;
@@ -133,6 +136,15 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         level.sendParticles(LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 7, 0.2, 0.2, 0.2, 0.3);
 
         if (player != null && !player.isCreative()) {
+            ItemStack itemInHand = context.getItemInHand();
+            if (Objects.requireNonNull(itemInHand.getTag()).contains("nobullshipUses", TAG_INT)) {
+                int uses = itemInHand.getTag().getInt("nobullshipUses");
+                if (uses <= 1) {
+                    itemInHand.shrink(1);
+                    level.playSound(null, pos, CONSTRUCT_EXPENDED.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+                    itemInHand = null;
+                }
+            }
             for (int i = 0; i < player.getInventory().items.size(); i++) {
                 ItemStack stackInSlot = player.getInventory().items.get(i);
                 ItemStack craftingRemaining = stackInSlot.getCraftingRemainingItem();
@@ -162,6 +174,11 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                 } else if (!player.getInventory().add(craftingRemaining)) {
                     player.drop(craftingRemaining, false);
                 }
+            }
+            if (itemInHand != null && Objects.requireNonNull(itemInHand.getTag()).contains("nobullshipUses", TAG_INT)) {
+                int uses = itemInHand.getTag().getInt("nobullshipUses");
+                itemInHand.getTag().remove("nobullshipUses");
+                itemInHand.getTag().putInt("nobullshipUses", uses - 1);
             }
         }
 

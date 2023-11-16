@@ -34,8 +34,7 @@ import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
 import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSummedContents;
 import static net.minecraft.ChatFormatting.*;
-import static net.minecraft.nbt.Tag.TAG_COMPOUND;
-import static net.minecraft.nbt.Tag.TAG_LIST;
+import static net.minecraft.nbt.Tag.*;
 
 /**
  * Care is taken to ensure that using the schematic does not alter the blockstate of the clicked block.
@@ -48,6 +47,7 @@ public class SchematicItem extends Item {
     public static final MutableComponent ITEM_LIST = Component.translatable("tooltip.nobullship.items").withStyle(ITALIC);
     public static final MutableComponent BLANK = Component.literal("");
     public static final MutableComponent BLANK_SCHEMATIC = Component.translatable("tooltip.nobullship.blank_schematic").withStyle(GOLD_STANDARD);
+    public static final MutableComponent REMAINING_USES = Component.translatable("tooltip.nobullship.remaining_uses").withStyle(ITALIC);
 
     public SchematicItem() {
         super(new Properties().tab(NO_BULLSHIP_TAB));
@@ -88,6 +88,8 @@ public class SchematicItem extends Item {
                 "tooltip.nobullship.filled_schematic",
                 pStack.getTag().getString("nobullshipRecipe"))
                 .withStyle(GOLD_STANDARD));
+        if (pStack.getTag() != null && pStack.getTag().contains("nobullshipUses", TAG_INT))
+            pTooltipComponents.add(REMAINING_USES.copy().append(" " + pStack.getTag().getInt("nobullshipUses")));
     }
 
     @SubscribeEvent

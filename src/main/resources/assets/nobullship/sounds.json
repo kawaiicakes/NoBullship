@@ -4,5 +4,17 @@
     "sounds": [
       "nobullship:construct_success"
     ]
+  },
+  "construct_expended": {
+    "subtitle": "sounds.nobullship.construct_expended",
+    "sounds": [
+      "nobullship:construct_expended"
+    ]
+  },
+  "construct_failed": {
+    "subtitle": "sounds.nobullship.construct_failed",
+    "sounds": [
+      "nobullship:construct_failed"
+    ]
   }
 }

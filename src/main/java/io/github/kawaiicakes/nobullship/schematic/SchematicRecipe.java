@@ -29,14 +29,16 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     private final ResourceLocation resultId;
     private final ImmutableList<Ingredient> shaped;
     private final ImmutableList<ItemStack> shapeless;
+    private final int maximumSchematicUsage;
     public final byte actualShapedWidth;
     public final byte actualShapedHeight;
 
-    public SchematicRecipe(ResourceLocation recipeId, ResourceLocation resultId, ImmutableList<Ingredient> shaped, ImmutableList<ItemStack> shapeless, byte actualShapedWidth, byte actualShapedHeight) {
+    public SchematicRecipe(ResourceLocation recipeId, ResourceLocation resultId, ImmutableList<Ingredient> shaped, ImmutableList<ItemStack> shapeless, int maximumSchematicUsage, byte actualShapedWidth, byte actualShapedHeight) {
         this.recipeId = recipeId;
         this.resultId = resultId;
         this.shaped = shaped;
         this.shapeless = shapeless;
+        this.maximumSchematicUsage = maximumSchematicUsage;
         this.actualShapedWidth = actualShapedWidth;
         this.actualShapedHeight = actualShapedHeight;
     }
@@ -179,6 +181,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         if (copyOfInputSchematic.getTag() == null) copyOfInputSchematic.setTag(new CompoundTag());
         copyOfInputSchematic.getTag().putString("nobullshipRecipe", this.resultId.toString());
         copyOfInputSchematic.setCount(1);
+        if (this.maximumSchematicUsage > 0) copyOfInputSchematic.getTag().putInt("nobullshipUses", this.maximumSchematicUsage);
 
         return copyOfInputSchematic;
     }
@@ -198,6 +201,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public ItemStack getResultItem() {
         CompoundTag resultTag = new CompoundTag();
         resultTag.putString("nobullshipRecipe", this.resultId.toString());
+        if (this.maximumSchematicUsage > 0) resultTag.putInt("nobullshipUses", this.maximumSchematicUsage);
 
         ItemStack toReturn = SCHEMATIC.get().getDefaultInstance().copy();
         toReturn.setTag(resultTag);
@@ -351,7 +355,11 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
             ImmutableList<ItemStack> shapelessInput = ImmutableList.copyOf(itemsFromJson(GsonHelper.getAsJsonArray(pSerializedRecipe, "shapeless_input")));
             if (shapelessInput.size() > 9) throw new JsonParseException("Too many ingredients for shapeless recipe. The maximum is 9");
 
-            return new SchematicRecipe(pRecipeId, resultId, shapedInput, shapelessInput, recipeWidth, recipeHeight);
+            JsonPrimitive jsonUsages = pSerializedRecipe.getAsJsonPrimitive("max_usages");
+            int usages = 0;
+            if (jsonUsages != null && jsonUsages.isNumber() && jsonUsages.getAsInt() >= 1) usages = jsonUsages.getAsInt();
+
+            return new SchematicRecipe(pRecipeId, resultId, shapedInput, shapelessInput, usages, recipeWidth, recipeHeight);
         }
 
         @Override
@@ -367,7 +375,9 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
             NonNullList<ItemStack> shapelessList = NonNullList.withSize(9, ItemStack.EMPTY);
             shapelessList.replaceAll(_ignored -> pBuffer.readItem());
 
-            return new SchematicRecipe(pRecipeId, new ResourceLocation(resultId), ImmutableList.copyOf(shapedList), ImmutableList.copyOf(shapelessList), width, height);
+            int usages = pBuffer.readInt();
+
+            return new SchematicRecipe(pRecipeId, new ResourceLocation(resultId), ImmutableList.copyOf(shapedList), ImmutableList.copyOf(shapelessList), usages, width, height);
         }
 
         @Override
@@ -380,6 +390,8 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
             pRecipe.getShapedIngredients().forEach(ingredient -> ingredient.toNetwork(pBuffer));
 
             pRecipe.getShapelessIngredients().forEach(pBuffer::writeItem);
+
+            pBuffer.writeInt(pRecipe.maximumSchematicUsage);
         }
 
         protected static JsonSyntaxException throwNewSyntaxError(ResourceLocation pRecipeId, String message) {
