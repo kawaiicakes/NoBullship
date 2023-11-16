@@ -96,16 +96,15 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         BlockPos pos = context.getClickedPos();
 
-        Player player = null;
+        Player player = context.getPlayer();
         ImmutableList<ItemStack> requisites = cachedRecipe.requisites();
         if (requisites != null && !requisites.isEmpty()) {
-            if (context.getPlayer() != null && !context.getPlayer().isCreative()) {
-                player = context.getPlayer();
-                List<ItemStack> summedContents = getSummedContents(context.getPlayer().getInventory().items);
+            if (player != null && !player.isCreative()) {
+                List<ItemStack> summedContents = getSummedContents(player.getInventory().items);
                 List<ItemStack> requirementContents = getSummedContents(requisites);
                 if (!compareSummedContents(requirementContents, summedContents)) {
                     level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.87F, 1.0F);
-                    Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
+                    Objects.requireNonNull(((ServerPlayer) player))
                             .sendSystemMessage(FAIL2, true);
                     return;
                 }
@@ -144,35 +143,37 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                     level.playSound(null, pos, CONSTRUCT_EXPENDED.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
                     itemInHand = null;
                 }
-            }
-            for (int i = 0; i < player.getInventory().items.size(); i++) {
-                ItemStack stackInSlot = player.getInventory().items.get(i);
-                ItemStack craftingRemaining = stackInSlot.getCraftingRemainingItem();
+            } // FIXME: I hate nesting...
+            if (requisites != null) {
+                for (int i = 0; i < player.getInventory().items.size(); i++) {
+                    ItemStack stackInSlot = player.getInventory().items.get(i);
+                    ItemStack craftingRemaining = stackInSlot.getCraftingRemainingItem();
 
-                final ItemStack finalItemstack = stackInSlot;
-                ItemStack requiredItemRemaining = requisites.stream()
-                        .filter(standard -> ItemStack.isSameItemSameTags(standard, finalItemstack))
-                        .findFirst()
-                        .orElse(null);
+                    final ItemStack finalItemstack = stackInSlot;
+                    ItemStack requiredItemRemaining = requisites.stream()
+                            .filter(standard -> ItemStack.isSameItemSameTags(standard, finalItemstack))
+                            .findFirst()
+                            .orElse(null);
 
-                if (requiredItemRemaining == null) continue;
+                    if (requiredItemRemaining == null) continue;
 
-                int decrement = Math.min(stackInSlot.getCount(), requiredItemRemaining.getCount());
+                    int decrement = Math.min(stackInSlot.getCount(), requiredItemRemaining.getCount());
 
-                if (!stackInSlot.isEmpty()) {
-                    stackInSlot.shrink(decrement);
-                    requiredItemRemaining.shrink(decrement);
-                }
+                    if (!stackInSlot.isEmpty()) {
+                        stackInSlot.shrink(decrement);
+                        requiredItemRemaining.shrink(decrement);
+                    }
 
-                if (craftingRemaining.isEmpty()) continue;
+                    if (craftingRemaining.isEmpty()) continue;
 
-                if (stackInSlot.isEmpty()) {
-                    player.getInventory().setItem(i, craftingRemaining);
-                } else if (ItemStack.isSame(stackInSlot, craftingRemaining) && ItemStack.tagMatches(stackInSlot, craftingRemaining)) {
-                    craftingRemaining.grow(stackInSlot.getCount());
-                    player.getInventory().setItem(i, craftingRemaining);
-                } else if (!player.getInventory().add(craftingRemaining)) {
-                    player.drop(craftingRemaining, false);
+                    if (stackInSlot.isEmpty()) {
+                        player.getInventory().setItem(i, craftingRemaining);
+                    } else if (ItemStack.isSame(stackInSlot, craftingRemaining) && ItemStack.tagMatches(stackInSlot, craftingRemaining)) {
+                        craftingRemaining.grow(stackInSlot.getCount());
+                        player.getInventory().setItem(i, craftingRemaining);
+                    } else if (!player.getInventory().add(craftingRemaining)) {
+                        player.drop(craftingRemaining, false);
+                    }
                 }
             }
             if (itemInHand != null && Objects.requireNonNull(itemInHand.getTag()).contains("nobullshipUses", TAG_INT)) {
