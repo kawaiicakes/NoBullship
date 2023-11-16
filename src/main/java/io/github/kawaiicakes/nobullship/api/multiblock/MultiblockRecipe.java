@@ -150,12 +150,16 @@ public record MultiblockRecipe(
             }
         }
 
-        if (jsonRequisites == null) return new MultiblockRecipe(builder.build(), result, nbt, null);
-
-        NonNullList<ItemStack> requisites = NonNullList.createWithCapacity(jsonRequisites.size());
-        for (JsonElement element : jsonRequisites) {
-            if (element.isJsonObject()) requisites.add(ShapedRecipe.itemStackFromJson(element.getAsJsonObject()));
+        NonNullList<ItemStack> requisites;
+        ImmutableList<ItemStack> toReturnRequisites = null;
+        if (jsonRequisites != null) {
+            requisites = NonNullList.createWithCapacity(jsonRequisites.size());
+            for (JsonElement element : jsonRequisites) {
+                if (element.isJsonObject()) requisites.add(ShapedRecipe.itemStackFromJson(element.getAsJsonObject()));
+            }
+            toReturnRequisites = ImmutableList.copyOf(requisites);
         }
-        return new MultiblockRecipe(builder.build(), result, nbt, ImmutableList.copyOf(requisites));
+
+        return new MultiblockRecipe(builder.build(), result, nbt, toReturnRequisites);
     }
 }

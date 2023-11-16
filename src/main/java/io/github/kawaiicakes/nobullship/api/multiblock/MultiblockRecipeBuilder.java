@@ -200,13 +200,14 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
             pJson.add("recipe", recipePattern);
             pJson.add("result", jsonResult);
 
-            if (this.requisites == null || this.requisites.isEmpty()) return;
-            JsonArray jsonRequisites = new JsonArray();
-            for (ItemStack item : this.requisites) {
-                JsonElement serialized = ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, item).get().orThrow();
-                jsonRequisites.add(serialized);
+            if (this.requisites != null && !this.requisites.isEmpty()) {
+                JsonArray jsonRequisites = new JsonArray();
+                for (ItemStack item : this.requisites) {
+                    JsonElement serialized = ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, item).get().orThrow();
+                    jsonRequisites.add(serialized);
+                }
+                pJson.add("requisites", jsonRequisites);
             }
-            pJson.add("requisites", jsonRequisites);
         }
 
         @Override
