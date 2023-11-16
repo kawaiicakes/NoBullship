@@ -1,4 +1,4 @@
-package io.github.kawaiicakes.nobullship.multiblock;
+package io.github.kawaiicakes.nobullship.api.multiblock;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
@@ -6,7 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
-import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeBuilder;
+import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;

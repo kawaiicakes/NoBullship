@@ -2,7 +2,7 @@ package io.github.kawaiicakes.nobullship.multiblock.screen;
 
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.SchematicResultSlot;
-import io.github.kawaiicakes.nobullship.multiblock.MultiblockRecipe;
+import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.nbt.ListTag;

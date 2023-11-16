@@ -7,7 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
-import io.github.kawaiicakes.nobullship.multiblock.MultiblockRecipe;
+import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
