@@ -176,6 +176,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
 
         if (multiblockRecipeOptional.isPresent() && multiblockRecipeOptional.get().requisites() != null) {
             ListTag requisiteList = new ListTag();
+            //noinspection DataFlowIssue
             for (ItemStack item : multiblockRecipeOptional.get().requisites()) {
                 requisiteList.add(item.serializeNBT());
             }

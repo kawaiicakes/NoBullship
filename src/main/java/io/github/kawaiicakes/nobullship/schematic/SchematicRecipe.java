@@ -42,11 +42,20 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     }
 
     public ImmutableList<Ingredient> getShapedIngredients() {
-        return ImmutableList.copyOf(shaped);
+        ImmutableList.Builder<Ingredient> toReturn = ImmutableList.builder();
+        // FIXME this looks like it can still be mutated... maybe reimplement this
+        for (Ingredient ingredient : this.shaped) {
+            toReturn.add(ingredient);
+        }
+        return toReturn.build();
     }
 
     public ImmutableList<ItemStack> getShapelessIngredients() {
-        return ImmutableList.copyOf(shapeless);
+        ImmutableList.Builder<ItemStack> toReturn = ImmutableList.builder();
+        for (ItemStack stack : this.shapeless) {
+            toReturn.add(stack.copy());
+        }
+        return toReturn.build();
     }
 
     /**
