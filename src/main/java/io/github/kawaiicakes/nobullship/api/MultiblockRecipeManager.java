@@ -103,7 +103,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                 List<ItemStack> summedContents = getSummedContents(player.getInventory().items);
                 List<ItemStack> requirementContents = getSummedContents(requisites);
                 if (!compareSummedContents(requirementContents, summedContents)) {
-                    level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.87F, 1.0F);
+                    level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
                     Objects.requireNonNull(((ServerPlayer) player))
                             .sendSystemMessage(FAIL2, true);
                     return;
@@ -113,7 +113,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         BlockPattern.BlockPatternMatch match = pattern.find(level, pos);
         if (match == null) {
-            level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.87F, 1.0F);
+            level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
             Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
                     .sendSystemMessage(FAIL, true);
             return;
