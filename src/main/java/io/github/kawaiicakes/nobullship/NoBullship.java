@@ -28,6 +28,7 @@ import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -35,7 +36,9 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
 
+import static io.github.kawaiicakes.nobullship.Config.CONFIG;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.Serializer.INSTANCE;
+import static net.minecraftforge.fml.config.ModConfig.Type.COMMON;
 import static net.minecraftforge.registries.ForgeRegistries.*;
 
 @Mod(NoBullship.MOD_ID)
@@ -94,6 +97,8 @@ public class NoBullship
         MENU_REGISTRY.register(modEventBus);
         SOUND_REGISTRY.register(modEventBus);
         RECIPE_SERIALIZER_REGISTRY.register(modEventBus);
+
+        ModLoadingContext.get().registerConfig(COMMON, CONFIG);
     }
 
     @SubscribeEvent
