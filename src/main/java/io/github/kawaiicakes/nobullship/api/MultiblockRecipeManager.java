@@ -177,9 +177,18 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                 }
             }
             if (itemInHand != null && Objects.requireNonNull(itemInHand.getTag()).contains("nobullshipUses", TAG_INT)) {
-                int uses = itemInHand.getTag().getInt("nobullshipUses");
-                itemInHand.getTag().remove("nobullshipUses");
-                itemInHand.getTag().putInt("nobullshipUses", uses - 1);
+                ItemStack toNewStack = itemInHand;
+                if (itemInHand.getCount() > 1) {
+                    itemInHand.shrink(1);
+                    toNewStack = itemInHand.copy();
+                    toNewStack.setCount(1);
+                }
+                //noinspection DataFlowIssue (since toNewStack is based off itemInHand, it is known that it's not null)
+                int uses = toNewStack.getTag().getInt("nobullshipUses");
+                toNewStack.getTag().remove("nobullshipUses");
+                toNewStack.getTag().putInt("nobullshipUses", uses - 1);
+
+                if (toNewStack != itemInHand && !player.getInventory().add(toNewStack)) player.drop(toNewStack, false);
             }
         }
 
