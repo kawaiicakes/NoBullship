@@ -1,10 +1,13 @@
 package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableList;
 import com.mojang.math.Quaternion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
@@ -13,9 +16,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 
 public class MultiblockPattern extends BlockPattern {
+    protected final ImmutableList<ItemStack> totalBlocks;
 
-    public MultiblockPattern(Predicate<BlockInWorld>[][][] pPattern) {
+    public MultiblockPattern(Predicate<BlockInWorld>[][][] pPattern, NonNullList<ItemStack> totalBlocks) {
         super(pPattern);
+        this.totalBlocks = ImmutableList.copyOf(totalBlocks);
+    }
+
+    public NonNullList<ItemStack> getTotalBlocks() {
+        NonNullList<ItemStack> toReturn = NonNullList.createWithCapacity(this.totalBlocks.size());
+        this.totalBlocks.forEach(stack -> toReturn.add(stack.copy()));
+        return toReturn;
     }
 
     /**
