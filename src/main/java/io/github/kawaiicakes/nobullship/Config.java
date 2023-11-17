@@ -1,10 +1,8 @@
 package io.github.kawaiicakes.nobullship;
 
-import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraftforge.common.ForgeConfigSpec;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Config {
@@ -13,7 +11,6 @@ public class Config {
     public static ForgeConfigSpec.DoubleValue COOLDOWN, DROP_RAW_PERCENT;
     public static ForgeConfigSpec.BooleanValue AUTO_RECIPE, DISABLE_DROP, DROP_RAW;
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> EXCEPTION_RECIPE, EXCEPTION_DROP;
-    public static ForgeConfigSpec.ConfigValue<List<? extends Pair<String, Integer>>> DROP_RATES;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -60,15 +57,6 @@ public class Config {
                 .comment("Acts as a whitelist for automatic recipes when raw_drops is disabled, and a blacklist when enabled.")
                 .translation("config.nobullship.drop_exceptions")
                 .defineList("drop_exceptions", ObjectArrayList.wrap(new String[]{}), (obj) -> obj instanceof String);
-
-        DROP_RATES = builder
-                .comment("If raw_drops is enabled, this allows overrides of specific drop rates.")
-                .translation("config.nobullship.drop_rates")
-                .defineList("drop_rates", new ArrayList<>(), (obj)
-                        -> obj instanceof Pair<?, ?> pair
-                        && pair.getFirst() instanceof String
-                        && pair.getSecond() instanceof Integer
-                );
 
         CONFIG = builder.build();
     }
