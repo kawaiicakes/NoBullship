@@ -69,5 +69,7 @@ public class Config {
                         && pair.getFirst() instanceof String
                         && pair.getSecond() instanceof Integer
                 );
+
+        CONFIG = builder.build();
     }
 }
