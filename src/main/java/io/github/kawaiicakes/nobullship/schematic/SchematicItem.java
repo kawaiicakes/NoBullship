@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.schematic;
 
+import io.github.kawaiicakes.nobullship.Config;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -163,11 +164,9 @@ public class SchematicItem extends Item {
     // So long as a claim mod sets $useItem to DENY in RightClickBlock event, this will not bypass claim mods.
     @Override
     public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext pContext) {
-        // TODO: configurable options for cooldown time
         // Cooldown is added so spamming this isn't possible. BlockPattern#find is an expensive call.
         if (pContext.getPlayer() == null) return InteractionResult.FAIL;
         if (pContext.getPlayer().getCooldowns().isOnCooldown(this)) return InteractionResult.FAIL;
-
 
         if (pContext.getHitResult().getType() != HitResult.Type.BLOCK) return InteractionResult.FAIL;
         if (pContext.getLevel().isClientSide) return InteractionResult.SUCCESS;
@@ -177,7 +176,7 @@ public class SchematicItem extends Item {
         String noBsRecipe = nbt.getString("nobullshipRecipe");
         if (noBsRecipe.isEmpty()) return InteractionResult.FAIL;
 
-        pContext.getPlayer().getCooldowns().addCooldown(this, 20);
+        pContext.getPlayer().getCooldowns().addCooldown(this, (int) (20 * Config.COOLDOWN.get()));
 
         MultiblockRecipeManager.getInstance().trySpawn(new ResourceLocation(noBsRecipe), pContext);
 
