@@ -1,9 +1,13 @@
 package io.github.kawaiicakes.nobullship.api.schematic;
 
+import net.minecraft.core.NonNullList;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -15,8 +19,11 @@ import java.util.function.Consumer;
  * using resources.
  */
 public class SchematicRecipeProvider extends RecipeProvider {
-    public SchematicRecipeProvider(DataGenerator pGenerator) {
+    protected final Map<ResourceLocation, NonNullList<ItemStack>> blocksForDrops;
+
+    public SchematicRecipeProvider(DataGenerator pGenerator, Map<ResourceLocation, NonNullList<ItemStack>> blocksForDrops) {
         super(pGenerator);
+        this.blocksForDrops = blocksForDrops;
     }
 
     @Override

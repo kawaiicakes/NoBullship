@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship;
 
+import io.github.kawaiicakes.nobullship.api.MultiblockDropsLootProvider;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeProvider;
@@ -10,6 +11,7 @@ import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScre
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.inventory.MenuType;
@@ -36,6 +38,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 import static io.github.kawaiicakes.nobullship.Config.CONFIG;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.Serializer.INSTANCE;
@@ -109,9 +113,17 @@ public class NoBullship
                 new MultiblockRecipeProvider(event.getGenerator())
         );
 
+        Map<ResourceLocation, NonNullList<ItemStack>> blocksForDrops
+                = MultiblockRecipeManager.getInstance().getBlockItemsForRecipes();
+
         event.getGenerator().addProvider(
                 event.includeServer(),
-                new SchematicRecipeProvider(event.getGenerator())
+                new SchematicRecipeProvider(event.getGenerator(), blocksForDrops)
+        );
+
+        event.getGenerator().addProvider(
+                event.includeServer(),
+                new MultiblockDropsLootProvider(event.getGenerator(), blocksForDrops)
         );
     }
 

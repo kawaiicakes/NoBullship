@@ -9,6 +9,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -35,10 +36,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.*;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.compareSummedContents;
@@ -61,6 +59,23 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
     protected MultiblockRecipeManager() {
         super(GSON, "entity_recipes");
+    }
+
+    public Map<ResourceLocation, NonNullList<ItemStack>> getBlockItemsForRecipes() {
+        Map<ResourceLocation, NonNullList<ItemStack>> toReturn = new HashMap<>();
+
+        this.recipes.forEach((key, value) -> {
+            NonNullList<ItemStack> blocks = NonNullList.create();
+            blocks.addAll(value.recipe()
+                    .getTotalBlocks()
+                    .stream()
+                    .map(ItemStack::copy)
+                    .toList());
+
+            toReturn.put(key, blocks);
+        });
+
+        return toReturn;
     }
 
     public Optional<MultiblockRecipe> getRecipe(ResourceLocation id) {
