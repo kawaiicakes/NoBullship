@@ -160,4 +160,8 @@ public class BlockInWorldPredicateBuilder {
 
         return toReturn.and(propertiesPredicate).and(strictPropertiesPredicate).and(nbtPredicate);
     }
+
+    public BlockState getBlock() {
+        return this.blockState;
+    }
 }

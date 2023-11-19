@@ -3,12 +3,12 @@ package io.github.kawaiicakes.nobullship.api.multiblock;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Blocks;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import static net.minecraft.data.DataGenerator.Target.DATA_PACK;
+import static net.minecraft.world.level.block.Blocks.REDSTONE_ORE;
 
 public class MultiblockRecipeProvider implements DataProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -46,7 +47,7 @@ public class MultiblockRecipeProvider implements DataProvider {
     protected void buildRecipes(Consumer<FinishedMultiblockRecipe> consumer) {
         MultiblockRecipeBuilder
                 .of(new ResourceLocation("creeper"))
-                .where('#', Blocks.REDSTONE_ORE.defaultBlockState())
+                .where('#', BlockInWorldPredicateBuilder.of(REDSTONE_ORE))
                 .aisle(
                         " # ",
                         " # ",

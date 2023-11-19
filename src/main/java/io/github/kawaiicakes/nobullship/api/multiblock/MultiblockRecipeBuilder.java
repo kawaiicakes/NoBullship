@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.core.NonNullList;
@@ -21,7 +22,6 @@ import org.slf4j.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -43,7 +43,8 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * @param nbt the <code>CompoundTag</code> NBT data to be given to the spawned entity.
      */
     protected MultiblockRecipeBuilder(ResourceLocation result, @Nullable CompoundTag nbt) {
-        super();
+        this.lookup.put(' ', BlockInWorld.hasState(state -> state.is(AIR)));
+        this.lookup.put('$', (block) -> true);
         this.result = result;
         this.nbt = nbt;
     }
@@ -65,7 +66,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      *               spawned.
      */
     public static MultiblockRecipeBuilder of(ResourceLocation result, @Nullable CompoundTag nbt) {
-        return (MultiblockRecipeBuilder) (new MultiblockRecipeBuilder(result, nbt)).where(' ', (state) -> state.getState().is(AIR)).where('$', (state) -> true);
+        return new MultiblockRecipeBuilder(result, nbt);
     }
 
     /**
@@ -161,15 +162,18 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * Defines what <code>char</code> corresponds to a <code>BlockState</code>. All <code>char</code>s
      * used in calls to <code>#aisle</code> must be defined using this method. ' ' and '$' are used as
      * air and a wildcard respectively. These are reserved symbols; don't use them!
+     * @param block the <code>{@link BlockInWorldPredicateBuilder}</code> representing the block this symbol
+     *              is assigned to. The <code>BlockInWorldPredicateBuilder</code> allows for very fine
+     *              control over defining the block.
      */
-    public MultiblockRecipeBuilder where(char pSymbol, BlockState state) {
+    public MultiblockRecipeBuilder where(char pSymbol, BlockInWorldPredicateBuilder block) {
         if (pSymbol == ' ' || pSymbol == '$') {
             LOGGER.error("{} is a reserved character!", pSymbol);
             throw new IllegalArgumentException(pSymbol + " is a reserved character!");
         }
 
-        this.lookupSimple.put(String.valueOf(pSymbol), state);
-        return (MultiblockRecipeBuilder) super.where(pSymbol, BlockInWorld.hasState(testState -> Objects.equals(testState, state)));
+        this.lookupSimple.put(String.valueOf(pSymbol), block.getBlock());
+        return (MultiblockRecipeBuilder) super.where(pSymbol, block.build());
     }
 
     /**
@@ -177,8 +181,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      */
     @Override
     public BlockPatternBuilder where(char pSymbol, Predicate<BlockInWorld> pBlockMatcher) {
-        //throw new UnsupportedOperationException("This overload of #where does not function!");
-        return super.where(pSymbol, pBlockMatcher);
+        throw new UnsupportedOperationException("This overload of #where does not function!");
     }
 
     public static class Result implements FinishedMultiblockRecipe {

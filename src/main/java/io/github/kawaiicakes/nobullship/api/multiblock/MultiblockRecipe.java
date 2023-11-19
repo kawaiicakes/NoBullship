@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.core.NonNullList;
@@ -15,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
@@ -110,7 +110,7 @@ public record MultiblockRecipe(
             JsonObject blockStateJson = entry.getValue().getAsJsonObject().getAsJsonObject("state");
 
             if (blockStateJson == null) {
-                builder.where(entry.getKey().charAt(0), BlockInWorld.hasState(testState -> testState.is(block)));
+                builder.where(entry.getKey().charAt(0), BlockInWorldPredicateBuilder.of(block));
                 continue;
             }
 
@@ -127,13 +127,8 @@ public record MultiblockRecipe(
                 deserializedState.put(property, propertyValue);
             }
 
-            builder.where(entry.getKey().charAt(0), BlockInWorld.hasState(testState -> {
-                for (Map.Entry<Property<?>, String> propertyEntry : deserializedState.entrySet()) {
-                    if (!testState.hasProperty(propertyEntry.getKey())) return false;
-                    if (!testState.getValue(propertyEntry.getKey()).toString().equals(propertyEntry.getValue())) return false;
-                }
-                return true;
-            }));
+            // TODO: allow multiple blockstate properties
+            builder.where(entry.getKey().charAt(0), BlockInWorldPredicateBuilder.of(block));
         }
 
         for (int i = jsonRecipe.size() - 1; i >= 0 ; i--) {
