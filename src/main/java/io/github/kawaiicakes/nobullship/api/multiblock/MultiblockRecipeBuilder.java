@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import static net.minecraft.world.level.block.Blocks.AIR;
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
@@ -109,6 +110,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     protected NonNullList<ItemStack> totalBlocks() {
         NonNullList<ItemStack> toReturn = NonNullList.create();
 
+        /*
         Map<Character, Integer> totalCount = new HashMap<>();
         this.lookupSimple.keySet().forEach(key -> totalCount.put(key.charAt(0), 0));
 
@@ -129,6 +131,8 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
                     return itemStack;
                 })
                 .forEach(toReturn::add);
+
+         */
 
         return toReturn;
     }
@@ -165,7 +169,16 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
         }
 
         this.lookupSimple.put(String.valueOf(pSymbol), state);
-        return (MultiblockRecipeBuilder) this.where(pSymbol, BlockInWorld.hasState(testState -> Objects.equals(testState, state)));
+        return (MultiblockRecipeBuilder) super.where(pSymbol, BlockInWorld.hasState(testState -> Objects.equals(testState, state)));
+    }
+
+    /**
+     * Don't use this!
+     */
+    @Override
+    public BlockPatternBuilder where(char pSymbol, Predicate<BlockInWorld> pBlockMatcher) {
+        //throw new UnsupportedOperationException("This overload of #where does not function!");
+        return super.where(pSymbol, pBlockMatcher);
     }
 
     public static class Result implements FinishedMultiblockRecipe {
@@ -193,7 +206,6 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
 
         @Override
         public void serializeRecipeData(JsonObject pJson) {
-            // TODO - add conditional serialization stuff
             JsonObject keyMappings = new JsonObject();
             for (Map.Entry<String, BlockState> entry : this.lookup.entrySet()) {
                 if (entry.getKey().equals(" ")) continue;
