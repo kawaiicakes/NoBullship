@@ -99,7 +99,8 @@ public class BlockInWorldPredicateBuilder {
     public BlockInWorldPredicateBuilder requireStrictNbt(CompoundTag tag) {
         if (!(this.blockState.getBlock() instanceof EntityBlock)) throw new IllegalArgumentException(this.blockState + " does not have a block entity, so cannot have NBT data!");
         tag.putBoolean("softDependency", false);
-        this.blockEntityNbtData = tag;
+        if (this.blockEntityNbtData == null) this.blockEntityNbtData = new CompoundTag();
+        this.blockEntityNbtData.merge(tag);
         return this;
     }
 
@@ -114,7 +115,8 @@ public class BlockInWorldPredicateBuilder {
     public BlockInWorldPredicateBuilder requireNbt(CompoundTag tag) {
         if (!(this.blockState.getBlock() instanceof EntityBlock)) throw new IllegalArgumentException(this.blockState + " does not have a block entity, so cannot have NBT data!");
         tag.putBoolean("softDependency", true);
-        this.blockEntityNbtData = tag;
+        if (this.blockEntityNbtData == null) this.blockEntityNbtData = new CompoundTag();
+        this.blockEntityNbtData.merge(tag);
         return this;
     }
 
@@ -123,30 +125,39 @@ public class BlockInWorldPredicateBuilder {
      * specified by this builder.
      */
     public Predicate<BlockInWorld> build() {
-        Predicate<BlockInWorld> defaultPredicate = BlockInWorld.hasState(state -> state.is(this.blockState.getBlock()));
-        Predicate<BlockInWorld> toReturn = defaultPredicate;
+        Predicate<BlockInWorld> toReturn = BlockInWorld.hasState(state -> state.is(this.blockState.getBlock()));
 
         if (this.properties.isEmpty() && this.strictProperties.isEmpty() && this.blockEntityNbtData == null)
             return toReturn;
 
+        Predicate<BlockInWorld> propertiesPredicate = (block) -> true;
         if (!this.properties.isEmpty() && this.strictProperties.isEmpty()) {
-
+            propertiesPredicate = (block) -> {
+                for (Map.Entry<Property<?>, Set<Comparable<?>>> entry : this.properties.entrySet()) {
+                    if (!entry.getValue().contains(block.getState().getValue(entry.getKey()))) return false;
+                }
+                return true;
+            };
         }
 
+        Predicate<BlockInWorld> strictPropertiesPredicate = (block) -> true;
         if (!this.strictProperties.isEmpty())
-            toReturn = (block) -> block.getState()
+            strictPropertiesPredicate = (block) -> block.getState()
                     .getValues()
                     .entrySet()
                     .stream()
-                    .allMatch(entry -> this.strictProperties.get(entry.getKey()).contains(entry.getValue()))
-                    && defaultPredicate.test(block);
+                    .allMatch(entry -> this.strictProperties.get(entry.getKey()).contains(entry.getValue()));
 
+        Predicate<BlockInWorld> nbtPredicate = (block) -> true;
         if (this.blockEntityNbtData != null) {
-            for (String key : this.blockEntityNbtData.getAllKeys()) {
-                // TODO
-            }
+            nbtPredicate = (block) -> {
+                for (String key : this.blockEntityNbtData.getAllKeys()) {
+                    // TODO: implement this and make use of the tag softDependency
+                }
+                return true;
+            };
         }
 
-        return toReturn;
+        return toReturn.and(propertiesPredicate).and(strictPropertiesPredicate).and(nbtPredicate);
     }
 }
