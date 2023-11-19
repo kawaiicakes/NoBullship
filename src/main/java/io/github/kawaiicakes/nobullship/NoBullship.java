@@ -1,6 +1,6 @@
 package io.github.kawaiicakes.nobullship;
 
-import io.github.kawaiicakes.nobullship.api.MultiblockDropsLootProvider;
+import io.github.kawaiicakes.nobullship.multiblock.MultiblockDropsLootProvider;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeProvider;
