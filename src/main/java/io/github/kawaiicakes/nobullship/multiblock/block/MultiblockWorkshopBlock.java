@@ -1,6 +1,8 @@
 package io.github.kawaiicakes.nobullship.multiblock.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,10 +12,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
+
+import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
 
 public class MultiblockWorkshopBlock extends BaseEntityBlock {
     public MultiblockWorkshopBlock(Properties pProperties) {
@@ -69,6 +75,12 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
         if (!stack.hasCustomHoverName()) return;
 
         entity.setCustomName(stack.getHoverName());
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
+        return pBlockEntityType == WORKSHOP_BLOCK_ENTITY.get() ? MultiblockWorkshopBlockEntity::tick : null;
     }
 
     @SuppressWarnings("deprecation")

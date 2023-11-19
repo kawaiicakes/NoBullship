@@ -184,6 +184,7 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
             output.getTag().put("nobullshipRequisites", requisiteList);
         }
 
+        this.entity.setActiveRecipe(optional.orElse(null));
         this.setResult(output);
     }
 

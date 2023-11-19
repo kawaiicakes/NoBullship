@@ -1,16 +1,24 @@
 package io.github.kawaiicakes.nobullship.multiblock.block;
 
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
+import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -42,6 +50,8 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     public static final byte FILLED_SCHEM_SLOT = 19;
     public static final Component DEFAULT_NAME = Component.translatable("block.nobullship.workshop");
 
+    @Nullable
+    protected SchematicRecipe hasRecipe;
     protected LazyOptional<IItemHandler> lazyItemHandler = LazyOptional.empty();
     public final ItemStackHandler itemHandler = new ItemStackHandler(20) {
         @Override
@@ -58,6 +68,10 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
 
     public MultiblockWorkshopBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(WORKSHOP_BLOCK_ENTITY.get(), pPos, pBlockState);
+    }
+
+    public void setActiveRecipe(@Nullable SchematicRecipe recipe) {
+        this.hasRecipe = recipe;
     }
 
     @Override
@@ -183,5 +197,15 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     @Override
     protected Component getDefaultName() {
         return DEFAULT_NAME;
+    }
+
+    public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T t) {
+        if (!(level instanceof ServerLevel serverLevel)) return;
+        if (!(t instanceof MultiblockWorkshopBlockEntity entity)) return;
+
+        if (entity.hasRecipe != null && entity.hasRecipe.shapedMatches(entity)) {
+            // TODO: custom particle type
+            serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK_MARKER, Blocks.DIRT.defaultBlockState()), (double) pos.getX() + 0.5, (double) pos.getY() + 2.5, (double) pos.getZ() + 0.5, 1, 0, 0, 0, 0);
+        }
     }
 }
