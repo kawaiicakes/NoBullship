@@ -56,6 +56,9 @@ public class MultiblockPattern extends BlockPattern {
      * <br><br>
      * This is explained in detail here to be referenced when I optimize this logic... For now, I've actually made the
      * performance worse since the previous volume was too small to properly account for asymmetric 3D patterns.
+     * <br><br>
+     * I've since only made this check 4 orientations as opposed to 24; namely the four cardinal directions while upright.
+     * This should significantly improve performance for minimal tradeoff.
      */
     @Nullable
     @Override
@@ -65,13 +68,9 @@ public class MultiblockPattern extends BlockPattern {
 
         for(BlockPos blockpos : BlockPos.betweenClosed(pPos.offset(-i + 1, -i + 1, -i + 1), pPos.offset(i - 1, i - 1, i - 1))) {
             for(Direction direction : Direction.values()) {
-                for(Direction direction1 : Direction.values()) {
-                    if (direction1 != direction && direction1 != direction.getOpposite()) {
-                        BlockPattern.BlockPatternMatch blockpattern$blockpatternmatch = this.matches(blockpos, direction, direction1, loadingcache);
-                        if (blockpattern$blockpatternmatch != null) {
-                            return blockpattern$blockpatternmatch;
-                        }
-                    }
+                BlockPattern.BlockPatternMatch match = this.matches(blockpos, direction, Direction.UP, loadingcache);
+                if (match != null) {
+                    return match;
                 }
             }
         }
