@@ -2,25 +2,43 @@ package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
-import com.mojang.math.Quaternion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 public class MultiblockPattern extends BlockPattern {
+    protected final ImmutableList<BlockState> palette;
     protected final ImmutableList<ItemStack> totalBlocks;
 
-    public MultiblockPattern(Predicate<BlockInWorld>[][][] pPattern, NonNullList<ItemStack> totalBlocks) {
+    public MultiblockPattern(Predicate<BlockInWorld>[][][] pPattern, List<BlockState> palette, NonNullList<ItemStack> totalBlocks) {
         super(pPattern);
+        this.palette = ImmutableList.copyOf(palette);
         this.totalBlocks = ImmutableList.copyOf(totalBlocks);
+    }
+
+    public boolean patternContains(BlockState state) {
+        for (BlockState block : this.palette) {
+            if (state.is(block.getBlock())) return true;
+        }
+        return false;
+    }
+
+    public ImmutableList<BlockState> getPalette() {
+        ImmutableList.Builder<BlockState> builder = ImmutableList.builder();
+        for (BlockState state : this.palette) {
+            builder.add(state);
+        }
+        return builder.build();
     }
 
     public NonNullList<ItemStack> getTotalBlocks() {
@@ -58,13 +76,17 @@ public class MultiblockPattern extends BlockPattern {
      * performance worse since the previous volume was too small to properly account for asymmetric 3D patterns.
      * <br><br>
      * I've since only made this check 4 orientations as opposed to 24; namely the four cardinal directions while upright.
-     * This should significantly improve performance for minimal tradeoff.
+     * This should significantly improve performance for minimal tradeoff. I've also added an early return if the checked
+     * block at the <code>BlockPos</code> does not exist in the recipe.
      */
     @Nullable
     @Override
     public BlockPatternMatch find(LevelReader pLevel, BlockPos pPos) {
         LoadingCache<BlockPos, BlockInWorld> loadingcache = createLevelCache(pLevel, false);
         int i = Math.max(Math.max(this.getWidth(), this.getHeight()), this.getDepth());
+
+        BlockState blockAt = pLevel.getBlockState(pPos);
+        if (!this.patternContains(blockAt)) return null;
 
         for(BlockPos blockpos : BlockPos.betweenClosed(pPos.offset(-i + 1, -i + 1, -i + 1), pPos.offset(i - 1, i - 1, i - 1))) {
             for(Direction direction : Direction.values()) {
@@ -92,14 +114,6 @@ public class MultiblockPattern extends BlockPattern {
                 thumbNormal.getX() * -pThumbOffset + palmNormal.getX() * pPalmOffset + fingerNormal.getX() * pFingerOffset,
                 thumbNormal.getY() * -pThumbOffset + palmNormal.getY() * pPalmOffset + fingerNormal.getY() * pFingerOffset,
                 thumbNormal.getZ() * -pThumbOffset + palmNormal.getZ() * pPalmOffset + fingerNormal.getZ() * pFingerOffset
-        );
-    }
-
-    protected static BlockPos rotatePoint(Quaternion rot, BlockPos pos) {
-        return new BlockPos(
-                (rot.r() * pos.getX()) - (rot.j() * pos.getZ()) + (rot.k() * pos.getY()),
-                (rot.r() * pos.getY()) + (rot.i() * pos.getZ()) - (rot.k() * pos.getX()),
-                (rot.r() * pos.getZ()) - (rot.i() * pos.getY()) + (rot.j() * pos.getZ())
         );
     }
 }

@@ -105,13 +105,12 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      */
     @Override
     public MultiblockPattern build() {
-        return new MultiblockPattern(this.createPattern(), this.totalBlocks());
+        return new MultiblockPattern(this.createPattern(), (List<BlockState>) this.lookupSimple.values(), this.totalBlocks());
     }
 
     protected NonNullList<ItemStack> totalBlocks() {
         NonNullList<ItemStack> toReturn = NonNullList.create();
 
-        /*
         Map<Character, Integer> totalCount = new HashMap<>();
         this.lookupSimple.keySet().forEach(key -> totalCount.put(key.charAt(0), 0));
 
@@ -132,8 +131,6 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
                     return itemStack;
                 })
                 .forEach(toReturn::add);
-
-         */
 
         return toReturn;
     }
