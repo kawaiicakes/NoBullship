@@ -66,12 +66,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         this.recipes.forEach((key, value) -> {
             NonNullList<ItemStack> blocks = NonNullList.create();
-            blocks.addAll(value.recipe()
-                    .getTotalBlocks()
-                    .stream()
-                    .map(ItemStack::copy)
-                    .toList());
-
+            blocks.addAll(value.recipe().getTotalBlocks());
             toReturn.put(key, blocks);
         });
 
