@@ -172,7 +172,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
             throw new IllegalArgumentException(pSymbol + " is a reserved character!");
         }
 
-        this.lookupSimple.put(String.valueOf(pSymbol), block.getBlock());
+        this.lookupSimple.put(String.valueOf(pSymbol), block.getBlockState());
         return (MultiblockRecipeBuilder) super.where(pSymbol, block.build());
     }
 

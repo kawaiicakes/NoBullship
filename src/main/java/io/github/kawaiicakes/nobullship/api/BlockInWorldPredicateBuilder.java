@@ -161,7 +161,7 @@ public class BlockInWorldPredicateBuilder {
         return toReturn.and(propertiesPredicate).and(strictPropertiesPredicate).and(nbtPredicate);
     }
 
-    public BlockState getBlock() {
+    public BlockState getBlockState() {
         return this.blockState;
     }
 }
