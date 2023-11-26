@@ -105,7 +105,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      */
     @Override
     public MultiblockPattern build() {
-        return new MultiblockPattern(this.createPattern(), (List<BlockState>) this.lookupSimple.values(), this.totalBlocks());
+        return new MultiblockPattern(this.createPattern(), this.lookupSimple.values().stream().toList(), this.totalBlocks());
     }
 
     protected NonNullList<ItemStack> totalBlocks() {
