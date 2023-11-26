@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
+import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -50,6 +51,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final Component FAIL = Component.translatable("chat.nobullship.fail").withStyle(RED);
     public static final Component FAIL2 = Component.translatable("chat.nobullship.fail2").withStyle(RED);
+    public static final Component FAIL3 = Component.translatable("chat.nobullship.fail3").withStyle(RED);
     protected static MultiblockRecipeManager INSTANCE = null;
 
     /**
@@ -98,9 +100,14 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         MultiblockRecipe cachedRecipe
                 = this.recipes.getOrDefault(recipeId, null);
-        if (cachedRecipe == null) return;
+        if (cachedRecipe == null) {
+            level.playSound(null, context.getClickedPos(), CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
+            Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
+                    .sendSystemMessage(FAIL3, true);
+            return;
+        }
 
-        BlockPattern pattern = cachedRecipe.recipe();
+        MultiblockPattern pattern = cachedRecipe.recipe();
         ResourceLocation resultLocation = cachedRecipe.result();
         CompoundTag nbt = cachedRecipe.nbt();
 

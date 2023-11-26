@@ -12,6 +12,7 @@
 
   "chat.nobullship.fail": "Construction failed!",
   "chat.nobullship.fail2": "You do not have enough items!",
+  "chat.nobullship.fail3": "There is a problem with the recipe JSON!",
 
   "tooltip.nobullship.blank_schematic": "Schematic is blank.",
   "tooltip.nobullship.filled_schematic": "Contains %1$s.",
