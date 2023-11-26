@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class MultiblockPattern extends BlockPattern {
+    public static final Direction[] CARDINAL = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
     protected final ImmutableList<BlockState> palette;
     protected final ImmutableList<ItemStack> totalBlocks;
 
@@ -89,7 +90,7 @@ public class MultiblockPattern extends BlockPattern {
         if (!this.patternContains(blockAt)) return null;
 
         for(BlockPos blockpos : BlockPos.betweenClosed(pPos.offset(-i + 1, -i + 1, -i + 1), pPos.offset(i - 1, i - 1, i - 1))) {
-            for(Direction direction : Direction.values()) {
+            for (Direction direction : CARDINAL) {
                 BlockPattern.BlockPatternMatch match = this.matches(blockpos, direction, Direction.UP, loadingcache);
                 if (match != null) {
                     return match;
