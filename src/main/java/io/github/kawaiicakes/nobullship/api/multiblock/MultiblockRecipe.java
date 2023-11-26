@@ -122,13 +122,13 @@ public record MultiblockRecipe(
             for (Map.Entry<String, JsonElement> stateEntry : blockStateJson.entrySet()) {
                 if (!stateEntry.getValue().isJsonArray()) {
                     LOGGER.error("Values for property {} are not a valid JSON array!", stateEntry.getKey());
-                    continue;
+                    return null;
                 }
 
                 Property<?> property = block.getStateDefinition().getProperty(stateEntry.getKey());
                 if (property == null) {
                     LOGGER.error("Property {} does not exist for {}", stateEntry.getKey(), blockLocation);
-                    continue;
+                    return null;
                 }
 
                 if (blockStateJson.get(stateEntry.getKey()) == null) {
