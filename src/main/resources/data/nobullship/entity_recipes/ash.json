@@ -3,7 +3,9 @@
     "A": {
       "block": "minecraft:redstone_ore",
       "state": {
-        "lit": "false"
+        "lit": [
+          "false"
+        ]
       }
     },
     "S": {
