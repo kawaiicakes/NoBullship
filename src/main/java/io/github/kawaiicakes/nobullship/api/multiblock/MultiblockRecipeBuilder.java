@@ -117,6 +117,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
         for (String[] strings : this.pattern) {
             for (String string : strings) {
                 for (char character : string.toCharArray()) {
+                    if (character == ' ' || character == '$') continue;
                     int count = totalCount.get(character);
                     totalCount.put(character, ++count);
                 }
