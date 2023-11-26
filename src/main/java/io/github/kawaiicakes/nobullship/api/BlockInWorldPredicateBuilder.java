@@ -63,7 +63,7 @@ public class BlockInWorldPredicateBuilder {
      */
     public BlockInWorldPredicateBuilder requireProperties(Property<?> property, Set<Comparable<?>> value) {
         if (!this.blockState.getValues().containsKey(property)) throw new IllegalArgumentException(property + " does not belong to " + this.blockState + "!");
-        if (!property.getPossibleValues().contains(value)) throw new IllegalArgumentException(value + " cannot be associated with " + property + "!");
+        if (value.stream().anyMatch(comparable -> !property.getPossibleValues().contains(comparable))) throw new IllegalArgumentException(value + " cannot be associated with " + property + "!");
 
         this.properties.putIfAbsent(property, new HashSet<>());
         if (this.properties.containsKey(property)) {
