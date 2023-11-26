@@ -162,7 +162,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * air and a wildcard respectively. These are reserved symbols; don't use them!
      * @param block the <code>{@link BlockInWorldPredicateBuilder}</code> representing the block this symbol
      *              is assigned to. The <code>BlockInWorldPredicateBuilder</code> allows for very fine
-     *              control over defining the block.
+     *              control over defining the permitted block state(s).
      */
     public MultiblockRecipeBuilder where(char pSymbol, BlockInWorldPredicateBuilder block) {
         if (pSymbol == ' ' || pSymbol == '$') {
@@ -176,6 +176,9 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
 
     /**
      * Don't use this!
+     * This has been made non-functional because I have no reasonable way of getting the blocks that actually
+     * make up the pattern in this method; this stops me from being able to calculate how many/what kind of
+     * blocks are in the recipe.
      */
     @Override
     public BlockPatternBuilder where(char pSymbol, Predicate<BlockInWorld> pBlockMatcher) {
