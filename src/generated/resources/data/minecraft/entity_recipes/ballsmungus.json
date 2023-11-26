@@ -3,7 +3,9 @@
     "#": {
       "block": "minecraft:redstone_ore",
       "state": {
-        "lit": "false"
+        "lit": [
+          "false"
+        ]
       }
     }
   },
@@ -17,8 +19,8 @@
   "result": {
     "entity": "minecraft:creeper",
     "nbt": {
-      "powered": true,
-      "ExplosionRadius": 60
+      "ExplosionRadius": 60,
+      "powered": 1
     }
   }
 }

@@ -86,7 +86,7 @@ public record MultiblockRecipe(
 
         ResourceLocation result = new ResourceLocation(jsonResult.getAsJsonPrimitive("entity").getAsString());
 
-
+        // FIXME: converted boolean values turn into either 0 or 1. Keep this in mind when implementing deserialization
         CompoundTag nbt = null;
         if (jsonResult.has("nbt")) {
             nbt = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, jsonResult.get("nbt"));

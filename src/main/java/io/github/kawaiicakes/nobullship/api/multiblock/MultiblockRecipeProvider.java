@@ -8,7 +8,9 @@ import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -45,14 +47,22 @@ public class MultiblockRecipeProvider implements DataProvider {
     }
 
     protected void buildRecipes(Consumer<FinishedMultiblockRecipe> consumer) {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("powered", true);
+        tag.putInt("ExplosionRadius", 60);
+
         MultiblockRecipeBuilder
                 .of(new ResourceLocation("creeper"))
-                .where('#', BlockInWorldPredicateBuilder.of(REDSTONE_ORE))
+                .where('#', BlockInWorldPredicateBuilder
+                        .of(REDSTONE_ORE)
+                        .requireProperty(BooleanProperty.create("lit"), false)
+                )
                 .aisle(
                         " # ",
                         " # ",
                         "###"
                 )
+                .setTagOfResult(tag)
                 .save(consumer, new ResourceLocation("ballsmungus"));
     }
 
