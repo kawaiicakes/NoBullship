@@ -61,7 +61,7 @@ public class BlockInWorldPredicateBuilder {
      * key already exists, the passed value will be added to the <code>Set</code> of "allowed" values for that
      * property.
      */
-    public BlockInWorldPredicateBuilder requireProperty(Property<?> property, Set<Comparable<?>> value) {
+    public BlockInWorldPredicateBuilder requireProperties(Property<?> property, Set<Comparable<?>> value) {
         if (!this.blockState.getValues().containsKey(property)) throw new IllegalArgumentException(property + " does not belong to " + this.blockState + "!");
         if (!property.getPossibleValues().contains(value)) throw new IllegalArgumentException(value + " cannot be associated with " + property + "!");
 
