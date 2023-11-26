@@ -57,7 +57,7 @@ public record MultiblockRecipe(
     }
 
     /**
-     * This shit is made like this to ensure I return a shallow copy; it kept returning mutable values
+     * This shit is made like this to ensure I return a deep copy; it kept returning mutable values
      */
     @Nullable
     @Override
