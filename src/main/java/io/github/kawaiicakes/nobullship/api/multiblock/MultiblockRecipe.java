@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
@@ -94,41 +95,72 @@ public record MultiblockRecipe(
 
         MultiblockRecipeBuilder builder = MultiblockRecipeBuilder.of(result);
 
-        for (Map.Entry<String, JsonElement> entry : jsonKeys.entrySet()) {
-            if (Objects.equals(entry.getKey(), " ") || Objects.equals(entry.getKey(), "$")) {
-                LOGGER.error("{} is a reserved character", entry.getKey());
+        for (Map.Entry<String, JsonElement> keyEntry : jsonKeys.entrySet()) {
+            if (Objects.equals(keyEntry.getKey(), " ") || Objects.equals(keyEntry.getKey(), "$")) {
+                LOGGER.error("{} is a reserved character", keyEntry.getKey());
                 return null;
             }
 
-            JsonElement mappedCharacterBlock = entry.getValue().getAsJsonObject().get("block");
+            JsonElement mappedCharacterBlock = keyEntry.getValue().getAsJsonObject().get("block");
 
-            if (mappedCharacterBlock == null) return null;
+            if (mappedCharacterBlock == null) {
+                LOGGER.error("There is no block associated with this recipe!");
+                return null;
+            }
 
             ResourceLocation blockLocation = new ResourceLocation(mappedCharacterBlock.getAsString());
             Block block = RegistryObject.create(blockLocation, BLOCKS).get();
 
-            JsonObject blockStateJson = entry.getValue().getAsJsonObject().getAsJsonObject("state");
+            JsonObject blockStateJson = keyEntry.getValue().getAsJsonObject().getAsJsonObject("state");
 
             if (blockStateJson == null) {
-                builder.where(entry.getKey().charAt(0), BlockInWorldPredicateBuilder.of(block));
+                builder.where(keyEntry.getKey().charAt(0), BlockInWorldPredicateBuilder.of(block));
                 continue;
             }
 
-            final Map<Property<?>, String> deserializedState = new HashMap<>(blockStateJson.size());
-            for (Map.Entry<String, JsonElement> keyPair : blockStateJson.entrySet()) {
-                Property<?> property = block.getStateDefinition().getProperty(keyPair.getKey());
-                if (property == null) {
-                    LOGGER.error("Property {} does not exist for {}", keyPair.getKey(), blockLocation);
+            final Map<Property<?>, Set<String>> deserializedState = new HashMap<>(blockStateJson.size());
+            for (Map.Entry<String, JsonElement> stateEntry : blockStateJson.entrySet()) {
+                if (!stateEntry.getValue().isJsonArray()) {
+                    LOGGER.error("Values for property {} are not a valid JSON array!", stateEntry.getKey());
                     continue;
                 }
 
-                if (blockStateJson.get(keyPair.getKey()) == null) return null;
-                String propertyValue = blockStateJson.get(keyPair.getKey()).getAsString();
-                deserializedState.put(property, propertyValue);
+                Property<?> property = block.getStateDefinition().getProperty(stateEntry.getKey());
+                if (property == null) {
+                    LOGGER.error("Property {} does not exist for {}", stateEntry.getKey(), blockLocation);
+                    continue;
+                }
+
+                if (blockStateJson.get(stateEntry.getKey()) == null) {
+                    // wtf is this doing??? why did I write this? It seems pretty roundabout...
+                    return null;
+                }
+
+                Set<String> propertyValues = new HashSet<>();
+                for (JsonElement element : stateEntry.getValue().getAsJsonArray()) {
+                    if (!element.isJsonPrimitive()) {
+                        LOGGER.error("Element {} in value definition for property {} is not a valid primitive!", element, stateEntry.getKey());
+                        return null;
+                    }
+                    propertyValues.add(element.getAsString());
+                }
+
+                deserializedState.put(property, propertyValues);
             }
 
-            // TODO: allow multiple blockstate properties
-            builder.where(entry.getKey().charAt(0), BlockInWorldPredicateBuilder.of(block));
+            BlockInWorldPredicateBuilder predicateBuilder = BlockInWorldPredicateBuilder.of(block);
+            for (Map.Entry<Property<?>, Set<String>> stateEntry : deserializedState.entrySet()) {
+                predicateBuilder.requireProperties(stateEntry.getKey(),
+                        stateEntry.getValue()
+                                .stream()
+                                .map(stateEntry.getKey()::getValue)
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .collect(Collectors.toSet())
+                );
+            }
+
+            builder.where(keyEntry.getKey().charAt(0), predicateBuilder);
         }
 
         for (int i = jsonRecipe.size() - 1; i >= 0 ; i--) {
