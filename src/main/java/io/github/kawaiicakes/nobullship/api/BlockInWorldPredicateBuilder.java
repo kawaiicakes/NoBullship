@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.api;
 
+import com.google.gson.JsonArray;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -150,7 +151,24 @@ public class BlockInWorldPredicateBuilder {
         return toReturn.and(propertiesPredicate).and(nbtPredicate);
     }
 
-    public BlockState getBlockState() {
+    /**
+     * Returns the default <code>BlockState</code> of the <code>Block</code> passed to this builder.
+     */
+    public BlockState getDefaultBlockState() {
         return this.blockState;
+    }
+
+    /**
+     * Returns a <code>JsonArray</code> containing the values at the passed property.
+     */
+    public JsonArray getPropertyValuesAsJsonArray(Property<?> property) {
+        if (!this.properties.containsKey(property)) throw new IllegalArgumentException("No such property " + property + " exists for this builder!");
+        JsonArray toReturn = new JsonArray();
+        this.properties.get(property).forEach(value -> toReturn.add(value.toString()));
+        return toReturn;
+    }
+
+    public boolean isRequiredProperty(Property<?> property) {
+        return this.properties.containsKey(property);
     }
 }

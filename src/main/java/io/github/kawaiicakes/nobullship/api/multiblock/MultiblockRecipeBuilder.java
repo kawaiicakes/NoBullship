@@ -13,9 +13,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -35,7 +35,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     protected CompoundTag nbt;
     @Nullable
     protected NonNullList<ItemStack> requisites;
-    protected final Map<String, BlockState> lookupSimple = new HashMap<>();
+    protected final Map<String, BlockInWorldPredicateBuilder> lookupSimple = new HashMap<>();
 
     /**
      * This constructor is only intended to be accessed by subclassing types. This is so the static <code>#of</code>
@@ -73,7 +73,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * Sets the <code>CompoundTag</code> NBT data to be given to the spawned entity.
      * e.g. Setting a creeper's blast radius to 300.
      */
-    public MultiblockRecipeBuilder setTag(CompoundTag tag) {
+    public MultiblockRecipeBuilder setTagOfResult(CompoundTag tag) {
         this.nbt = tag;
         return this;
     }
@@ -105,7 +105,9 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      */
     @Override
     public MultiblockPattern build() {
-        return new MultiblockPattern(this.createPattern(), this.lookupSimple.values().stream().toList(), this.totalBlocks());
+        return new MultiblockPattern(
+                this.createPattern(),
+                this.lookupSimple.values().stream().map(BlockInWorldPredicateBuilder::getDefaultBlockState).toList(), this.totalBlocks());
     }
 
     protected NonNullList<ItemStack> totalBlocks() {
@@ -127,7 +129,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
         totalCount.entrySet()
                 .stream()
                 .map(entry -> {
-                    ItemStack itemStack = new ItemStack(this.lookupSimple.get(String.valueOf(entry.getKey())).getBlock());
+                    ItemStack itemStack = new ItemStack(this.lookupSimple.get(String.valueOf(entry.getKey())).getDefaultBlockState().getBlock());
                     itemStack.setCount(entry.getValue());
                     return itemStack;
                 })
@@ -170,7 +172,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
             throw new IllegalArgumentException(pSymbol + " is a reserved character!");
         }
 
-        this.lookupSimple.put(String.valueOf(pSymbol), block.getBlockState());
+        this.lookupSimple.put(String.valueOf(pSymbol), block);
         return (MultiblockRecipeBuilder) super.where(pSymbol, block.build());
     }
 
@@ -193,11 +195,11 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
         protected final List<String[]> recipe;
         @Nullable
         protected final NonNullList<ItemStack> requisites;
-        protected final Map<String, BlockState> lookup;
+        protected final Map<String, BlockInWorldPredicateBuilder> lookup;
         protected final int height;
         protected final int width;
 
-        public Result(ResourceLocation id, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, @Nullable NonNullList<ItemStack> requisites, Map<String, BlockState> lookup, int height, int width) {
+        public Result(ResourceLocation id, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, @Nullable NonNullList<ItemStack> requisites, Map<String, BlockInWorldPredicateBuilder> lookup, int height, int width) {
             this.id = id;
             this.result = result;
             this.nbt = nbt;
@@ -211,17 +213,18 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
         @Override
         public void serializeRecipeData(JsonObject pJson) {
             JsonObject keyMappings = new JsonObject();
-            for (Map.Entry<String, BlockState> entry : this.lookup.entrySet()) {
-                if (entry.getKey().equals(" ")) continue;
+            for (Map.Entry<String, BlockInWorldPredicateBuilder> entry : this.lookup.entrySet()) {
                 JsonObject mapping = new JsonObject();
 
                 JsonObject properties = new JsonObject();
-                entry.getValue().getValues().forEach((property, comparable) ->
-                        properties.addProperty(property.getName(), comparable.toString()));
+                for (Property<?> property : entry.getValue().getDefaultBlockState().getProperties()) {
+                    if (!entry.getValue().isRequiredProperty(property)) continue;
+                    properties.add(property.getName(), entry.getValue().getPropertyValuesAsJsonArray(property));
+                }
 
-                // Given where this method is being called, it's impossible for the registry to not be loaded... right?
+                // Given where this method is being called, it's impossible for the registry to not be loaded.
                 // noinspection DataFlowIssue
-                mapping.addProperty("block", BLOCKS.getKey(entry.getValue().getBlock()).toString());
+                mapping.addProperty("block", BLOCKS.getKey(entry.getValue().getDefaultBlockState().getBlock()).toString());
                 if (properties.size() != 0) mapping.add("state", properties);
                 keyMappings.add(String.valueOf(entry.getKey()), mapping);
             }
