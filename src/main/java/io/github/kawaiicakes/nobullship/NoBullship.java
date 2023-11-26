@@ -113,8 +113,9 @@ public class NoBullship
                 new MultiblockRecipeProvider(event.getGenerator())
         );
 
-        Map<ResourceLocation, NonNullList<ItemStack>> blocksForDrops
-                = MultiblockRecipeManager.getInstance().getBlockItemsForRecipes();
+        /*
+        commented out because these aren't strictly needed atm and are causing problems
+        Map<ResourceLocation, NonNullList<ItemStack>> blocksForDrops = MultiblockRecipeManager.getInstance().getBlockItemsForRecipes();
 
         event.getGenerator().addProvider(
                 event.includeServer(),
@@ -125,6 +126,7 @@ public class NoBullship
                 event.includeServer(),
                 new MultiblockDropsLootProvider(event.getGenerator(), blocksForDrops)
         );
+        */
     }
 
     @SubscribeEvent
