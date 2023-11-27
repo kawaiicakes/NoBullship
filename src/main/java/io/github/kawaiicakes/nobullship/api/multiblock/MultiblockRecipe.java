@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
@@ -87,7 +88,6 @@ public record MultiblockRecipe(
 
         ResourceLocation result = new ResourceLocation(jsonResult.getAsJsonPrimitive("entity").getAsString());
 
-        // FIXME: converted boolean values turn into either 0 or 1. Keep this in mind when implementing deserialization
         CompoundTag nbt = null;
         if (jsonResult.has("nbt")) {
             nbt = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, jsonResult.get("nbt"));
@@ -112,11 +112,19 @@ public record MultiblockRecipe(
             Block block = RegistryObject.create(blockLocation, BLOCKS).get();
 
             JsonObject blockStateJson = keyEntry.getValue().getAsJsonObject().getAsJsonObject("state");
+            JsonObject nbtJson = keyEntry.getValue().getAsJsonObject().getAsJsonObject("nbt");
 
-            if (blockStateJson == null) {
+            if (nbtJson != null && !(block instanceof EntityBlock)) {
+                LOGGER.error("Block {} does not have a block entity and cannot hold NBT data!", block);
+                return null;
+            }
+
+            if (blockStateJson == null && nbtJson == null) {
                 builder.where(keyEntry.getKey().charAt(0), BlockInWorldPredicateBuilder.of(block));
                 continue;
             }
+
+            if (blockStateJson == null) blockStateJson = new JsonObject();
 
             final Map<Property<?>, Set<String>> deserializedState = new HashMap<>(blockStateJson.size());
             for (Map.Entry<String, JsonElement> stateEntry : blockStateJson.entrySet()) {
@@ -158,6 +166,13 @@ public record MultiblockRecipe(
                                 .map(Optional::get)
                                 .collect(Collectors.toSet())
                 );
+            }
+
+            // TODO: properly implement strict/non-strict nbt requirement behaviour.
+            // TODO: nbtJson should actually be two different members: "nbt_strict" and "nbt"
+            if (nbtJson != null) {
+                CompoundTag nbtForPredicate = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, nbtJson);
+                predicateBuilder.requireStrictNbt(nbtForPredicate);
             }
 
             builder.where(keyEntry.getKey().charAt(0), predicateBuilder);
