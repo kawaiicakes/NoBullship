@@ -31,6 +31,8 @@ public class BlockInWorldPredicateBuilder {
     protected Map<Property<?>, Set<Comparable<?>>> properties = new HashMap<>();
     @Nullable
     protected CompoundTag blockEntityNbtData;
+    @Nullable
+    protected CompoundTag blockEntityNbtDataStrict;
 
     protected BlockInWorldPredicateBuilder(Block block) {
         this.blockState = block.defaultBlockState();
@@ -54,6 +56,18 @@ public class BlockInWorldPredicateBuilder {
         Block toReturn = ForgeRegistries.BLOCKS.getValue(blockLocation);
         if (toReturn == null) throw new IllegalArgumentException("Block " + blockLocation + " does not exist!");
         return new BlockInWorldPredicateBuilder(toReturn);
+    }
+
+    @Nullable
+    public CompoundTag getBlockEntityNbtData() {
+        if (this.blockEntityNbtData == null) return null;
+        return this.blockEntityNbtData.copy();
+    }
+
+    @Nullable
+    public CompoundTag getBlockEntityNbtDataStrict() {
+        if (this.blockEntityNbtDataStrict == null) return null;
+        return this.blockEntityNbtDataStrict.copy();
     }
 
     /**
@@ -92,13 +106,12 @@ public class BlockInWorldPredicateBuilder {
 
     /**
      * Specifies the exact NBT data a <code>BlockEntity</code> must have to allow the built predicate to test true.
-     * Note that the passed NBT data will be merged into the existing one in this builder.
+     * The passed NBT data will be merged into the existing.
      */
     public BlockInWorldPredicateBuilder requireStrictNbt(CompoundTag tag) {
         if (!(this.blockState.getBlock() instanceof EntityBlock)) throw new IllegalArgumentException(this.blockState + " does not have a block entity, so it cannot have NBT data!");
-        tag.putBoolean("softDependency", false);
-        if (this.blockEntityNbtData == null) this.blockEntityNbtData = new CompoundTag();
-        this.blockEntityNbtData.merge(tag);
+        if (this.blockEntityNbtDataStrict == null) this.blockEntityNbtDataStrict = new CompoundTag();
+        this.blockEntityNbtDataStrict.merge(tag);
         return this;
     }
 
@@ -112,7 +125,6 @@ public class BlockInWorldPredicateBuilder {
      */
     public BlockInWorldPredicateBuilder requireNbt(CompoundTag tag) {
         if (!(this.blockState.getBlock() instanceof EntityBlock)) throw new IllegalArgumentException(this.blockState + " does not have a block entity, so it cannot have NBT data!");
-        tag.putBoolean("softDependency", true);
         if (this.blockEntityNbtData == null) this.blockEntityNbtData = new CompoundTag();
         this.blockEntityNbtData.merge(tag);
         return this;
@@ -125,7 +137,7 @@ public class BlockInWorldPredicateBuilder {
     public Predicate<BlockInWorld> build() {
         Predicate<BlockInWorld> toReturn = BlockInWorld.hasState(state -> state.is(this.blockState.getBlock()));
 
-        if (this.properties.isEmpty() && this.blockEntityNbtData == null)
+        if (this.properties.isEmpty() && this.blockEntityNbtData == null && this.blockEntityNbtDataStrict == null)
             return toReturn;
 
         Predicate<BlockInWorld> propertiesPredicate = (block) -> true;
@@ -138,17 +150,27 @@ public class BlockInWorldPredicateBuilder {
             };
         }
 
-        Predicate<BlockInWorld> nbtPredicate = (block) -> true;
-        if (this.blockEntityNbtData != null) {
-            nbtPredicate = (block) -> {
-                for (String key : this.blockEntityNbtData.getAllKeys()) {
-                    // TODO: implement this and make use of the tag softDependency
+        Predicate<BlockInWorld> nbtPredicateStrict = (block) -> true;
+        if (this.blockEntityNbtDataStrict != null) {
+            nbtPredicateStrict = (block) -> {
+                for (String key : this.blockEntityNbtDataStrict.getAllKeys()) {
+                    // TODO
                 }
                 return true;
             };
         }
 
-        return toReturn.and(propertiesPredicate).and(nbtPredicate);
+        Predicate<BlockInWorld> nbtPredicate = block -> true;
+        if (this.blockEntityNbtData != null) {
+            nbtPredicate = (block) -> {
+                for (String key : this.blockEntityNbtData.getAllKeys()) {
+                    // TODO
+                }
+                return true;
+            };
+        }
+
+        return toReturn.and(propertiesPredicate).and(nbtPredicateStrict).and(nbtPredicate);
     }
 
     /**

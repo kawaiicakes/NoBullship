@@ -112,14 +112,15 @@ public record MultiblockRecipe(
             Block block = RegistryObject.create(blockLocation, BLOCKS).get();
 
             JsonObject blockStateJson = keyEntry.getValue().getAsJsonObject().getAsJsonObject("state");
+            JsonObject nbtJsonStrict = keyEntry.getValue().getAsJsonObject().getAsJsonObject("nbt_strict");
             JsonObject nbtJson = keyEntry.getValue().getAsJsonObject().getAsJsonObject("nbt");
 
-            if (nbtJson != null && !(block instanceof EntityBlock)) {
+            if ((nbtJsonStrict != null || nbtJson != null) && !(block instanceof EntityBlock)) {
                 LOGGER.error("Block {} does not have a block entity and cannot hold NBT data!", block);
                 return null;
             }
 
-            if (blockStateJson == null && nbtJson == null) {
+            if (blockStateJson == null && nbtJsonStrict == null && nbtJson == null) {
                 builder.where(keyEntry.getKey().charAt(0), BlockInWorldPredicateBuilder.of(block));
                 continue;
             }
@@ -168,11 +169,14 @@ public record MultiblockRecipe(
                 );
             }
 
-            // TODO: properly implement strict/non-strict nbt requirement behaviour.
-            // TODO: nbtJson should actually be two different members: "nbt_strict" and "nbt"
+            if (nbtJsonStrict != null) {
+                CompoundTag nbtForPredicate = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, nbtJsonStrict);
+                predicateBuilder.requireStrictNbt(nbtForPredicate);
+            }
+
             if (nbtJson != null) {
                 CompoundTag nbtForPredicate = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, nbtJson);
-                predicateBuilder.requireStrictNbt(nbtForPredicate);
+                predicateBuilder.requireNbt(nbtForPredicate);
             }
 
             builder.where(keyEntry.getKey().charAt(0), predicateBuilder);

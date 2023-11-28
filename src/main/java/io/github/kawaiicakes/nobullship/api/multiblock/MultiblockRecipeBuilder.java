@@ -11,6 +11,7 @@ import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -222,10 +224,19 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
                     properties.add(property.getName(), entry.getValue().getPropertyValuesAsJsonArray(property));
                 }
 
+                JsonObject nbt = new JsonObject();
+                JsonObject nbtStrict = new JsonObject();
+                Tag nbtForParse = entry.getValue().getBlockEntityNbtData();
+                Tag nbtStrictForParse = entry.getValue().getBlockEntityNbtDataStrict();
+                if (nbtForParse != null) nbt.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, nbtForParse));
+                if (nbtStrictForParse != null) nbtStrict.add("nbt_strict", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, nbtStrictForParse));
+
                 // Given where this method is being called, it's impossible for the registry to not be loaded.
                 // noinspection DataFlowIssue
                 mapping.addProperty("block", BLOCKS.getKey(entry.getValue().getDefaultBlockState().getBlock()).toString());
                 if (properties.size() != 0) mapping.add("state", properties);
+                if (nbt.size() != 0) mapping.add("nbt", nbt);
+                if (nbtStrict.size() != 0) mapping.add("nbt_strict", nbtStrict);
                 keyMappings.add(String.valueOf(entry.getKey()), mapping);
             }
 
