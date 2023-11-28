@@ -13,6 +13,7 @@ import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
@@ -29,6 +30,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -43,6 +45,7 @@ import java.util.Map;
 
 import static io.github.kawaiicakes.nobullship.Config.CONFIG;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.Serializer.INSTANCE;
+import static net.minecraft.world.level.Level.OVERWORLD;
 import static net.minecraftforge.fml.config.ModConfig.Type.COMMON;
 import static net.minecraftforge.registries.ForgeRegistries.*;
 
@@ -104,6 +107,14 @@ public class NoBullship
         RECIPE_SERIALIZER_REGISTRY.register(modEventBus);
 
         ModLoadingContext.get().registerConfig(COMMON, CONFIG);
+    }
+
+    @SubscribeEvent
+    public void onServerTick(TickEvent.LevelTickEvent event) {
+        if (!(event.level instanceof ServerLevel level)) return;
+        if (level.dimension() != OVERWORLD) return;
+
+        MultiblockRecipeManager.getInstance().decrementGlobalCooldown();
     }
 
     @SubscribeEvent

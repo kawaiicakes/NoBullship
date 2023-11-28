@@ -176,9 +176,13 @@ public class SchematicItem extends Item {
         String noBsRecipe = nbt.getString("nobullshipRecipe");
         if (noBsRecipe.isEmpty()) return InteractionResult.FAIL;
 
-        pContext.getPlayer().getCooldowns().addCooldown(this, (int) (20 * Config.COOLDOWN.get()));
+        // TODO: change time relative to how large the checked pattern is
+        int cooldownTimeTicks = (int) (20 * Config.COOLDOWN.get());
+
+        pContext.getPlayer().getCooldowns().addCooldown(this, cooldownTimeTicks);
 
         MultiblockRecipeManager.getInstance().trySpawn(new ResourceLocation(noBsRecipe), pContext);
+        MultiblockRecipeManager.getInstance().incrementGlobalCooldown(cooldownTimeTicks);
 
         return InteractionResult.FAIL;
     }

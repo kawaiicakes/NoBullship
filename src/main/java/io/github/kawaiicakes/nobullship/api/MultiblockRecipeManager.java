@@ -52,7 +52,11 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     public static final Component FAIL = Component.translatable("chat.nobullship.fail").withStyle(RED);
     public static final Component FAIL2 = Component.translatable("chat.nobullship.fail2").withStyle(RED);
     public static final Component FAIL3 = Component.translatable("chat.nobullship.fail3").withStyle(RED);
+    public static final Component FAIL4 = Component.translatable("chat.nobullship.fail4").withStyle(RED);
     protected static MultiblockRecipeManager INSTANCE = null;
+
+    protected int globalCooldownTime = 0;
+    protected int maxGlobalCooldownTime = 400000;
 
     /**
      * A map available on the serverside containing the recipe id as a key.
@@ -104,6 +108,14 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             level.playSound(null, context.getClickedPos(), CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
             Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
                     .sendSystemMessage(FAIL3, true);
+            return;
+        }
+
+        // TODO: make this configurable & change time relative to how large the checked pattern is
+        if (this.globalCooldownTime > this.maxGlobalCooldownTime) {
+            level.playSound(null, context.getClickedPos(), CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
+            Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
+                    .sendSystemMessage(FAIL4, true);
             return;
         }
 
@@ -241,6 +253,14 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                 }
             }
         }
+    }
+
+    public void incrementGlobalCooldown(int ticks) {
+        this.globalCooldownTime += ticks;
+    }
+
+    public void decrementGlobalCooldown() {
+        this.globalCooldownTime--;
     }
 
     public static MultiblockRecipeManager getInstance() {
