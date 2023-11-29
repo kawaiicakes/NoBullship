@@ -78,6 +78,14 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         return this.recipes;
     }
 
+    public int getGlobalCooldownTime() {
+        return this.globalCooldownTime;
+    }
+
+    public int getMaxGlobalCooldownTime() {
+        return this.maxGlobalCooldownTime;
+    }
+
     public Map<ResourceLocation, NonNullList<ItemStack>> getBlockItemsForRecipes() {
         Map<ResourceLocation, NonNullList<ItemStack>> toReturn = new HashMap<>();
 

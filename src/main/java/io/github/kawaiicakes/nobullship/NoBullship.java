@@ -6,6 +6,7 @@ import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen;
+import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacket;
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
@@ -122,7 +123,7 @@ public class NoBullship
 
     @SubscribeEvent
     public void onDatapackSync(OnDatapackSyncEvent event) {
-
+        NoBullshipPackets.sendToPlayer(new ClientboundUpdateNoBullshipPacket(MultiblockRecipeManager.getInstance()), event.getPlayer());
     }
 
     @SubscribeEvent

@@ -20,6 +20,12 @@ public class ClientboundUpdateNoBullshipPacket {
     public int globalCooldownTime;
     public int maxGlobalCooldownTime;
 
+    public ClientboundUpdateNoBullshipPacket(MultiblockRecipeManager manager) {
+        this.recipes = manager.getRecipes();
+        this.globalCooldownTime = manager.getGlobalCooldownTime();
+        this.maxGlobalCooldownTime = manager.getMaxGlobalCooldownTime();
+    }
+
     public ClientboundUpdateNoBullshipPacket(FriendlyByteBuf buffer) {
         this.globalCooldownTime = buffer.readInt();
         this.maxGlobalCooldownTime = buffer.readInt();
