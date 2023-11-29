@@ -9,6 +9,7 @@ import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
+import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -65,6 +66,16 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
     protected MultiblockRecipeManager() {
         super(GSON, "entity_recipes");
+    }
+
+    public void replaceRecipes(ClientboundUpdateNoBullshipPacket packet) {
+        this.recipes = packet.recipes;
+        this.globalCooldownTime = packet.globalCooldownTime;
+        this.maxGlobalCooldownTime = packet.maxGlobalCooldownTime;
+    }
+
+    public Map<ResourceLocation, MultiblockRecipe> getRecipes() {
+        return this.recipes;
     }
 
     public Map<ResourceLocation, NonNullList<ItemStack>> getBlockItemsForRecipes() {

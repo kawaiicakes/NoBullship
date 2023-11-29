@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -116,5 +117,15 @@ public class MultiblockPattern extends BlockPattern {
                 thumbNormal.getY() * -pThumbOffset + palmNormal.getY() * pPalmOffset + fingerNormal.getY() * pFingerOffset,
                 thumbNormal.getZ() * -pThumbOffset + palmNormal.getZ() * pPalmOffset + fingerNormal.getZ() * pFingerOffset
         );
+    }
+
+    public CompoundTag toNbt() {
+        // TODO
+        return new CompoundTag();
+    }
+
+    public static MultiblockPattern fromNbt(CompoundTag nbt) {
+        // TODO
+        return new MultiblockPattern();
     }
 }

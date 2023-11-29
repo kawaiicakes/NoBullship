@@ -1,17 +1,15 @@
 package io.github.kawaiicakes.nobullship;
 
-import io.github.kawaiicakes.nobullship.multiblock.MultiblockDropsLootProvider;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
-import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeProvider;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen;
+import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -30,18 +28,18 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Map;
 
 import static io.github.kawaiicakes.nobullship.Config.CONFIG;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.Serializer.INSTANCE;
@@ -110,11 +108,21 @@ public class NoBullship
     }
 
     @SubscribeEvent
+    public void commonSetup(FMLCommonSetupEvent event) {
+        NoBullshipPackets.register();
+    }
+
+    @SubscribeEvent
     public void onServerTick(TickEvent.LevelTickEvent event) {
         if (!(event.level instanceof ServerLevel level)) return;
         if (level.dimension() != OVERWORLD) return;
 
         MultiblockRecipeManager.getInstance().decrementGlobalCooldown();
+    }
+
+    @SubscribeEvent
+    public void onDatapackSync(OnDatapackSyncEvent event) {
+
     }
 
     @SubscribeEvent

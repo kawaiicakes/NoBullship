@@ -10,8 +10,7 @@ import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.ShapedRecipe;
@@ -69,6 +68,54 @@ public record MultiblockRecipe(
             toReturn.add(stack.copy());
         }
         return toReturn.build();
+    }
+
+    public CompoundTag toNbt() {
+        CompoundTag toReturn = new CompoundTag();
+
+        toReturn.put("recipe", this.recipe.toNbt());
+
+        toReturn.putString("result", this.result.toString());
+
+        if (this.nbt != null) toReturn.put("nbt", this.nbt);
+
+        if (this.requisites != null && !this.requisites.isEmpty()) {
+            ListTag requisiteList = new ListTag();
+
+            for (ItemStack item : this.requisites) {
+                requisiteList.add(item.serializeNBT());
+            }
+
+            toReturn.put("requisites", requisiteList);
+        }
+
+        return toReturn;
+    }
+
+    public static MultiblockRecipe fromNbt(CompoundTag nbt) {
+        if (!(nbt.get("recipe") instanceof CompoundTag recipeNbt)) throw new IllegalArgumentException("Passed NBT does not contain a recipe!");
+        if (!(nbt.get("result") instanceof StringTag stringNbt)) throw new IllegalArgumentException("Passed NBT does not contain a string!");
+
+        CompoundTag resultNbt = null;
+        if (nbt.get("nbt") instanceof CompoundTag serializedResult) resultNbt = serializedResult.copy();
+
+        ImmutableList<ItemStack> deserializedRequisites = null;
+        if (nbt.get("requisites") instanceof ListTag requisiteList && requisiteList.getElementType() == Tag.TAG_COMPOUND) {
+            ImmutableList.Builder<ItemStack> builder = new ImmutableList.Builder<>();
+
+            for (Tag value : requisiteList) {
+                builder.add(ItemStack.of((CompoundTag) value));
+            }
+
+            deserializedRequisites = builder.build();
+        }
+
+        return new MultiblockRecipe(
+                MultiblockPattern.fromNbt(recipeNbt),
+                new ResourceLocation(stringNbt.getAsString()),
+                resultNbt,
+                deserializedRequisites
+        );
     }
 
     /**
