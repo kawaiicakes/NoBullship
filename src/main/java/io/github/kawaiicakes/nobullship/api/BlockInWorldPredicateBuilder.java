@@ -238,4 +238,40 @@ public class BlockInWorldPredicateBuilder {
 
         return toReturn;
     }
+
+    public static BlockInWorldPredicateBuilder fromNbt(CompoundTag nbt) {
+        BlockState blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, nbt.get("blockState")).getOrThrow(false, null);
+
+        BlockInWorldPredicateBuilder toReturn = BlockInWorldPredicateBuilder.of(blockstate.getBlock());
+
+        if (nbt.get("properties") instanceof ListTag propertiesTag) {
+            for (Tag keyPairTag : propertiesTag) {
+                CompoundTag keyPair = (CompoundTag) keyPairTag;
+                CompoundTag propertyTag = ((CompoundTag) keyPairTag).getCompound("property");
+
+                Property<?> propertyForBlock = blockstate.getProperties()
+                        .stream()
+                        .filter(property -> property.getName().equals(propertyTag.getString("name"))
+                                && property.getValueClass().getSimpleName().equals(propertyTag.getString("type")))
+                        .findFirst()
+                        .orElse(null);
+
+                if (propertyForBlock == null) throw new IllegalArgumentException("Passed NBT does not contain valid properties!");
+
+                ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
+                Set<Comparable<?>> valuesSet = new HashSet<>(valuesList.size());
+                for (Tag string : valuesList) {
+                    Comparable<?> comparable = propertyForBlock.getValue(string.getAsString()).orElseThrow();
+                    valuesSet.add(comparable);
+                }
+
+                toReturn.requireProperties(propertyForBlock, valuesSet);
+            }
+        }
+
+        if (nbt.get("nbt") instanceof CompoundTag nbtTag) toReturn.requireNbt(nbtTag);
+        if (nbt.get("nbt_strict") instanceof CompoundTag nbtTagStrict) toReturn.requireNbt(nbtTagStrict);
+
+        return toReturn;
+    }
 }
