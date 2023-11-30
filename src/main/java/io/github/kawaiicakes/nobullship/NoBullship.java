@@ -97,6 +97,7 @@ public class NoBullship
         MinecraftForge.EVENT_BUS.register(SchematicItem.class);
 
         modEventBus.addListener(this::gatherData);
+        modEventBus.addListener(this::commonSetup);
 
         BLOCK_REGISTRY.register(modEventBus);
         BLOCK_ENTITY_REGISTRY.register(modEventBus);
