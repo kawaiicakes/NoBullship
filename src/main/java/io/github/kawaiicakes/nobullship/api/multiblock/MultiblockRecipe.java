@@ -42,7 +42,12 @@ public record MultiblockRecipe(
     private static final Logger LOGGER = LogUtils.getLogger();
     @Override
     public MultiblockPattern recipe() {
-        return new MultiblockPattern(this.recipe.getPattern(), this.recipe.getPalette(), this.recipe.getTotalBlocks());
+        return new MultiblockPattern(
+                this.recipe.getPattern(),
+                this.recipe.getPalette(),
+                this.recipe.getTotalBlocks(),
+                this.recipe.getSerializedPattern()
+        );
     }
 
     @Override

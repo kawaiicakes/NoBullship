@@ -21,11 +21,17 @@ public class MultiblockPattern extends BlockPattern {
     public static final Direction[] CARDINAL = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
     protected final ImmutableList<BlockState> palette;
     protected final ImmutableList<ItemStack> totalBlocks;
+    @Nullable
+    protected CompoundTag serializedPattern;
 
-    public MultiblockPattern(Predicate<BlockInWorld>[][][] pPattern, List<BlockState> palette, NonNullList<ItemStack> totalBlocks) {
+    /**
+     * Serverside
+     */
+    public MultiblockPattern(Predicate<BlockInWorld>[][][] pPattern, List<BlockState> palette, NonNullList<ItemStack> totalBlocks, @Nullable CompoundTag serializedPattern) {
         super(pPattern);
         this.palette = ImmutableList.copyOf(palette);
         this.totalBlocks = ImmutableList.copyOf(totalBlocks);
+        this.serializedPattern = serializedPattern;
     }
 
     public boolean patternContains(BlockState state) {
@@ -33,6 +39,12 @@ public class MultiblockPattern extends BlockPattern {
             if (state.is(block.getBlock())) return true;
         }
         return false;
+    }
+
+    @Nullable
+    public CompoundTag getSerializedPattern() {
+        if (this.serializedPattern == null) return null;
+        return this.serializedPattern.copy();
     }
 
     public ImmutableList<BlockState> getPalette() {

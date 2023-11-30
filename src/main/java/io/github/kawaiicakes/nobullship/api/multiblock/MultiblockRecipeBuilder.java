@@ -9,9 +9,7 @@ import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -108,7 +106,10 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     public MultiblockPattern build() {
         return new MultiblockPattern(
                 this.createPattern(),
-                this.lookupSimple.values().stream().map(BlockInWorldPredicateBuilder::getDefaultBlockState).toList(), this.totalBlocks());
+                this.lookupSimple.values().stream().map(BlockInWorldPredicateBuilder::getDefaultBlockState).toList(),
+                this.totalBlocks(),
+                this.serializePatternNbt()
+        );
     }
 
     protected NonNullList<ItemStack> totalBlocks() {
@@ -186,6 +187,28 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     @Override
     public BlockPatternBuilder where(char pSymbol, Predicate<BlockInWorld> pBlockMatcher) {
         throw new UnsupportedOperationException("This overload of #where does not function!");
+    }
+
+    public CompoundTag serializePatternNbt() {
+        CompoundTag toReturn = new CompoundTag();
+
+        ListTag patternTag = new ListTag();
+        for (String[] strings : this.pattern) {
+            ListTag stringArrayTag = new ListTag();
+            for (String string : strings) {
+                stringArrayTag.add(StringTag.valueOf(string));
+            }
+            patternTag.add(stringArrayTag);
+        }
+        toReturn.put("pattern", patternTag);
+
+        CompoundTag paletteTag = new CompoundTag();
+        for (Map.Entry<String, BlockInWorldPredicateBuilder> entry : this.lookupSimple.entrySet()) {
+            paletteTag.put(entry.getKey(), entry.getValue().toNbt());
+        }
+        toReturn.put("palette", paletteTag);
+
+        return toReturn;
     }
 
     public static class Result implements FinishedMultiblockRecipe {
