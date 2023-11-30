@@ -182,7 +182,7 @@ public class MultiblockPattern extends BlockPattern {
             pattern.add(tempList.toArray(new String[patternListTag.size()]));
         }
 
-        CompoundTag originalPaletteTag = nbt.getCompound("palette");
+        CompoundTag originalPaletteTag = serializedTag.getCompound("palette");
         Map<String, BlockInWorldPredicateBuilder> paletteMap = new HashMap<>(originalPaletteTag.size());
         for (String key : originalPaletteTag.getAllKeys()) {
             CompoundTag tagAtKey = originalPaletteTag.getCompound(key);
