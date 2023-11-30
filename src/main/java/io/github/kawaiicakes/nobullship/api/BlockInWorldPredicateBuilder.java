@@ -1,7 +1,9 @@
 package io.github.kawaiicakes.nobullship.api;
 
 import com.google.gson.JsonArray;
-import net.minecraft.nbt.CompoundTag;
+import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -10,6 +12,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +30,8 @@ import java.util.function.Predicate;
  * what the possible criteria are.
  */
 public class BlockInWorldPredicateBuilder {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     protected BlockState blockState;
     protected Map<Property<?>, Set<Comparable<?>>> properties = new HashMap<>();
     @Nullable
@@ -192,5 +197,45 @@ public class BlockInWorldPredicateBuilder {
 
     public boolean isRequiredProperty(Property<?> property) {
         return this.properties.containsKey(property);
+    }
+
+    public CompoundTag toNbt() {
+        CompoundTag toReturn = new CompoundTag();
+
+        Tag tag = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, this.blockState).getOrThrow(false, (error) -> {});
+        if (!(tag instanceof CompoundTag blockNbt)) {
+            LOGGER.error("BlockState could not be serialized to NBT!");
+            return toReturn;
+        }
+        toReturn.put("blockState", blockNbt);
+
+        // TODO: redo this shit lmao
+        if (!this.properties.isEmpty()) {
+            ListTag propertiesNbt = new ListTag();
+
+            for (Map.Entry<Property<?>, Set<Comparable<?>>> entry : this.properties.entrySet()) {
+                CompoundTag keyPairNbt = new CompoundTag();
+
+                CompoundTag propertyNbt = new CompoundTag();
+                propertyNbt.putString("name", entry.getKey().getName());
+                propertyNbt.putString("type", entry.getKey().getValueClass().getSimpleName());
+                keyPairNbt.put("property", propertyNbt);
+
+                ListTag valuesNbt = new ListTag();
+                for (Comparable<?> comparable : entry.getValue()) {
+                    valuesNbt.add(StringTag.valueOf(comparable.toString()));
+                }
+                keyPairNbt.put("values", valuesNbt);
+
+                propertiesNbt.add(keyPairNbt);
+            }
+
+            toReturn.put("properties", propertiesNbt);
+        }
+
+        if (this.blockEntityNbtData != null) toReturn.put("nbt", this.blockEntityNbtData);
+        if (this.blockEntityNbtDataStrict != null) toReturn.put("nbt_strict", this.blockEntityNbtDataStrict);
+
+        return toReturn;
     }
 }
