@@ -2,11 +2,12 @@ package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -14,7 +15,11 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 public class MultiblockPattern extends BlockPattern {
@@ -132,12 +137,77 @@ public class MultiblockPattern extends BlockPattern {
     }
 
     public CompoundTag toNbt() {
-        // TODO
-        return new CompoundTag();
+        CompoundTag toReturn = new CompoundTag();
+
+        ListTag paletteTag = new ListTag();
+        for (BlockState block : this.palette) {
+            Tag blockTag = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, block).getOrThrow(false, null);
+            if (!(blockTag instanceof CompoundTag compoundTag)) throw new RuntimeException("BlockState could not be parsed as a CompoundTag!");
+            paletteTag.add(compoundTag);
+        }
+        toReturn.put("palette", paletteTag);
+
+        ListTag totalBlocksTag = new ListTag();
+        for (ItemStack stack : this.totalBlocks) {
+           totalBlocksTag.add(stack.serializeNBT());
+        }
+        toReturn.put("total_blocks", totalBlocksTag);
+
+        if (this.serializedPattern != null) toReturn.put("serialized_palette", this.serializedPattern);
+        else throw new RuntimeException("The serialized pattern does not exist!");
+
+        return toReturn;
     }
 
     public static MultiblockPattern fromNbt(CompoundTag nbt) {
-        // TODO
-        return new MultiblockPattern();
+        ListTag paletteTag = nbt.getList("palette", Tag.TAG_COMPOUND);
+        ListTag totalBlocksTag = nbt.getList("total_blocks", Tag.TAG_COMPOUND);
+        CompoundTag serializedTag = nbt.getCompound("serialized_palette");
+
+        ListTag patternList = serializedTag.getList("pattern", Tag.TAG_LIST);
+        List<String[]> pattern = new ArrayList<>(patternList.size());
+        int patternHeight = 1;
+        int patternWidth = 1;
+        for (Tag patternTag : patternList) {
+            ListTag patternListTag = (ListTag) patternTag;
+            if (patternListTag.getElementType() != Tag.TAG_STRING) throw new IllegalArgumentException("Passed NBT does not contain valid type of list elements for pattern!");
+            if (patternListTag.size() > patternHeight) patternHeight = patternListTag.size();
+            List<String> tempList = new ArrayList<>(patternListTag.size());
+            for (Tag string : patternListTag) {
+                if (string.getAsString().length() > patternWidth) patternWidth = string.getAsString().length();
+                tempList.add(string.getAsString());
+            }
+            pattern.add(tempList.toArray(new String[patternListTag.size()]));
+        }
+
+        CompoundTag originalPaletteTag = nbt.getCompound("palette");
+        Map<String, BlockInWorldPredicateBuilder> paletteMap = new HashMap<>(originalPaletteTag.size());
+        for (String key : originalPaletteTag.getAllKeys()) {
+            CompoundTag tagAtKey = originalPaletteTag.getCompound(key);
+            paletteMap.put(key, BlockInWorldPredicateBuilder.fromNbt(tagAtKey));
+        }
+
+        Predicate<BlockInWorld>[][][] predicate = (Predicate<BlockInWorld>[][][]) Array.newInstance(Predicate.class, pattern.size(), patternHeight, patternWidth);
+
+        for(int i = 0; i < pattern.size(); ++i) {
+            for(int j = 0; j < patternHeight; ++j) {
+                for(int k = 0; k < patternWidth; ++k) {
+                    predicate[i][j][k] = paletteMap.get(String.valueOf((pattern.get(i))[j].charAt(k))).build();
+                }
+            }
+        }
+
+        NonNullList<BlockState> paletteList = NonNullList.createWithCapacity(paletteTag.size());
+        for (Tag tag : paletteTag) {
+            BlockState deserialized = BlockState.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow(false, null);
+            paletteList.add(deserialized);
+        }
+
+        NonNullList<ItemStack> totalBlocksList = NonNullList.createWithCapacity(totalBlocksTag.size());
+        for (Tag itemTag : totalBlocksTag) {
+            totalBlocksList.add(ItemStack.of((CompoundTag) itemTag));
+        }
+
+        return new MultiblockPattern(predicate, paletteList, totalBlocksList, null);
     }
 }
