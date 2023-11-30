@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import static net.minecraft.world.level.block.Blocks.AIR;
+
 public class MultiblockPattern extends BlockPattern {
     public static final Direction[] CARDINAL = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
     protected final ImmutableList<BlockState> palette;
@@ -192,7 +194,18 @@ public class MultiblockPattern extends BlockPattern {
         for(int i = 0; i < pattern.size(); ++i) {
             for(int j = 0; j < patternHeight; ++j) {
                 for(int k = 0; k < patternWidth; ++k) {
-                    predicate[i][j][k] = paletteMap.get(String.valueOf((pattern.get(i))[j].charAt(k))).build();
+                    String stringAt = String.valueOf((pattern.get(i))[j].charAt(k));
+                    Predicate<BlockInWorld> blockPredicate;
+
+                    if (stringAt.equals("$")) {
+                        blockPredicate = (block) -> true;
+                    } else if (stringAt.equals(" ")) {
+                        blockPredicate = BlockInWorldPredicateBuilder.of(AIR).build();
+                    } else {
+                        blockPredicate = paletteMap.get(stringAt).build();
+                    }
+
+                    predicate[i][j][k] = blockPredicate;
                 }
             }
         }
