@@ -22,8 +22,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
@@ -70,7 +68,7 @@ public class NoBullship
             = DeferredRegister.create(RECIPE_SERIALIZERS, MOD_ID);
 
     public static final RegistryObject<Block> WORKSHOP_BLOCK
-            = BLOCK_REGISTRY.register("workshop", () -> new MultiblockWorkshopBlock(BlockBehaviour.Properties.of(Material.STONE)));
+            = BLOCK_REGISTRY.register("workshop", MultiblockWorkshopBlock::new);
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
             = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
     public static final RegistryObject<BlockItem> WORKSHOP_ITEM

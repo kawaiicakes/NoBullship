@@ -1,5 +1,19 @@
 {
   "variants": {
-    "": {"model": "nobullship:block/workshop"}
+    "facing=north": {
+      "model": "nobullship:block/workshop"
+    },
+    "facing=south": {
+      "model": "nobullship:block/workshop",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nobullship:block/workshop",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "nobullship:block/workshop",
+      "y": 90
+    }
   }
 }
