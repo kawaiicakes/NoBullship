@@ -2,7 +2,6 @@ package io.github.kawaiicakes.nobullship.api;
 
 import com.google.gson.JsonArray;
 import com.mojang.logging.LogUtils;
-import com.mojang.serialization.Codec;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -155,17 +154,40 @@ public class BlockInWorldPredicateBuilder {
             };
         }
 
+        Predicate<BlockInWorld> nbtPredicateStrict = checkNbtMatch();
+
+        Predicate<BlockInWorld> nbtPredicate = this.checkSoftNbtMatch();
+
+        return toReturn.and(propertiesPredicate).and(nbtPredicateStrict).and(nbtPredicate);
+    }
+
+    protected Predicate<BlockInWorld> checkNbtMatch() {
         Predicate<BlockInWorld> nbtPredicateStrict = (block) -> true;
         if (this.blockEntityNbtDataStrict != null) {
             nbtPredicateStrict = (block) -> {
+                //noinspection DataFlowIssue ($blockEntityNbtDataStrict being non-null implies the block has an entity.)
+                CompoundTag blockNbt = block.getEntity().saveWithFullMetadata();
+
                 for (String key : this.blockEntityNbtDataStrict.getAllKeys()) {
-                    // TODO
+                    if (!blockNbt.contains(key)) return false;
+                    //noinspection DataFlowIssue
+                    if (!blockNbt.get(key).equals(this.blockEntityNbtData.get(key))) return false;
                 }
+
                 return true;
             };
         }
+        return nbtPredicateStrict;
+    }
 
+    /**
+     * Helper method which generates a <code>{@literal Predicate<BlockInWorld>}</code> which checks for the presence
+     * of NBT data with soft scrutiny. As an example to what the return does, containers need not match the NBT exactly;
+     * only the count of the contents should meet or exceed what is stipulated in NBT.
+     */
+    protected Predicate<BlockInWorld> checkSoftNbtMatch() {
         Predicate<BlockInWorld> nbtPredicate = block -> true;
+
         if (this.blockEntityNbtData != null) {
             nbtPredicate = (block) -> {
                 for (String key : this.blockEntityNbtData.getAllKeys()) {
@@ -175,7 +197,7 @@ public class BlockInWorldPredicateBuilder {
             };
         }
 
-        return toReturn.and(propertiesPredicate).and(nbtPredicateStrict).and(nbtPredicate);
+        return nbtPredicate;
     }
 
     /**
