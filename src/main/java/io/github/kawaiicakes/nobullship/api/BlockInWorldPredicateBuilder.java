@@ -2,8 +2,11 @@ package io.github.kawaiicakes.nobullship.api;
 
 import com.google.gson.JsonArray;
 import com.mojang.logging.LogUtils;
+import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,10 +16,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -190,9 +190,40 @@ public class BlockInWorldPredicateBuilder {
 
         if (this.blockEntityNbtData != null) {
             nbtPredicate = (block) -> {
+                //noinspection DataFlowIssue ($blockEntityNbtData being non-null implies the block has an entity.)
+                CompoundTag blockNbt = block.getEntity().saveWithFullMetadata();
+
                 for (String key : this.blockEntityNbtData.getAllKeys()) {
-                    // TODO
+                    if (!key.equals("Items")) {
+                        if (!blockNbt.contains(key)) return false;
+                        //noinspection DataFlowIssue
+                        if (!blockNbt.get(key).equals(this.blockEntityNbtData.get(key))) return false;
+                        continue;
+                    }
+
+                    ListTag requirementContents = this.blockEntityNbtData.getList("Items", Tag.TAG_COMPOUND);
+                    if (requirementContents.isEmpty()) return false;
+
+                    ListTag containerContents = blockNbt.getList("Items", Tag.TAG_COMPOUND);
+                    if (containerContents.isEmpty() && !requirementContents.isEmpty()) return false;
+
+                    NonNullList<ItemStack> requirementsAsList = NonNullList.createWithCapacity(requirementContents.size());
+                    for (Tag slotTag : requirementContents) {
+                        ItemStack slotStack = ItemStack.of((CompoundTag) slotTag);
+                        requirementsAsList.add(slotStack);
+                    }
+                    List<ItemStack> summedRequirements = SchematicRecipe.getSummedContents(requirementsAsList);
+
+                    NonNullList<ItemStack> contentsAsList = NonNullList.createWithCapacity(containerContents.size());
+                    for (Tag slotTag : containerContents) {
+                        ItemStack slotStack = ItemStack.of((CompoundTag) slotTag);
+                        contentsAsList.add(slotStack);
+                    }
+                    List<ItemStack> summedContents = SchematicRecipe.getSummedContents(contentsAsList);
+
+                    if (!SchematicRecipe.compareSummedContents(summedRequirements, summedContents)) return false;
                 }
+
                 return true;
             };
         }
