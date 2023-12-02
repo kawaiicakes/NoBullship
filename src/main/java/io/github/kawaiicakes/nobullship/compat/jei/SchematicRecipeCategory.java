@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
+import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -16,6 +17,7 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.IRecipeCategoryExtension;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.Component;
@@ -37,6 +39,7 @@ import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSumm
 import static mezz.jei.api.constants.VanillaTypes.ITEM_STACK;
 import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
 import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
+import static net.minecraft.client.gui.GuiComponent.drawCenteredString;
 
 public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>, IRecipeCategoryExtension {
     public static final ResourceLocation UID = new ResourceLocation(MOD_ID, ID);
@@ -114,6 +117,23 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
         int scale = (int) (22 / (longestSide / 1.8));
 
         renderEntity(136, 50, stack, scale, 130 - mouseX, entity);
+
+        stack.pushPose();
+        stack.translate(136, 59, 0);
+        GuiComponent.drawCenteredString(stack, Minecraft.getInstance().font, entity.getDisplayName(), 0, 0, 8453920);
+
+        MultiblockRecipe resultRecipe = MultiblockRecipeManager.getInstance().getRecipe(this.currentRecipe.getResultId()).orElse(null);
+        if (resultRecipe == null) {
+            stack.popPose();
+            return;
+        }
+
+        if (resultRecipe.nbt() != null) {
+            stack.scale(0.8F, 0.8F, 1);
+            GuiComponent.drawCenteredString(stack, Minecraft.getInstance().font, "+NBT", 0, 12, 11141290);
+        }
+
+        stack.popPose();
     }
 
     /**

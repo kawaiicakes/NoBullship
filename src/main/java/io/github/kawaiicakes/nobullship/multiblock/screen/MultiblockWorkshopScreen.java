@@ -5,9 +5,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
@@ -126,6 +128,15 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         renderEntity(x + 155, y + 64, scale, f, f1, resultEntity);
 
         drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 72, 8453920);
+        MultiblockRecipe resultRecipe = MultiblockRecipeManager.getInstance().getRecipe(matchingRecipe.get().getResultId()).orElse(null);
+        if (resultRecipe == null) return;
+        if (resultRecipe.nbt() != null) {
+            pPoseStack.pushPose();
+            pPoseStack.translate(x + 155, y + 81, 0);
+            pPoseStack.scale(0.8F, 0.8F, 1);
+            GuiComponent.drawCenteredString(pPoseStack, Minecraft.getInstance().font, "+NBT", 0, 0, 11141290);
+            pPoseStack.popPose();
+        }
     }
 
     protected void drawNoResultString(PoseStack pPoseStack, int x, int y) {
