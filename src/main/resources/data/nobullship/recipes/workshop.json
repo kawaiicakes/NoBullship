@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "I$I",
+    "I#I",
+    "IbI"
+  ],
+  "key":{
+    "$": {
+      "item": "minecraft:crafting_table"
+    },
+    "b": {
+      "tag": "#forge:dyes/black"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "#": {
+      "item": "minecraft:iron_bars"
+    }
+  },
+  "result": {
+    "item": "nobullship:workshop"
+  }
+}
