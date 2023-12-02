@@ -41,9 +41,9 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
     protected static final double[] VERTICAL_BAR_LEFT = {14.5, 1.5, 10, 16, 13.5, 13};
     protected static final double[] HORIZONTAL_BAR_BOTTOM = {1.5, 2, 11.75, 14.5, 3.25, 12.5};
     protected static final double[] HORIZONTAL_BAR_TOP = {1.5, 6, 11.75, 14.5, 7.25, 12.5};
-    protected static final double[] BOX_1 = {1.5, 10, 1, 14.5, 13, 5};
-    protected static final double[] BOX_2 = {1.5, 11, 6, 14.5, 14, 9};
-    protected static final double[] BOX_3 = {1.5, 13, 10, 14.5, 15, 14};
+    protected static final double[] BOX_1 = {1.5, 9, 1, 14.5, 12, 6};
+    protected static final double[] BOX_2 = {1.5, 10, 6, 14.5, 14, 10};
+    protected static final double[] BOX_3 = {1.5, 13, 10, 14.5, 16, 16};
     protected static final VoxelShape NORTH_SHAPE = generateForDirection(Direction.NORTH);
     protected static final VoxelShape EAST_SHAPE = generateForDirection(Direction.EAST);
     protected static final VoxelShape SOUTH_SHAPE = generateForDirection(Direction.SOUTH);
