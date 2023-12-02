@@ -44,7 +44,6 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
     protected static final double[] BOX_1 = {1.5, 10, 1, 14.5, 13, 5};
     protected static final double[] BOX_2 = {1.5, 11, 6, 14.5, 14, 9};
     protected static final double[] BOX_3 = {1.5, 13, 10, 14.5, 15, 14};
-    protected static final VoxelShape COLLISION_SHAPE = Block.box(0, 0, 0, 16, 12.5, 16);
     protected static final VoxelShape NORTH_SHAPE = generateForDirection(Direction.NORTH);
     protected static final VoxelShape EAST_SHAPE = generateForDirection(Direction.EAST);
     protected static final VoxelShape SOUTH_SHAPE = generateForDirection(Direction.SOUTH);
@@ -84,18 +83,22 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
     @SuppressWarnings("deprecation")
     @Override
     public VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-        return COLLISION_SHAPE;
+        return switch (pState.getValue(FACING)) {
+            case SOUTH -> SOUTH_SHAPE;
+            case EAST -> EAST_SHAPE;
+            case WEST -> WEST_SHAPE;
+            default -> NORTH_SHAPE;
+        };
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         return switch (pState.getValue(FACING)) {
-            case NORTH -> NORTH_SHAPE;
             case SOUTH -> SOUTH_SHAPE;
             case EAST -> EAST_SHAPE;
             case WEST -> WEST_SHAPE;
-            default -> COLLISION_SHAPE;
+            default -> NORTH_SHAPE;
         };
     }
 
