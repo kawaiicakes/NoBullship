@@ -4,6 +4,7 @@ import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.Minecraft;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
+import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK;
 
 @JeiPlugin
 public class NoBullshipJEI implements IModPlugin {
@@ -37,5 +39,10 @@ public class NoBullshipJEI implements IModPlugin {
 
         List<SchematicRecipe> schematicRecipes = recipeManager.getAllRecipesFor(SchematicRecipe.Type.INSTANCE);
         registration.addRecipes(SCHEMATIC_TYPE, schematicRecipes);
+    }
+
+    @Override
+    public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        registration.addRecipeCatalyst(WORKSHOP_BLOCK.get().asItem().getDefaultInstance(), SCHEMATIC_TYPE);
     }
 }
