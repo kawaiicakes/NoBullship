@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.multiblock.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
@@ -25,6 +26,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
@@ -32,9 +34,50 @@ import org.jetbrains.annotations.Nullable;
 import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
 
 public class MultiblockWorkshopBlock extends BaseEntityBlock {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    protected static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     // TODO:
-    protected static final VoxelShape HITBOX = Block.box(0,0,0,1,1,1);
+    protected static final double[] FOOT_RIGHT = {};
+    protected static final double[] FOOT_LEFT = {};
+    protected static final double[] VERTICAL_BAR_RIGHT = {};
+    protected static final double[] VERTICAL_BAR_LEFT = {};
+    protected static final double[] HORIZONTAL_BAR_BOTTOM = {};
+    protected static final double[] HORIZONTAL_BAR_TOP = {};
+    protected static final double[] BOX_1 = {};
+    protected static final double[] BOX_2 = {};
+    protected static final double[] BOX_3 = {};
+    protected static final VoxelShape COLLISION_SHAPE = Block.box(0, 0, 0, 16, 12.5, 16);
+    protected static final VoxelShape NORTH_SHAPE = generateForDirection(Direction.NORTH);
+    protected static final VoxelShape EAST_SHAPE = generateForDirection(Direction.EAST);
+    protected static final VoxelShape SOUTH_SHAPE = generateForDirection(Direction.SOUTH);
+    protected static final VoxelShape WEST_SHAPE = generateForDirection(Direction.WEST);
+
+    /**
+     * Voxel coords should be defined assuming the model is facing north
+     */
+    protected static VoxelShape rotateProvidedDimensions(Direction direction, double[] dimensions) {
+        return switch (direction) {
+            case NORTH -> Block.box(dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
+            case EAST -> Block.box(16 - dimensions[2], dimensions[1], dimensions[0], 16 - dimensions[5], dimensions[4], dimensions[3]);
+            case SOUTH -> Block.box(16 - dimensions[0], dimensions[1], 16 - dimensions[2], 16 - dimensions[3], dimensions[4], 16 - dimensions[5]);
+            case WEST -> Block.box(dimensions[2], dimensions[1], 16 - dimensions[0], dimensions[5], dimensions[4], 16 - dimensions[3]);
+            default -> throw new IllegalArgumentException("Invalid direction passed!");
+        };
+    }
+
+    protected static VoxelShape generateForDirection(Direction direction) {
+        return Shapes.or(
+                rotateProvidedDimensions(direction, FOOT_RIGHT),
+                rotateProvidedDimensions(direction, FOOT_LEFT),
+                rotateProvidedDimensions(direction, VERTICAL_BAR_RIGHT),
+                rotateProvidedDimensions(direction, VERTICAL_BAR_LEFT),
+                rotateProvidedDimensions(direction, HORIZONTAL_BAR_BOTTOM),
+                rotateProvidedDimensions(direction, HORIZONTAL_BAR_TOP),
+                rotateProvidedDimensions(direction, BOX_1),
+                rotateProvidedDimensions(direction, BOX_2),
+                rotateProvidedDimensions(direction, BOX_3),
+                COLLISION_SHAPE
+        );
+    }
 
     public MultiblockWorkshopBlock() {
         super(BlockBehaviour.Properties.of(Material.METAL).noOcclusion().isViewBlocking((a, b, c) -> false).strength(5).requiresCorrectToolForDrops());
@@ -42,8 +85,20 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
 
     @SuppressWarnings("deprecation")
     @Override
+    public VoxelShape getCollisionShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        return COLLISION_SHAPE;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-        return HITBOX;
+        return switch (pState.getValue(FACING)) {
+            case NORTH -> NORTH_SHAPE;
+            case SOUTH -> SOUTH_SHAPE;
+            case EAST -> EAST_SHAPE;
+            case WEST -> WEST_SHAPE;
+            default -> COLLISION_SHAPE;
+        };
     }
 
     @Nullable
