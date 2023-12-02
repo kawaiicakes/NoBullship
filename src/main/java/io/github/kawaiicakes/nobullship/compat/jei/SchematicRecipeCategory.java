@@ -39,7 +39,6 @@ import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSumm
 import static mezz.jei.api.constants.VanillaTypes.ITEM_STACK;
 import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
 import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
-import static net.minecraft.client.gui.GuiComponent.drawCenteredString;
 
 public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>, IRecipeCategoryExtension {
     public static final ResourceLocation UID = new ResourceLocation(MOD_ID, ID);
