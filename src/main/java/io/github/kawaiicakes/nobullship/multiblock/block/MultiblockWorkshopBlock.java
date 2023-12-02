@@ -35,16 +35,15 @@ import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
 
 public class MultiblockWorkshopBlock extends BaseEntityBlock {
     protected static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    // TODO:
-    protected static final double[] FOOT_RIGHT = {};
-    protected static final double[] FOOT_LEFT = {};
-    protected static final double[] VERTICAL_BAR_RIGHT = {};
-    protected static final double[] VERTICAL_BAR_LEFT = {};
-    protected static final double[] HORIZONTAL_BAR_BOTTOM = {};
-    protected static final double[] HORIZONTAL_BAR_TOP = {};
-    protected static final double[] BOX_1 = {};
-    protected static final double[] BOX_2 = {};
-    protected static final double[] BOX_3 = {};
+    protected static final double[] FOOT_RIGHT = {0, 0, 0, 2, 1.5, 16};
+    protected static final double[] FOOT_LEFT = {14, 0, 0, 16, 1.5, 16};
+    protected static final double[] VERTICAL_BAR_RIGHT = {0.25, 1.5, 10, 1.75, 13.5, 13};
+    protected static final double[] VERTICAL_BAR_LEFT = {14.5, 1.5, 10, 16, 13.5, 13};
+    protected static final double[] HORIZONTAL_BAR_BOTTOM = {1.5, 2, 11.75, 14.5, 3.25, 12.5};
+    protected static final double[] HORIZONTAL_BAR_TOP = {1.5, 6, 11.75, 14.5, 7.25, 12.5};
+    protected static final double[] BOX_1 = {1.5, 10, 1, 14.5, 13, 5};
+    protected static final double[] BOX_2 = {1.5, 11, 6, 14.5, 14, 9};
+    protected static final double[] BOX_3 = {1.5, 13, 10, 14.5, 15, 14};
     protected static final VoxelShape COLLISION_SHAPE = Block.box(0, 0, 0, 16, 12.5, 16);
     protected static final VoxelShape NORTH_SHAPE = generateForDirection(Direction.NORTH);
     protected static final VoxelShape EAST_SHAPE = generateForDirection(Direction.EAST);
