@@ -56,9 +56,9 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
     protected static VoxelShape rotateProvidedDimensions(Direction direction, double[] dimensions) {
         return switch (direction) {
             case NORTH -> Block.box(dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
-            case EAST -> Block.box(16 - dimensions[2], dimensions[1], dimensions[0], 16 - dimensions[5], dimensions[4], dimensions[3]);
-            case SOUTH -> Block.box(16 - dimensions[0], dimensions[1], 16 - dimensions[2], 16 - dimensions[3], dimensions[4], 16 - dimensions[5]);
-            case WEST -> Block.box(dimensions[2], dimensions[1], 16 - dimensions[0], dimensions[5], dimensions[4], 16 - dimensions[3]);
+            case EAST -> Block.box(16 - dimensions[5], dimensions[1], dimensions[0], 16 - dimensions[2], dimensions[4], dimensions[3]);
+            case SOUTH -> Block.box(16 - dimensions[3], dimensions[1], 16 - dimensions[5], 16 - dimensions[0], dimensions[4], 16 - dimensions[2]);
+            case WEST -> Block.box(dimensions[2], dimensions[1], 16 - dimensions[3], dimensions[5], dimensions[4], 16 - dimensions[0]);
             default -> throw new IllegalArgumentException("Invalid direction passed!");
         };
     }
@@ -73,8 +73,7 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
                 rotateProvidedDimensions(direction, HORIZONTAL_BAR_TOP),
                 rotateProvidedDimensions(direction, BOX_1),
                 rotateProvidedDimensions(direction, BOX_2),
-                rotateProvidedDimensions(direction, BOX_3),
-                COLLISION_SHAPE
+                rotateProvidedDimensions(direction, BOX_3)
         );
     }
 
