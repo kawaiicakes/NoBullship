@@ -141,6 +141,7 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
         }
 
         Containers.dropContents(pLevel, pPos, inventory);
+        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
     }
 
     @Nullable
