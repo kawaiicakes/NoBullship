@@ -119,11 +119,15 @@ public class SchematicItem extends Item {
 
         for (ItemStack requirement : requirements) {
             ChatFormatting colour = GREEN;
+            String requisiteCharacter = "[✔] ";
             if (playerContents.stream().noneMatch(content ->
                 ItemStack.isSameItemSameTags(content, requirement) && content.getCount() >= requirement.getCount()
-            )) colour = RED;
+            )) {
+                colour = RED;
+                requisiteCharacter = "[✘] ";
+            }
 
-            toAdd.add(fromStack(requirement).withStyle(Style.EMPTY.withColor(colour)));
+            toAdd.add(Component.literal(requisiteCharacter).withStyle(Style.EMPTY.withColor(colour)).append(fromStack(requirement)));
         }
 
         event.getToolTip().addAll(insertionIndex, toAdd);
