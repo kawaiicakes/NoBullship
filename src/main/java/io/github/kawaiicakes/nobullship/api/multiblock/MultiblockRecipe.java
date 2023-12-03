@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.FieldsAreNonnullByDefault;
@@ -43,7 +44,7 @@ public record MultiblockRecipe(
     @Override
     public MultiblockPattern recipe() {
         return new MultiblockPattern(
-                this.recipe.getPattern(),
+                (BlockInWorldPredicate[][][]) this.recipe.getPattern(),
                 this.recipe.getPalette(),
                 this.recipe.getTotalBlocks(),
                 this.recipe.getSerializedPattern()

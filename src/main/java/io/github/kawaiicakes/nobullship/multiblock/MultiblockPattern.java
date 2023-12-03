@@ -2,6 +2,7 @@ package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -34,7 +35,7 @@ public class MultiblockPattern extends BlockPattern {
     /**
      * Serverside
      */
-    public MultiblockPattern(Predicate<BlockInWorld>[][][] pPattern, List<BlockState> palette, NonNullList<ItemStack> totalBlocks, @Nullable CompoundTag serializedPattern) {
+    public MultiblockPattern(BlockInWorldPredicate[][][] pPattern, List<BlockState> palette, NonNullList<ItemStack> totalBlocks, @Nullable CompoundTag serializedPattern) {
         super(pPattern);
         this.palette = ImmutableList.copyOf(palette);
         this.totalBlocks = ImmutableList.copyOf(totalBlocks);
@@ -77,9 +78,7 @@ public class MultiblockPattern extends BlockPattern {
         for(int i = 0; i < this.width; ++i) {
             for(int j = 0; j < this.height; ++j) {
                 for(int k = 0; k < this.depth; ++k) {
-                    // TODO: make $pattern a 3D array of BlockInWorldPredicates
-                    // TODO: use #setFacing as needed
-                    boolean hasMatchAt = this.pattern[k][j][i].test(pCache.getUnchecked(translateAndRotate(pPos, pFinger, pThumb, i, j, k)));
+                    boolean hasMatchAt = ((BlockInWorldPredicate) this.pattern[k][j][i]).setFacing(pFinger).test(pCache.getUnchecked(translateAndRotate(pPos, pFinger, pThumb, i, j, k)));
                     if (!hasMatchAt) return null;
                 }
             }
@@ -190,16 +189,16 @@ public class MultiblockPattern extends BlockPattern {
             paletteMap.put(key, BlockInWorldPredicateBuilder.fromNbt(tagAtKey));
         }
 
-        Predicate<BlockInWorld>[][][] predicate = (Predicate<BlockInWorld>[][][]) Array.newInstance(Predicate.class, pattern.size(), patternHeight, patternWidth);
+        BlockInWorldPredicate[][][] predicate = (BlockInWorldPredicate[][][]) Array.newInstance(Predicate.class, pattern.size(), patternHeight, patternWidth);
 
         for(int i = 0; i < pattern.size(); ++i) {
             for(int j = 0; j < patternHeight; ++j) {
                 for(int k = 0; k < patternWidth; ++k) {
                     String stringAt = String.valueOf((pattern.get(i))[j].charAt(k));
-                    Predicate<BlockInWorld> blockPredicate;
+                    BlockInWorldPredicate blockPredicate;
 
                     if (stringAt.equals("$")) {
-                        blockPredicate = (block) -> true;
+                        blockPredicate = BlockInWorldPredicate.WILDCARD;
                     } else if (stringAt.equals(" ")) {
                         blockPredicate = BlockInWorldPredicateBuilder.of(AIR).build();
                     } else {

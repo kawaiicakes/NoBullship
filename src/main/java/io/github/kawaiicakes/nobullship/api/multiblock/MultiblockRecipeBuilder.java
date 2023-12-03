@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
@@ -110,6 +111,11 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
                 this.totalBlocks(),
                 this.serializePatternNbt()
         );
+    }
+
+    @Override
+    protected BlockInWorldPredicate[][][] createPattern() {
+        return (BlockInWorldPredicate[][][]) super.createPattern();
     }
 
     protected NonNullList<ItemStack> totalBlocks() {
