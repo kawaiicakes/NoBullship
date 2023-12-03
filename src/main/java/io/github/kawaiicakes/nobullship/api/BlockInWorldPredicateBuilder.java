@@ -3,6 +3,7 @@ package io.github.kawaiicakes.nobullship.api;
 import com.google.gson.JsonArray;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
@@ -135,100 +137,12 @@ public class BlockInWorldPredicateBuilder {
     }
 
     /**
-     * Returns a <code>Predicate{@literal <BlockInWorld>}</code> whose <code>#test</code> looks for the criteria
-     * specified by this builder.
+     * Returns a <code>BlockInWorldPredicate</code> whose <code>#test</code> looks for the criteria
+     * specified by this builder. This overload only works if there are no directional properties specified as
+     * a requisite.
      */
-    public Predicate<BlockInWorld> build() {
-        Predicate<BlockInWorld> toReturn = BlockInWorld.hasState(state -> state.is(this.blockState.getBlock()));
-
-        if (this.properties.isEmpty() && this.blockEntityNbtData == null && this.blockEntityNbtDataStrict == null)
-            return toReturn;
-
-        Predicate<BlockInWorld> propertiesPredicate = (block) -> true;
-        if (!this.properties.isEmpty()) {
-            propertiesPredicate = (block) -> {
-                for (Map.Entry<Property<?>, Set<Comparable<?>>> entry : this.properties.entrySet()) {
-                    if (!entry.getValue().contains(block.getState().getValue(entry.getKey()))) return false;
-                }
-                return true;
-            };
-        }
-
-        Predicate<BlockInWorld> nbtPredicateStrict = checkNbtMatch();
-
-        Predicate<BlockInWorld> nbtPredicate = this.checkSoftNbtMatch();
-
-        return toReturn.and(propertiesPredicate).and(nbtPredicateStrict).and(nbtPredicate);
-    }
-
-    protected Predicate<BlockInWorld> checkNbtMatch() {
-        Predicate<BlockInWorld> nbtPredicateStrict = (block) -> true;
-        if (this.blockEntityNbtDataStrict != null) {
-            nbtPredicateStrict = (block) -> {
-                //noinspection DataFlowIssue ($blockEntityNbtDataStrict being non-null implies the block has an entity.)
-                CompoundTag blockNbt = block.getEntity().saveWithFullMetadata();
-
-                for (String key : this.blockEntityNbtDataStrict.getAllKeys()) {
-                    if (!blockNbt.contains(key)) return false;
-                    //noinspection DataFlowIssue
-                    if (!blockNbt.get(key).equals(this.blockEntityNbtData.get(key))) return false;
-                }
-
-                return true;
-            };
-        }
-        return nbtPredicateStrict;
-    }
-
-    /**
-     * Helper method which generates a <code>{@literal Predicate<BlockInWorld>}</code> which checks for the presence
-     * of NBT data with soft scrutiny. As an example to what the return does, containers need not match the NBT exactly;
-     * only the count of the contents should meet or exceed what is stipulated in NBT.
-     */
-    protected Predicate<BlockInWorld> checkSoftNbtMatch() {
-        Predicate<BlockInWorld> nbtPredicate = block -> true;
-
-        if (this.blockEntityNbtData != null) {
-            nbtPredicate = (block) -> {
-                //noinspection DataFlowIssue ($blockEntityNbtData being non-null implies the block has an entity.)
-                CompoundTag blockNbt = block.getEntity().saveWithFullMetadata();
-
-                for (String key : this.blockEntityNbtData.getAllKeys()) {
-                    if (!key.equals("Items")) {
-                        if (!blockNbt.contains(key)) return false;
-                        //noinspection DataFlowIssue
-                        if (!blockNbt.get(key).equals(this.blockEntityNbtData.get(key))) return false;
-                        continue;
-                    }
-
-                    ListTag requirementContents = this.blockEntityNbtData.getList("Items", Tag.TAG_COMPOUND);
-                    if (requirementContents.isEmpty()) return false;
-
-                    ListTag containerContents = blockNbt.getList("Items", Tag.TAG_COMPOUND);
-                    if (containerContents.isEmpty() && !requirementContents.isEmpty()) return false;
-
-                    NonNullList<ItemStack> requirementsAsList = NonNullList.createWithCapacity(requirementContents.size());
-                    for (Tag slotTag : requirementContents) {
-                        ItemStack slotStack = ItemStack.of((CompoundTag) slotTag);
-                        requirementsAsList.add(slotStack);
-                    }
-                    List<ItemStack> summedRequirements = SchematicRecipe.getSummedContents(requirementsAsList);
-
-                    NonNullList<ItemStack> contentsAsList = NonNullList.createWithCapacity(containerContents.size());
-                    for (Tag slotTag : containerContents) {
-                        ItemStack slotStack = ItemStack.of((CompoundTag) slotTag);
-                        contentsAsList.add(slotStack);
-                    }
-                    List<ItemStack> summedContents = SchematicRecipe.getSummedContents(contentsAsList);
-
-                    if (!SchematicRecipe.compareSummedContents(summedRequirements, summedContents)) return false;
-                }
-
-                return true;
-            };
-        }
-
-        return nbtPredicate;
+    public BlockInWorldPredicate build() {
+        return new BlockInWorldPredicate(this.blockState, this.properties, this.blockEntityNbtData, this.blockEntityNbtDataStrict);
     }
 
     /**

@@ -77,9 +77,10 @@ public class MultiblockPattern extends BlockPattern {
         for(int i = 0; i < this.width; ++i) {
             for(int j = 0; j < this.height; ++j) {
                 for(int k = 0; k < this.depth; ++k) {
-                    if (!this.pattern[k][j][i].test(pCache.getUnchecked(translateAndRotate(pPos, pFinger, pThumb, i, j, k)))) {
-                        return null;
-                    }
+                    // TODO: make $pattern a 3D array of BlockInWorldPredicates
+                    // TODO: use #setFacing as needed
+                    boolean hasMatchAt = this.pattern[k][j][i].test(pCache.getUnchecked(translateAndRotate(pPos, pFinger, pThumb, i, j, k)));
+                    if (!hasMatchAt) return null;
                 }
             }
         }
