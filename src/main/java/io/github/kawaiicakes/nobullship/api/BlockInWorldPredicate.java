@@ -35,8 +35,6 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
     /**
      * Creates a new <code>BlockInWorldPredicate</code> facing the given direction. Any directional properties
      * will be rotated accordingly for the test.
-     * @param facing the <code>Direction</code> the recipe is facing. It must be one of the cardinal directions (N,E,S,W)
-     *               or an <code>IllegalArgumentException</code> will be thrown.
      */
     protected BlockInWorldPredicate(BlockState block, @Nullable Map<Property<?>, Set<Comparable<?>>> properties,
                                     @Nullable CompoundTag blockEntityNbtData, @Nullable CompoundTag blockEntityNbtDataStrict) {
