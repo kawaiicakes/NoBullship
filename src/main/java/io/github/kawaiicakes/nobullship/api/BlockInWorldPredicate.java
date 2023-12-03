@@ -26,6 +26,11 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
     @SuppressWarnings("DataFlowIssue")
     public static final BlockInWorldPredicate WILDCARD = new BlockInWorldPredicate(null, null, null, null) {
         @Override
+        public BlockInWorldPredicate setFacing(Direction direction) {
+            return this;
+        }
+
+        @Override
         public boolean test(BlockInWorld blockInWorld) {
             return true;
         }
