@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +30,13 @@ import static net.minecraft.world.level.block.Blocks.AIR;
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
 public class MultiblockRecipeBuilder extends BlockPatternBuilder {
-    protected final Logger LOGGER = LogUtils.getLogger();
+    protected static final Logger LOGGER = LogUtils.getLogger();
     protected final ResourceLocation result;
+    protected final Map<String, BlockInWorldPredicateBuilder> lookupSimple = new HashMap<>();
     @Nullable
     protected CompoundTag nbt;
     @Nullable
     protected NonNullList<ItemStack> requisites;
-    protected final Map<String, BlockInWorldPredicateBuilder> lookupSimple = new HashMap<>();
 
     /**
      * This constructor is only intended to be accessed by subclassing types. This is so the static <code>#of</code>
@@ -43,8 +44,8 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * @param nbt the <code>CompoundTag</code> NBT data to be given to the spawned entity.
      */
     protected MultiblockRecipeBuilder(ResourceLocation result, @Nullable CompoundTag nbt) {
-        this.lookup.put(' ', BlockInWorld.hasState(state -> state.is(AIR)));
-        this.lookup.put('$', (block) -> true);
+        this.lookup.put(' ', BlockInWorldPredicateBuilder.of(AIR).build());
+        this.lookup.put('$', BlockInWorldPredicate.WILDCARD);
         this.result = result;
         this.nbt = nbt;
     }
@@ -115,7 +116,18 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
 
     @Override
     protected BlockInWorldPredicate[][][] createPattern() {
-        return (BlockInWorldPredicate[][][]) super.createPattern();
+        this.ensureAllCharactersMatched();
+        BlockInWorldPredicate[][][] predicate = (BlockInWorldPredicate[][][]) Array.newInstance(BlockInWorldPredicate.class, this.pattern.size(), this.height, this.width);
+
+        for(int i = 0; i < this.pattern.size(); ++i) {
+            for(int j = 0; j < this.height; ++j) {
+                for(int k = 0; k < this.width; ++k) {
+                    predicate[i][j][k] = (BlockInWorldPredicate) this.lookup.get((this.pattern.get(i))[j].charAt(k));
+                }
+            }
+        }
+
+        return predicate;
     }
 
     protected NonNullList<ItemStack> totalBlocks() {

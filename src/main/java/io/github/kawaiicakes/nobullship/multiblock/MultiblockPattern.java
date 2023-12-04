@@ -189,7 +189,7 @@ public class MultiblockPattern extends BlockPattern {
             paletteMap.put(key, BlockInWorldPredicateBuilder.fromNbt(tagAtKey));
         }
 
-        BlockInWorldPredicate[][][] predicate = (BlockInWorldPredicate[][][]) Array.newInstance(Predicate.class, pattern.size(), patternHeight, patternWidth);
+        BlockInWorldPredicate[][][] predicate = (BlockInWorldPredicate[][][]) Array.newInstance(BlockInWorldPredicate.class, pattern.size(), patternHeight, patternWidth);
 
         for(int i = 0; i < pattern.size(); ++i) {
             for(int j = 0; j < patternHeight; ++j) {
