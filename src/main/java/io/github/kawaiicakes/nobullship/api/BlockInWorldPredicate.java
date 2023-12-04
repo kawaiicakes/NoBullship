@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.api;
 
+import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -9,11 +10,14 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARDINAL;
 
@@ -23,6 +27,7 @@ import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARD
  * from the original.
  */
 public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
+    protected static final Logger LOGGER = LogUtils.getLogger();
     @SuppressWarnings("DataFlowIssue")
     public static final BlockInWorldPredicate WILDCARD = new BlockInWorldPredicate(null, null, null, null) {
         @Override
@@ -81,9 +86,28 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
         Predicate<BlockInWorld> propertiesPredicate = (block) -> true;
         if (properties != null && !properties.isEmpty()) {
             propertiesPredicate = (block) -> {
+                // TODO: I HATE NESTING! I HATE NESTING!.
                 for (Map.Entry<Property<?>, Set<Comparable<?>>> entry : properties.entrySet()) {
-                    // TODO: implement facing (dynamic direction checks)
-                    if (!entry.getValue().contains(block.getState().getValue(entry.getKey()))) return false;
+                    final Set<Comparable<?>> checkedValues = entry.getValue();
+                    Comparable<?> valueOfBlockInWorld;
+
+                    try {
+                        valueOfBlockInWorld = block.getState().getValue(entry.getKey());
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
+
+                    if (entry.getKey() instanceof DirectionProperty directionProperty
+                            && directionProperty.getPossibleValues().containsAll(List.of(CARDINAL))) {
+
+                        Set<Direction> setOfDirections = checkedValues.stream().map(value -> rotateValue(value, facing)).collect(Collectors.toSet());
+
+                        if (!(valueOfBlockInWorld instanceof Direction)) return false;
+                        if (!(setOfDirections.contains(valueOfBlockInWorld))) return false;
+                        continue;
+                    }
+
+                    if (!checkedValues.contains(valueOfBlockInWorld)) return false;
                 }
                 return true;
             };
@@ -159,5 +183,17 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
         }
 
         return nbtPredicate;
+    }
+
+    protected static Direction rotateValue(Comparable<?> original, Direction rotated) {
+        if (!(original instanceof Direction originalDirection))
+            throw new IllegalArgumentException("Argument 'original' is not a direction!");
+
+        return switch (rotated) {
+            case SOUTH -> originalDirection.getOpposite();
+            case WEST -> originalDirection.getCounterClockWise();
+            case EAST -> originalDirection.getClockWise();
+            default -> originalDirection;
+        };
     }
 }
