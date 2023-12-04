@@ -167,8 +167,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             return;
         }
 
-        // TODO: dynamic checking for BlockState directions (specifically, rotating required facings w/ the orientation)
-        // FIXME: other checks, missing logic & optimizations (see CarvedPumpkinBlock)
+        // TODO: optimizations for pattern logic
         for (int i = 0; i < pattern.getDepth(); ++i) {
             for (int j = 0; j < pattern.getWidth(); ++j) {
                 for (int k = 0; k < pattern.getHeight(); ++k) {
