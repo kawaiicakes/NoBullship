@@ -1,8 +1,19 @@
 package io.github.kawaiicakes.nobullship.multiblock.block;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
+import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
+import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
+import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -18,16 +29,25 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.*;
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 /**
  * I am merely implementing <code>Container</code> via <code>BaseContainerBlockEntity</code> so that this is a valid
@@ -197,11 +217,145 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T t) {
-        if (!(level instanceof ServerLevel serverLevel)) return;
         if (!(t instanceof MultiblockWorkshopBlockEntity entity)) return;
 
-        if (entity.hasRecipe != null && entity.hasRecipe.shapedMatches(entity)) {
-            serverLevel.sendParticles(new BlockParticleOption(MINI_GHOST_PARTICLE.get(), Blocks.DIRT.defaultBlockState()), (double) pos.getX() + 0.5, (double) pos.getY() + 2.5, (double) pos.getZ() + 0.5, 1, 0, 0, 0, 0);
+        if (level instanceof ClientLevel clientLevel) {
+            SchematicRenderer.renderRecipe(clientLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, entity, clientLevel).orElse(null), state.getValue(HORIZONTAL_FACING), pos);
+            return;
+        }
+
+        if (level instanceof ServerLevel serverLevel) {
+            if (entity.hasRecipe != null && entity.hasRecipe.shapedMatches(entity)) {
+                serverLevel.sendParticles(new BlockParticleOption(MINI_GHOST_PARTICLE.get(), Blocks.DIRT.defaultBlockState()), (double) pos.getX() + 0.5, (double) pos.getY() + 2.5, (double) pos.getZ() + 0.5, 1, 0, 0, 0, 0);
+            }
+        }
+    }
+
+    @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+    public static class SchematicRenderer {
+        protected static final Map<Pair<BlockPos, Direction>, Pair<List<String[]>, Map<Character, BlockState>>> RENDER_QUEUE = new HashMap<>();
+
+        public static void renderRecipe(@Nullable SchematicRecipe recipe, Direction facing, BlockPos origin) {
+            Pair<BlockPos, Direction> keyPair = Pair.of(origin, facing);
+
+            if (recipe == null) {
+                forceStopRender(keyPair);
+                return;
+            }
+
+            MultiblockRecipe forRender = MultiblockRecipeManager.getInstance().getRecipe(recipe.getResultId()).orElse(null);
+            if (forRender == null) return;
+            if (RENDER_QUEUE.containsKey(keyPair)) return;
+
+            CompoundTag patternTag = forRender.recipe().getSerializedPattern();
+            if (patternTag == null) return;
+
+            RENDER_QUEUE.put(keyPair, MultiblockPattern.rawPatternFromNbt(patternTag));
+        }
+
+        public static void forceStopRender(Pair<BlockPos, Direction> entityPos) {
+            RENDER_QUEUE.remove(entityPos);
+        }
+
+        @SubscribeEvent
+        public static void render(RenderLevelStageEvent event) {
+            if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS) return;
+            if (RENDER_QUEUE.isEmpty()) return;
+
+            ClientLevel clientLevel = Minecraft.getInstance().level;
+            if (clientLevel == null) return;
+
+            BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+            Vec3 cameraPosition = event.getCamera().getPosition();
+
+            PoseStack stack = event.getPoseStack();
+
+            VertexConsumer buffer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.solid());
+            buffer.color(0.145F, 0.588F, 0.745F, 1.0f);
+            VertexConsumer proxyBuffer = new VertexConsumer() {
+                @Override
+                public void putBulkData(PoseStack.Pose pPoseEntry, BakedQuad pQuad, float[] pColorMuls, float pRed, float pGreen, float pBlue, int[] pCombinedLights, int pCombinedOverlay, boolean pMulColor) {
+                    putBulkData(pPoseEntry, pQuad, pColorMuls, pRed, pGreen, pBlue, 0.5f, pCombinedLights, pCombinedOverlay, pMulColor);
+                }
+
+                @Override
+                public VertexConsumer vertex(double pX, double pY, double pZ) {
+                    return buffer.vertex(pX, pY, pZ);
+                }
+
+                @Override
+                public VertexConsumer color(int pRed, int pGreen, int pBlue, int pAlpha) {
+                    return buffer.color(pRed, pGreen, pBlue, pAlpha);
+                }
+
+                @Override
+                public VertexConsumer uv(float pU, float pV) {
+                    return buffer.uv(pU, pV);
+                }
+
+                @Override
+                public VertexConsumer overlayCoords(int pU, int pV) {
+                    return buffer.overlayCoords(pU, pV);
+                }
+
+                @Override
+                public VertexConsumer uv2(int pU, int pV) {
+                    return buffer.uv2(pU, pV);
+                }
+
+                @Override
+                public VertexConsumer normal(float pX, float pY, float pZ) {
+                    return buffer.normal(pX, pY, pZ);
+                }
+
+                @Override
+                public void endVertex() {
+                    buffer.endVertex();
+                }
+
+                @Override
+                public void defaultColor(int pDefaultR, int pDefaultG, int pDefaultB, int pDefaultA) {
+                    buffer.defaultColor(pDefaultR, pDefaultG, pDefaultB, pDefaultA);
+                }
+
+                @Override
+                public void unsetDefaultColor() {
+                    buffer.unsetDefaultColor();
+                }
+            };
+
+            for (Map.Entry<Pair<BlockPos, Direction>, Pair<List<String[]>, Map<Character, BlockState>>> entry : RENDER_QUEUE.entrySet()) {
+                BlockPos previewPosition = entry.getKey().getFirst().mutable().move(1, 0, 1).immutable();
+
+                int zSize = entry.getValue().getFirst().size();
+                int ySize = entry.getValue().getFirst().get(0).length;
+                int xSize = entry.getValue().getFirst().get(0)[0].length();
+
+                for(int i = 0; i < zSize; ++i) {
+                    for(int j = 0; j < ySize; ++j) {
+                        for(int k = 0; k < xSize; ++k) {
+                            BlockState forRender = entry.getValue().getSecond().get((entry.getValue().getFirst().get(i))[j].charAt(k));
+                            if (forRender == null) continue;
+
+                            BlockPos newPos = previewPosition.mutable().move(zSize - i, ySize - j, xSize - k);
+                            if (!clientLevel.getBlockState(newPos).isAir()) continue;
+
+                            stack.pushPose();
+                            stack.translate(newPos.getX() - cameraPosition.x(), newPos.getY() - cameraPosition.y(), newPos.getZ() - cameraPosition.z());
+
+                            //noinspection deprecation
+                            blockRenderer.renderBatched(
+                                    forRender, newPos,
+                                    clientLevel, stack,
+                                    proxyBuffer, true,
+                                    clientLevel.getRandom()
+                            );
+
+                            stack.popPose();
+                        }
+                    }
+                }
+            }
         }
     }
 }

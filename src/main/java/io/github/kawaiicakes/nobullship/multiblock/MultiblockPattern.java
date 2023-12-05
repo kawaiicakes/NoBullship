@@ -2,26 +2,28 @@ package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.mojang.datafixers.util.Pair;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
+import java.util.*;
 
 import static net.minecraft.world.level.block.Blocks.AIR;
 
@@ -221,6 +223,59 @@ public class MultiblockPattern extends BlockPattern {
             totalBlocksList.add(ItemStack.of((CompoundTag) itemTag));
         }
 
-        return new MultiblockPattern(predicate, paletteList, totalBlocksList, null);
+        return new MultiblockPattern(predicate, paletteList, totalBlocksList, serializedTag);
+    }
+
+    public static Pair<List<String[]>, Map<Character, BlockState>> rawPatternFromNbt(CompoundTag patternTag) {
+        ListTag patternList = patternTag.getList("pattern", Tag.TAG_LIST);
+        List<String[]> pattern = new ArrayList<>(patternList.size());
+        int patternHeight = 1;
+        int patternWidth = 1;
+        for (Tag tag : patternList) {
+            ListTag patternListTag = (ListTag) tag;
+            if (patternListTag.getElementType() != Tag.TAG_STRING) throw new IllegalArgumentException("Passed NBT does not contain valid type of list elements for pattern!");
+            if (patternListTag.size() > patternHeight) patternHeight = patternListTag.size();
+            List<String> tempList = new ArrayList<>(patternListTag.size());
+            for (Tag string : patternListTag) {
+                if (string.getAsString().length() > patternWidth) patternWidth = string.getAsString().length();
+                tempList.add(string.getAsString());
+            }
+            pattern.add(tempList.toArray(new String[patternListTag.size()]));
+        }
+
+        CompoundTag originalPaletteTag = patternTag.getCompound("palette");
+        Map<Character, BlockState> paletteMap = new HashMap<>(originalPaletteTag.size());
+        for (String key : originalPaletteTag.getAllKeys()) {
+            CompoundTag tagAtKey = originalPaletteTag.getCompound(key);
+
+            BlockState blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, tagAtKey.get("blockState")).get().orThrow();
+
+            /* TODO
+            if (tagAtKey.get("properties") instanceof ListTag propertiesTag) {
+                for (Tag keyPairTag : propertiesTag) {
+                    CompoundTag keyPair = (CompoundTag) keyPairTag;
+                    CompoundTag propertyTag = keyPair.getCompound("property");
+
+                    Property<?> propertyForBlock = blockstate.getProperties()
+                            .stream()
+                            .filter(property -> property.getName().equals(propertyTag.getString("name"))
+                                    && property.getValueClass().getSimpleName().equals(propertyTag.getString("type")))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (propertyForBlock == null) throw new IllegalArgumentException("Passed NBT does not contain valid properties!");
+
+                    ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
+
+                    blockstate.setValue(propertyForBlock, propertyForBlock.getValue(valuesList.getString(0)).orElseThrow());
+                }
+            }
+
+             */
+
+            paletteMap.put(key.charAt(0), blockstate);
+        }
+
+        return Pair.of(pattern, paletteMap);
     }
 }
