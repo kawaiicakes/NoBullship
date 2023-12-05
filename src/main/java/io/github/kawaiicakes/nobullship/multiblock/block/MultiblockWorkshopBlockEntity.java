@@ -325,11 +325,11 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
             };
 
             for (Map.Entry<Pair<BlockPos, Direction>, Pair<List<String[]>, Map<Character, BlockState>>> entry : RENDER_QUEUE.entrySet()) {
-                BlockPos previewPosition = entry.getKey().getFirst().mutable().move(1, 0, 1).immutable();
-
                 int zSize = entry.getValue().getFirst().size();
                 int ySize = entry.getValue().getFirst().get(0).length;
                 int xSize = entry.getValue().getFirst().get(0)[0].length();
+
+                BlockPos previewPosition = entry.getKey().getFirst().mutable().move(entry.getKey().getSecond(), -(zSize + 1)).move(0, ySize - 1, 0).immutable();
 
                 for(int i = 0; i < zSize; ++i) {
                     for(int j = 0; j < ySize; ++j) {
@@ -337,7 +337,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
                             BlockState forRender = entry.getValue().getSecond().get((entry.getValue().getFirst().get(i))[j].charAt(k));
                             if (forRender == null) continue;
 
-                            BlockPos newPos = previewPosition.mutable().move((zSize - 1) - i, (ySize - 1) - j, (xSize - 1) - k);
+                            BlockPos newPos = MultiblockPattern.translateAndRotate(previewPosition, entry.getKey().getSecond(), Direction.UP, k, j, i);
                             if (!clientLevel.getBlockState(newPos).isAir()) continue;
 
                             stack.pushPose();
