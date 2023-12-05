@@ -337,7 +337,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
                             BlockState forRender = entry.getValue().getSecond().get((entry.getValue().getFirst().get(i))[j].charAt(k));
                             if (forRender == null) continue;
 
-                            BlockPos newPos = previewPosition.mutable().move(zSize - i, ySize - j, xSize - k);
+                            BlockPos newPos = previewPosition.mutable().move((zSize - 1) - i, (ySize - 1) - j, (xSize - 1) - k);
                             if (!clientLevel.getBlockState(newPos).isAir()) continue;
 
                             stack.pushPose();
