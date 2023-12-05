@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship;
 
+import com.mojang.serialization.Codec;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
@@ -11,6 +12,8 @@ import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -66,6 +69,8 @@ public class NoBullship
     private static final DeferredRegister<SoundEvent> SOUND_REGISTRY = DeferredRegister.create(SOUND_EVENTS, MOD_ID);
     private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER_REGISTRY
             = DeferredRegister.create(RECIPE_SERIALIZERS, MOD_ID);
+    private static final DeferredRegister<ParticleType<?>> PARTICLE_REGISTRY
+            = DeferredRegister.create(PARTICLE_TYPES, MOD_ID);
 
     public static final RegistryObject<Block> WORKSHOP_BLOCK
             = BLOCK_REGISTRY.register("workshop", MultiblockWorkshopBlock::new);
@@ -77,16 +82,23 @@ public class NoBullship
             () -> new BlockItem(WORKSHOP_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB)));
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));
-
-    public static final RegistryObject<SchematicItem> SCHEMATIC = ITEM_REGISTRY.register("schematic", SchematicItem::new);
+    public static final RegistryObject<SchematicItem> SCHEMATIC
+            = ITEM_REGISTRY.register("schematic", SchematicItem::new);
     public static final RegistryObject<SoundEvent> CONSTRUCT_SUCCESS
             = SOUND_REGISTRY.register("construct_success", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_success")));
     public static final RegistryObject<SoundEvent> CONSTRUCT_FAILED
             = SOUND_REGISTRY.register("construct_failed", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_failed")));
     public static final RegistryObject<SoundEvent> CONSTRUCT_EXPENDED
             = SOUND_REGISTRY.register("construct_expended", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_expended")));
-
-    public static final RegistryObject<SchematicRecipe.Serializer> SCHEMATIC_SERIALIZER = RECIPE_SERIALIZER_REGISTRY.register("schematic_workbench", () -> INSTANCE);
+    public static final RegistryObject<SchematicRecipe.Serializer> SCHEMATIC_SERIALIZER
+            = RECIPE_SERIALIZER_REGISTRY.register("schematic_workbench", () -> INSTANCE);
+    public static final RegistryObject<ParticleType<BlockParticleOption>> MINI_GHOST_PARTICLE
+            = PARTICLE_REGISTRY.register("mini_ghost", () -> new ParticleType<>(true, BlockParticleOption.DESERIALIZER) {
+        @Override
+        public @NotNull Codec<BlockParticleOption> codec() {
+            return BlockParticleOption.codec(this);
+        }
+    });
 
     public NoBullship()
     {
@@ -101,8 +113,9 @@ public class NoBullship
         BLOCK_ENTITY_REGISTRY.register(modEventBus);
         ITEM_REGISTRY.register(modEventBus);
         MENU_REGISTRY.register(modEventBus);
-        SOUND_REGISTRY.register(modEventBus);
+        PARTICLE_REGISTRY.register(modEventBus);
         RECIPE_SERIALIZER_REGISTRY.register(modEventBus);
+        SOUND_REGISTRY.register(modEventBus);
 
         ModLoadingContext.get().registerConfig(COMMON, CONFIG);
     }

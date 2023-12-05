@@ -1,37 +1,41 @@
 package io.github.kawaiicakes.nobullship.particle;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.*;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 @OnlyIn(Dist.CLIENT)
-public class MiniGhostParticle extends Particle {
-    protected MiniGhostParticle(ClientLevel pLevel, double pX, double pY, double pZ) {
+public class MiniGhostParticle extends TextureSheetParticle {
+    protected MiniGhostParticle(ClientLevel pLevel, double pX, double pY, double pZ, BlockState block) {
         super(pLevel, pX, pY, pZ);
-    }
-
-    @Override
-    public void render(VertexConsumer pBuffer, Camera pRenderInfo, float pPartialTicks) {
-
+        //noinspection deprecation
+        this.setSprite(Minecraft.getInstance().getBlockRenderer().getBlockModelShaper().getParticleIcon(block));
+        this.gravity = 0.0F;
+        this.lifetime = 1;
+        this.hasPhysics = false;
+        this.quadSize = 0.15F;
     }
 
     @Override
     public ParticleRenderType getRenderType() {
-        return null;
+        return ParticleRenderType.TERRAIN_SHEET;
+    }
+
+    public float getQuadSize(float pScaleFactor) {
+        return 0.15F;
     }
 
     @OnlyIn(Dist.CLIENT)
-    public static class MiniGhostParticleProvider implements ParticleProvider<MiniGhostParticleOption> {
+    public static class Provider implements ParticleProvider<BlockParticleOption> {
         @Nullable
         @Override
-        public Particle createParticle(MiniGhostParticleOption pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            return null;
+        public Particle createParticle(BlockParticleOption pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+            return new MiniGhostParticle(pLevel, pX, pY, pZ, pType.getState());
         }
     }
 }
