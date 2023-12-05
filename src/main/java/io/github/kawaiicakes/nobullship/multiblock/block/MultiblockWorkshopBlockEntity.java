@@ -3,11 +3,9 @@ package io.github.kawaiicakes.nobullship.multiblock.block;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import it.unimi.dsi.fastutil.ints.IntImmutableList;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -29,8 +27,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
-import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
-import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
+import static io.github.kawaiicakes.nobullship.NoBullship.*;
 
 /**
  * I am merely implementing <code>Container</code> via <code>BaseContainerBlockEntity</code> so that this is a valid
@@ -204,8 +201,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
         if (!(t instanceof MultiblockWorkshopBlockEntity entity)) return;
 
         if (entity.hasRecipe != null && entity.hasRecipe.shapedMatches(entity)) {
-            // TODO: custom particle type
-            serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK_MARKER, Blocks.DIRT.defaultBlockState()), (double) pos.getX() + 0.5, (double) pos.getY() + 2.5, (double) pos.getZ() + 0.5, 1, 0, 0, 0, 0);
+            serverLevel.sendParticles(new BlockParticleOption(MINI_GHOST_PARTICLE.get(), Blocks.DIRT.defaultBlockState()), (double) pos.getX() + 0.5, (double) pos.getY() + 2.5, (double) pos.getZ() + 0.5, 1, 0, 0, 0, 0);
         }
     }
 }

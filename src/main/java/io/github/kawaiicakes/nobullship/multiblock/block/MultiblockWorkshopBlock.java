@@ -179,6 +179,7 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
+        if (pLevel.isClientSide) return null;
         return pBlockEntityType == WORKSHOP_BLOCK_ENTITY.get() ? MultiblockWorkshopBlockEntity::tick : null;
     }
 

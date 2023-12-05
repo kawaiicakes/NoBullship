@@ -9,6 +9,7 @@ import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen;
 import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacket;
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
+import io.github.kawaiicakes.nobullship.particle.MiniGhostParticle;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -26,6 +27,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.data.event.GatherDataEvent;
@@ -108,6 +110,7 @@ public class NoBullship
 
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::registerParticleFactory);
 
         BLOCK_REGISTRY.register(modEventBus);
         BLOCK_ENTITY_REGISTRY.register(modEventBus);
@@ -164,6 +167,11 @@ public class NoBullship
     @SubscribeEvent
     public void addReloadListener(AddReloadListenerEvent event) {
         event.addListener(MultiblockRecipeManager.getInstance());
+    }
+
+    @SubscribeEvent
+    public void registerParticleFactory(RegisterParticleProvidersEvent event) {
+        event.register(MINI_GHOST_PARTICLE.get(), new MiniGhostParticle.Provider());
     }
 
     @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
