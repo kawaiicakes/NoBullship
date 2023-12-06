@@ -74,10 +74,6 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
         this.hasRecipe = recipe;
     }
 
-    public boolean hasActiveRecipe() {
-        return this.hasRecipe != null;
-    }
-
     @Override
     public void onLoad() {
         super.onLoad();

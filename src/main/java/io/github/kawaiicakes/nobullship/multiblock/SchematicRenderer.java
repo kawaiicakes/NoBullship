@@ -55,10 +55,6 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         BlockPos posOfEntity = pBlockEntity.getBlockPos();
         // I want to avoid caching block entities. I'm concerned about memory leaks
         if (!RENDER_QUEUE.containsKey(posOfEntity)) return;
-        if (!pBlockEntity.hasActiveRecipe()) {
-            RENDER_QUEUE.remove(posOfEntity);
-            return;
-        }
 
         ClientLevel clientLevel = Minecraft.getInstance().level;
         if (clientLevel == null) return;
