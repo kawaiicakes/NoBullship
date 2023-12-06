@@ -76,7 +76,11 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         BlockPos previewPosition = posOfEntity.mutable().move(facing, -(zSize + 1)).offset(0, ySize - 1, 0).immutable();
 
         for(int i = 0; i < zSize; ++i) {
+            if (pBlockEntity.verticalRenderSlicing && pBlockEntity.renderedLayer != i) continue;
+
             for(int j = 0; j < ySize; ++j) {
+                if (!pBlockEntity.verticalRenderSlicing && pBlockEntity.renderedLayer != j) continue;
+
                 for(int k = 0; k < xSize; ++k) {
                     BlockState forRender = palette.get((pattern.get(i))[j].charAt(k));
                     if (forRender == null) continue;
@@ -106,7 +110,6 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
     @Override
     public boolean shouldRenderOffScreen(MultiblockWorkshopBlockEntity pBlockEntity) {
-        // TODO: more robust conditions when schematic display buttons are added
         return true;
     }
 

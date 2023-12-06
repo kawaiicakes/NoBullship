@@ -10,6 +10,7 @@ import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -32,8 +33,13 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     public static final ResourceLocation TEXTURE = new ResourceLocation(MOD_ID, "textures/gui/workbench_gui.png");
     public static final Component NO_RESULT = Component.translatable("gui.nobullship.no_recipe");
     public static final Component VISIBILITY_BUTTON = Component.translatable("gui.nobullship.toggle_render");
+    public static final Component VERTICAL = Component.literal("|");
+    public static final Component HORIZONTAL = Component.literal("-");
     public static final Quaternion ROTATE_180 = Vector3f.ZP.rotationDegrees(-180F);
     protected boolean renderSchematic;
+    protected Component sliceMode = VERTICAL;
+    public boolean verticalRenderSlicing;
+    public int renderedLayer = 0;
 
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -44,6 +50,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.inventoryLabelX += 12;
         this.inventoryLabelY += 40;
         this.renderSchematic = pMenu.entity.shouldRenderSchematicInWorld;
+        this.verticalRenderSlicing = pMenu.entity.verticalRenderSlicing;
     }
 
     @Override
@@ -74,6 +81,9 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
                     }
                 }
         );
+
+        // FIXME: proper component display change
+        this.addRenderableWidget(new Button(this.leftPos + 148, this.topPos + 71, 16, 16, this.sliceMode, (button) -> this.toggleSlice()));
     }
 
     @Override
@@ -180,6 +190,12 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     protected void toggleSchematicDisplay() {
         this.renderSchematic = !this.renderSchematic;
         this.menu.entity.shouldRenderSchematicInWorld = this.renderSchematic;
+    }
+
+    protected void toggleSlice() {
+        this.sliceMode = this.sliceMode == VERTICAL ? HORIZONTAL : VERTICAL;
+        this.verticalRenderSlicing = !this.verticalRenderSlicing;
+        this.menu.entity.verticalRenderSlicing = this.verticalRenderSlicing;
     }
 
     protected static void renderLivingEntity(int pPosX, int pPosY, int pScale, float angleXComponent, float angleYComponent, LivingEntity pLivingEntity) {

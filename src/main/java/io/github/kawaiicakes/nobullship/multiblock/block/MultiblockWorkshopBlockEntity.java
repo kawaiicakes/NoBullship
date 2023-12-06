@@ -65,6 +65,8 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
         }
     };
     public boolean shouldRenderSchematicInWorld;
+    public boolean verticalRenderSlicing;
+    public int renderedLayer = 0;
 
     public MultiblockWorkshopBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(WORKSHOP_BLOCK_ENTITY.get(), pPos, pBlockState);
