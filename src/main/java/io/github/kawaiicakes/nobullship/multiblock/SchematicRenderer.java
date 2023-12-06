@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
@@ -36,12 +37,12 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
         MultiblockRecipe forRender = MultiblockRecipeManager.getInstance().getRecipe(recipe.getResultId()).orElse(null);
         if (forRender == null) return;
-        if (RENDER_QUEUE.containsKey(origin)) return;
+        if (RENDER_QUEUE.containsKey(origin) && forRender.result().equals(RENDER_QUEUE.get(origin).id)) return;
 
         CompoundTag patternTag = forRender.recipe().getSerializedPattern();
         if (patternTag == null) return;
 
-        RENDER_QUEUE.put(origin, new RenderInstructions(MultiblockPattern.rawPaletteFromNbt(patternTag),
+        RENDER_QUEUE.put(origin, new RenderInstructions(forRender.result(), MultiblockPattern.rawPaletteFromNbt(patternTag),
                 MultiblockPattern.rawPatternFromNbt(patternTag), facing));
     }
 
@@ -113,5 +114,5 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         return true;
     }
 
-    public record RenderInstructions(Map<Character, BlockState> palette, List<String[]> pattern, Direction direction) {}
+    public record RenderInstructions(ResourceLocation id, Map<Character, BlockState> palette, List<String[]> pattern, Direction direction) {}
 }
