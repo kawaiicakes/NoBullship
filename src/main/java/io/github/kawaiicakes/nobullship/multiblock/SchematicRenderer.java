@@ -107,5 +107,11 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         ModelBlockRenderer.clearCache();
     }
 
+    @Override
+    public boolean shouldRenderOffScreen(MultiblockWorkshopBlockEntity pBlockEntity) {
+        // TODO: more robust conditions when schematic display buttons are added
+        return true;
+    }
+
     public record RenderInstructions(Map<Character, BlockState> palette, List<String[]> pattern, Direction direction) {}
 }
