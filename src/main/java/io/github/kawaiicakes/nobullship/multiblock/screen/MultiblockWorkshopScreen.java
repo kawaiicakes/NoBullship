@@ -80,7 +80,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         );
 
         this.addRenderableWidget(
-                new ImageButton(this.leftPos + 146, this.topPos + 71,
+                new ImageButton(this.leftPos + 147, this.topPos + 71,
                 16, 16,
                 131, 206, 16,
                 TEXTURE, 256, 256,
