@@ -10,7 +10,6 @@ import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -33,11 +32,9 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     public static final ResourceLocation TEXTURE = new ResourceLocation(MOD_ID, "textures/gui/workbench_gui.png");
     public static final Component NO_RESULT = Component.translatable("gui.nobullship.no_recipe");
     public static final Component VISIBILITY_BUTTON = Component.translatable("gui.nobullship.toggle_render");
-    public static final Component VERTICAL = Component.literal("|");
-    public static final Component HORIZONTAL = Component.literal("-");
+    public static final Component SLICE_DIRECTION = Component.translatable("gui.nobullship.slice_direction");
     public static final Quaternion ROTATE_180 = Vector3f.ZP.rotationDegrees(-180F);
     protected boolean renderSchematic;
-    protected Component sliceMode = VERTICAL;
     public boolean verticalRenderSlicing;
     public int renderedLayer = 0;
 
@@ -58,7 +55,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         super.init();
 
         this.addRenderableWidget(
-                new ImageButton(this.leftPos + 130, this.topPos + 71,
+                new ImageButton(this.leftPos + 129, this.topPos + 71,
                         16, 16,
                         115, 206, 16,
                         TEXTURE, 256, 256,
@@ -82,8 +79,30 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
                 }
         );
 
-        // FIXME: proper component display change
-        this.addRenderableWidget(new Button(this.leftPos + 148, this.topPos + 71, 16, 16, this.sliceMode, (button) -> this.toggleSlice()));
+        this.addRenderableWidget(
+                new ImageButton(this.leftPos + 146, this.topPos + 71,
+                16, 16,
+                131, 206, 16,
+                TEXTURE, 256, 256,
+                (button) -> this.toggleSlice(),
+                (button, stack, mX, mY) -> this.renderTooltip(stack, SLICE_DIRECTION, mX, mY),
+                Component.empty()) {
+                    @Override
+                    public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                        RenderSystem.setShaderTexture(0, this.resourceLocation);
+
+                        int i = this.yTexStart;
+                        if (!MultiblockWorkshopScreen.this.verticalRenderSlicing) i += this.yDiffTex;
+
+                        RenderSystem.enableDepthTest();
+                        blit(pPoseStack, this.x, this.y, 5, this.xTexStart, i, this.width, this.height, this.textureHeight, this.textureWidth);
+                        if (this.isHovered) {
+                            this.renderToolTip(pPoseStack, pMouseX, pMouseY);
+                        }
+                    }
+                }
+        );
     }
 
     @Override
@@ -193,7 +212,6 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     }
 
     protected void toggleSlice() {
-        this.sliceMode = this.sliceMode == VERTICAL ? HORIZONTAL : VERTICAL;
         this.verticalRenderSlicing = !this.verticalRenderSlicing;
         this.menu.entity.verticalRenderSlicing = this.verticalRenderSlicing;
     }
