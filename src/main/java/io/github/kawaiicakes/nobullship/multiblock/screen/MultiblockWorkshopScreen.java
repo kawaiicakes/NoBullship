@@ -5,12 +5,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
-import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -52,12 +51,12 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         super.init();
 
         this.addRenderableWidget(
-                new ImageButton(this.leftPos + 133, this.topPos + 19,
+                new ImageButton(this.leftPos + 111, this.topPos + 3,
                         16, 16,
                         115, 206, 16,
                         TEXTURE, 256, 256,
                         (button) -> this.toggleSchematicDisplay(),
-                        Button.NO_TOOLTIP,
+                        (button, stack, mX, mY) -> this.renderTooltip(stack, VISIBILITY_BUTTON, mX, mY),
                         Component.empty()) {
                     @Override
                     public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
@@ -68,7 +67,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
                         if (MultiblockWorkshopScreen.this.renderSchematic) i += this.yDiffTex;
 
                         RenderSystem.enableDepthTest();
-                        blit(pPoseStack, this.x, this.y, (float)this.xTexStart, (float)i, this.width, this.height, this.textureWidth, this.textureHeight);
+                        blit(pPoseStack, this.x, this.y, 5, this.xTexStart, i, this.width, this.height, this.textureHeight, this.textureWidth);
                         if (this.isHovered) {
                             this.renderToolTip(pPoseStack, pMouseX, pMouseY);
                         }
