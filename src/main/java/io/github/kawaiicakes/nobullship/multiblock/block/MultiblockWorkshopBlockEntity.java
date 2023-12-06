@@ -7,16 +7,13 @@ import it.unimi.dsi.fastutil.ints.IntImmutableList;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,7 +27,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
-import static io.github.kawaiicakes.nobullship.NoBullship.*;
+import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
+import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 /**
@@ -209,15 +207,8 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T t) {
         if (!(t instanceof MultiblockWorkshopBlockEntity entity)) return;
 
-        if (level instanceof ClientLevel clientLevel) {
-            SchematicRenderer.setRecipe(clientLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, entity, clientLevel).orElse(null), state.getValue(HORIZONTAL_FACING), pos);
-            return;
-        }
+        if (!(level instanceof ClientLevel clientLevel)) return;
 
-        if (level instanceof ServerLevel serverLevel) {
-            if (entity.hasRecipe != null && entity.hasRecipe.shapedMatches(entity)) {
-                serverLevel.sendParticles(new BlockParticleOption(MINI_GHOST_PARTICLE.get(), Blocks.DIRT.defaultBlockState()), (double) pos.getX() + 0.5, (double) pos.getY() + 2.5, (double) pos.getZ() + 0.5, 1, 0, 0, 0, 0);
-            }
-        }
+        SchematicRenderer.setRecipe(clientLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, entity, clientLevel).orElse(null), state.getValue(HORIZONTAL_FACING), pos);
     }
 }

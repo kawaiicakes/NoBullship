@@ -1,6 +1,5 @@
 package io.github.kawaiicakes.nobullship;
 
-import com.mojang.serialization.Codec;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
@@ -10,12 +9,9 @@ import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen;
 import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacket;
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
-import io.github.kawaiicakes.nobullship.particle.MiniGhostParticle;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.core.particles.BlockParticleOption;
-import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -29,7 +25,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.data.event.GatherDataEvent;
@@ -73,8 +68,6 @@ public class NoBullship
     private static final DeferredRegister<SoundEvent> SOUND_REGISTRY = DeferredRegister.create(SOUND_EVENTS, MOD_ID);
     private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER_REGISTRY
             = DeferredRegister.create(RECIPE_SERIALIZERS, MOD_ID);
-    private static final DeferredRegister<ParticleType<?>> PARTICLE_REGISTRY
-            = DeferredRegister.create(PARTICLE_TYPES, MOD_ID);
 
     public static final RegistryObject<Block> WORKSHOP_BLOCK
             = BLOCK_REGISTRY.register("workshop", MultiblockWorkshopBlock::new);
@@ -96,13 +89,6 @@ public class NoBullship
             = SOUND_REGISTRY.register("construct_expended", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_expended")));
     public static final RegistryObject<SchematicRecipe.Serializer> SCHEMATIC_SERIALIZER
             = RECIPE_SERIALIZER_REGISTRY.register("schematic_workbench", () -> INSTANCE);
-    public static final RegistryObject<ParticleType<BlockParticleOption>> MINI_GHOST_PARTICLE
-            = PARTICLE_REGISTRY.register("mini_ghost", () -> new ParticleType<>(true, BlockParticleOption.DESERIALIZER) {
-        @Override
-        public @NotNull Codec<BlockParticleOption> codec() {
-            return BlockParticleOption.codec(this);
-        }
-    });
 
     public NoBullship()
     {
@@ -113,13 +99,11 @@ public class NoBullship
 
         modEventBus.addListener(this::gatherData);
         modEventBus.addListener(this::commonSetup);
-        modEventBus.addListener(this::registerParticleFactory);
 
         BLOCK_REGISTRY.register(modEventBus);
         BLOCK_ENTITY_REGISTRY.register(modEventBus);
         ITEM_REGISTRY.register(modEventBus);
         MENU_REGISTRY.register(modEventBus);
-        PARTICLE_REGISTRY.register(modEventBus);
         RECIPE_SERIALIZER_REGISTRY.register(modEventBus);
         SOUND_REGISTRY.register(modEventBus);
 
@@ -170,11 +154,6 @@ public class NoBullship
     @SubscribeEvent
     public void addReloadListener(AddReloadListenerEvent event) {
         event.addListener(MultiblockRecipeManager.getInstance());
-    }
-
-    @SubscribeEvent
-    public void registerParticleFactory(RegisterParticleProvidersEvent event) {
-        event.register(MINI_GHOST_PARTICLE.get(), new MiniGhostParticle.Provider());
     }
 
     @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
