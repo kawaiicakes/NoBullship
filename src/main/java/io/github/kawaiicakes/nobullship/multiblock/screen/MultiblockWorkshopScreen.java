@@ -51,7 +51,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         super.init();
 
         this.addRenderableWidget(
-                new ImageButton(this.leftPos + 111, this.topPos + 3,
+                new ImageButton(this.leftPos + 130, this.topPos + 71,
                         16, 16,
                         115, 206, 16,
                         TEXTURE, 256, 256,
@@ -113,13 +113,13 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
 
         if (!(this.menu.player.level instanceof ClientLevel clientLevel)) return;
         if (this.menu.entity.isEmpty()) {
-            drawNoResultString(pPoseStack, x + 155, y + 72);
+            drawNoResultString(pPoseStack, x + 155, y + 5);
             return;
         }
         List<SchematicRecipe> recipeList
                 = clientLevel.getRecipeManager().getAllRecipesFor(SchematicRecipe.Type.INSTANCE);
         if (recipeList.isEmpty()) {
-            drawNoResultString(pPoseStack, x + 155, y + 72);
+            drawNoResultString(pPoseStack, x + 155, y + 5);
             return;
         }
 
@@ -132,7 +132,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             matchingRecipe = shapedMatches.stream().filter(recipe -> recipe.shapelessMatches(this.menu.entity)).findFirst();
 
         if (matchingRecipe.isEmpty()) {
-            drawNoResultString(pPoseStack, x + 155, y + 72);
+            drawNoResultString(pPoseStack, x + 155, y + 5);
             return;
         }
 
@@ -149,26 +149,26 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         Entity resultEntity =
             MultiblockRecipeManager.getInstance().getEntityForRecipe(matchingRecipe.get().getResultId(), clientLevel);
         if (resultEntity == null) {
-            drawNoResultString(pPoseStack, x + 155, y + 72);
+            drawNoResultString(pPoseStack, x + 155, y + 5);
             return;
         }
 
         if (resultEntity instanceof LivingEntity livingResult) {
             renderLivingEntity(x + 155, y + 64, scale, f, f1, livingResult);
-            drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 72, 8453920);
+            drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 5, 8453920);
             return;
         }
 
         renderEntity(x + 155, y + 64, scale, f, f1, resultEntity);
 
-        drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 72, 8453920);
+        drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 5, 8453920);
         MultiblockRecipe resultRecipe = MultiblockRecipeManager.getInstance().getRecipe(matchingRecipe.get().getResultId()).orElse(null);
         if (resultRecipe == null) return;
         if (resultRecipe.nbt() != null) {
             pPoseStack.pushPose();
-            pPoseStack.translate(x + 155, y + 81, 0);
+            pPoseStack.translate(x + 132, y + 20, 0);
             pPoseStack.scale(0.8F, 0.8F, 1);
-            GuiComponent.drawCenteredString(pPoseStack, Minecraft.getInstance().font, "+NBT", 0, 0, 11141290);
+            GuiComponent.drawString(pPoseStack, Minecraft.getInstance().font, "+NBT", 0, 0, 11141290);
             pPoseStack.popPose();
         }
     }
