@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
@@ -69,6 +70,11 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
 
     public MultiblockWorkshopBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(WORKSHOP_BLOCK_ENTITY.get(), pPos, pBlockState);
+    }
+
+    @Override
+    public AABB getRenderBoundingBox() {
+        return new AABB(this.getBlockPos()).inflate(140);
     }
 
     public void setActiveRecipe(@Nullable SchematicRecipe recipe) {
