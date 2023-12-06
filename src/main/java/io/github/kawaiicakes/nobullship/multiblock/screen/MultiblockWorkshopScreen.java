@@ -33,10 +33,12 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     public static final Component NO_RESULT = Component.translatable("gui.nobullship.no_recipe");
     public static final Component VISIBILITY_BUTTON = Component.translatable("gui.nobullship.toggle_render");
     public static final Component SLICE_DIRECTION = Component.translatable("gui.nobullship.slice_direction");
+    public static final Component INCREMENT = Component.translatable("gui.nobullship.increment");
+    public static final Component DECREMENT = Component.translatable("gui.nobullship.decrement");
     public static final Quaternion ROTATE_180 = Vector3f.ZP.rotationDegrees(-180F);
     protected boolean renderSchematic;
     public boolean verticalRenderSlicing;
-    public int renderedLayer = 0;
+    public int renderedLayer;
 
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -48,6 +50,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.inventoryLabelY += 40;
         this.renderSchematic = pMenu.entity.shouldRenderSchematicInWorld;
         this.verticalRenderSlicing = pMenu.entity.verticalRenderSlicing;
+        this.renderedLayer = pMenu.entity.renderedLayer;
     }
 
     @Override
@@ -103,6 +106,50 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
                     }
                 }
         );
+
+        this.addRenderableWidget(
+                new ImageButton(this.leftPos + 163, this.topPos + 71,
+                        8, 8,
+                        147, 206, 0,
+                        TEXTURE, 256, 256,
+                        (button) -> this.incrementLayer(),
+                        (button, stack, mX, mY) -> this.renderTooltip(stack, INCREMENT, mX, mY),
+                        Component.empty()) {
+                    @Override
+                    public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                        RenderSystem.setShaderTexture(0, this.resourceLocation);
+
+                        RenderSystem.enableDepthTest();
+                        blit(pPoseStack, this.x, this.y, 5, this.xTexStart, this.yTexStart, this.width, this.height, this.textureHeight, this.textureWidth);
+                        if (this.isHovered) {
+                            this.renderToolTip(pPoseStack, pMouseX, pMouseY);
+                        }
+                    }
+                }
+        );
+
+        this.addRenderableWidget(
+                new ImageButton(this.leftPos + 163, this.topPos + 79,
+                        8, 8,
+                        147, 214, 0,
+                        TEXTURE, 256, 256,
+                        (button) -> this.decrementLayer(),
+                        (button, stack, mX, mY) -> this.renderTooltip(stack, DECREMENT, mX, mY),
+                        Component.empty()) {
+                    @Override
+                    public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                        RenderSystem.setShaderTexture(0, this.resourceLocation);
+
+                        RenderSystem.enableDepthTest();
+                        blit(pPoseStack, this.x, this.y, 5, this.xTexStart, this.yTexStart, this.width, this.height, this.textureHeight, this.textureWidth);
+                        if (this.isHovered) {
+                            this.renderToolTip(pPoseStack, pMouseX, pMouseY);
+                        }
+                    }
+                }
+        );
     }
 
     @Override
@@ -110,6 +157,8 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.renderBackground(pPoseStack);
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
         this.renderTooltip(pPoseStack, pMouseX, pMouseY);
+
+        if (this.menu.entity.queueLayerReset) this.resetLayer();
     }
 
     @Override
@@ -214,6 +263,22 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     protected void toggleSlice() {
         this.verticalRenderSlicing = !this.verticalRenderSlicing;
         this.menu.entity.verticalRenderSlicing = this.verticalRenderSlicing;
+    }
+
+    public void resetLayer() {
+        this.renderedLayer = 0;
+        this.menu.entity.renderedLayer = this.renderedLayer;
+        this.menu.entity.queueLayerReset = false;
+    }
+
+    protected void incrementLayer() {
+        this.renderedLayer++;
+        this.menu.entity.renderedLayer = this.renderedLayer;
+    }
+
+    protected void decrementLayer() {
+        this.renderedLayer--;
+        this.menu.entity.renderedLayer = this.renderedLayer;
     }
 
     protected static void renderLivingEntity(int pPosX, int pPosY, int pScale, float angleXComponent, float angleYComponent, LivingEntity pLivingEntity) {

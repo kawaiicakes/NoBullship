@@ -29,7 +29,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
     public SchematicRenderer(BlockEntityRendererProvider.Context context) {}
 
-    public static void setRecipe(@Nullable SchematicRecipe recipe, Direction facing, BlockPos origin) {
+    public static void setRecipe(MultiblockWorkshopBlockEntity entity, @Nullable SchematicRecipe recipe, Direction facing, BlockPos origin) {
         if (recipe == null) {
             stopRenderAt(origin);
             return;
@@ -41,6 +41,8 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
         CompoundTag patternTag = forRender.recipe().getSerializedPattern();
         if (patternTag == null) return;
+
+        entity.queueLayerReset = true;
 
         RENDER_QUEUE.put(origin, new RenderInstructions(forRender.result(), MultiblockPattern.rawPaletteFromNbt(patternTag),
                 MultiblockPattern.rawPatternFromNbt(patternTag), facing));
@@ -73,14 +75,17 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         int zSize = pattern.size();
         int ySize = pattern.get(0).length;
         int xSize = pattern.get(0)[0].length();
+        int layerForRender = pBlockEntity.verticalRenderSlicing
+                ? Math.abs(pBlockEntity.renderedLayer % zSize)
+                : Math.abs(pBlockEntity.renderedLayer % ySize);
 
         BlockPos previewPosition = posOfEntity.mutable().move(facing, -(zSize + 1)).offset(0, ySize - 1, 0).immutable();
 
         for(int i = 0; i < zSize; ++i) {
-            if (pBlockEntity.verticalRenderSlicing && pBlockEntity.renderedLayer != i) continue;
+            if (pBlockEntity.verticalRenderSlicing && layerForRender != i) continue;
 
             for(int j = 0; j < ySize; ++j) {
-                if (!pBlockEntity.verticalRenderSlicing && pBlockEntity.renderedLayer != j) continue;
+                if (!pBlockEntity.verticalRenderSlicing && layerForRender != j) continue;
 
                 for(int k = 0; k < xSize; ++k) {
                     BlockState forRender = palette.get((pattern.get(i))[j].charAt(k));
