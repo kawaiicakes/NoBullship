@@ -10,6 +10,8 @@ import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
@@ -30,7 +32,9 @@ import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 public class MultiblockWorkshopScreen extends AbstractContainerScreen<MultiblockWorkshopMenu> {
     public static final ResourceLocation TEXTURE = new ResourceLocation(MOD_ID, "textures/gui/workbench_gui.png");
     public static final Component NO_RESULT = Component.translatable("gui.nobullship.no_recipe");
+    public static final Component VISIBILITY_BUTTON = Component.translatable("gui.nobullship.toggle_render");
     public static final Quaternion ROTATE_180 = Vector3f.ZP.rotationDegrees(-180F);
+    protected boolean renderSchematic;
 
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -40,6 +44,37 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.titleLabelX += 12;
         this.inventoryLabelX += 12;
         this.inventoryLabelY += 40;
+        this.renderSchematic = pMenu.entity.shouldRenderSchematicInWorld;
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        this.addRenderableWidget(
+                new ImageButton(this.leftPos + 131, this.topPos + 19,
+                        16, 16,
+                        115, 206, 16,
+                        TEXTURE, 256, 256,
+                        (button) -> this.toggleSchematicDisplay(),
+                        Button.NO_TOOLTIP,
+                        Component.empty()) {
+                    @Override
+                    public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                        RenderSystem.setShaderTexture(0, this.resourceLocation);
+
+                        int i = this.yTexStart;
+                        if (MultiblockWorkshopScreen.this.renderSchematic) i += this.yDiffTex;
+
+                        RenderSystem.enableDepthTest();
+                        blit(pPoseStack, this.x, this.y, (float)this.xTexStart, (float)i, this.width, this.height, this.textureWidth, this.textureHeight);
+                        if (this.isHovered) {
+                            this.renderToolTip(pPoseStack, pMouseX, pMouseY);
+                        }
+                    }
+                }
+        );
     }
 
     @Override
@@ -141,6 +176,11 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
 
     protected void drawNoResultString(PoseStack pPoseStack, int x, int y) {
         drawCenteredString(pPoseStack, this.font, NO_RESULT, x, y, 16736352);
+    }
+
+    protected void toggleSchematicDisplay() {
+        this.renderSchematic = !this.renderSchematic;
+        this.menu.entity.shouldRenderSchematicInWorld = this.renderSchematic;
     }
 
     protected static void renderLivingEntity(int pPosX, int pPosY, int pScale, float angleXComponent, float angleYComponent, LivingEntity pLivingEntity) {

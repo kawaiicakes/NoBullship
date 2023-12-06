@@ -65,6 +65,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
             return MultiblockWorkshopBlockEntity.this.canPlaceItem(slot, stack);
         }
     };
+    public boolean shouldRenderSchematicInWorld;
 
     public MultiblockWorkshopBlockEntity(BlockPos pPos, BlockState pBlockState) {
         super(WORKSHOP_BLOCK_ENTITY.get(), pPos, pBlockState);
