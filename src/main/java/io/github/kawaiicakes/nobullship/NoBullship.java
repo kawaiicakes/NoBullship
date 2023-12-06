@@ -3,6 +3,7 @@ package io.github.kawaiicakes.nobullship;
 import com.mojang.serialization.Codec;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
+import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
@@ -27,6 +28,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
@@ -177,6 +179,11 @@ public class NoBullship
 
     @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientSetup {
+        @SubscribeEvent
+        public static void registerBlockEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+            event.registerBlockEntityRenderer(WORKSHOP_BLOCK_ENTITY.get(), SchematicRenderer::new);
+        }
+
         @SubscribeEvent
         public static void registerMenuType(FMLClientSetupEvent event) {
             MenuScreens.register(WORKSHOP_MENU.get(), MultiblockWorkshopScreen::new);

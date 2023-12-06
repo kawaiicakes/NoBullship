@@ -2,7 +2,6 @@ package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.util.Pair;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import net.minecraft.core.BlockPos;
@@ -15,15 +14,16 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
-import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static net.minecraft.world.level.block.Blocks.AIR;
 
@@ -226,7 +226,7 @@ public class MultiblockPattern extends BlockPattern {
         return new MultiblockPattern(predicate, paletteList, totalBlocksList, serializedTag);
     }
 
-    public static Pair<List<String[]>, Map<Character, BlockState>> rawPatternFromNbt(CompoundTag patternTag) {
+    public static List<String[]> rawPatternFromNbt(CompoundTag patternTag) {
         ListTag patternList = patternTag.getList("pattern", Tag.TAG_LIST);
         List<String[]> pattern = new ArrayList<>(patternList.size());
         int patternHeight = 1;
@@ -242,8 +242,11 @@ public class MultiblockPattern extends BlockPattern {
             }
             pattern.add(tempList.toArray(new String[patternListTag.size()]));
         }
+        return pattern;
+    }
 
-        CompoundTag originalPaletteTag = patternTag.getCompound("palette");
+    public static Map<Character, BlockState> rawPaletteFromNbt(CompoundTag paletteTag) {
+        CompoundTag originalPaletteTag = paletteTag.getCompound("palette");
         Map<Character, BlockState> paletteMap = new HashMap<>(originalPaletteTag.size());
         for (String key : originalPaletteTag.getAllKeys()) {
             CompoundTag tagAtKey = originalPaletteTag.getCompound(key);
@@ -275,7 +278,6 @@ public class MultiblockPattern extends BlockPattern {
 
             paletteMap.put(key.charAt(0), blockstate);
         }
-
-        return Pair.of(pattern, paletteMap);
+        return paletteMap;
     }
 }
