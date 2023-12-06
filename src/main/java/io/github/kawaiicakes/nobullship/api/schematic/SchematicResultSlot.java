@@ -1,4 +1,4 @@
-package io.github.kawaiicakes.nobullship.api;
+package io.github.kawaiicakes.nobullship.api.schematic;
 
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
