@@ -266,7 +266,8 @@ public class MultiblockPattern extends BlockPattern {
                     ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
 
                     if (propertyForBlock instanceof DirectionProperty && facing != null) {
-                        forPalette = blockstate.setValue(HORIZONTAL_FACING, facing.getOpposite());
+                        forPalette = blockstate.setValue(HORIZONTAL_FACING,
+                                BlockInWorldPredicate.rotateValue(HORIZONTAL_FACING.getValue(valuesList.getString(0)).orElse(Direction.NORTH), facing));
                         continue;
                     }
 

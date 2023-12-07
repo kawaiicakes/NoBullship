@@ -185,7 +185,7 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
         return nbtPredicate;
     }
 
-    protected static Direction rotateValue(Comparable<?> original, Direction rotated) {
+    public static Direction rotateValue(Comparable<?> original, Direction rotated) {
         if (!(original instanceof Direction originalDirection))
             throw new IllegalArgumentException("Argument 'original' is not a direction!");
 
