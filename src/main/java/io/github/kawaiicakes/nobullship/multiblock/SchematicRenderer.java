@@ -203,6 +203,24 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                             continue;
                         }
                         if (direction.equals(Direction.UP) || direction.equals(Direction.DOWN)) continue;
+
+                        BlockState toLeft = AIR.defaultBlockState();
+                        if (k - 1 >= 0) toLeft = palette.get((pattern.get(i))[j].charAt(k - 1));
+
+                        BlockState toRight = AIR.defaultBlockState();
+                        if (k + 1 < xSize) toRight = palette.get((pattern.get(i))[j].charAt(k + 1));
+
+                        BlockState toFront = AIR.defaultBlockState();
+                        if (i - 1 >= 0) toFront = palette.get((pattern.get(i - 1))[j].charAt(k));
+
+                        BlockState behind = AIR.defaultBlockState();
+                        if (i + 1 < zSize) behind = palette.get((pattern.get(i + 1))[j].charAt(k));
+
+                        if (toLeft.isAir() && direction.equals(workshopFacing.getCounterClockWise())) continue;
+                        if (toRight.isAir() && direction.equals(workshopFacing.getClockWise())) continue;
+                        if (toFront.isAir() && direction.equals(workshopFacing.getOpposite())) continue;
+                        if (behind.isAir() && direction.equals(workshopFacing)) continue;
+
                         hiddenFaces.add(direction);
                     }
 
