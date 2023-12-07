@@ -17,6 +17,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,6 +25,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 import static net.minecraft.world.level.block.Blocks.AIR;
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 public class MultiblockPattern extends BlockPattern {
     public static final Direction[] CARDINAL = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
@@ -243,13 +245,14 @@ public class MultiblockPattern extends BlockPattern {
         return pattern;
     }
 
-    public static Map<Character, BlockState> rawPaletteFromNbt(CompoundTag paletteTag) {
+    public static Map<Character, BlockState> rawPaletteFromNbt(CompoundTag paletteTag, @Nullable Direction facing) {
         CompoundTag originalPaletteTag = paletteTag.getCompound("palette");
         Map<Character, BlockState> paletteMap = new HashMap<>(originalPaletteTag.size());
         for (String key : originalPaletteTag.getAllKeys()) {
             CompoundTag tagAtKey = originalPaletteTag.getCompound(key);
 
             BlockState blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, tagAtKey.get("blockState")).get().orThrow();
+            BlockState forPalette = blockstate;
 
             if (tagAtKey.get("properties") instanceof ListTag propertiesTag) {
                 for (Tag keyPairTag : propertiesTag) {
@@ -262,13 +265,18 @@ public class MultiblockPattern extends BlockPattern {
 
                     ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
 
+                    if (propertyForBlock instanceof DirectionProperty && facing != null) {
+                        forPalette = blockstate.setValue(HORIZONTAL_FACING, facing.getOpposite());
+                        continue;
+                    }
+
                     // FIXME: this is so scuffed lol
                     //noinspection unchecked
-                    blockstate.setValue(propertyForBlock.getClass().cast(propertyForBlock), Objects.requireNonNull(blockstate.getValue(propertyForBlock).getClass().cast(propertyForBlock.getValue(valuesList.getString(0)).orElse(null))));
+                    forPalette = blockstate.setValue(propertyForBlock.getClass().cast(propertyForBlock), Objects.requireNonNull(blockstate.getValue(propertyForBlock).getClass().cast(propertyForBlock.getValue(valuesList.getString(0)).orElse(null))));
                 }
             }
 
-            paletteMap.put(key.charAt(0), blockstate);
+            paletteMap.put(key.charAt(0), forPalette);
         }
         return paletteMap;
     }

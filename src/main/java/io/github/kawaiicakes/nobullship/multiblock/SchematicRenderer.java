@@ -62,7 +62,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
         entity.queueLayerReset = true;
 
-        RENDER_QUEUE.put(origin, new RenderInstructions(forRender.result(), MultiblockPattern.rawPaletteFromNbt(patternTag),
+        RENDER_QUEUE.put(origin, new RenderInstructions(forRender.result(), MultiblockPattern.rawPaletteFromNbt(patternTag, facing),
                 MultiblockPattern.rawPatternFromNbt(patternTag), facing));
     }
 
