@@ -108,7 +108,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         );
 
         this.addRenderableWidget(
-                new ImageButton(this.leftPos + 163, this.topPos + 71,
+                new ImageButton(this.leftPos + 165, this.topPos + 72,
                         8, 8,
                         147, 206, 0,
                         TEXTURE, 256, 256,
@@ -130,7 +130,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         );
 
         this.addRenderableWidget(
-                new ImageButton(this.leftPos + 163, this.topPos + 79,
+                new ImageButton(this.leftPos + 165, this.topPos + 80,
                         8, 8,
                         147, 214, 0,
                         TEXTURE, 256, 256,
@@ -157,6 +157,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.renderBackground(pPoseStack);
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
         this.renderTooltip(pPoseStack, pMouseX, pMouseY);
+        drawString(pPoseStack, Minecraft.getInstance().font, String.valueOf(this.menu.entity.actualRenderedLayer), this.leftPos + 174, this.topPos + 75, 0x555555);
 
         if (this.menu.entity.queueLayerReset) this.resetLayer();
     }
@@ -269,6 +270,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.renderedLayer = 0;
         this.menu.entity.renderedLayer = this.renderedLayer;
         this.menu.entity.queueLayerReset = false;
+        this.menu.entity.actualRenderedLayer = 0;
     }
 
     protected void incrementLayer() {

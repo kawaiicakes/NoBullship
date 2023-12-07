@@ -67,6 +67,7 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     public boolean shouldRenderSchematicInWorld;
     public boolean verticalRenderSlicing;
     public int renderedLayer = 0;
+    public int actualRenderedLayer;
     public boolean queueLayerReset = false;
 
     public MultiblockWorkshopBlockEntity(BlockPos pPos, BlockState pBlockState) {
@@ -212,6 +213,8 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
 
         if (!(level instanceof ClientLevel clientLevel)) return;
 
-        SchematicRenderer.setRecipe(entity, clientLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, entity, clientLevel).orElse(null), state.getValue(HORIZONTAL_FACING), pos);
+        SchematicRecipe recipe = clientLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, entity, clientLevel).orElse(null);
+        SchematicRenderer.setRecipe(entity, recipe, state.getValue(HORIZONTAL_FACING), pos);
+        if (recipe == null) entity.actualRenderedLayer = 0;
     }
 }

@@ -58,6 +58,20 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         BlockPos posOfEntity = pBlockEntity.getBlockPos();
         // I want to avoid caching block entities. I'm concerned about memory leaks
         if (!RENDER_QUEUE.containsKey(posOfEntity)) return;
+
+        RenderInstructions entry = RENDER_QUEUE.get(posOfEntity);
+        List<String[]> pattern = entry.pattern;
+        int zSize = pattern.size();
+        int ySize = pattern.get(0).length;
+        int xSize = pattern.get(0)[0].length();
+
+        // FIXME: zero will appear twice when renderedLayer is near 0
+        int layerForRender = pBlockEntity.verticalRenderSlicing
+                ? (pBlockEntity.renderedLayer < 0 ? zSize - Math.abs(pBlockEntity.renderedLayer % zSize) - 1 : pBlockEntity.renderedLayer % zSize)
+                : (pBlockEntity.renderedLayer < 0 ? ySize - Math.abs(pBlockEntity.renderedLayer % ySize) - 1 : pBlockEntity.renderedLayer % ySize);
+
+        pBlockEntity.actualRenderedLayer = layerForRender;
+
         if (!pBlockEntity.shouldRenderSchematicInWorld) return;
 
         ClientLevel clientLevel = Minecraft.getInstance().level;
@@ -66,18 +80,8 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
         ModelBlockRenderer.enableCaching();
 
-        RenderInstructions entry = RENDER_QUEUE.get(posOfEntity);
-
-        List<String[]> pattern = entry.pattern;
         Map<Character, BlockState> palette = entry.palette;
         Direction facing = entry.direction;
-
-        int zSize = pattern.size();
-        int ySize = pattern.get(0).length;
-        int xSize = pattern.get(0)[0].length();
-        int layerForRender = pBlockEntity.verticalRenderSlicing
-                ? Math.abs(pBlockEntity.renderedLayer % zSize)
-                : Math.abs(pBlockEntity.renderedLayer % ySize);
 
         BlockPos previewPosition = posOfEntity.mutable().move(facing, -(zSize + 1)).offset(0, ySize - 1, 0).immutable();
 
