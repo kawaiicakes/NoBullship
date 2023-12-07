@@ -17,13 +17,11 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static net.minecraft.world.level.block.Blocks.AIR;
 
@@ -253,28 +251,22 @@ public class MultiblockPattern extends BlockPattern {
 
             BlockState blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, tagAtKey.get("blockState")).get().orThrow();
 
-            /* TODO
             if (tagAtKey.get("properties") instanceof ListTag propertiesTag) {
                 for (Tag keyPairTag : propertiesTag) {
                     CompoundTag keyPair = (CompoundTag) keyPairTag;
                     CompoundTag propertyTag = keyPair.getCompound("property");
 
-                    Property<?> propertyForBlock = blockstate.getProperties()
-                            .stream()
-                            .filter(property -> property.getName().equals(propertyTag.getString("name"))
-                                    && property.getValueClass().getSimpleName().equals(propertyTag.getString("type")))
-                            .findFirst()
-                            .orElse(null);
+                    Property<?> propertyForBlock = blockstate.getBlock().getStateDefinition().getProperty(propertyTag.getString("name"));
 
                     if (propertyForBlock == null) throw new IllegalArgumentException("Passed NBT does not contain valid properties!");
 
                     ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
 
-                    blockstate.setValue(propertyForBlock, propertyForBlock.getValue(valuesList.getString(0)).orElseThrow());
+                    // FIXME: this is so scuffed lol
+                    //noinspection unchecked
+                    blockstate.setValue(propertyForBlock.getClass().cast(propertyForBlock), Objects.requireNonNull(blockstate.getValue(propertyForBlock).getClass().cast(propertyForBlock.getValue(valuesList.getString(0)).orElse(null))));
                 }
             }
-
-             */
 
             paletteMap.put(key.charAt(0), blockstate);
         }

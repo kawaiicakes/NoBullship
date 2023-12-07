@@ -1,0 +1,24 @@
+{
+  "key": {
+    "#": {
+      "block": "minecraft:acacia_stairs",
+      "state": {
+        "facing": [
+          "north"
+        ]
+      }
+    }
+  },
+  "recipe": {
+    "layer0": [
+      "##"
+    ]
+  },
+  "result": {
+    "entity": "minecraft:boat",
+    "nbt": {
+      "Type": "acacia",
+      "Fire": 20
+    }
+  }
+}

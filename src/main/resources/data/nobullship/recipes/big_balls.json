@@ -1,0 +1,18 @@
+{
+  "type": "nobullship:schematic_workbench",
+  "declaration": {
+    "output_id": "nobullship:crash_sim",
+    "key": {
+      "#": {
+        "item": "stick"
+      }
+    },
+    "shaped_input": [
+      "###"
+    ]
+  },
+  "shapeless_input": [
+
+  ],
+  "max_usages": 3
+}
