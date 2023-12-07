@@ -1,28 +1,46 @@
 package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.data.ModelData;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static net.minecraft.world.level.block.Blocks.AIR;
+import static net.minecraft.world.level.block.Blocks.BEDROCK;
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshopBlockEntity> {
     protected static final Map<BlockPos, RenderInstructions> RENDER_QUEUE = new HashMap<>();
@@ -77,10 +95,11 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         ClientLevel clientLevel = Minecraft.getInstance().level;
         if (clientLevel == null) return;
 
-        BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
         ModelBlockRenderer.enableCaching();
 
         Map<Character, BlockState> palette = entry.palette;
+        palette.put(' ', AIR.defaultBlockState());
+        palette.put('$', BEDROCK.defaultBlockState());
         Direction facing = entry.direction;
 
         BlockPos previewPosition = posOfEntity.mutable().move(facing, -(zSize + 1)).offset(0, ySize - 1, 0).immutable();
@@ -99,15 +118,50 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                     if (!clientLevel.isEmptyBlock(newPos)) continue;
                     BlockPos offset = newPos.subtract(previewPosition).mutable().move(facing, -(zSize + 1)).offset(0, ySize - 1, 0).immutable();
 
+                    VertexConsumer buffer = pBufferSource.getBuffer(RenderType.translucent());
+                    buffer.color(1.0F, 1.0F, 1.0F, 0.1F);
+
                     pPoseStack.pushPose();
                     pPoseStack.translate(offset.getX(), offset.getY(), offset.getZ());
 
-                    //noinspection deprecation
-                    blockRenderer.renderBatched(
+                    List<Direction> hiddenFaces = new ArrayList<>();
+                    Direction workshopFacing = pBlockEntity.getBlockState().getValue(HORIZONTAL_FACING);
+                    for (Direction direction : Direction.values()) {
+                        if (pBlockEntity.verticalRenderSlicing) {
+                            if (direction.equals(workshopFacing) || direction.equals(workshopFacing.getOpposite())) continue;
+
+                            BlockState toLeft = AIR.defaultBlockState();
+                            if (k - 1 >= 0) toLeft = palette.get((pattern.get(i))[j].charAt(k - 1));
+
+                            BlockState toRight = AIR.defaultBlockState();
+                            if (k + 1 < xSize) toRight = palette.get((pattern.get(i))[j].charAt(k + 1));
+
+                            BlockState above = AIR.defaultBlockState();
+                            if (j - 1 >= 0) above = palette.get((pattern.get(i))[j - 1].charAt(k));
+
+                            BlockState below = AIR.defaultBlockState();
+                            if (j + 1 < ySize) below = palette.get((pattern.get(i))[j + 1].charAt(k));
+
+                            if (toLeft.isAir() && direction.equals(workshopFacing.getCounterClockWise())) continue;
+                            if (toRight.isAir() && direction.equals(workshopFacing.getClockWise())) continue;
+                            if (above.isAir() && direction.equals(Direction.UP)) continue;
+                            if (below.isAir() && direction.equals(Direction.DOWN)) continue;
+
+                            hiddenFaces.add(direction);
+                            continue;
+                        }
+                        if (direction.equals(Direction.UP) || direction.equals(Direction.DOWN)) continue;
+                        hiddenFaces.add(direction);
+                    }
+
+                    this.renderGhostBlock(
                             forRender, newPos,
                             clientLevel, pPoseStack,
-                            pBufferSource.getBuffer(RenderType.solid()), true,
-                            clientLevel.getRandom()
+                            buffer, true,
+                            clientLevel.getRandom(),
+                            ModelData.EMPTY, RenderType.translucent(),
+                            true,
+                            hiddenFaces
                     );
 
                     pPoseStack.popPose();
@@ -121,6 +175,51 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
     @Override
     public boolean shouldRenderOffScreen(MultiblockWorkshopBlockEntity pBlockEntity) {
         return true;
+    }
+
+    public void renderGhostBlock(BlockState pState, BlockPos pPos, BlockAndTintGetter pLevel, PoseStack pPoseStack, VertexConsumer pConsumer, boolean pCheckSides, RandomSource pRandom, ModelData modelData, RenderType renderType, boolean queryModelSpecificData, List<Direction> hiddenFaces) {
+        try {
+            RenderShape rendershape = pState.getRenderShape();
+            if (rendershape == RenderShape.MODEL) {
+                BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+                ModelBlockRenderer modelRenderer = blockRenderer.getModelRenderer();
+
+                BakedModel ogModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(pState);
+                BakedModelWrapper<?> model = new BakedModelWrapper<>(ogModel) {
+                    @Override
+                    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
+                        if (side == null) {
+                            return super.getQuads(state, null, rand);
+                        }
+
+                        for (Direction face : hiddenFaces) {
+                            if (face.equals(side)) return new ArrayList<>();
+                        }
+                        return super.getQuads(state, side, rand);
+                    }
+
+                    @Override
+                    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData extraData, @Nullable RenderType renderType) {
+                        if (side == null) {
+                            return super.getQuads(state, null, rand, extraData, renderType);
+                        }
+
+                        for (Direction face : hiddenFaces) {
+                            if (face.equals(side)) return new ArrayList<>();
+                        }
+                        return super.getQuads(state, side, rand, extraData, renderType);
+                    }
+                };
+
+                modelRenderer.tesselateBlock(pLevel, model, pState, pPos, pPoseStack, pConsumer, pCheckSides, pRandom, pState.getSeed(pPos), OverlayTexture.NO_OVERLAY, modelData, renderType, queryModelSpecificData);
+            }
+
+        } catch (Throwable throwable) {
+            CrashReport crashreport = CrashReport.forThrowable(throwable, "Tessellating block in world");
+            CrashReportCategory crashreportcategory = crashreport.addCategory("Block being tessellated");
+            CrashReportCategory.populateBlockDetails(crashreportcategory, pLevel, pPos, pState);
+            throw new ReportedException(crashreport);
+        }
     }
 
     public record RenderInstructions(ResourceLocation id, Map<Character, BlockState> palette, List<String[]> pattern, Direction direction) {}
