@@ -179,7 +179,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
 
         blit(pPoseStack, x + 202, y + 110, 0, 206, 49, 50);
         blit(pPoseStack, x + 202, y + 60, 49, 206, 49, 50);
-        blit(pPoseStack, x + 234, y + 54, 98, 206, 49, 6);
+        blit(pPoseStack, x + 234, y + 54, 98, 206, 17, 6);
 
         pPoseStack.pushPose();
         pPoseStack.translate(x, y + 209, -3);
