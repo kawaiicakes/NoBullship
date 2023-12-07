@@ -121,6 +121,58 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                     VertexConsumer buffer = pBufferSource.getBuffer(RenderType.translucent());
                     buffer.color(1.0F, 1.0F, 1.0F, 0.1F);
 
+                    VertexConsumer proxyBuffer = new VertexConsumer() {
+                        @Override
+                        public void putBulkData(PoseStack.Pose pPoseEntry, BakedQuad pQuad, float[] pColorMuls, float pRed, float pGreen, float pBlue, int[] pCombinedLights, int pCombinedOverlay, boolean pMulColor) {
+                            putBulkData(pPoseEntry, pQuad, pColorMuls, pRed, pGreen, pBlue, 0.5f, pCombinedLights, pCombinedOverlay, pMulColor);
+                        }
+
+                        @Override
+                        public VertexConsumer vertex(double pX, double pY, double pZ) {
+                            return buffer.vertex(pX, pY, pZ);
+                        }
+
+                        @Override
+                        public VertexConsumer color(int pRed, int pGreen, int pBlue, int pAlpha) {
+                            return buffer.color(pRed, pGreen, pBlue, pAlpha);
+                        }
+
+                        @Override
+                        public VertexConsumer uv(float pU, float pV) {
+                            return buffer.uv(pU, pV);
+                        }
+
+                        @Override
+                        public VertexConsumer overlayCoords(int pU, int pV) {
+                            return buffer.overlayCoords(pU, pV);
+                        }
+
+                        @Override
+                        public VertexConsumer uv2(int pU, int pV) {
+                            return buffer.uv2(pU, pV);
+                        }
+
+                        @Override
+                        public VertexConsumer normal(float pX, float pY, float pZ) {
+                            return buffer.normal(pX, pY, pZ);
+                        }
+
+                        @Override
+                        public void endVertex() {
+                            buffer.endVertex();
+                        }
+
+                        @Override
+                        public void defaultColor(int pDefaultR, int pDefaultG, int pDefaultB, int pDefaultA) {
+                            buffer.defaultColor(pDefaultR, pDefaultG, pDefaultB, pDefaultA);
+                        }
+
+                        @Override
+                        public void unsetDefaultColor() {
+                            buffer.unsetDefaultColor();
+                        }
+                    };
+
                     pPoseStack.pushPose();
                     pPoseStack.translate(offset.getX(), offset.getY(), offset.getZ());
 
@@ -157,7 +209,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                     this.renderGhostBlock(
                             forRender, newPos,
                             clientLevel, pPoseStack,
-                            buffer, true,
+                            proxyBuffer, true,
                             clientLevel.getRandom(),
                             ModelData.EMPTY, RenderType.translucent(),
                             true,
