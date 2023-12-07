@@ -213,7 +213,20 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
 
         if (!(level instanceof ClientLevel clientLevel)) return;
 
-        SchematicRecipe recipe = clientLevel.getRecipeManager().getRecipeFor(SchematicRecipe.Type.INSTANCE, entity, clientLevel).orElse(null);
+        if (!entity.shouldRenderSchematicInWorld) {
+            SchematicRenderer.setRecipe(entity, null, state.getValue(HORIZONTAL_FACING), pos);
+            entity.actualRenderedLayer = 0;
+            return;
+        }
+
+        if (entity.isEmpty()) {
+            SchematicRenderer.setRecipe(entity, null, state.getValue(HORIZONTAL_FACING), pos);
+            entity.actualRenderedLayer = 0;
+            return;
+        }
+
+        SchematicRecipe recipe = clientLevel.getRecipeManager().getAllRecipesFor(SchematicRecipe.Type.INSTANCE).stream().filter(managerRecipe ->
+                managerRecipe.shapedMatches(entity)).findAny().orElse(null);
         SchematicRenderer.setRecipe(entity, recipe, state.getValue(HORIZONTAL_FACING), pos);
         if (recipe == null) entity.actualRenderedLayer = 0;
     }
