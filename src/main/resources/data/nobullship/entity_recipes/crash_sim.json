@@ -5,13 +5,77 @@
       "state": {
         "facing": [
           "north"
+        ],
+        "shape": [
+          "inner_right"
+        ]
+      }
+    },
+    "h": {
+      "block": "minecraft:acacia_stairs",
+      "state": {
+        "facing": [
+          "north"
+        ],
+        "shape": [
+          "inner_left"
+        ]
+      }
+    },
+    "t": {
+      "block": "minecraft:acacia_stairs",
+      "state": {
+        "facing": [
+          "south"
+        ],
+        "shape": [
+          "inner_right"
+        ]
+      }
+    },
+    "w": {
+      "block": "minecraft:acacia_stairs",
+      "state": {
+        "facing": [
+          "south"
+        ],
+        "shape": [
+          "inner_left"
+        ]
+      }
+    },
+    "L": {
+      "block": "minecraft:acacia_stairs",
+      "state": {
+        "facing": [
+          "west"
+        ],
+        "shape": [
+          "straight"
+        ]
+      }
+    },
+    "R": {
+      "block": "minecraft:acacia_stairs",
+      "state": {
+        "facing": [
+          "east"
+        ],
+        "shape": [
+          "straight"
         ]
       }
     }
   },
   "recipe": {
     "layer0": [
-      "##"
+      "h#"
+    ],
+    "layer1": [
+      "LR"
+    ],
+    "layer2": [
+      "tw"
     ]
   },
   "result": {
