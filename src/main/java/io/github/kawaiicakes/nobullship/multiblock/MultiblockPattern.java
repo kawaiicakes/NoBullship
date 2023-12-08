@@ -256,6 +256,8 @@ public class MultiblockPattern extends BlockPattern {
 
             if (tagAtKey.get("properties") instanceof ListTag propertiesTag) {
                 for (Tag keyPairTag : propertiesTag) {
+                    BlockState temp;
+
                     CompoundTag keyPair = (CompoundTag) keyPairTag;
                     CompoundTag propertyTag = keyPair.getCompound("property");
 
@@ -266,14 +268,16 @@ public class MultiblockPattern extends BlockPattern {
                     ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
 
                     if (propertyForBlock instanceof DirectionProperty && facing != null) {
-                        forPalette = blockstate.setValue(HORIZONTAL_FACING,
+                        temp = forPalette.setValue(HORIZONTAL_FACING,
                                 BlockInWorldPredicate.rotateValue(HORIZONTAL_FACING.getValue(valuesList.getString(0)).orElse(Direction.NORTH), facing));
+                        forPalette = temp;
                         continue;
                     }
 
                     // FIXME: this is so scuffed lol
                     //noinspection unchecked
-                    forPalette = blockstate.setValue(propertyForBlock.getClass().cast(propertyForBlock), Objects.requireNonNull(blockstate.getValue(propertyForBlock).getClass().cast(propertyForBlock.getValue(valuesList.getString(0)).orElse(null))));
+                    temp = forPalette.setValue(propertyForBlock.getClass().cast(propertyForBlock), Objects.requireNonNull(blockstate.getValue(propertyForBlock).getClass().cast(propertyForBlock.getValue(valuesList.getString(0)).orElse(null))));
+                    forPalette = temp;
                 }
             }
 
