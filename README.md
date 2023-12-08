@@ -36,24 +36,30 @@ Enough with that bullship, **this mod is for you!**
 
 **_No Bullship_** is a mod that lets you craft these entities using a multiblock structure which **you** can define! Pretty much any block you can think of can be used, and may **include blockstates and NBT data!**
 The entities you can make aren't restricted either; make any entity, including any NBT data! In the future, this mod will also allow you to disable drops - even hardcoded ones - for entities.
-This will allow modpackers to more easily prevent obtaining entities in their inventories!
+This will allow modpackers to more easily prevent obtaining entities in their inventories! [Learn more about how to make a **_No Bullship!_** data file here.](https://github.com/kawaiicakes/NoBullship/wiki)
 
-This mod is intended for modpackers to use & configure; however, it does come with recipes for some mods. See below.
+This mod is intended for modpackers to use & configure; however, it will come with recipes for some mods in the near future.
 
 ---
 
 # 📖 Information
 
 ## Quick How-To
-- Craft a schematic for the multiblock recipe you wish to make! 
-- Use the Workshop to display the recipe into the world!
-- Build stuff just like you would for an Iron Golem, then right-click with the schematic! (Note: sideways and upside-down building will not work)
+1. Craft a schematic for the multiblock recipe you wish to make! 
+![Schematic for a boat](2023-12-07_21.02.38.png)
+2. Use the Workshop to display the recipe into the world!
+![Schematic preview in world](2023-12-07_21.03.35.png)
+3. Build stuff just like you would for an Iron Golem (Note: sideways and upside-down building will not work)
+![Built multiblock](2023-12-07_21.04.11.png)
+4. Right-click the multiblock with the schematic! 
+![Build!](2023-12-07_21.04.59.png)
 
 ## Features
-- Straight-forward datapack creation for multiblock & schematic recipes
+- JEI compatibility for the Schematic Workshop!
+- [Straight-forward datapack creation for multiblock & schematic recipes](https://github.com/kawaiicakes/NoBullship/wiki)
 - Multiblocks may require extra items in the inventory to make!
 - Supports NBT and blockstate data for both crafted entities and ingredient blocks!
-- Packaged support for select mods! Read below!
+- Compatible with nearly any mod!
 - Lots of config options!
 
 ___
@@ -69,11 +75,23 @@ ___
 - Configurable drop prevention, even for hard-coded drops (e.g. Simple Planes planes)
 - Configurable drops of blocks from multiblock recipe on entity death
 - Cleaner API
+- Packaged support for select mods! Read below!
 - Miscellaneous improvements and bug fixes
 
 ---
 
 # 💻 For Developers
+
+Internationalization and misc PRs are welcomed!
+
+## Modders
+To add this mod as a dependency, using Curse Maven would probably the simplest route.
+As a mod dev, you will probably be looking in the .api package for most of the things you'll need, and I've included some
+documentation here and there. I'll get on improving it as I clean the API. [Further reading on the wiki.](https://github.com/kawaiicakes/NoBullship/wiki)
+
+## Modpack Devs
+Detailed info on creating datapacks for this mod may be found [here.](https://github.com/kawaiicakes/NoBullship/wiki) Otherwise, feel free to include this mod in your modpack! It was made specifically for modpackers!
+Anyhow, don't expect the structure of data files for this mod to change. I will work hard to maintain them as they are now if possible and the format isn't difficult to work with; continued development of this mod notwithstanding.
 
 
 ---
@@ -90,6 +108,6 @@ Also, I want to commend Kaupenjoe for his free Forge tutorials on YouTube to bri
 
 ___
 
-<div style="text-align: center;">Also, check out my very lovely sponsor and help me <s>take over</s> improve the world!</div>
+<div style="text-align: center;">Also, check out my very lovely sponsor and help me <s>take over</s> improve the world! I genuinely love DediMC's services, and its incredible customer support has won me over.</div>
 
 [![Sponsor!](https://github.com/kawaiicakes/kawaiicakes.github.io/blob/main/dedimcashley.png?raw=true 'Sponsor!')](https://dedimc.promo/ashley)
