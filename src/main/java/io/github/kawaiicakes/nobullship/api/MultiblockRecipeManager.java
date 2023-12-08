@@ -241,7 +241,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         if (nbt == null) nbt = new CompoundTag();
         nbt.putString("id", resultLocation.toString());
-        BlockPos blockpos = match.getBlock(1, 2, 0).getPos();
+        BlockPos blockpos = match.getBlock(match.getWidth() / 2, match.getHeight() / 2, match.getDepth() / 2).getPos();
 
         Entity entity = EntityType.loadEntityRecursive(nbt, level, (entityType) -> {
             entityType.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.55D, (double)blockpos.getZ() + 0.5D, entityType.getYRot(), entityType.getXRot());
