@@ -12,7 +12,7 @@ logoFile="nobullship.png"
 credits="Thanks to ME!"
 authors="kawaiicakes"
 description='''
-This is a template used for my mods so I can just copy paste this for a new 1.19.2 dev environment lol
+Highly-configurable data-driven crafting recipes using multiblocks.
 '''
 
 [[dependencies.nobullship]]
