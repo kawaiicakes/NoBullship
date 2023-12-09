@@ -366,16 +366,13 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         public @Nullable SchematicRecipe fromNetwork(ResourceLocation pRecipeId, FriendlyByteBuf pBuffer) {
             byte width = pBuffer.readByte();
             byte height = pBuffer.readByte();
-
+            int usages = pBuffer.readVarInt();
             String resultId = pBuffer.readUtf();
 
             NonNullList<Ingredient> shapedList = NonNullList.withSize(width * height, Ingredient.EMPTY);
-            shapedList.replaceAll(_ignored -> Ingredient.fromNetwork(pBuffer));
+            shapedList.replaceAll(ignored -> Ingredient.fromNetwork(pBuffer));
 
-            NonNullList<ItemStack> shapelessList = NonNullList.withSize(9, ItemStack.EMPTY);
-            shapelessList.replaceAll(_ignored -> pBuffer.readItem());
-
-            int usages = pBuffer.readInt();
+            NonNullList<ItemStack> shapelessList = pBuffer.readCollection(NonNullList::createWithCapacity, FriendlyByteBuf::readItem);
 
             return new SchematicRecipe(pRecipeId, new ResourceLocation(resultId), ImmutableList.copyOf(shapedList), ImmutableList.copyOf(shapelessList), usages, width, height);
         }
@@ -384,14 +381,14 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         public void toNetwork(FriendlyByteBuf pBuffer, SchematicRecipe pRecipe) {
             pBuffer.writeByte(pRecipe.actualShapedWidth);
             pBuffer.writeByte(pRecipe.actualShapedHeight);
-
+            pBuffer.writeVarInt(pRecipe.maximumSchematicUsage);
             pBuffer.writeUtf(pRecipe.getId().toString());
 
-            pRecipe.getShapedIngredients().forEach(ingredient -> ingredient.toNetwork(pBuffer));
+            for (Ingredient ingredient : pRecipe.getShapedIngredients()) {
+                ingredient.toNetwork(pBuffer);
+            }
 
-            pRecipe.getShapelessIngredients().forEach(pBuffer::writeItem);
-
-            pBuffer.writeInt(pRecipe.maximumSchematicUsage);
+            pBuffer.writeCollection(pRecipe.getShapelessIngredients(), FriendlyByteBuf::writeItem);
         }
 
         protected static JsonSyntaxException throwNewSyntaxError(ResourceLocation pRecipeId, String message) {
