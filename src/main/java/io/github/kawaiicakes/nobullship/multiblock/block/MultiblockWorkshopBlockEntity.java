@@ -209,8 +209,8 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T t) {
+        if (!level.isClientSide) return;
         if (!(t instanceof MultiblockWorkshopBlockEntity entity)) return;
-
         if (!(level instanceof ClientLevel clientLevel)) return;
 
         if (!entity.shouldRenderSchematicInWorld) {
