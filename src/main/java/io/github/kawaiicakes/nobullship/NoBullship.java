@@ -1,7 +1,6 @@
 package io.github.kawaiicakes.nobullship;
 
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
-import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
@@ -27,7 +26,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TickEvent;
@@ -97,7 +95,6 @@ public class NoBullship
         MinecraftForge.EVENT_BUS.register(SchematicItem.class);
         MinecraftForge.EVENT_BUS.register(MultiblockWorkshopBlockEntity.class);
 
-        modEventBus.addListener(this::gatherData);
         modEventBus.addListener(this::commonSetup);
 
         BLOCK_REGISTRY.register(modEventBus);
@@ -126,29 +123,6 @@ public class NoBullship
     @SubscribeEvent
     public void onDatapackSync(OnDatapackSyncEvent event) {
         NoBullshipPackets.sendToPlayer(new ClientboundUpdateNoBullshipPacket(MultiblockRecipeManager.getInstance()), event.getPlayer());
-    }
-
-    @SubscribeEvent
-    public void gatherData(GatherDataEvent event) {
-        event.getGenerator().addProvider(
-                event.includeServer(),
-                new MultiblockRecipeProvider(event.getGenerator())
-        );
-
-        /*
-        commented out because these aren't strictly needed atm and are causing problems
-        Map<ResourceLocation, NonNullList<ItemStack>> blocksForDrops = MultiblockRecipeManager.getInstance().getBlockItemsForRecipes();
-
-        event.getGenerator().addProvider(
-                event.includeServer(),
-                new SchematicRecipeProvider(event.getGenerator(), blocksForDrops)
-        );
-
-        event.getGenerator().addProvider(
-                event.includeServer(),
-                new MultiblockDropsLootProvider(event.getGenerator(), blocksForDrops)
-        );
-        */
     }
 
     @SubscribeEvent

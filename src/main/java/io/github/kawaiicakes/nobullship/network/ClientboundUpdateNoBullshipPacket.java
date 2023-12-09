@@ -3,6 +3,7 @@ package io.github.kawaiicakes.nobullship.network;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -58,7 +59,8 @@ public class ClientboundUpdateNoBullshipPacket {
     }
 
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {
-        NetworkEvent.Context context = contextSupplier.get();
-        context.enqueueWork(() -> MultiblockRecipeManager.getInstance().replaceRecipes(this));
+        if (Minecraft.getInstance().player == null) return;
+        MultiblockRecipeManager.getInstance().replaceRecipes(this);
+        LOGGER.info("Successfully received {} No Bullship! recipes from the server!", this.recipes.size());
     }
 }
