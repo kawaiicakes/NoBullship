@@ -235,12 +235,11 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         if (resultEntity instanceof LivingEntity livingResult) {
             renderLivingEntity(x + 155, y + 64, scale, f, f1, livingResult);
             drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 5, 8453920);
-            return;
+        } else {
+            renderEntity(x + 155, y + 64, scale, f, f1, resultEntity);
+            drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 5, 8453920);
         }
 
-        renderEntity(x + 155, y + 64, scale, f, f1, resultEntity);
-
-        drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 5, 8453920);
         MultiblockRecipe resultRecipe = MultiblockRecipeManager.getInstance().getRecipe(matchingRecipe.get().getResultId()).orElse(null);
         if (resultRecipe == null) return;
         if (resultRecipe.nbt() != null) {
