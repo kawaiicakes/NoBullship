@@ -382,7 +382,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
             pBuffer.writeByte(pRecipe.actualShapedWidth);
             pBuffer.writeByte(pRecipe.actualShapedHeight);
             pBuffer.writeVarInt(pRecipe.maximumSchematicUsage);
-            pBuffer.writeUtf(pRecipe.getId().toString());
+            pBuffer.writeUtf(pRecipe.getResultId().toString());
 
             for (Ingredient ingredient : pRecipe.getShapedIngredients()) {
                 ingredient.toNetwork(pBuffer);
