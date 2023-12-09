@@ -252,9 +252,15 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             LOGGER.error("Unable to spawn entity {}!", resultLocation);
             throw new RuntimeException("Unable to spawn entity " + resultLocation + "!");
         } else {
+            float yRot = match.getForwards().toYRot();
+            entity.setYRot(yRot);
+
             if (entity instanceof Mob mob) {
-                if (!ForgeEventFactory.doSpecialSpawn(mob, level, (float)entity.getX(), (float)entity.getY(), (float)entity.getZ(), null, MobSpawnType.MOB_SUMMONED))
+                if (!ForgeEventFactory.doSpecialSpawn(mob, level, (float)entity.getX(), (float)entity.getY(), (float)entity.getZ(), null, MobSpawnType.MOB_SUMMONED)) {
+                    mob.setYBodyRot(yRot);
+                    mob.setYHeadRot(yRot);
                     mob.finalizeSpawn(level, level.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null, null);
+                }
             }
 
             if (!level.tryAddFreshEntityWithPassengers(entity)) {
