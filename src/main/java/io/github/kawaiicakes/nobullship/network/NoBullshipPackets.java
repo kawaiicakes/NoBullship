@@ -6,6 +6,7 @@ import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+import org.jetbrains.annotations.Nullable;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 
@@ -33,7 +34,11 @@ public class NoBullshipPackets {
                 .add();
     }
 
-    public static <MSG> void sendToPlayer(MSG msg, ServerPlayer player) {
+    public static <MSG> void sendToPlayer(MSG msg, @Nullable ServerPlayer player) {
+        if (player == null) {
+            INSTANCE.send(PacketDistributor.ALL.noArg(), msg);
+            return;
+        }
         INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), msg);
     }
 }
