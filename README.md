@@ -76,6 +76,7 @@ ___
 - Configurable drops of blocks from multiblock recipe on entity death
 - Cleaner API
 - Packaged support for select mods! Read below!
+- Miscellaneous custom blocks & items for use with this mod! Stuff like nails, wooden beams, etc.
 - Miscellaneous improvements and bug fixes
 
 ---
