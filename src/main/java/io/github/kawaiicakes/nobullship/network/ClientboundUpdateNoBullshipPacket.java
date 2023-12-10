@@ -42,7 +42,21 @@ public class ClientboundUpdateNoBullshipPacket {
                 continue;
             }
 
-            newRecipes.put(new ResourceLocation(key), MultiblockRecipe.fromNbt(nbt));
+            MultiblockRecipe fromNbt;
+            try {
+                fromNbt = MultiblockRecipe.fromNbt(nbt);
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Error parsing recipe {} from NBT!", key);
+                LOGGER.error("Error: ", e);
+                continue;
+            }
+
+            if (fromNbt == null) {
+                LOGGER.error("Error parsing recipe {} from NBT!", key);
+                continue;
+            }
+
+            newRecipes.put(new ResourceLocation(key), fromNbt);
         }
         this.recipes = newRecipes;
     }
@@ -50,7 +64,12 @@ public class ClientboundUpdateNoBullshipPacket {
     public void toBytes(FriendlyByteBuf buffer) {
         CompoundTag serialized = new CompoundTag();
         for (Map.Entry<ResourceLocation, MultiblockRecipe> entry : this.recipes.entrySet()) {
-            serialized.put(entry.getKey().toString(), entry.getValue().toNbt());
+            CompoundTag valueTag = entry.getValue().toNbt();
+            if (valueTag == null) {
+                LOGGER.error("Error parsing recipe {} due to malformed syntax!", entry.getKey());
+                continue;
+            }
+            serialized.put(entry.getKey().toString(), valueTag);
         }
 
         buffer.writeInt(this.globalCooldownTime);

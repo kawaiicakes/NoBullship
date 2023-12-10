@@ -76,10 +76,17 @@ public record MultiblockRecipe(
         return toReturn.build();
     }
 
+    /**
+     * Serializes this recipe into a <code>CompoundTag</code>. Returns null if the recipe is malformed.
+     */
+    @Nullable
     public CompoundTag toNbt() {
         CompoundTag toReturn = new CompoundTag();
 
-        toReturn.put("recipe", this.recipe.toNbt());
+        CompoundTag pattern = this.recipe.toNbt();
+        if (pattern == null) return null;
+
+        toReturn.put("recipe", pattern);
 
         toReturn.putString("result", this.result.toString());
 
@@ -98,9 +105,17 @@ public record MultiblockRecipe(
         return toReturn;
     }
 
-    public static MultiblockRecipe fromNbt(CompoundTag nbt) {
+    /**
+     * Deserializes a <code>CompoundTag</code> into a <code>MultiblockRecipe</code>.
+     * Returns null if the NBT tag is malformed.
+     */
+    @Nullable
+    public static MultiblockRecipe fromNbt(CompoundTag nbt) throws IllegalArgumentException {
         if (!(nbt.get("recipe") instanceof CompoundTag recipeNbt)) throw new IllegalArgumentException("Passed NBT does not contain a recipe!");
         if (!(nbt.get("result") instanceof StringTag stringNbt)) throw new IllegalArgumentException("Passed NBT does not contain a string!");
+
+        MultiblockPattern pattern = MultiblockPattern.fromNbt(recipeNbt);
+        if (pattern == null) return null;
 
         CompoundTag resultNbt = null;
         if (nbt.get("nbt") instanceof CompoundTag serializedResult) resultNbt = serializedResult.copy();
@@ -117,7 +132,7 @@ public record MultiblockRecipe(
         }
 
         return new MultiblockRecipe(
-                MultiblockPattern.fromNbt(recipeNbt),
+                pattern,
                 new ResourceLocation(stringNbt.getAsString()),
                 resultNbt,
                 deserializedRequisites
@@ -246,6 +261,7 @@ public record MultiblockRecipe(
                 builder.aisle(strings.toArray(String[]::new));
             } catch (IllegalArgumentException exception) {
                 LOGGER.error(exception.getMessage());
+                return null;
             }
         }
 

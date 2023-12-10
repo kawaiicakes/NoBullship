@@ -162,13 +162,22 @@ public class BlockInWorldPredicateBuilder {
         return this.properties.containsKey(property);
     }
 
+    @Nullable
     public CompoundTag toNbt() {
         CompoundTag toReturn = new CompoundTag();
 
-        Tag tag = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, this.blockState).getOrThrow(false, (error) -> {});
-        if (!(tag instanceof CompoundTag blockNbt)) {
+        Tag tag;
+        try {
+            tag = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, this.blockState).getOrThrow(false, (error) -> {
+            });
+        } catch (RuntimeException e) {
             LOGGER.error("BlockState could not be serialized to NBT!");
-            return toReturn;
+            return null;
+        }
+
+        if (!(tag instanceof CompoundTag blockNbt)) {
+            LOGGER.error("BlockState could not be serialized to a CompoundTag!");
+            return null;
         }
         toReturn.put("blockState", blockNbt);
 
@@ -201,34 +210,46 @@ public class BlockInWorldPredicateBuilder {
         return toReturn;
     }
 
+    @Nullable
     public static BlockInWorldPredicateBuilder fromNbt(CompoundTag nbt) {
-        BlockState blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, nbt.get("blockState")).getOrThrow(false, null);
+        BlockState blockstate;
+        try {
+            blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, nbt.get("blockState")).getOrThrow(false, null);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error deserializing BlockInWorldPredicateBuilder from NBT!", e);
+            return null;
+        }
 
         BlockInWorldPredicateBuilder toReturn = BlockInWorldPredicateBuilder.of(blockstate.getBlock());
 
-        if (nbt.get("properties") instanceof ListTag propertiesTag) {
-            for (Tag keyPairTag : propertiesTag) {
-                CompoundTag keyPair = (CompoundTag) keyPairTag;
-                CompoundTag propertyTag = ((CompoundTag) keyPairTag).getCompound("property");
+        try {
+            if (nbt.get("properties") instanceof ListTag propertiesTag) {
+                for (Tag keyPairTag : propertiesTag) {
+                    CompoundTag keyPair = (CompoundTag) keyPairTag;
+                    CompoundTag propertyTag = ((CompoundTag) keyPairTag).getCompound("property");
 
-                Property<?> propertyForBlock = blockstate.getProperties()
-                        .stream()
-                        .filter(property -> property.getName().equals(propertyTag.getString("name"))
-                                && property.getValueClass().getSimpleName().equals(propertyTag.getString("type")))
-                        .findFirst()
-                        .orElse(null);
+                    Property<?> propertyForBlock = blockstate.getProperties()
+                            .stream()
+                            .filter(property -> property.getName().equals(propertyTag.getString("name"))
+                                    && property.getValueClass().getSimpleName().equals(propertyTag.getString("type")))
+                            .findFirst()
+                            .orElse(null);
 
-                if (propertyForBlock == null) throw new IllegalArgumentException("Passed NBT does not contain valid properties!");
+                    if (propertyForBlock == null) throw new IllegalArgumentException("Passed NBT does not contain valid properties!");
 
-                ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
-                Set<Comparable<?>> valuesSet = new HashSet<>(valuesList.size());
-                for (Tag string : valuesList) {
-                    Comparable<?> comparable = propertyForBlock.getValue(string.getAsString()).orElseThrow();
-                    valuesSet.add(comparable);
+                    ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
+                    Set<Comparable<?>> valuesSet = new HashSet<>(valuesList.size());
+                    for (Tag string : valuesList) {
+                        Comparable<?> comparable = propertyForBlock.getValue(string.getAsString()).orElseThrow();
+                        valuesSet.add(comparable);
+                    }
+
+                    toReturn.requireProperties(propertyForBlock, valuesSet);
                 }
-
-                toReturn.requireProperties(propertyForBlock, valuesSet);
             }
+        } catch (RuntimeException e) {
+            LOGGER.error("BlockInWorldPredicateBuilder contains malformed property definition!", e);
+            return null;
         }
 
         if (nbt.get("nbt") instanceof CompoundTag nbtTag) toReturn.requireNbt(nbtTag);

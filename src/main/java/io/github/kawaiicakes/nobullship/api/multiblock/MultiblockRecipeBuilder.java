@@ -222,7 +222,12 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
 
         CompoundTag paletteTag = new CompoundTag();
         for (Map.Entry<String, BlockInWorldPredicateBuilder> entry : this.lookupSimple.entrySet()) {
-            paletteTag.put(entry.getKey(), entry.getValue().toNbt());
+            CompoundTag value = entry.getValue().toNbt();
+            if (value == null) {
+                LOGGER.error("Unable to deserialize BlockInWorldPredicateBuilder to NBT!");
+                continue;
+            }
+            paletteTag.put(entry.getKey(), value);
         }
         toReturn.put("palette", paletteTag);
 

@@ -2,6 +2,7 @@ package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import net.minecraft.core.BlockPos;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.block.state.pattern.BlockPattern;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -28,6 +30,7 @@ import static net.minecraft.world.level.block.Blocks.AIR;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 public class MultiblockPattern extends BlockPattern {
+    protected static final Logger LOGGER = LogUtils.getLogger();
     public static final Direction[] CARDINAL = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
     protected final ImmutableList<BlockState> palette;
     protected final ImmutableList<ItemStack> totalBlocks;
@@ -140,29 +143,42 @@ public class MultiblockPattern extends BlockPattern {
         );
     }
 
+    /**
+     * Returns null if pattern is malformed.
+     */
+    @Nullable
     public CompoundTag toNbt() {
-        CompoundTag toReturn = new CompoundTag();
+        CompoundTag toReturn;
 
-        ListTag paletteTag = new ListTag();
-        for (BlockState block : this.palette) {
-            Tag blockTag = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, block).getOrThrow(false, null);
-            if (!(blockTag instanceof CompoundTag compoundTag)) throw new RuntimeException("BlockState could not be parsed as a CompoundTag!");
-            paletteTag.add(compoundTag);
+        try {
+            toReturn = new CompoundTag();
+
+            ListTag paletteTag = new ListTag();
+            for (BlockState block : this.palette) {
+                Tag blockTag = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, block).getOrThrow(false, null);
+                if (!(blockTag instanceof CompoundTag compoundTag))
+                    throw new RuntimeException("BlockState could not be parsed as a CompoundTag!");
+                paletteTag.add(compoundTag);
+            }
+            toReturn.put("palette", paletteTag);
+
+            ListTag totalBlocksTag = new ListTag();
+            for (ItemStack stack : this.totalBlocks) {
+                totalBlocksTag.add(stack.serializeNBT());
+            }
+            toReturn.put("total_blocks", totalBlocksTag);
+
+            if (this.serializedPattern != null) toReturn.put("serialized_palette", this.serializedPattern);
+            else throw new RuntimeException("The serialized pattern does not exist!");
+        } catch (RuntimeException e) {
+            LOGGER.error("Error serializing pattern to NBT!", e);
+            return null;
         }
-        toReturn.put("palette", paletteTag);
-
-        ListTag totalBlocksTag = new ListTag();
-        for (ItemStack stack : this.totalBlocks) {
-           totalBlocksTag.add(stack.serializeNBT());
-        }
-        toReturn.put("total_blocks", totalBlocksTag);
-
-        if (this.serializedPattern != null) toReturn.put("serialized_palette", this.serializedPattern);
-        else throw new RuntimeException("The serialized pattern does not exist!");
 
         return toReturn;
     }
 
+    @Nullable
     public static MultiblockPattern fromNbt(CompoundTag nbt) {
         ListTag paletteTag = nbt.getList("palette", Tag.TAG_COMPOUND);
         ListTag totalBlocksTag = nbt.getList("total_blocks", Tag.TAG_COMPOUND);
@@ -172,23 +188,35 @@ public class MultiblockPattern extends BlockPattern {
         List<String[]> pattern = new ArrayList<>(patternList.size());
         int patternHeight = 1;
         int patternWidth = 1;
-        for (Tag patternTag : patternList) {
-            ListTag patternListTag = (ListTag) patternTag;
-            if (patternListTag.getElementType() != Tag.TAG_STRING) throw new IllegalArgumentException("Passed NBT does not contain valid type of list elements for pattern!");
-            if (patternListTag.size() > patternHeight) patternHeight = patternListTag.size();
-            List<String> tempList = new ArrayList<>(patternListTag.size());
-            for (Tag string : patternListTag) {
-                if (string.getAsString().length() > patternWidth) patternWidth = string.getAsString().length();
-                tempList.add(string.getAsString());
+
+        try {
+            for (Tag patternTag : patternList) {
+                ListTag patternListTag = (ListTag) patternTag;
+                if (patternListTag.getElementType() != Tag.TAG_STRING)
+                    throw new IllegalArgumentException("Passed NBT does not contain valid type of list elements for pattern!");
+                if (patternListTag.size() > patternHeight) patternHeight = patternListTag.size();
+                List<String> tempList = new ArrayList<>(patternListTag.size());
+                for (Tag string : patternListTag) {
+                    if (string.getAsString().length() > patternWidth) patternWidth = string.getAsString().length();
+                    tempList.add(string.getAsString());
+                }
+                pattern.add(tempList.toArray(new String[patternListTag.size()]));
             }
-            pattern.add(tempList.toArray(new String[patternListTag.size()]));
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Unable to deserialize pattern from NBT!");
+            return null;
         }
 
         CompoundTag originalPaletteTag = serializedTag.getCompound("palette");
         Map<String, BlockInWorldPredicateBuilder> paletteMap = new HashMap<>(originalPaletteTag.size());
         for (String key : originalPaletteTag.getAllKeys()) {
             CompoundTag tagAtKey = originalPaletteTag.getCompound(key);
-            paletteMap.put(key, BlockInWorldPredicateBuilder.fromNbt(tagAtKey));
+            BlockInWorldPredicateBuilder builder = BlockInWorldPredicateBuilder.fromNbt(tagAtKey);
+            if (builder == null) {
+                LOGGER.error("Unable to deserialize BlockInWorldPredicate from NBT!");
+                return null;
+            }
+            paletteMap.put(key, builder);
         }
 
         BlockInWorldPredicate[][][] predicate = (BlockInWorldPredicate[][][]) Array.newInstance(BlockInWorldPredicate.class, pattern.size(), patternHeight, patternWidth);
@@ -213,9 +241,14 @@ public class MultiblockPattern extends BlockPattern {
         }
 
         NonNullList<BlockState> paletteList = NonNullList.createWithCapacity(paletteTag.size());
-        for (Tag tag : paletteTag) {
-            BlockState deserialized = BlockState.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow(false, null);
-            paletteList.add(deserialized);
+        try {
+            for (Tag tag : paletteTag) {
+                BlockState deserialized = BlockState.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow(false, null);
+                paletteList.add(deserialized);
+            }
+        } catch (RuntimeException e) {
+            LOGGER.error("BlockState unable to be deserialized from NBT!", e);
+            return null;
         }
 
         NonNullList<ItemStack> totalBlocksList = NonNullList.createWithCapacity(totalBlocksTag.size());
@@ -226,57 +259,101 @@ public class MultiblockPattern extends BlockPattern {
         return new MultiblockPattern(predicate, paletteList, totalBlocksList, serializedTag);
     }
 
+    @Nullable
     public static List<String[]> rawPatternFromNbt(CompoundTag patternTag) {
         ListTag patternList = patternTag.getList("pattern", Tag.TAG_LIST);
+        if (patternList.isEmpty()) return null;
+
         List<String[]> pattern = new ArrayList<>(patternList.size());
         int patternHeight = 1;
         int patternWidth = 1;
-        for (Tag tag : patternList) {
-            ListTag patternListTag = (ListTag) tag;
-            if (patternListTag.getElementType() != Tag.TAG_STRING) throw new IllegalArgumentException("Passed NBT does not contain valid type of list elements for pattern!");
-            if (patternListTag.size() > patternHeight) patternHeight = patternListTag.size();
-            List<String> tempList = new ArrayList<>(patternListTag.size());
-            for (Tag string : patternListTag) {
-                if (string.getAsString().length() > patternWidth) patternWidth = string.getAsString().length();
-                tempList.add(string.getAsString());
+
+        try {
+            for (Tag tag : patternList) {
+                ListTag patternListTag = (ListTag) tag;
+                if (patternListTag.getElementType() != Tag.TAG_STRING)
+                    throw new IllegalArgumentException("Passed NBT does not contain valid type of list elements for pattern!");
+                if (patternListTag.size() > patternHeight) patternHeight = patternListTag.size();
+                List<String> tempList = new ArrayList<>(patternListTag.size());
+                for (Tag string : patternListTag) {
+                    if (string.getAsString().length() > patternWidth) patternWidth = string.getAsString().length();
+                    tempList.add(string.getAsString());
+                }
+                pattern.add(tempList.toArray(new String[patternListTag.size()]));
             }
-            pattern.add(tempList.toArray(new String[patternListTag.size()]));
+        } catch (IllegalArgumentException e) {
+            LOGGER.error(e.getMessage());
+            return null;
         }
+
         return pattern;
     }
 
+    @Nullable
     public static Map<Character, BlockState> rawPaletteFromNbt(CompoundTag paletteTag, @Nullable Direction facing) {
         CompoundTag originalPaletteTag = paletteTag.getCompound("palette");
+        if (originalPaletteTag.isEmpty()) return null;
+
         Map<Character, BlockState> paletteMap = new HashMap<>(originalPaletteTag.size());
         for (String key : originalPaletteTag.getAllKeys()) {
             CompoundTag tagAtKey = originalPaletteTag.getCompound(key);
+            if (tagAtKey.isEmpty()) {
+                LOGGER.error("Palette key at {} is empty!", key);
+                return null;
+            }
 
-            BlockState blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, tagAtKey.get("blockState")).get().orThrow();
+            BlockState blockstate;
+            try {
+                blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, tagAtKey.get("blockState")).get().orThrow();
+            } catch (RuntimeException e) {
+                LOGGER.error("Error deserializing blockstate from NBT for palette!", e);
+                return null;
+            }
+
             BlockState forPalette = blockstate;
 
             if (tagAtKey.get("properties") instanceof ListTag propertiesTag) {
                 for (Tag keyPairTag : propertiesTag) {
                     BlockState temp;
 
-                    CompoundTag keyPair = (CompoundTag) keyPairTag;
-                    CompoundTag propertyTag = keyPair.getCompound("property");
+                    Property<?> propertyForBlock;
+                    ListTag valuesList;
+                    try {
+                        CompoundTag keyPair = (CompoundTag) keyPairTag;
+                        CompoundTag propertyTag = keyPair.getCompound("property");
 
-                    Property<?> propertyForBlock = blockstate.getBlock().getStateDefinition().getProperty(propertyTag.getString("name"));
+                        propertyForBlock = blockstate.getBlock().getStateDefinition().getProperty(propertyTag.getString("name"));
 
-                    if (propertyForBlock == null) throw new IllegalArgumentException("Passed NBT does not contain valid properties!");
+                        if (propertyForBlock == null)
+                            throw new IllegalArgumentException("Passed NBT does not contain valid properties!");
 
-                    ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
-
-                    if (propertyForBlock instanceof DirectionProperty && facing != null) {
-                        temp = forPalette.setValue(HORIZONTAL_FACING,
-                                BlockInWorldPredicate.rotateValue(HORIZONTAL_FACING.getValue(valuesList.getString(0)).orElse(Direction.NORTH), facing));
-                        forPalette = temp;
-                        continue;
+                        valuesList = keyPair.getList("values", Tag.TAG_STRING);
+                    } catch (IllegalArgumentException e) {
+                        LOGGER.error("Invalid properties in palette NBT!", e);
+                        return null;
                     }
 
-                    // FIXME: this is so scuffed lol
-                    //noinspection unchecked
-                    temp = forPalette.setValue(propertyForBlock.getClass().cast(propertyForBlock), Objects.requireNonNull(blockstate.getValue(propertyForBlock).getClass().cast(propertyForBlock.getValue(valuesList.getString(0)).orElse(null))));
+                    try {
+                        if (propertyForBlock instanceof DirectionProperty && facing != null) {
+                            temp = forPalette.setValue(HORIZONTAL_FACING,
+                                    BlockInWorldPredicate.rotateValue(HORIZONTAL_FACING.getValue(valuesList.getString(0)).orElse(Direction.NORTH), facing));
+                            forPalette = temp;
+                            continue;
+                        }
+
+                        //noinspection unchecked
+                        temp = forPalette.setValue(
+                                propertyForBlock.getClass().cast(propertyForBlock),
+                                Objects.requireNonNull(blockstate.getValue(propertyForBlock).getClass().cast(propertyForBlock.getValue(valuesList.getString(0)).orElse(null)))
+                        );
+                    } catch (ClassCastException e) {
+                        LOGGER.error("Error casting appropriate value for property!", e);
+                        return null;
+                    } catch (NullPointerException e) {
+                        LOGGER.error("No such value exists!", e);
+                        return null;
+                    }
+
                     forPalette = temp;
                 }
             }

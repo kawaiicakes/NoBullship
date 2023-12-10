@@ -2,6 +2,7 @@ package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -43,6 +45,7 @@ import static net.minecraft.world.level.block.Blocks.BEDROCK;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshopBlockEntity> {
+    protected static final Logger LOGGER = LogUtils.getLogger();
     protected static final Map<BlockPos, RenderInstructions> RENDER_QUEUE = new HashMap<>();
 
     public SchematicRenderer(BlockEntityRendererProvider.Context context) {}
@@ -62,8 +65,18 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
         entity.queueLayerReset = true;
 
-        RENDER_QUEUE.put(origin, new RenderInstructions(forRender.result(), MultiblockPattern.rawPaletteFromNbt(patternTag, facing),
-                MultiblockPattern.rawPatternFromNbt(patternTag), facing));
+        List<String[]> listForRender = MultiblockPattern.rawPatternFromNbt(patternTag);
+        if (listForRender == null || listForRender.isEmpty()) {
+            LOGGER.error("Unable to set recipe {} as pattern for render is null or empty!", recipe.getId());
+            return;
+        }
+        Map<Character, BlockState> mapForRender = MultiblockPattern.rawPaletteFromNbt(patternTag, facing);
+        if (mapForRender == null || mapForRender.isEmpty()) {
+            LOGGER.error("Unable to set recipe {} as palette for render is null or empty!", recipe.getId());
+            return;
+        }
+
+        RENDER_QUEUE.put(origin, new RenderInstructions(forRender.result(), mapForRender, listForRender, facing));
     }
 
     public static void stopRenderAt(BlockPos entityPos) {
