@@ -45,9 +45,9 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
 
     public ImmutableList<Ingredient> getShapedIngredients() {
         ImmutableList.Builder<Ingredient> toReturn = ImmutableList.builder();
-        // FIXME this looks like it can still be mutated... maybe reimplement this
         for (Ingredient ingredient : this.shaped) {
-            toReturn.add(ingredient);
+            // This is done to absolutely ensure this recipe's contents cannot be mutated.
+            toReturn.add(Ingredient.fromJson(ingredient.toJson()));
         }
         return toReturn.build();
     }
