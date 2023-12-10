@@ -27,7 +27,6 @@ import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARD
  * from the original.
  */
 public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
-    protected static final Logger LOGGER = LogUtils.getLogger();
     @SuppressWarnings("DataFlowIssue")
     public static final BlockInWorldPredicate WILDCARD = new BlockInWorldPredicate(null, null, null, null) {
         @Override
@@ -37,7 +36,7 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
 
         @Override
         public boolean test(BlockInWorld blockInWorld) {
-            return true;
+            return !blockInWorld.getState().isAir();
         }
     };
 
