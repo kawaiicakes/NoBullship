@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nobullship:block/wildcard"
+    },
+    "facing=south": {
+      "model": "nobullship:block/wildcard",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nobullship:block/wildcard",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "nobullship:block/wildcard",
+      "y": 90
+    }
+  }
+}

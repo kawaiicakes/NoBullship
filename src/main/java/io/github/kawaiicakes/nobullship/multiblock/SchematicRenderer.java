@@ -40,8 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.github.kawaiicakes.nobullship.NoBullship.WILDCARD_BLOCK;
 import static net.minecraft.world.level.block.Blocks.AIR;
-import static net.minecraft.world.level.block.Blocks.BEDROCK;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshopBlockEntity> {
@@ -111,9 +111,9 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         ModelBlockRenderer.enableCaching();
 
         Map<Character, BlockState> palette = entry.palette;
-        palette.put(' ', AIR.defaultBlockState());
-        palette.put('$', BEDROCK.defaultBlockState());
         Direction facing = entry.direction;
+        palette.put(' ', AIR.defaultBlockState());
+        palette.put('$', WILDCARD_BLOCK.get().defaultBlockState().setValue(HORIZONTAL_FACING, facing));
 
         BlockPos previewPosition = posOfEntity.mutable().move(facing, -(zSize + 1)).offset(0, ySize - 1, 0).immutable();
 

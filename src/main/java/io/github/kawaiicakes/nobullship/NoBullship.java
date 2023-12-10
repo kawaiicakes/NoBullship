@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship;
 
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
+import io.github.kawaiicakes.nobullship.block.WildcardBlock;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
@@ -67,10 +68,16 @@ public class NoBullship
     private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER_REGISTRY
             = DeferredRegister.create(RECIPE_SERIALIZERS, MOD_ID);
 
+    public static final RegistryObject<Block> WILDCARD_BLOCK
+            = BLOCK_REGISTRY.register("wildcard", WildcardBlock::new);
     public static final RegistryObject<Block> WORKSHOP_BLOCK
             = BLOCK_REGISTRY.register("workshop", MultiblockWorkshopBlock::new);
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
             = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
+    public static final RegistryObject<BlockItem> WILDCARD_ITEM
+            = ITEM_REGISTRY.register(
+                    "wildcard",
+            () -> new BlockItem(WILDCARD_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB)));
     public static final RegistryObject<BlockItem> WORKSHOP_ITEM
             = ITEM_REGISTRY.register(
                     "workshop",
