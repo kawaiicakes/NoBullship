@@ -8,19 +8,31 @@ import java.util.List;
 public class Config {
     public static ForgeConfigSpec CONFIG;
 
-    public static ForgeConfigSpec.DoubleValue COOLDOWN, DROP_RAW_PERCENT;
-    public static ForgeConfigSpec.BooleanValue AUTO_RECIPE, DISABLE_DROP, DROP_RAW;
+    public static ForgeConfigSpec.DoubleValue COOLDOWN_MULTIPLIER, MINIMUM_COOLDOWN, MAXIMUM_COOLDOWN, DROP_RAW_PERCENT;
+    public static ForgeConfigSpec.BooleanValue AUTO_RECIPE, DISABLE_DROP, DROP_RAW, DISABLE_GLOBAL_COOLDOWN;
     public static ForgeConfigSpec.ConfigValue<List<? extends String>> EXCEPTION_RECIPE, EXCEPTION_DROP;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.push("No Bullship!");
 
-        COOLDOWN = builder
-                .comment("The time in seconds that schematics become unusable after use.")
+        COOLDOWN_MULTIPLIER = builder
+                .comment("The multiplier on cooldown times for schematics.")
                 .translation("config.nobullship.cooldown")
-                .comment("Default 1.0 seconds.")
-                .defineInRange("cooldown", 1.0, 0.50, 30);
+                .comment("Default 1.0")
+                .defineInRange("cooldown", 1.0, 0.01, 30);
+
+        MINIMUM_COOLDOWN = builder
+                .comment("The minimum cooldown time possible in seconds.")
+                .translation("config.nobullship.min_cooldown")
+                .comment("Default 1.0")
+                .defineInRange("min_cooldown", 1.0, 0.50, 395);
+
+        MAXIMUM_COOLDOWN = builder
+                .comment("The maximum cooldown time possible in seconds.")
+                .translation("config.nobullship.max_cooldown")
+                .comment("Default 405")
+                .defineInRange("max_cooldown", 405, 0.51, 3000);
 
         DROP_RAW_PERCENT = builder
                 .comment("The percentage of blocks that will be dropped if an entity is destroyed. CURRENTLY DOES NOTHING")
@@ -47,6 +59,12 @@ public class Config {
                 .translation("config.nobullship.raw_drops")
                 .comment("Default true.")
                 .define("raw_drops", true);
+
+        DISABLE_GLOBAL_COOLDOWN = builder
+                .comment("Disables global cooldown. Not recommended.")
+                .translation("config.nobullship.disable_global_cooldown")
+                .comment("Default true.")
+                .define("disable_global_cooldown", false);
 
         EXCEPTION_RECIPE = builder
                 .comment("Acts as a whitelist for automatic recipes when auto_recipe is disabled, and a blacklist when enabled. CURRENTLY DOES NOTHING")

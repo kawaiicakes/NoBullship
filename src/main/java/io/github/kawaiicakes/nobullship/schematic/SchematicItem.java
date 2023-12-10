@@ -2,6 +2,8 @@ package io.github.kawaiicakes.nobullship.schematic;
 
 import io.github.kawaiicakes.nobullship.Config;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
+import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
+import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.player.LocalPlayer;
@@ -180,13 +182,24 @@ public class SchematicItem extends Item {
         String noBsRecipe = nbt.getString("nobullshipRecipe");
         if (noBsRecipe.isEmpty()) return InteractionResult.FAIL;
 
-        // TODO: change time relative to how large the checked pattern is
-        int cooldownTimeTicks = (int) (20 * Config.COOLDOWN.get());
+        MultiblockRecipeManager manager = MultiblockRecipeManager.getInstance();
+        MultiblockRecipe recipe = manager.getRecipe(new ResourceLocation(noBsRecipe)).orElse(null);
 
+        try {
+            if (!manager.trySpawn(recipe, pContext)) return InteractionResult.FAIL;
+        } catch (RuntimeException e) {
+            return InteractionResult.FAIL;
+        }
+
+        //noinspection DataFlowIssue (#trySpawn returning true indicates recipe cannot be null.)
+        MultiblockPattern pattern = recipe.recipe();
+        int recipeSize = pattern.getDepth() * pattern.getHeight() * pattern.getWidth();
+        int cooldownTimeTicks = Math.min(
+                Math.max((int) (recipeSize * Config.COOLDOWN_MULTIPLIER.get()), 20 * (Config.MINIMUM_COOLDOWN.get()).intValue()),
+                20 * Config.MAXIMUM_COOLDOWN.get().intValue()
+        );
         pContext.getPlayer().getCooldowns().addCooldown(this, cooldownTimeTicks);
-
-        MultiblockRecipeManager.getInstance().trySpawn(new ResourceLocation(noBsRecipe), pContext);
-        MultiblockRecipeManager.getInstance().incrementGlobalCooldown(cooldownTimeTicks);
+        manager.incrementGlobalCooldown(cooldownTimeTicks);
 
         return InteractionResult.FAIL;
     }

@@ -172,7 +172,6 @@ public class BlockInWorldPredicateBuilder {
         }
         toReturn.put("blockState", blockNbt);
 
-        // TODO: redo this shit lmao
         if (!this.properties.isEmpty()) {
             ListTag propertiesNbt = new ListTag();
 

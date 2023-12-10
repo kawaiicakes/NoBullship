@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.logging.LogUtils;
+import io.github.kawaiicakes.nobullship.Config;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacket;
@@ -117,35 +118,31 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     /**
      * Pass a recipe ID and the context using it into here to attempt to spawn the result.
      */
-    public void trySpawn(ResourceLocation recipeId, UseOnContext context) {
+    public boolean trySpawn(@Nullable MultiblockRecipe recipe, UseOnContext context) throws RuntimeException {
         // TODO: config whether fake players can use this schematic...
-        if (!(context.getLevel() instanceof ServerLevel level)) return;
-
-        MultiblockRecipe cachedRecipe
-                = this.recipes.getOrDefault(recipeId, null);
-        if (cachedRecipe == null) {
+        if (!(context.getLevel() instanceof ServerLevel level)) return false;
+        if (recipe == null) {
             level.playSound(null, context.getClickedPos(), CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
             Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
                     .sendSystemMessage(FAIL3, true);
-            return;
+            return false;
         }
 
-        // TODO: make this configurable & change time relative to how large the checked pattern is
-        if (this.globalCooldownTime > this.maxGlobalCooldownTime) {
+        if (Config.DISABLE_GLOBAL_COOLDOWN.get() && this.globalCooldownTime > this.maxGlobalCooldownTime) {
             level.playSound(null, context.getClickedPos(), CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
             Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
                     .sendSystemMessage(FAIL4, true);
-            return;
+            return false;
         }
 
-        MultiblockPattern pattern = cachedRecipe.recipe();
-        ResourceLocation resultLocation = cachedRecipe.result();
-        CompoundTag nbt = cachedRecipe.nbt();
+        MultiblockPattern pattern = recipe.recipe();
+        ResourceLocation resultLocation = recipe.result();
+        CompoundTag nbt = recipe.nbt();
 
         BlockPos pos = context.getClickedPos();
 
         Player player = context.getPlayer();
-        ImmutableList<ItemStack> requisites = cachedRecipe.requisites();
+        ImmutableList<ItemStack> requisites = recipe.requisites();
         if (requisites != null && !requisites.isEmpty()) {
             if (player != null && !player.isCreative()) {
                 List<ItemStack> summedContents = getSummedContents(player.getInventory().items);
@@ -154,7 +151,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                     level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
                     Objects.requireNonNull(((ServerPlayer) player))
                             .sendSystemMessage(FAIL2, true);
-                    return;
+                    return false;
                 }
             }
         }
@@ -164,7 +161,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
             Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
                     .sendSystemMessage(FAIL, true);
-            return;
+            return false;
         }
 
         // TODO: optimizations for pattern logic
@@ -277,6 +274,8 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                 }
             }
         }
+
+        return true;
     }
 
     public void incrementGlobalCooldown(int ticks) {
