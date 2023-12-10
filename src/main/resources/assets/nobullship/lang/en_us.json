@@ -10,7 +10,7 @@
   "sounds.nobullship.construct_expended": "[Paper tearing]",
   "sounds.nobullship.construct_failed": "[Boowhomp :(]",
 
-  "chat.nobullship.fail": "Construction failed!",
+  "chat.nobullship.fail": "Construction failed! Schematic is not built properly!",
   "chat.nobullship.fail2": "You do not have enough items!",
   "chat.nobullship.fail3": "There is a problem with the recipe JSON!",
   "chat.nobullship.fail4": "Global usage of schematics is currently on cooldown!",
