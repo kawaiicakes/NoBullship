@@ -83,55 +83,50 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
     }
 
     protected static Predicate<BlockInWorld> checkProperties(@Nullable Map<Property<?>, Set<Comparable<?>>> properties, Direction facing) {
-        Predicate<BlockInWorld> propertiesPredicate = (block) -> true;
-        if (properties != null && !properties.isEmpty()) {
-            propertiesPredicate = (block) -> {
-                // TODO: I HATE NESTING! I HATE NESTING!.
-                for (Map.Entry<Property<?>, Set<Comparable<?>>> entry : properties.entrySet()) {
-                    final Set<Comparable<?>> checkedValues = entry.getValue();
-                    Comparable<?> valueOfBlockInWorld;
+        if (properties == null || properties.isEmpty()) return (block) -> true;
 
-                    try {
-                        valueOfBlockInWorld = block.getState().getValue(entry.getKey());
-                    } catch (IllegalArgumentException e) {
-                        return false;
-                    }
+        return (block) -> {
+            for (Map.Entry<Property<?>, Set<Comparable<?>>> entry : properties.entrySet()) {
+                final Set<Comparable<?>> checkedValues = entry.getValue();
+                Comparable<?> valueOfBlockInWorld;
 
-                    if (entry.getKey() instanceof DirectionProperty directionProperty
-                            && directionProperty.getPossibleValues().containsAll(List.of(CARDINAL))) {
-
-                        Set<Direction> setOfDirections = checkedValues.stream().map(value -> rotateValue(value, facing)).collect(Collectors.toSet());
-
-                        if (!(valueOfBlockInWorld instanceof Direction)) return false;
-                        if (!(setOfDirections.contains(valueOfBlockInWorld))) return false;
-                        continue;
-                    }
-
-                    if (!checkedValues.contains(valueOfBlockInWorld)) return false;
+                try {
+                    valueOfBlockInWorld = block.getState().getValue(entry.getKey());
+                } catch (IllegalArgumentException e) {
+                    return false;
                 }
-                return true;
-            };
-        }
-        return propertiesPredicate;
+
+                if (entry.getKey() instanceof DirectionProperty directionProperty
+                        && directionProperty.getPossibleValues().containsAll(List.of(CARDINAL))) {
+
+                    Set<Direction> setOfDirections = checkedValues.stream().map(value -> rotateValue(value, facing)).collect(Collectors.toSet());
+
+                    if (!(valueOfBlockInWorld instanceof Direction)) return false;
+                    if (!(setOfDirections.contains(valueOfBlockInWorld))) return false;
+                    continue;
+                }
+
+                if (!checkedValues.contains(valueOfBlockInWorld)) return false;
+            }
+            return true;
+        };
     }
 
     protected static Predicate<BlockInWorld> checkNbtMatch(@Nullable CompoundTag blockEntityNbtDataStrict) {
-        Predicate<BlockInWorld> nbtPredicateStrict = (block) -> true;
-        if (blockEntityNbtDataStrict != null) {
-            nbtPredicateStrict = (block) -> {
-                //noinspection DataFlowIssue ($blockEntityNbtDataStrict being non-null implies the block has an entity.)
-                CompoundTag blockNbt = block.getEntity().saveWithFullMetadata();
+        if (blockEntityNbtDataStrict == null) return block -> true;
 
-                for (String key : blockEntityNbtDataStrict.getAllKeys()) {
-                    if (!blockNbt.contains(key)) return false;
-                    //noinspection DataFlowIssue
-                    if (!blockNbt.get(key).equals(blockEntityNbtDataStrict.get(key))) return false;
-                }
+        return (block) -> {
+            //noinspection DataFlowIssue ($blockEntityNbtDataStrict being non-null implies the block has an entity.)
+            CompoundTag blockNbt = block.getEntity().saveWithFullMetadata();
 
-                return true;
-            };
-        }
-        return nbtPredicateStrict;
+            for (String key : blockEntityNbtDataStrict.getAllKeys()) {
+                if (!blockNbt.contains(key)) return false;
+                //noinspection DataFlowIssue
+                if (!blockNbt.get(key).equals(blockEntityNbtDataStrict.get(key))) return false;
+            }
+
+            return true;
+        };
     }
 
     /**
@@ -140,49 +135,45 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
      * only the count of the contents should meet or exceed what is stipulated in NBT.
      */
     protected static Predicate<BlockInWorld> checkSoftNbtMatch(@Nullable CompoundTag blockEntityNbtData) {
-        Predicate<BlockInWorld> nbtPredicate = block -> true;
+        if (blockEntityNbtData == null) return block -> true;
 
-        if (blockEntityNbtData != null) {
-            nbtPredicate = (block) -> {
-                //noinspection DataFlowIssue ($blockEntityNbtData being non-null implies the block has an entity.)
-                CompoundTag blockNbt = block.getEntity().saveWithFullMetadata();
+        return (block) -> {
+            //noinspection DataFlowIssue ($blockEntityNbtData being non-null implies the block has an entity.)
+            CompoundTag blockNbt = block.getEntity().saveWithFullMetadata();
 
-                for (String key : blockEntityNbtData.getAllKeys()) {
-                    if (!key.equals("Items")) {
-                        if (!blockNbt.contains(key)) return false;
-                        //noinspection DataFlowIssue
-                        if (!blockNbt.get(key).equals(blockEntityNbtData.get(key))) return false;
-                        continue;
-                    }
-
-                    ListTag requirementContents = blockEntityNbtData.getList("Items", Tag.TAG_COMPOUND);
-                    if (requirementContents.isEmpty()) return false;
-
-                    ListTag containerContents = blockNbt.getList("Items", Tag.TAG_COMPOUND);
-                    if (containerContents.isEmpty() && !requirementContents.isEmpty()) return false;
-
-                    NonNullList<ItemStack> requirementsAsList = NonNullList.createWithCapacity(requirementContents.size());
-                    for (Tag slotTag : requirementContents) {
-                        ItemStack slotStack = ItemStack.of((CompoundTag) slotTag);
-                        requirementsAsList.add(slotStack);
-                    }
-                    List<ItemStack> summedRequirements = SchematicRecipe.getSummedContents(requirementsAsList);
-
-                    NonNullList<ItemStack> contentsAsList = NonNullList.createWithCapacity(containerContents.size());
-                    for (Tag slotTag : containerContents) {
-                        ItemStack slotStack = ItemStack.of((CompoundTag) slotTag);
-                        contentsAsList.add(slotStack);
-                    }
-                    List<ItemStack> summedContents = SchematicRecipe.getSummedContents(contentsAsList);
-
-                    if (!SchematicRecipe.compareSummedContents(summedRequirements, summedContents)) return false;
+            for (String key : blockEntityNbtData.getAllKeys()) {
+                if (!key.equals("Items")) {
+                    if (!blockNbt.contains(key)) return false;
+                    //noinspection DataFlowIssue
+                    if (!blockNbt.get(key).equals(blockEntityNbtData.get(key))) return false;
+                    continue;
                 }
 
-                return true;
-            };
-        }
+                ListTag requirementContents = blockEntityNbtData.getList("Items", Tag.TAG_COMPOUND);
+                if (requirementContents.isEmpty()) return false;
 
-        return nbtPredicate;
+                ListTag containerContents = blockNbt.getList("Items", Tag.TAG_COMPOUND);
+                if (containerContents.isEmpty() && !requirementContents.isEmpty()) return false;
+
+                NonNullList<ItemStack> requirementsAsList = NonNullList.createWithCapacity(requirementContents.size());
+                for (Tag slotTag : requirementContents) {
+                    ItemStack slotStack = ItemStack.of((CompoundTag) slotTag);
+                    requirementsAsList.add(slotStack);
+                }
+                List<ItemStack> summedRequirements = SchematicRecipe.getSummedContents(requirementsAsList);
+
+                NonNullList<ItemStack> contentsAsList = NonNullList.createWithCapacity(containerContents.size());
+                for (Tag slotTag : containerContents) {
+                    ItemStack slotStack = ItemStack.of((CompoundTag) slotTag);
+                    contentsAsList.add(slotStack);
+                }
+                List<ItemStack> summedContents = SchematicRecipe.getSummedContents(contentsAsList);
+
+                if (!SchematicRecipe.compareSummedContents(summedRequirements, summedContents)) return false;
+            }
+
+            return true;
+        };
     }
 
     public static Direction rotateValue(Comparable<?> original, Direction rotated) {
