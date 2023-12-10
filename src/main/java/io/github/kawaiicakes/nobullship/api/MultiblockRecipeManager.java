@@ -178,63 +178,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         level.playSound(null, pos, CONSTRUCT_SUCCESS.get(), SoundSource.PLAYERS, 0.77F, 1.0F);
         level.sendParticles(LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 7, 0.2, 0.2, 0.2, 0.3);
 
-        if (player != null && !player.isCreative()) {
-            ItemStack itemInHand = context.getItemInHand();
-            if (Objects.requireNonNull(itemInHand.getTag()).contains("nobullshipUses", TAG_INT)) {
-                int uses = itemInHand.getTag().getInt("nobullshipUses");
-                if (uses <= 1) {
-                    itemInHand.shrink(1);
-                    level.playSound(null, pos, CONSTRUCT_EXPENDED.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-                    itemInHand = null;
-                }
-            } // FIXME: I hate nesting...
-            if (requisites != null) {
-                for (int i = 0; i < player.getInventory().items.size(); i++) {
-                    ItemStack stackInSlot = player.getInventory().items.get(i);
-                    ItemStack craftingRemaining = stackInSlot.getCraftingRemainingItem();
-
-                    final ItemStack finalItemstack = stackInSlot;
-                    ItemStack requiredItemRemaining = requisites.stream()
-                            .filter(standard -> ItemStack.isSameItemSameTags(standard, finalItemstack))
-                            .findFirst()
-                            .orElse(null);
-
-                    if (requiredItemRemaining == null) continue;
-
-                    int decrement = Math.min(stackInSlot.getCount(), requiredItemRemaining.getCount());
-
-                    if (!stackInSlot.isEmpty()) {
-                        stackInSlot.shrink(decrement);
-                        requiredItemRemaining.shrink(decrement);
-                    }
-
-                    if (craftingRemaining.isEmpty()) continue;
-
-                    if (stackInSlot.isEmpty()) {
-                        player.getInventory().setItem(i, craftingRemaining);
-                    } else if (ItemStack.isSame(stackInSlot, craftingRemaining) && ItemStack.tagMatches(stackInSlot, craftingRemaining)) {
-                        craftingRemaining.grow(stackInSlot.getCount());
-                        player.getInventory().setItem(i, craftingRemaining);
-                    } else if (!player.getInventory().add(craftingRemaining)) {
-                        player.drop(craftingRemaining, false);
-                    }
-                }
-            }
-            if (itemInHand != null && Objects.requireNonNull(itemInHand.getTag()).contains("nobullshipUses", TAG_INT)) {
-                ItemStack toNewStack = itemInHand;
-                if (itemInHand.getCount() > 1) {
-                    itemInHand.shrink(1);
-                    toNewStack = itemInHand.copy();
-                    toNewStack.setCount(1);
-                }
-                //noinspection DataFlowIssue (since toNewStack is based off itemInHand, it is known that it's not null)
-                int uses = toNewStack.getTag().getInt("nobullshipUses");
-                toNewStack.getTag().remove("nobullshipUses");
-                toNewStack.getTag().putInt("nobullshipUses", uses - 1);
-
-                if (toNewStack != itemInHand && !player.getInventory().add(toNewStack)) player.drop(toNewStack, false);
-            }
-        }
+        removeItemsFromPlayer(player, level, context, pos, requisites);
 
         if (nbt == null) nbt = new CompoundTag();
         nbt.putString("id", resultLocation.toString());
@@ -293,6 +237,66 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     public static MultiblockRecipeManager getInstance() {
         if (INSTANCE == null) INSTANCE = new MultiblockRecipeManager();
         return INSTANCE;
+    }
+
+    protected static void removeItemsFromPlayer(@Nullable Player player, Level level, UseOnContext context, BlockPos pos, @Nullable ImmutableList<ItemStack> requisites) {
+        if (player == null || player.isCreative()) return;
+
+        ItemStack itemInHand = context.getItemInHand();
+        if (Objects.requireNonNull(itemInHand.getTag()).contains("nobullshipUses", TAG_INT)) {
+            int uses = itemInHand.getTag().getInt("nobullshipUses");
+            if (uses <= 1) {
+                itemInHand.shrink(1);
+                level.playSound(null, pos, CONSTRUCT_EXPENDED.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+                itemInHand = null;
+            }
+        }
+        if (requisites != null) {
+            for (int i = 0; i < player.getInventory().items.size(); i++) {
+                ItemStack stackInSlot = player.getInventory().items.get(i);
+                ItemStack craftingRemaining = stackInSlot.getCraftingRemainingItem();
+
+                final ItemStack finalItemstack = stackInSlot;
+                ItemStack requiredItemRemaining = requisites.stream()
+                        .filter(standard -> ItemStack.isSameItemSameTags(standard, finalItemstack))
+                        .findFirst()
+                        .orElse(null);
+
+                if (requiredItemRemaining == null) continue;
+
+                int decrement = Math.min(stackInSlot.getCount(), requiredItemRemaining.getCount());
+
+                if (!stackInSlot.isEmpty()) {
+                    stackInSlot.shrink(decrement);
+                    requiredItemRemaining.shrink(decrement);
+                }
+
+                if (craftingRemaining.isEmpty()) continue;
+
+                if (stackInSlot.isEmpty()) {
+                    player.getInventory().setItem(i, craftingRemaining);
+                } else if (ItemStack.isSame(stackInSlot, craftingRemaining) && ItemStack.tagMatches(stackInSlot, craftingRemaining)) {
+                    craftingRemaining.grow(stackInSlot.getCount());
+                    player.getInventory().setItem(i, craftingRemaining);
+                } else if (!player.getInventory().add(craftingRemaining)) {
+                    player.drop(craftingRemaining, false);
+                }
+            }
+        }
+        if (itemInHand != null && Objects.requireNonNull(itemInHand.getTag()).contains("nobullshipUses", TAG_INT)) {
+            ItemStack toNewStack = itemInHand;
+            if (itemInHand.getCount() > 1) {
+                itemInHand.shrink(1);
+                toNewStack = itemInHand.copy();
+                toNewStack.setCount(1);
+            }
+            //noinspection DataFlowIssue (since toNewStack is based off itemInHand, it is known that it's not null)
+            int uses = toNewStack.getTag().getInt("nobullshipUses");
+            toNewStack.getTag().remove("nobullshipUses");
+            toNewStack.getTag().putInt("nobullshipUses", uses - 1);
+
+            if (toNewStack != itemInHand && !player.getInventory().add(toNewStack)) player.drop(toNewStack, false);
+        }
     }
 
     @Override
