@@ -284,6 +284,10 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     }
 
     public void decrementGlobalCooldown() {
+        if (this.globalCooldownTime <= 0) {
+            this.globalCooldownTime = 0;
+            return;
+        }
         this.globalCooldownTime--;
     }
 
