@@ -116,6 +116,7 @@ public class NoBullship
     public void onServerTick(TickEvent.LevelTickEvent event) {
         if (!(event.level instanceof ServerLevel level)) return;
         if (level.dimension() != OVERWORLD) return;
+        if (event.phase != TickEvent.Phase.START) return;
 
         MultiblockRecipeManager.getInstance().decrementGlobalCooldown();
     }
