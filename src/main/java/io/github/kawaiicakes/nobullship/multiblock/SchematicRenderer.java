@@ -207,10 +207,10 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                             BlockState below = AIR.defaultBlockState();
                             if (j + 1 < ySize) below = palette.get((pattern.get(i))[j + 1].charAt(k));
 
-                            if (toLeft.isAir() && direction.equals(workshopFacing.getCounterClockWise())) continue;
-                            if (toRight.isAir() && direction.equals(workshopFacing.getClockWise())) continue;
-                            if (above.isAir() && direction.equals(Direction.UP)) continue;
-                            if (below.isAir() && direction.equals(Direction.DOWN)) continue;
+                            if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender, toLeft)) continue;
+                            if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender, toRight)) continue;
+                            if (direction.equals(Direction.UP) && blockDoesNotOccludeFace(forRender, above)) continue;
+                            if (direction.equals(Direction.DOWN) && blockDoesNotOccludeFace(forRender, below)) continue;
 
                             hiddenFaces.add(direction);
                             continue;
@@ -229,10 +229,10 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                         BlockState behind = AIR.defaultBlockState();
                         if (i + 1 < zSize) behind = palette.get((pattern.get(i + 1))[j].charAt(k));
 
-                        if (toLeft.isAir() && direction.equals(workshopFacing.getCounterClockWise())) continue;
-                        if (toRight.isAir() && direction.equals(workshopFacing.getClockWise())) continue;
-                        if (toFront.isAir() && direction.equals(workshopFacing.getOpposite())) continue;
-                        if (behind.isAir() && direction.equals(workshopFacing)) continue;
+                        if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender, toLeft)) continue;
+                        if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender, toRight)) continue;
+                        if (direction.equals(workshopFacing.getOpposite()) && blockDoesNotOccludeFace(forRender, toFront)) continue;
+                        if (direction.equals(workshopFacing) && blockDoesNotOccludeFace(forRender, behind)) continue;
 
                         hiddenFaces.add(direction);
                     }
@@ -303,6 +303,11 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
             CrashReportCategory.populateBlockDetails(crashreportcategory, pLevel, pPos, pState);
             throw new ReportedException(crashreport);
         }
+    }
+
+    public static boolean blockDoesNotOccludeFace(BlockState occludedBlock, BlockState block) {
+        if (occludedBlock.is(WILDCARD_BLOCK.get()) && block.is(WILDCARD_BLOCK.get())) return false;
+        return block.getRenderShape() == RenderShape.INVISIBLE || block.is(WILDCARD_BLOCK.get());
     }
 
     public record RenderInstructions(ResourceLocation id, Map<Character, BlockState> palette, List<String[]> pattern, Direction direction) {}

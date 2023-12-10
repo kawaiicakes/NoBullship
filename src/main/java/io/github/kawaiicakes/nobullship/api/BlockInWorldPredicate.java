@@ -1,6 +1,5 @@
 package io.github.kawaiicakes.nobullship.api;
 
-import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -13,9 +12,11 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 

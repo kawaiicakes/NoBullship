@@ -17,11 +17,9 @@ import static net.minecraft.world.level.block.state.properties.BlockStatePropert
 
 public class WildcardBlock extends Block {
     public WildcardBlock() {
-        super(BlockBehaviour.Properties.of(Material.GLASS)
+        super(BlockBehaviour.Properties.of(Material.STONE)
                 .noLootTable()
                 .noOcclusion()
-                .isViewBlocking((a,b,c) -> false)
-                .isSuffocating((a,b,c) -> false)
                 .explosionResistance(3600000.0F)
                 .strength(-1.0F)
         );
