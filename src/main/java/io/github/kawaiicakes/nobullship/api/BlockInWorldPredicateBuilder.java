@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.mojang.logging.LogUtils;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,9 +29,16 @@ import java.util.Set;
  * what the possible criteria are.
  */
 public class BlockInWorldPredicateBuilder {
+    // TODO: inspect usages of this class and repair stuff PRN
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    @Nullable
+    protected Block block;
+    @Nullable
     protected BlockState blockState;
+    @Nullable
+    protected TagKey<Block> blockTag;
+    protected boolean exactMatch = false;
     protected Map<Property<?>, Set<Comparable<?>>> properties = new HashMap<>();
     @Nullable
     protected CompoundTag blockEntityNbtData;
@@ -37,27 +46,45 @@ public class BlockInWorldPredicateBuilder {
     protected CompoundTag blockEntityNbtDataStrict;
 
     protected BlockInWorldPredicateBuilder(Block block) {
-        this.blockState = block.defaultBlockState();
+        this.block = block;
+        this.blockState = null;
+        this.blockTag = null;
+    }
+
+    protected BlockInWorldPredicateBuilder(BlockState blockState) {
+        this.block = blockState.getBlock();
+        this.blockState = blockState;
+        this.blockTag = null;
+        this.exactMatch = true;
+    }
+
+    protected BlockInWorldPredicateBuilder(TagKey<Block> blockTag) {
+        this.block = null;
+        this.blockState = null;
+        this.blockTag = blockTag;
     }
 
     /**
-     * Returns a new <code>BlockInWorldPredicateBuilder</code> that, when built, matches if the predicate is the
-     * same type of <code>Block</code> as passed.
+     * Returns a new <code>BlockInWorldPredicateBuilder</code> that matches for the passed <code>Block</code>.
      */
     public static BlockInWorldPredicateBuilder of(Block block) {
         return new BlockInWorldPredicateBuilder(block);
     }
 
     /**
-     * Returns a new <code>BlockInWorldPredicateBuilder</code> that, when built, matches if the predicate is the
-     * same type of <code>Block</code> as passed. Ensure that <code>ForgeRegistries</code> are loaded when this
-     * is called.
-     * @param blockLocation the <code>ResourceLocation</code> of the <code>Block</code> to test against.
+     * Returns a new <code>BlockInWorldPredicateBuilder</code> that looks for an exact match to the
+     * passed <code>BlockState</code>. Using this <code>#of</code> overload will disable the functionality
+     * of the rest of the builder.
      */
-    public static BlockInWorldPredicateBuilder of(ResourceLocation blockLocation) {
-        Block toReturn = ForgeRegistries.BLOCKS.getValue(blockLocation);
-        if (toReturn == null) throw new IllegalArgumentException("Block " + blockLocation + " does not exist!");
-        return new BlockInWorldPredicateBuilder(toReturn);
+    public static BlockInWorldPredicateBuilder of(BlockState blockState) {
+        return new BlockInWorldPredicateBuilder(blockState);
+    }
+
+    /**
+     * Returns a new <code>BlockInWorldPredicateBuilder</code> that looks for a match to a block tag.
+     */
+    public static BlockInWorldPredicateBuilder of(TagKey<Block> blockTag) {
+        return new BlockInWorldPredicateBuilder(blockTag);
     }
 
     @Nullable
@@ -78,8 +105,13 @@ public class BlockInWorldPredicateBuilder {
      * property.
      */
     public BlockInWorldPredicateBuilder requireProperties(Property<?> property, Set<Comparable<?>> value) {
-        if (!this.blockState.getValues().containsKey(property)) throw new IllegalArgumentException(property + " does not belong to " + this.blockState + "!");
-        if (value.stream().anyMatch(comparable -> !property.getPossibleValues().contains(comparable))) throw new IllegalArgumentException(value + " cannot be associated with " + property + "!");
+        if (this.exactMatch) throw new UnsupportedOperationException("This builder is already looking for an exact match to the passed BlockState!");
+        if (this.block != null) {
+            if (!this.block.defaultBlockState().getValues().containsKey(property))
+                throw new IllegalArgumentException(property + " does not belong to " + this.block.defaultBlockState() + "!");
+            if (value.stream().anyMatch(comparable -> !property.getPossibleValues().contains(comparable)))
+                throw new IllegalArgumentException(value + " cannot be associated with " + property + "!");
+        }
 
         this.properties.putIfAbsent(property, new HashSet<>());
         if (this.properties.containsKey(property)) {
@@ -95,8 +127,13 @@ public class BlockInWorldPredicateBuilder {
      * property.
      */
     public BlockInWorldPredicateBuilder requireProperty(Property<?> property, Comparable<?> value) {
-        if (!this.blockState.getValues().containsKey(property)) throw new IllegalArgumentException(property + " does not belong to " + this.blockState + "!");
-        if (!property.getPossibleValues().contains(value)) throw new IllegalArgumentException(value + " cannot be associated with " + property + "!");
+        if (this.exactMatch) throw new UnsupportedOperationException("This builder is already looking for an exact match to the passed BlockState!");
+        if (this.block != null) {
+            if (!this.block.defaultBlockState().getValues().containsKey(property))
+                throw new IllegalArgumentException(property + " does not belong to " + this.block.defaultBlockState() + "!");
+            if (!property.getPossibleValues().contains(value))
+                throw new IllegalArgumentException(value + " cannot be associated with " + property + "!");
+        }
 
         this.properties.putIfAbsent(property, new HashSet<>());
         if (this.properties.containsKey(property)) {
@@ -111,7 +148,8 @@ public class BlockInWorldPredicateBuilder {
      * The passed NBT data will be merged into the existing.
      */
     public BlockInWorldPredicateBuilder requireStrictNbt(CompoundTag tag) {
-        if (!(this.blockState.getBlock() instanceof EntityBlock)) throw new IllegalArgumentException(this.blockState + " does not have a block entity, so it cannot have NBT data!");
+        if (this.exactMatch) throw new UnsupportedOperationException("This builder is already looking for an exact match to the passed BlockState!");
+        if (!(this.block instanceof EntityBlock)) throw new IllegalArgumentException(this.block + " cannot have a block entity, so it cannot have NBT data!");
         if (this.blockEntityNbtDataStrict == null) this.blockEntityNbtDataStrict = new CompoundTag();
         this.blockEntityNbtDataStrict.merge(tag);
         return this;
@@ -126,7 +164,8 @@ public class BlockInWorldPredicateBuilder {
      * of the contents.
      */
     public BlockInWorldPredicateBuilder requireNbt(CompoundTag tag) {
-        if (!(this.blockState.getBlock() instanceof EntityBlock)) throw new IllegalArgumentException(this.blockState + " does not have a block entity, so it cannot have NBT data!");
+        if (this.exactMatch) throw new UnsupportedOperationException("This builder is already looking for an exact match to the passed BlockState!");
+        if (!(this.block instanceof EntityBlock)) throw new IllegalArgumentException(this.block + " cannot have a block entity, so it cannot have NBT data!");
         if (this.blockEntityNbtData == null) this.blockEntityNbtData = new CompoundTag();
         this.blockEntityNbtData.merge(tag);
         return this;
@@ -138,13 +177,21 @@ public class BlockInWorldPredicateBuilder {
      * a requisite.
      */
     public BlockInWorldPredicate build() {
-        return new BlockInWorldPredicate(this.blockState, this.properties, this.blockEntityNbtData, this.blockEntityNbtDataStrict);
+        Block blockToArg = this.block;
+        BlockState stateToArg = null;
+        if (this.exactMatch) stateToArg = this.blockState;
+        else if (this.blockTag != null) blockToArg = null;
+        return new BlockInWorldPredicate(blockToArg, stateToArg, this.blockTag, this.properties, this.blockEntityNbtData, this.blockEntityNbtDataStrict);
     }
 
     /**
      * Returns the default <code>BlockState</code> of the <code>Block</code> passed to this builder.
+     * Returns <code>null</code> if this builder matches for a block tag.
      */
+    @Nullable
     public BlockState getDefaultBlockState() {
+        if (this.blockTag != null) return null;
+        // TODO: replace the intended functionality of this method
         return this.blockState;
     }
 
@@ -162,26 +209,40 @@ public class BlockInWorldPredicateBuilder {
         return this.properties.containsKey(property);
     }
 
+    public boolean isExactMatch() {
+        return this.exactMatch;
+    }
+
     @Nullable
     public CompoundTag toNbt() {
         CompoundTag toReturn = new CompoundTag();
 
-        Tag tag;
-        try {
-            tag = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, this.blockState).getOrThrow(false, (error) -> {
-            });
-        } catch (RuntimeException e) {
-            LOGGER.error("BlockState could not be serialized to NBT!");
-            return null;
+        if (this.exactMatch) {
+            Tag tag;
+            try {
+                tag = BlockState.CODEC.encodeStart(NbtOps.INSTANCE, this.blockState).getOrThrow(false, (error) -> {
+                });
+            } catch (RuntimeException e) {
+                LOGGER.error("BlockState could not be serialized to NBT!");
+                return null;
+            }
+
+            if (!(tag instanceof CompoundTag blockNbt)) {
+                LOGGER.error("BlockState could not be serialized to a CompoundTag!");
+                return null;
+            }
+            toReturn.put("blockState", blockNbt);
+        } else if (this.blockTag == null) {
+            if (this.block == null) {
+                LOGGER.error("Block in builder is null despite no block tag existing! If you are seeing this, report it to the author!");
+                return null;
+            }
+            toReturn.putString("block", this.block.toString());
+        } else {
+            toReturn.putString("blockTag", this.blockTag.location().toString());
         }
 
-        if (!(tag instanceof CompoundTag blockNbt)) {
-            LOGGER.error("BlockState could not be serialized to a CompoundTag!");
-            return null;
-        }
-        toReturn.put("blockState", blockNbt);
-
-        if (!this.properties.isEmpty()) {
+        if (!this.properties.isEmpty() && !this.exactMatch) {
             ListTag propertiesNbt = new ListTag();
 
             for (Map.Entry<Property<?>, Set<Comparable<?>>> entry : this.properties.entrySet()) {
@@ -204,6 +265,7 @@ public class BlockInWorldPredicateBuilder {
             toReturn.put("properties", propertiesNbt);
         }
 
+        if (this.exactMatch) return toReturn;
         if (this.blockEntityNbtData != null) toReturn.put("nbt", this.blockEntityNbtData);
         if (this.blockEntityNbtDataStrict != null) toReturn.put("nbt_strict", this.blockEntityNbtDataStrict);
 
@@ -212,15 +274,33 @@ public class BlockInWorldPredicateBuilder {
 
     @Nullable
     public static BlockInWorldPredicateBuilder fromNbt(CompoundTag nbt) {
-        BlockState blockstate;
-        try {
-            blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, nbt.get("blockState")).getOrThrow(false, null);
-        } catch (RuntimeException e) {
-            LOGGER.error("Error deserializing BlockInWorldPredicateBuilder from NBT!", e);
-            return null;
-        }
+        BlockInWorldPredicateBuilder toReturn;
+        Block block1 = null;
+        if (!nbt.getCompound("blockState").isEmpty()) {
+            try {
+                BlockState blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, nbt.get("blockState")).getOrThrow(false, null);
+                toReturn = BlockInWorldPredicateBuilder.of(blockstate);
+            } catch (RuntimeException e) {
+                LOGGER.error("Error deserializing BlockInWorldPredicateBuilder from NBT!", e);
+                return null;
+            }
+        } else if (nbt.getString("blockTag").isEmpty()) {
+            String blockString = nbt.getString("block");
+            if (blockString.isEmpty()) {
+                LOGGER.error("Block in string is empty despite no block tag existing! If you are seeing this, report it to the author!");
+                return null;
+            }
+            Block block2 = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(blockString));
+            if (block2 == null) {
+                LOGGER.error("No such block '{}' exists!", blockString);
+                return null;
+            }
 
-        BlockInWorldPredicateBuilder toReturn = BlockInWorldPredicateBuilder.of(blockstate.getBlock());
+            toReturn = BlockInWorldPredicateBuilder.of(block2);
+            block1 = block2;
+        } else {
+            toReturn = BlockInWorldPredicateBuilder.of(BlockTags.create(new ResourceLocation(nbt.getString("blockTag"))));
+        }
 
         try {
             if (nbt.get("properties") instanceof ListTag propertiesTag) {
@@ -228,23 +308,28 @@ public class BlockInWorldPredicateBuilder {
                     CompoundTag keyPair = (CompoundTag) keyPairTag;
                     CompoundTag propertyTag = ((CompoundTag) keyPairTag).getCompound("property");
 
-                    Property<?> propertyForBlock = blockstate.getProperties()
-                            .stream()
-                            .filter(property -> property.getName().equals(propertyTag.getString("name"))
-                                    && property.getValueClass().getSimpleName().equals(propertyTag.getString("type")))
-                            .findFirst()
-                            .orElse(null);
+                    // TODO: cache values as Strings in builder; then cast. This should allow for an easier time de/serializing in a lot of contexts
+                    // TODO: this does not work for block tags. repair after doing the above
+                    if (block1 != null) {
+                        Property<?> propertyForBlock = block1.defaultBlockState().getProperties()
+                                .stream()
+                                .filter(property -> property.getName().equals(propertyTag.getString("name"))
+                                        && property.getValueClass().getSimpleName().equals(propertyTag.getString("type")))
+                                .findFirst()
+                                .orElse(null);
 
-                    if (propertyForBlock == null) throw new IllegalArgumentException("Passed NBT does not contain valid properties!");
+                        if (propertyForBlock == null)
+                            throw new IllegalArgumentException("Passed NBT does not contain valid properties!");
 
-                    ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
-                    Set<Comparable<?>> valuesSet = new HashSet<>(valuesList.size());
-                    for (Tag string : valuesList) {
-                        Comparable<?> comparable = propertyForBlock.getValue(string.getAsString()).orElseThrow();
-                        valuesSet.add(comparable);
+                        ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
+                        Set<Comparable<?>> valuesSet = new HashSet<>(valuesList.size());
+                        for (Tag string : valuesList) {
+                            Comparable<?> comparable = propertyForBlock.getValue(string.getAsString()).orElseThrow();
+                            valuesSet.add(comparable);
+                        }
+
+                        toReturn.requireProperties(propertyForBlock, valuesSet);
                     }
-
-                    toReturn.requireProperties(propertyForBlock, valuesSet);
                 }
             }
         } catch (RuntimeException e) {

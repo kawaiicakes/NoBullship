@@ -6,7 +6,9 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -21,6 +23,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARDINAL;
+import static net.minecraft.world.level.block.Blocks.AIR;
 
 /**
  * This is a <code>Predicate</code> implementation allowing for dynamic checking of rotations in directional
@@ -28,8 +31,7 @@ import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARD
  * from the original.
  */
 public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
-    @SuppressWarnings("DataFlowIssue")
-    public static final BlockInWorldPredicate WILDCARD = new BlockInWorldPredicate(null, null, null, null) {
+    public static final BlockInWorldPredicate WILDCARD = new BlockInWorldPredicate(AIR, null, null, null, null, null) {
         @Override
         public BlockInWorldPredicate setFacing(Direction direction) {
             return this;
@@ -42,8 +44,13 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
     };
 
     protected Direction facing;
-    protected final BlockState block;
     @Nullable
+    protected final Block block;
+    @Nullable
+    protected final BlockState blockState;
+    @Nullable
+    protected final TagKey<Block> blockTag;
+    @Nullable // TODO: replace set in map with set of strings pursuant to BlockInWorldPredicateBuilder#L302
     protected final Map<Property<?>, Set<Comparable<?>>> properties;
     @Nullable
     protected final CompoundTag blockEntityNbtData;
@@ -54,9 +61,13 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
      * Creates a new <code>BlockInWorldPredicate</code> facing the given direction. Any directional properties
      * will be rotated accordingly for the test.
      */
-    protected BlockInWorldPredicate(BlockState block, @Nullable Map<Property<?>, Set<Comparable<?>>> properties,
+    protected BlockInWorldPredicate(@Nullable Block block, @Nullable BlockState blockState, @Nullable TagKey<Block> blockTag, @Nullable Map<Property<?>, Set<Comparable<?>>> properties,
                                     @Nullable CompoundTag blockEntityNbtData, @Nullable CompoundTag blockEntityNbtDataStrict) {
+        if (block == null && blockState == null && blockTag == null) throw new IllegalArgumentException("The block, blockstate, and block tag are all null!");
+
         this.block = block;
+        this.blockState = blockState;
+        this.blockTag = blockTag;
         this.properties = properties;
         this.blockEntityNbtData = blockEntityNbtData;
         this.blockEntityNbtDataStrict = blockEntityNbtDataStrict;
@@ -65,13 +76,15 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
 
     public BlockInWorldPredicate setFacing(Direction direction) {
         if (!Arrays.asList(CARDINAL).contains(direction)) throw new IllegalArgumentException(direction + " is an invalid Direction!");
+        if (this.blockState != null) return this;
         this.facing = direction;
         return this;
     }
 
     @Override
     public boolean test(BlockInWorld blockInWorld) {
-        Predicate<BlockInWorld> basicTest = BlockInWorld.hasState(state -> state.is(this.block.getBlock()));
+        Predicate<BlockInWorld> basicTest = this.getBasic();
+        if (this.blockState != null) return basicTest.test(blockInWorld);
         Predicate<BlockInWorld> propertiesPredicate = checkProperties(this.properties, this.facing);
         Predicate<BlockInWorld> nbtPredicateStrict = checkNbtMatch(this.blockEntityNbtDataStrict);
         Predicate<BlockInWorld> nbtPredicate = checkSoftNbtMatch(this.blockEntityNbtData);
@@ -80,6 +93,13 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
                 && propertiesPredicate.test(blockInWorld)
                 && nbtPredicateStrict.test(blockInWorld)
                 && nbtPredicate.test(blockInWorld);
+    }
+
+    protected Predicate<BlockInWorld> getBasic() {
+        if (this.block != null) return BlockInWorld.hasState(state -> state.is(this.block));
+        else if (this.blockState != null) return (blockInWorld) -> blockInWorld.getState().equals(this.blockState);
+        else //noinspection DataFlowIssue (making it to here implies blockTag is not null)
+            return (blockInWorld) -> blockInWorld.getState().is(this.blockTag);
     }
 
     protected static Predicate<BlockInWorld> checkProperties(@Nullable Map<Property<?>, Set<Comparable<?>>> properties, Direction facing) {
