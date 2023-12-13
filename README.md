@@ -99,7 +99,7 @@ Anyhow, don't expect the structure of data files for this mod to change. I will 
 
 # 💗 Credits & Thanks
 
-The models and textures were made by me.
+The models and textures were made by me. Massive thanks to [Aspennly](https://twitter.com/Aspennly_) who made the very pretty icon for me!
 
 Credit to **blackbirdantlion** on Discord for the lovely GUI texture. I've modified it a bit as I am reusing it from another project I am working on, which I have permission to do. You may find his Twitter [here](https://twitter.com/BlackbirdieAnt).
 
