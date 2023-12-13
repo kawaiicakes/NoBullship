@@ -6,18 +6,19 @@ import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * The <code>BlockPredicateBuilder</code> allows easy instantiation of a <code>Predicate{@literal <BlockInWorld>}</code>
@@ -248,9 +249,47 @@ public class BlockInWorldPredicateBuilder {
             for (Map.Entry<Property<?>, Set<Comparable<?>>> entry : this.properties.entrySet()) {
                 CompoundTag keyPairNbt = new CompoundTag();
 
+                Property<?> property = entry.getKey();
+                String canonicalPropertyName = entry.getKey().getClass().getCanonicalName();
+
                 CompoundTag propertyNbt = new CompoundTag();
-                propertyNbt.putString("name", entry.getKey().getName());
-                propertyNbt.putString("type", entry.getKey().getValueClass().getSimpleName());
+                propertyNbt.putString("property_name", entry.getKey().getName());
+                propertyNbt.putString("qualified_name", canonicalPropertyName);
+                propertyNbt.putString("value_type", entry.getKey().getValueClass().getCanonicalName());
+
+                try {
+                    switch (canonicalPropertyName) {
+                        case "net.minecraft.world.level.block.state.properties.IntegerProperty" -> {
+                            IntegerProperty integerProperty = (IntegerProperty) property;
+                            propertyNbt.putInt("max", integerProperty.getPossibleValues().stream().max(Comparator.naturalOrder()).orElseThrow());
+                            propertyNbt.putInt("min", integerProperty.getPossibleValues().stream().min(Comparator.naturalOrder()).orElseThrow());
+                        }
+                        case "net.minecraft.world.level.block.state.properties.BooleanProperty" -> {
+                        }
+                        case "net.minecraft.world.level.block.state.properties.EnumProperty", "net.minecraft.world.level.block.state.properties.DirectionProperty" -> {
+                            EnumProperty<?> enumProperty = (EnumProperty<?>) property;
+                            ListTag validValues = new ListTag();
+                            for (StringRepresentable value : enumProperty.getPossibleValues()) {
+                                validValues.add(StringTag.valueOf(value.getSerializedName()));
+                            }
+                            propertyNbt.put("valid_values", validValues);
+                        }
+                        default -> {
+                            LOGGER.error("Unrecognized Property instance {} failed to be serialized to NBT!", canonicalPropertyName);
+                            return null;
+                        }
+                    }
+                } catch (ClassCastException e) {
+                    LOGGER.error("Class cast exception while handling property: {}!", e.getMessage());
+                    return null;
+                } catch (NoSuchElementException e) {
+                    LOGGER.error("No such integer for max/min in IntegerProperty exists!", e);
+                    return null;
+                } catch (RuntimeException e) {
+                    LOGGER.error("Error during property serialization!", e);
+                    return null;
+                }
+
                 keyPairNbt.put("property", propertyNbt);
 
                 ListTag valuesNbt = new ListTag();
@@ -273,13 +312,13 @@ public class BlockInWorldPredicateBuilder {
     }
 
     @Nullable
-    public static BlockInWorldPredicateBuilder fromNbt(CompoundTag nbt) {
+    public static <T extends Enum<T> & StringRepresentable> BlockInWorldPredicateBuilder fromNbt(CompoundTag nbt) {
         BlockInWorldPredicateBuilder toReturn;
-        Block block1 = null;
         if (!nbt.getCompound("blockState").isEmpty()) {
             try {
                 BlockState blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, nbt.get("blockState")).getOrThrow(false, null);
-                toReturn = BlockInWorldPredicateBuilder.of(blockstate);
+                // FIXME: exact matches get to skip all the other stuff except for NBT. NBT isn't normally serialized in the blockstate
+                return BlockInWorldPredicateBuilder.of(blockstate);
             } catch (RuntimeException e) {
                 LOGGER.error("Error deserializing BlockInWorldPredicateBuilder from NBT!", e);
                 return null;
@@ -297,7 +336,6 @@ public class BlockInWorldPredicateBuilder {
             }
 
             toReturn = BlockInWorldPredicateBuilder.of(block2);
-            block1 = block2;
         } else {
             toReturn = BlockInWorldPredicateBuilder.of(BlockTags.create(new ResourceLocation(nbt.getString("blockTag"))));
         }
@@ -308,32 +346,64 @@ public class BlockInWorldPredicateBuilder {
                     CompoundTag keyPair = (CompoundTag) keyPairTag;
                     CompoundTag propertyTag = ((CompoundTag) keyPairTag).getCompound("property");
 
-                    // TODO: cache values as Strings in builder; then cast. This should allow for an easier time de/serializing in a lot of contexts
-                    // TODO: this does not work for block tags. repair after doing the above
-                    if (block1 != null) {
-                        Property<?> propertyForBlock = block1.defaultBlockState().getProperties()
-                                .stream()
-                                .filter(property -> property.getName().equals(propertyTag.getString("name"))
-                                        && property.getValueClass().getSimpleName().equals(propertyTag.getString("type")))
-                                .findFirst()
-                                .orElse(null);
+                    String propertyName = propertyTag.getString("property_name");
+                    String propertyClass = propertyTag.getString("qualified_name");
+                    String valueClass = propertyTag.getString("value_type");
 
-                        if (propertyForBlock == null)
-                            throw new IllegalArgumentException("Passed NBT does not contain valid properties!");
-
-                        ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
-                        Set<Comparable<?>> valuesSet = new HashSet<>(valuesList.size());
-                        for (Tag string : valuesList) {
-                            Comparable<?> comparable = propertyForBlock.getValue(string.getAsString()).orElseThrow();
-                            valuesSet.add(comparable);
-                        }
-
-                        toReturn.requireProperties(propertyForBlock, valuesSet);
+                    if (propertyName.isEmpty() || propertyClass.isEmpty() || valueClass.isEmpty()) {
+                        LOGGER.error("Information on property name, its class, or the value's class is missing!");
+                        return null;
                     }
+
+                    // Caching sets of strings proved harder than anticipated. I found a way around it though that I am
+                    // more satisfied with.
+                    Property<?> propertyForBlock;
+
+                    switch (propertyClass) {
+                        case "net.minecraft.world.level.block.state.properties.IntegerProperty" ->
+                                propertyForBlock = IntegerProperty.create(propertyName, propertyTag.getInt("min"), propertyTag.getInt("max"));
+                        case "net.minecraft.world.level.block.state.properties.BooleanProperty" ->
+                                propertyForBlock = BooleanProperty.create(propertyName);
+                        case "net.minecraft.world.level.block.state.properties.EnumProperty", "net.minecraft.world.level.block.state.properties.DirectionProperty" -> {
+                            ListTag validValuesTag = propertyTag.getList("valid_values", Tag.TAG_STRING);
+                            //noinspection unchecked
+                            Class<T> enumClass = (Class<T>) Class.forName(valueClass);
+                            Collection<T> enums = new ArrayList<>(validValuesTag.size());
+                            for (Tag stringTag : validValuesTag) {
+                                enums.add(Enum.valueOf(enumClass, stringTag.getAsString().toUpperCase(Locale.ROOT)));
+                            }
+
+                            propertyForBlock = EnumProperty.create(propertyName, enumClass, enums);
+                        }
+                        default -> {
+                            LOGGER.error("Unrecognized Property instance {} failed to be deserialized!", propertyClass);
+                            return null;
+                        }
+                    }
+
+                    ListTag valuesList = keyPair.getList("values", Tag.TAG_STRING);
+                    Set<Comparable<?>> valuesSet = new HashSet<>(valuesList.size());
+                    for (Tag string : valuesList) {
+                        Comparable<?> comparable = propertyForBlock.getValue(string.getAsString()).orElseThrow();
+                        valuesSet.add(comparable);
+                    }
+
+                    toReturn.requireProperties(propertyForBlock, valuesSet);
                 }
             }
+        } catch (ClassNotFoundException e) {
+            LOGGER.error("Class in NBT does not exist: {}!", e.getMessage());
+            return null;
+        } catch (ClassCastException e) {
+            LOGGER.error("Class cast exception during property deserialization!", e);
+            return null;
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("No such enum exists!", e);
+            LOGGER.error(e.getMessage());
+            return null;
         } catch (RuntimeException e) {
             LOGGER.error("BlockInWorldPredicateBuilder contains malformed property definition!", e);
+            LOGGER.error(e.getMessage());
             return null;
         }
 
