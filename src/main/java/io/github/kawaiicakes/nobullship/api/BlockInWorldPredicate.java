@@ -50,7 +50,7 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
     protected final BlockState blockState;
     @Nullable
     protected final TagKey<Block> blockTag;
-    @Nullable // TODO: replace set in map with set of strings pursuant to BlockInWorldPredicateBuilder#L302
+    @Nullable
     protected final Map<Property<?>, Set<Comparable<?>>> properties;
     @Nullable
     protected final CompoundTag blockEntityNbtData;
@@ -84,11 +84,13 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
     @Override
     public boolean test(BlockInWorld blockInWorld) {
         Predicate<BlockInWorld> basicTest = this.getBasic();
-        if (this.blockState != null) return basicTest.test(blockInWorld);
         Predicate<BlockInWorld> propertiesPredicate = checkProperties(this.properties, this.facing);
         Predicate<BlockInWorld> nbtPredicateStrict = checkNbtMatch(this.blockEntityNbtDataStrict);
         Predicate<BlockInWorld> nbtPredicate = checkSoftNbtMatch(this.blockEntityNbtData);
 
+        if (this.blockState != null) return basicTest.test(blockInWorld)
+                && nbtPredicateStrict.test(blockInWorld)
+                && nbtPredicate.test(blockInWorld);
         return basicTest.test(blockInWorld)
                 && propertiesPredicate.test(blockInWorld)
                 && nbtPredicateStrict.test(blockInWorld)

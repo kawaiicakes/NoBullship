@@ -149,7 +149,6 @@ public class BlockInWorldPredicateBuilder {
      * The passed NBT data will be merged into the existing.
      */
     public BlockInWorldPredicateBuilder requireStrictNbt(CompoundTag tag) {
-        if (this.exactMatch) throw new UnsupportedOperationException("This builder is already looking for an exact match to the passed BlockState!");
         if (!(this.block instanceof EntityBlock)) throw new IllegalArgumentException(this.block + " cannot have a block entity, so it cannot have NBT data!");
         if (this.blockEntityNbtDataStrict == null) this.blockEntityNbtDataStrict = new CompoundTag();
         this.blockEntityNbtDataStrict.merge(tag);
@@ -165,7 +164,6 @@ public class BlockInWorldPredicateBuilder {
      * of the contents.
      */
     public BlockInWorldPredicateBuilder requireNbt(CompoundTag tag) {
-        if (this.exactMatch) throw new UnsupportedOperationException("This builder is already looking for an exact match to the passed BlockState!");
         if (!(this.block instanceof EntityBlock)) throw new IllegalArgumentException(this.block + " cannot have a block entity, so it cannot have NBT data!");
         if (this.blockEntityNbtData == null) this.blockEntityNbtData = new CompoundTag();
         this.blockEntityNbtData.merge(tag);
@@ -304,7 +302,6 @@ public class BlockInWorldPredicateBuilder {
             toReturn.put("properties", propertiesNbt);
         }
 
-        if (this.exactMatch) return toReturn;
         if (this.blockEntityNbtData != null) toReturn.put("nbt", this.blockEntityNbtData);
         if (this.blockEntityNbtDataStrict != null) toReturn.put("nbt_strict", this.blockEntityNbtDataStrict);
 
@@ -317,7 +314,6 @@ public class BlockInWorldPredicateBuilder {
         if (!nbt.getCompound("blockState").isEmpty()) {
             try {
                 BlockState blockstate = BlockState.CODEC.parse(NbtOps.INSTANCE, nbt.get("blockState")).getOrThrow(false, null);
-                // FIXME: exact matches get to skip all the other stuff except for NBT. NBT isn't normally serialized in the blockstate
                 return BlockInWorldPredicateBuilder.of(blockstate);
             } catch (RuntimeException e) {
                 LOGGER.error("Error deserializing BlockInWorldPredicateBuilder from NBT!", e);
@@ -341,7 +337,7 @@ public class BlockInWorldPredicateBuilder {
         }
 
         try {
-            if (nbt.get("properties") instanceof ListTag propertiesTag) {
+            if (!toReturn.isExactMatch() && nbt.get("properties") instanceof ListTag propertiesTag) {
                 for (Tag keyPairTag : propertiesTag) {
                     CompoundTag keyPair = (CompoundTag) keyPairTag;
                     CompoundTag propertyTag = ((CompoundTag) keyPairTag).getCompound("property");
