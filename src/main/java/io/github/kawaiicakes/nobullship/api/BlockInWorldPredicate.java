@@ -9,6 +9,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
@@ -23,7 +24,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARDINAL;
-import static net.minecraft.world.level.block.Blocks.AIR;
 
 /**
  * This is a <code>Predicate</code> implementation allowing for dynamic checking of rotations in directional
@@ -31,7 +31,7 @@ import static net.minecraft.world.level.block.Blocks.AIR;
  * from the original.
  */
 public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
-    public static final BlockInWorldPredicate WILDCARD = new BlockInWorldPredicate(AIR, null, null, null, null, null) {
+    public static final BlockInWorldPredicate WILDCARD = new BlockInWorldPredicate(Blocks.AIR, null, null, null, null, null) {
         @Override
         public BlockInWorldPredicate setFacing(Direction direction) {
             return this;
@@ -40,6 +40,18 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
         @Override
         public boolean test(BlockInWorld blockInWorld) {
             return !blockInWorld.getState().isAir();
+        }
+    };
+
+    public static final BlockInWorldPredicate AIR = new BlockInWorldPredicate(Blocks.AIR, null, null, null, null, null) {
+        @Override
+        public BlockInWorldPredicate setFacing(Direction direction) {
+            return this;
+        }
+
+        @Override
+        public boolean test(BlockInWorld blockInWorld) {
+            return blockInWorld.getState().isAir();
         }
     };
 

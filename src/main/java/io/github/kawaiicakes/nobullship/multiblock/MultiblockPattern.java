@@ -230,7 +230,7 @@ public class MultiblockPattern extends BlockPattern {
                     if (stringAt.equals("$")) {
                         blockPredicate = BlockInWorldPredicate.WILDCARD;
                     } else if (stringAt.equals(" ")) {
-                        blockPredicate = BlockInWorldPredicateBuilder.of(AIR).build();
+                        blockPredicate = BlockInWorldPredicate.AIR;
                     } else {
                         blockPredicate = paletteMap.get(stringAt).build();
                     }
