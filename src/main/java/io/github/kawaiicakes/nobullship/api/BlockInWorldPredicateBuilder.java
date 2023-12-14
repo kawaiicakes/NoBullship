@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.api;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
@@ -183,13 +184,23 @@ public class BlockInWorldPredicateBuilder {
     }
 
     /**
-     * Returns the default <code>BlockState</code> of the <code>Block</code> passed to this builder.
+     * Returns the <code>BlockState</code> associated with this builder.
      * Returns <code>null</code> if this builder matches for a block tag.
      */
     @Nullable
-    public BlockState getDefaultBlockState() {
+    public BlockState getBlockState() {
         if (this.blockTag != null) return null;
         return this.blockState;
+    }
+
+    @Nullable
+    public String getBlockTagAsString() {
+        return this.blockTag == null ? null : this.blockTag.toString();
+    }
+
+    @Nullable
+    public String getBlockAsString() {
+        return this.block == null ? null : this.block.toString();
     }
 
     /**
@@ -199,6 +210,109 @@ public class BlockInWorldPredicateBuilder {
         if (!this.properties.containsKey(property)) throw new IllegalArgumentException("No such property " + property + " exists for this builder!");
         JsonArray toReturn = new JsonArray();
         this.properties.get(property).forEach(value -> toReturn.add(value.toString()));
+        return toReturn;
+    }
+
+    // TODO: extract de/serialization for this builder to inside of this class.
+    @Nullable
+    public JsonObject getPropertiesAsJson() {
+        JsonObject toReturn = new JsonObject();
+        if (this.exactMatch) return toReturn;
+
+        if (this.block != null) {
+            for (Map.Entry<Property<?>, Set<Comparable<?>>> propertyEntry : this.properties.entrySet()) {
+                Property<?> property = propertyEntry.getKey();
+                String canonicalPropertyName = propertyEntry.getKey().getClass().getCanonicalName();
+
+                toReturn.addProperty("property_name", propertyEntry.getKey().getName());
+                toReturn.addProperty("qualified_name", canonicalPropertyName);
+                toReturn.addProperty("value_type", propertyEntry.getKey().getValueClass().getCanonicalName());
+
+                try {
+                    switch (canonicalPropertyName) {
+                        case "net.minecraft.world.level.block.state.properties.IntegerProperty" -> {
+                            IntegerProperty integerProperty = (IntegerProperty) property;
+                            toReturn.addProperty("max", integerProperty.getPossibleValues().stream().max(Comparator.naturalOrder()).orElseThrow());
+                            toReturn.addProperty("min", integerProperty.getPossibleValues().stream().min(Comparator.naturalOrder()).orElseThrow());
+                        }
+                        case "net.minecraft.world.level.block.state.properties.BooleanProperty" -> {
+                        }
+                        case "net.minecraft.world.level.block.state.properties.EnumProperty", "net.minecraft.world.level.block.state.properties.DirectionProperty" -> {
+                            EnumProperty<?> enumProperty = (EnumProperty<?>) property;
+                            JsonArray validValues = new JsonArray(enumProperty.getPossibleValues().size());
+                            for (StringRepresentable value : enumProperty.getPossibleValues()) {
+                                validValues.add(value.getSerializedName());
+                            }
+                            toReturn.add("valid_values", validValues);
+                        }
+                        default -> {
+                            LOGGER.error("Unrecognized Property instance {} failed to be serialized to NBT!", canonicalPropertyName);
+                            return null;
+                        }
+                    }
+                } catch (ClassCastException e) {
+                    LOGGER.error("Class cast exception while handling property: {}!", e.getMessage());
+                    return null;
+                } catch (NoSuchElementException e) {
+                    LOGGER.error("No such integer for max/min in IntegerProperty exists!", e);
+                    return null;
+                } catch (RuntimeException e) {
+                    LOGGER.error("Error during property serialization!", e);
+                    return null;
+                }
+            }
+        } else {
+            for (Map.Entry<Property<?>, Set<Comparable<?>>> propertyEntry : this.properties.entrySet()) {
+                JsonObject propertyDefinition = new JsonObject();
+                JsonArray arrayValues = new JsonArray();
+                Property<?> property = propertyEntry.getKey();
+                String canonicalPropertyName = propertyEntry.getKey().getClass().getCanonicalName();
+
+                toReturn.addProperty("property_name", propertyEntry.getKey().getName());
+                toReturn.addProperty("qualified_name", canonicalPropertyName);
+                toReturn.addProperty("value_type", propertyEntry.getKey().getValueClass().getCanonicalName());
+
+                try {
+                    switch (canonicalPropertyName) {
+                        case "net.minecraft.world.level.block.state.properties.IntegerProperty" -> {
+                            IntegerProperty integerProperty = (IntegerProperty) property;
+                            propertyDefinition.addProperty("type", "int");
+                            propertyDefinition.addProperty("max", integerProperty.getPossibleValues().stream().max(Comparator.naturalOrder()).orElseThrow());
+                            propertyDefinition.addProperty("min", integerProperty.getPossibleValues().stream().min(Comparator.naturalOrder()).orElseThrow());
+                        }
+                        case "net.minecraft.world.level.block.state.properties.BooleanProperty" -> {
+                            propertyDefinition.addProperty("type", "boolean");
+                        }
+                        // TODO
+                        case "net.minecraft.world.level.block.state.properties.EnumProperty", "net.minecraft.world.level.block.state.properties.DirectionProperty" -> {
+                            EnumProperty<?> enumProperty = (EnumProperty<?>) property;
+                            JsonArray validValues = new JsonArray(enumProperty.getPossibleValues().size());
+                            for (StringRepresentable value : enumProperty.getPossibleValues()) {
+                                validValues.add(value.getSerializedName());
+                            }
+                            toReturn.add("valid_values", validValues);
+                        }
+                        default -> {
+                            LOGGER.error("Unrecognized Property instance {} failed to be serialized to NBT!", canonicalPropertyName);
+                            return null;
+                        }
+                    }
+                } catch (ClassCastException e) {
+                    LOGGER.error("Class cast exception while handling property: {}!", e.getMessage());
+                    return null;
+                } catch (NoSuchElementException e) {
+                    LOGGER.error("No such integer for max/min in IntegerProperty exists!", e);
+                    return null;
+                } catch (RuntimeException e) {
+                    LOGGER.error("Error during property serialization!", e);
+                    return null;
+                }
+
+                toReturn.add("property_definition", propertyDefinition);
+                toReturn.add("values", arrayValues);
+            }
+        }
+
         return toReturn;
     }
 

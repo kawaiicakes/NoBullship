@@ -13,9 +13,9 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
-import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static net.minecraft.world.level.block.Blocks.AIR;
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
 public class MultiblockRecipeBuilder extends BlockPatternBuilder {
@@ -44,7 +43,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * @param nbt the <code>CompoundTag</code> NBT data to be given to the spawned entity.
      */
     protected MultiblockRecipeBuilder(ResourceLocation result, @Nullable CompoundTag nbt) {
-        this.lookup.put(' ', BlockInWorldPredicateBuilder.of(AIR).build());
+        this.lookup.put(' ', BlockInWorldPredicate.AIR);
         this.lookup.put('$', BlockInWorldPredicate.WILDCARD);
         this.result = result;
         this.nbt = nbt;
@@ -108,7 +107,8 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     public MultiblockPattern build() {
         return new MultiblockPattern(
                 this.createPattern(),
-                this.lookupSimple.values().stream().map(BlockInWorldPredicateBuilder::getDefaultBlockState).toList(),
+                // FIXME
+                this.lookupSimple.values().stream().map(BlockInWorldPredicateBuilder::getBlockState).toList(),
                 this.totalBlocks(),
                 this.serializePatternNbt()
         );
@@ -149,7 +149,8 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
         totalCount.entrySet()
                 .stream()
                 .map(entry -> {
-                    ItemStack itemStack = new ItemStack(this.lookupSimple.get(String.valueOf(entry.getKey())).getDefaultBlockState().getBlock());
+                    // FIXME
+                    ItemStack itemStack = new ItemStack(this.lookupSimple.get(String.valueOf(entry.getKey())).getBlockState().getBlock());
                     itemStack.setCount(entry.getValue());
                     return itemStack;
                 })
@@ -202,6 +203,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * make up the pattern in this method; this stops me from being able to calculate how many/what kind of
      * blocks are in the recipe.
      */
+    @Deprecated
     @Override
     public BlockPatternBuilder where(char pSymbol, Predicate<BlockInWorld> pBlockMatcher) {
         throw new UnsupportedOperationException("This overload of #where does not function!");
@@ -263,10 +265,22 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
             for (Map.Entry<String, BlockInWorldPredicateBuilder> entry : this.lookup.entrySet()) {
                 JsonObject mapping = new JsonObject();
 
-                JsonObject properties = new JsonObject();
-                for (Property<?> property : entry.getValue().getDefaultBlockState().getProperties()) {
-                    if (!entry.getValue().isRequiredProperty(property)) continue;
-                    properties.add(property.getName(), entry.getValue().getPropertyValuesAsJsonArray(property));
+                if (entry.getValue().isExactMatch()) {
+                    JsonElement blockStateExact =
+                            BlockState.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue().getBlockState()).getOrThrow(false, LOGGER::error);
+                    mapping.add("blockstate", blockStateExact);
+                } else if (entry.getValue().getBlockState() == null) {
+                    mapping.addProperty("block_tag", entry.getValue().getBlockTagAsString());
+                } else {
+                    // Given where this method is being called, it's impossible for the registry to not be loaded.
+                    mapping.addProperty("block", entry.getValue().getBlockAsString());
+                }
+
+                // TODO
+                JsonObject properties = entry.getValue().getPropertiesAsJson();
+                if (properties == null) {
+                    LOGGER.error("Error serializing recipe {}!", this.id);
+                    throw new IllegalArgumentException();
                 }
 
                 JsonObject nbt = new JsonObject();
@@ -276,13 +290,10 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
                 if (nbtForParse != null) nbt.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, nbtForParse));
                 if (nbtStrictForParse != null) nbtStrict.add("nbt_strict", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, nbtStrictForParse));
 
-                // Given where this method is being called, it's impossible for the registry to not be loaded.
-                // noinspection DataFlowIssue
-                mapping.addProperty("block", BLOCKS.getKey(entry.getValue().getDefaultBlockState().getBlock()).toString());
                 if (properties.size() != 0) mapping.add("state", properties);
                 if (nbt.size() != 0) mapping.add("nbt", nbt);
                 if (nbtStrict.size() != 0) mapping.add("nbt_strict", nbtStrict);
-                keyMappings.add(String.valueOf(entry.getKey()), mapping);
+                keyMappings.add(entry.getKey(), mapping);
             }
 
             JsonObject recipePattern = new JsonObject();
