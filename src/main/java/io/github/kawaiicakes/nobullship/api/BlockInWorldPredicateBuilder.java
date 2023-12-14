@@ -30,7 +30,6 @@ import java.util.*;
  * what the possible criteria are.
  */
 public class BlockInWorldPredicateBuilder {
-    // TODO: inspect usages of this class and repair stuff PRN
     private static final Logger LOGGER = LogUtils.getLogger();
 
     @Nullable
@@ -190,7 +189,6 @@ public class BlockInWorldPredicateBuilder {
     @Nullable
     public BlockState getDefaultBlockState() {
         if (this.blockTag != null) return null;
-        // TODO: replace the intended functionality of this method
         return this.blockState;
     }
 
