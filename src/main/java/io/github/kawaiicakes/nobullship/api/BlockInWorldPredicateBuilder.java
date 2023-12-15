@@ -192,13 +192,14 @@ public class BlockInWorldPredicateBuilder {
     }
 
     /**
-     * Returns the <code>BlockState</code> associated with this builder.
+     * Returns the <code>BlockState</code> associated with this builder. This method is mainly used for the palette in the
+     * <code>MultiblockPattern</code>. TODO: figure out wtf the palette field does, I forgot lmao. Then redo it so that this method doesn't exist ad hoc.
      */
     public BlockState getBlockState() {
         if (this.blockTag != null) //noinspection DataFlowIssue
             return BLOCKS.tags().getTag(this.blockTag).getRandomElement(RandomSource.create()).orElseThrow().defaultBlockState();
-        assert this.blockState != null;
-        return this.blockState;
+        else //noinspection DataFlowIssue
+            return Objects.requireNonNullElseGet(this.blockState, () -> this.block.defaultBlockState());
     }
 
     public ItemStack getItemized() {
@@ -206,7 +207,7 @@ public class BlockInWorldPredicateBuilder {
         if (!this.exactMatch && this.block != null) {
             return this.block.asItem().getDefaultInstance();
         } else {
-            // TODO
+            // TODO proper ingredient thingy
             //noinspection DataFlowIssue
             return Ingredient.of(ItemTags.create(new ResourceLocation(this.blockTag.toString()))).getItems()[0];
         }
