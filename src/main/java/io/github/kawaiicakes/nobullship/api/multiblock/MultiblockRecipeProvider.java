@@ -51,7 +51,7 @@ public class MultiblockRecipeProvider implements DataProvider {
         tag.putBoolean("powered", true);
         tag.putInt("ExplosionRadius", 60);
 
-        MultiblockRecipeBuilder
+        MultiblockPatternBuilder
                 .of(new ResourceLocation("creeper"))
                 .where('#', BlockInWorldPredicateBuilder
                         .of(REDSTONE_ORE)

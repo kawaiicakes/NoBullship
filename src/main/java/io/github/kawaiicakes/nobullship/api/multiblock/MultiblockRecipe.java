@@ -157,7 +157,7 @@ public record MultiblockRecipe(
             nbt = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, jsonResult.get("nbt"));
         }
 
-        MultiblockRecipeBuilder builder = MultiblockRecipeBuilder.of(result);
+        MultiblockPatternBuilder builder = MultiblockPatternBuilder.of(result);
 
         for (Map.Entry<String, JsonElement> keyEntry : jsonKeys.entrySet()) {
             if (Objects.equals(keyEntry.getKey(), " ") || Objects.equals(keyEntry.getKey(), "$")) {

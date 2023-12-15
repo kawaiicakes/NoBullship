@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class MultiblockRecipeBuilder extends BlockPatternBuilder {
+public class MultiblockPatternBuilder extends BlockPatternBuilder {
     protected static final Logger LOGGER = LogUtils.getLogger();
     protected final ResourceLocation result;
     protected final Map<String, BlockInWorldPredicateBuilder> lookupSimple = new HashMap<>();
@@ -42,7 +42,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * method may be used to more easily perform some "setup", and encourage usage of this to start from there.
      * @param nbt the <code>CompoundTag</code> NBT data to be given to the spawned entity.
      */
-    protected MultiblockRecipeBuilder(ResourceLocation result, @Nullable CompoundTag nbt) {
+    protected MultiblockPatternBuilder(ResourceLocation result, @Nullable CompoundTag nbt) {
         this.lookup.put(' ', BlockInWorldPredicate.AIR);
         this.lookup.put('$', BlockInWorldPredicate.WILDCARD);
         this.result = result;
@@ -54,7 +54,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * @param result the <code>ResourceLocation</code> representing the name & namespace of the entity intended to be
      *               spawned.
      */
-    public static MultiblockRecipeBuilder of(ResourceLocation result) {
+    public static MultiblockPatternBuilder of(ResourceLocation result) {
         return of(result, null);
     }
 
@@ -65,15 +65,15 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * @param result the <code>ResourceLocation</code> representing the name & namespace of the entity intended to be
      *               spawned.
      */
-    public static MultiblockRecipeBuilder of(ResourceLocation result, @Nullable CompoundTag nbt) {
-        return new MultiblockRecipeBuilder(result, nbt);
+    public static MultiblockPatternBuilder of(ResourceLocation result, @Nullable CompoundTag nbt) {
+        return new MultiblockPatternBuilder(result, nbt);
     }
 
     /**
      * Sets the <code>CompoundTag</code> NBT data to be given to the spawned entity.
      * e.g. Setting a creeper's blast radius to 300.
      */
-    public MultiblockRecipeBuilder setTagOfResult(CompoundTag tag) {
+    public MultiblockPatternBuilder setTagOfResult(CompoundTag tag) {
         this.nbt = tag;
         return this;
     }
@@ -82,7 +82,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * Adds an <code>ItemStack</code> that will be needed in the player's inventory to
      * successfully construct a multiblock recipe.
      */
-    public MultiblockRecipeBuilder addRequisite(ItemStack item) {
+    public MultiblockPatternBuilder addRequisite(ItemStack item) {
         if (this.requisites == null) this.requisites = NonNullList.createWithCapacity(1);
         this.requisites.add(item);
         return this;
@@ -92,7 +92,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * Adds a <code>NonNullList</code> of <code>ItemStack</code>s that will be needed in the
      * player's inventory to successfully construct a multiblock recipe.
      */
-    public MultiblockRecipeBuilder addRequisites(NonNullList<ItemStack> items) {
+    public MultiblockPatternBuilder addRequisites(NonNullList<ItemStack> items) {
         if (this.requisites == null) this.requisites = items;
         this.requisites.addAll(items);
         return this;
@@ -173,8 +173,8 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      * in this builder is the z-width of the pattern.
      */
     @Override
-    public MultiblockRecipeBuilder aisle(String... pAisle) {
-        return (MultiblockRecipeBuilder) super.aisle(pAisle);
+    public MultiblockPatternBuilder aisle(String... pAisle) {
+        return (MultiblockPatternBuilder) super.aisle(pAisle);
     }
 
     /**
@@ -185,14 +185,14 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
      *              is assigned to. The <code>BlockInWorldPredicateBuilder</code> allows for very fine
      *              control over defining the permitted block state(s).
      */
-    public MultiblockRecipeBuilder where(char pSymbol, BlockInWorldPredicateBuilder block) {
+    public MultiblockPatternBuilder where(char pSymbol, BlockInWorldPredicateBuilder block) {
         if (pSymbol == ' ' || pSymbol == '$') {
             LOGGER.error("{} is a reserved character!", pSymbol);
             throw new IllegalArgumentException(pSymbol + " is a reserved character!");
         }
 
         this.lookupSimple.put(String.valueOf(pSymbol), block);
-        return (MultiblockRecipeBuilder) super.where(pSymbol, block.build());
+        return (MultiblockPatternBuilder) super.where(pSymbol, block.build());
     }
 
     /**
