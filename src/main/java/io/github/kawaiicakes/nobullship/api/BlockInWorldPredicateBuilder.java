@@ -1,8 +1,11 @@
 package io.github.kawaiicakes.nobullship.api;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -11,15 +14,16 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.block.state.properties.*;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
 /**
  * The <code>BlockPredicateBuilder</code> allows easy instantiation of a <code>Predicate{@literal <BlockInWorld>}</code>
@@ -203,17 +207,303 @@ public class BlockInWorldPredicateBuilder {
         return this.block == null ? null : this.block.toString();
     }
 
-    /**
-     * Returns a <code>JsonArray</code> containing the values at the passed property.
-     */
-    public JsonArray getPropertyValuesAsJsonArray(Property<?> property) {
-        if (!this.properties.containsKey(property)) throw new IllegalArgumentException("No such property " + property + " exists for this builder!");
-        JsonArray toReturn = new JsonArray();
-        this.properties.get(property).forEach(value -> toReturn.add(value.toString()));
+    public boolean isExactMatch() {
+        return this.exactMatch;
+    }
+
+    @Nullable
+    public JsonObject toJson() {
+        JsonObject toReturn = new JsonObject();
+
+        if (this.isExactMatch()) {
+            JsonElement blockStateExact =
+                    BlockState.CODEC.encodeStart(JsonOps.INSTANCE, this.getBlockState()).getOrThrow(false, LOGGER::error);
+            toReturn.add("blockstate", blockStateExact);
+        } else if (this.getBlockState() == null) {
+            toReturn.addProperty("block_tag", this.getBlockTagAsString());
+        } else {
+            // Given where this method is being called, it's impossible for the registry to not be loaded.
+            toReturn.addProperty("block", this.getBlockAsString());
+        }
+
+        JsonObject properties = this.getPropertiesAsJson();
+        if (properties == null) {
+            LOGGER.error("Error serializing predicate!");
+            throw new IllegalArgumentException();
+        }
+
+        JsonObject nbt = new JsonObject();
+        JsonObject nbtStrict = new JsonObject();
+        Tag nbtForParse = this.getBlockEntityNbtData();
+        Tag nbtStrictForParse = this.getBlockEntityNbtDataStrict();
+        if (nbtForParse != null) nbt.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, nbtForParse));
+        if (nbtStrictForParse != null) nbtStrict.add("nbt_strict", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, nbtStrictForParse));
+
+        if (properties.size() != 0) toReturn.add("state", properties);
+        if (nbt.size() != 0) toReturn.add("nbt", nbt);
+        if (nbtStrict.size() != 0) toReturn.add("nbt_strict", nbtStrict);
+
         return toReturn;
     }
 
-    // TODO: extract de/serialization for this builder to inside of this class.
+    public static <T extends Enum<T> & StringRepresentable> BlockInWorldPredicateBuilder fromJson(JsonObject serializedBuilder) throws IllegalArgumentException {
+        BlockInWorldPredicateBuilder toReturn;
+
+        JsonElement mappedCharacterBlock = serializedBuilder.getAsJsonObject().get("block");
+        JsonElement mappedCharacterBlockState = serializedBuilder.getAsJsonObject().get("blockstate");
+        JsonElement mappedCharacterBlockTag = serializedBuilder.getAsJsonObject().get("block_tag");
+
+        byte nonNullCount = 0;
+        if (mappedCharacterBlock != null) nonNullCount++;
+        if (mappedCharacterBlockState != null) nonNullCount++;
+        if (mappedCharacterBlockTag != null) nonNullCount++;
+
+        if (nonNullCount == 0) {
+            LOGGER.error("There is no block associated with this recipe!");
+            throw new IllegalArgumentException();
+        }
+
+        if (nonNullCount > 1) {
+            LOGGER.error("More than one predicate block exists for this recipe!");
+            throw new IllegalArgumentException();
+        }
+
+        JsonObject propertyJson = serializedBuilder.getAsJsonObject().getAsJsonObject("state");
+        JsonObject nbtJsonStrict = serializedBuilder.getAsJsonObject().getAsJsonObject("nbt_strict");
+        JsonObject nbtJson = serializedBuilder.getAsJsonObject().getAsJsonObject("nbt");
+
+        if (mappedCharacterBlock != null) {
+            ResourceLocation blockLocation = new ResourceLocation(mappedCharacterBlock.getAsString());
+            Block block = RegistryObject.create(blockLocation, BLOCKS).get();
+
+            if ((nbtJsonStrict != null || nbtJson != null) && !(block instanceof EntityBlock)) {
+                LOGGER.error("Block {} does not have a block entity and cannot hold NBT data!", block);
+                throw new IllegalArgumentException();
+            }
+
+            if (propertyJson == null && nbtJsonStrict == null && nbtJson == null) {
+                toReturn = (BlockInWorldPredicateBuilder.of(block));
+                return toReturn;
+            }
+
+            if (propertyJson == null) propertyJson = new JsonObject();
+
+            final Map<Property<?>, Set<String>> deserializedProperties = new HashMap<>(propertyJson.size());
+            for (Map.Entry<String, JsonElement> stateEntry : propertyJson.entrySet()) {
+                if (!stateEntry.getValue().isJsonArray()) {
+                    LOGGER.error("Values for property {} are not a valid JSON array!", stateEntry.getKey());
+                    throw new IllegalArgumentException();
+                }
+
+                Property<?> property = block.getStateDefinition().getProperty(stateEntry.getKey());
+                if (property == null) {
+                    LOGGER.error("Property {} does not exist for {}", stateEntry.getKey(), blockLocation);
+                    throw new IllegalArgumentException();
+                }
+
+                if (propertyJson.get(stateEntry.getKey()) == null) {
+                    // wtf is this doing??? why did I write this? It seems pretty roundabout...
+                    throw new IllegalArgumentException();
+                }
+
+                Set<String> propertyValues = new HashSet<>();
+                for (JsonElement element : stateEntry.getValue().getAsJsonArray()) {
+                    if (!element.isJsonPrimitive()) {
+                        LOGGER.error("Element {} in value definition for property {} is not a valid primitive!", element, stateEntry.getKey());
+                        throw new IllegalArgumentException();
+                    }
+                    propertyValues.add(element.getAsString());
+                }
+
+                deserializedProperties.put(property, propertyValues);
+            }
+
+            BlockInWorldPredicateBuilder predicateBuilder = BlockInWorldPredicateBuilder.of(block);
+            for (Map.Entry<Property<?>, Set<String>> stateEntry : deserializedProperties.entrySet()) {
+                predicateBuilder.requireProperties(stateEntry.getKey(),
+                        stateEntry.getValue()
+                                .stream()
+                                .map(stateEntry.getKey()::getValue)
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .collect(Collectors.toSet())
+                );
+            }
+
+            if (nbtJsonStrict != null) {
+                CompoundTag nbtForPredicate = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, nbtJsonStrict);
+                predicateBuilder.requireStrictNbt(nbtForPredicate);
+            }
+
+            if (nbtJson != null) {
+                CompoundTag nbtForPredicate = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, nbtJson);
+                predicateBuilder.requireNbt(nbtForPredicate);
+            }
+
+            toReturn = predicateBuilder;
+        } else if (mappedCharacterBlockState != null) {
+            BlockState deserializedBlockState = BlockState.CODEC.parse(JsonOps.INSTANCE, mappedCharacterBlockState).getOrThrow(false, LOGGER::error);
+            BlockInWorldPredicateBuilder predicateBuilder = BlockInWorldPredicateBuilder.of(deserializedBlockState);
+
+            if (propertyJson != null) {
+                throw new IllegalArgumentException("Properties attempted to be defined for an exact blockstate match!");
+            }
+
+            if (nbtJsonStrict != null) {
+                CompoundTag nbtForPredicate = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, nbtJsonStrict);
+                predicateBuilder.requireStrictNbt(nbtForPredicate);
+            }
+
+            if (nbtJson != null) {
+                CompoundTag nbtForPredicate = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, nbtJson);
+                predicateBuilder.requireNbt(nbtForPredicate);
+            }
+
+            toReturn = predicateBuilder;
+        } else {
+            TagKey<Block> blockTag = BlockTags.create(new ResourceLocation(mappedCharacterBlockTag.getAsString()));
+
+            if (propertyJson == null && nbtJsonStrict == null && nbtJson == null) {
+                toReturn = (BlockInWorldPredicateBuilder.of(blockTag));
+                return toReturn;
+            }
+
+            if (propertyJson == null) propertyJson = new JsonObject();
+
+            final Map<Property<?>, Set<String>> deserializedProperties = new HashMap<>(propertyJson.size());
+            for (Map.Entry<String, JsonElement> stateEntry : propertyJson.entrySet()) {
+                if (!(stateEntry.getValue() instanceof JsonObject stateObject)) {
+                    LOGGER.error("Values for property {} are not a valid JSON object!", stateEntry.getKey());
+                    throw new IllegalArgumentException();
+                }
+
+                if (propertyJson.get(stateEntry.getKey()) == null) {
+                    // wtf is this doing??? why did I write this? It seems pretty roundabout...
+                    throw new IllegalArgumentException();
+                }
+
+                JsonObject propertyType = stateObject.getAsJsonObject("property_definition");
+                JsonArray propertyValuesArray = stateObject.getAsJsonArray("values");
+
+                if (propertyType.getAsString().isEmpty() || propertyValuesArray.isEmpty()) {
+                    LOGGER.error("Type or values for property {} could not be found!", stateEntry.getKey());
+                    throw new IllegalArgumentException();
+                }
+
+                Property<?> property;
+
+                try {
+                    switch (propertyType.getAsJsonObject("type").getAsString()) {
+                        case "int" -> {
+                            JsonElement max = propertyType.get("max");
+                            JsonElement min = propertyType.get("min");
+
+                            if (max == null || min == null) {
+                                LOGGER.error("Max/min undefined for int property {}!", stateEntry.getKey());
+                                throw new IllegalArgumentException();
+                            }
+
+                            property = IntegerProperty.create(stateEntry.getKey(), min.getAsInt(), max.getAsInt());
+                        }
+                        case "boolean" -> property = BooleanProperty.create(stateEntry.getKey());
+                        case "enum" -> {
+                            JsonElement clazzName = propertyType.get("class");
+
+                            if (clazzName == null || !clazzName.isJsonPrimitive()) throw new IllegalArgumentException();
+
+                            Class<T> clazz;
+                            try {
+                                //noinspection unchecked
+                                clazz = (Class<T>) Class.forName("net.minecraft.world.level.block.state.properties." + clazzName.getAsString());
+                            } catch (ClassNotFoundException | ClassCastException e) {
+                                try {
+                                    //noinspection unchecked
+                                    clazz = (Class<T>) Class.forName(clazzName.getAsString());
+                                } catch (ClassNotFoundException f) {
+                                    LOGGER.error("No class could be found while deserializing enum property {}!", stateEntry.getKey());
+                                    throw new RuntimeException(f);
+                                } catch (RuntimeException g) {
+                                    LOGGER.error("Class unable to be casted while deserializing enum property {}!", stateEntry.getKey());
+                                    throw new RuntimeException(g);
+                                }
+                            }
+
+                            JsonArray possibleValues = propertyType.getAsJsonArray("possible_values");
+                            Set<T> possibleEnums = new HashSet<>(possibleValues.size());
+                            for (JsonElement element : possibleValues) {
+                                if (!element.isJsonPrimitive()) throw new IllegalArgumentException();
+                                T enumValue = Enum.valueOf(clazz, element.getAsString());
+
+                                possibleEnums.add(enumValue);
+                            }
+
+                            property = EnumProperty.create(stateEntry.getKey(), clazz, possibleEnums);
+                        }
+                        case "direction" -> {
+                            JsonArray possibleValues = propertyType.getAsJsonArray("possible_values");
+                            Set<Direction> possibleDirections = new HashSet<>(possibleValues.size());
+                            for (JsonElement element : possibleValues) {
+                                if (!element.isJsonPrimitive()) throw new IllegalArgumentException();
+                                Direction direction = Direction.byName(element.getAsString());
+                                if (direction == null) throw new IllegalArgumentException();
+
+                                possibleDirections.add(direction);
+                            }
+
+                            property = DirectionProperty.create(stateEntry.getKey(), possibleDirections);
+                        }
+                        default -> {
+                            LOGGER.error("Unrecognized property type {}!", propertyType.getAsString());
+                            throw new IllegalArgumentException();
+                        }
+                    }
+                } catch (RuntimeException e) {
+                    LOGGER.error("Exception:", e);
+                    LOGGER.error("An error occurred while deserializing properties!");
+                    LOGGER.error(e.getMessage());
+                    throw new IllegalArgumentException();
+                }
+
+                Set<String> propertyValues = new HashSet<>();
+                for (JsonElement element : propertyValuesArray) {
+                    if (!element.isJsonPrimitive()) {
+                        LOGGER.error("Element {} in value definition for property {} is not a valid primitive!", element, stateEntry.getKey());
+                        throw new IllegalArgumentException();
+                    }
+                    propertyValues.add(element.getAsString());
+                }
+
+                deserializedProperties.put(property, propertyValues);
+            }
+
+            BlockInWorldPredicateBuilder predicateBuilder = BlockInWorldPredicateBuilder.of(blockTag);
+            for (Map.Entry<Property<?>, Set<String>> stateEntry : deserializedProperties.entrySet()) {
+                predicateBuilder.requireProperties(stateEntry.getKey(),
+                        stateEntry.getValue()
+                                .stream()
+                                .map(stateEntry.getKey()::getValue)
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .collect(Collectors.toSet())
+                );
+            }
+
+            if (nbtJsonStrict != null) {
+                CompoundTag nbtForPredicate = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, nbtJsonStrict);
+                predicateBuilder.requireStrictNbt(nbtForPredicate);
+            }
+
+            if (nbtJson != null) {
+                CompoundTag nbtForPredicate = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, nbtJson);
+                predicateBuilder.requireNbt(nbtForPredicate);
+            }
+
+            toReturn = predicateBuilder;
+        }
+
+        return toReturn;
+    }
+
     @Nullable
     public JsonObject getPropertiesAsJson() {
         JsonObject toReturn = new JsonObject();
@@ -243,7 +533,7 @@ public class BlockInWorldPredicateBuilder {
                             for (StringRepresentable value : enumProperty.getPossibleValues()) {
                                 validValues.add(value.getSerializedName());
                             }
-                            toReturn.add("valid_values", validValues);
+                            toReturn.add("possible_values", validValues);
                         }
                         default -> {
                             LOGGER.error("Unrecognized Property instance {} failed to be serialized to NBT!", canonicalPropertyName);
@@ -280,17 +570,26 @@ public class BlockInWorldPredicateBuilder {
                             propertyDefinition.addProperty("max", integerProperty.getPossibleValues().stream().max(Comparator.naturalOrder()).orElseThrow());
                             propertyDefinition.addProperty("min", integerProperty.getPossibleValues().stream().min(Comparator.naturalOrder()).orElseThrow());
                         }
-                        case "net.minecraft.world.level.block.state.properties.BooleanProperty" -> {
-                            propertyDefinition.addProperty("type", "boolean");
-                        }
-                        // TODO
-                        case "net.minecraft.world.level.block.state.properties.EnumProperty", "net.minecraft.world.level.block.state.properties.DirectionProperty" -> {
+                        case "net.minecraft.world.level.block.state.properties.BooleanProperty" -> propertyDefinition.addProperty("type", "boolean");
+                        case "net.minecraft.world.level.block.state.properties.EnumProperty" -> {
                             EnumProperty<?> enumProperty = (EnumProperty<?>) property;
+                            propertyDefinition.addProperty("type", "enum");
+                            propertyDefinition.addProperty("class", enumProperty.getValueClass().getCanonicalName());
+
                             JsonArray validValues = new JsonArray(enumProperty.getPossibleValues().size());
                             for (StringRepresentable value : enumProperty.getPossibleValues()) {
                                 validValues.add(value.getSerializedName());
                             }
-                            toReturn.add("valid_values", validValues);
+                            toReturn.add("possible_values", validValues);
+                        }
+                        case "net.minecraft.world.level.block.state.properties.DirectionProperty" -> {
+                            DirectionProperty directionProperty = (DirectionProperty) property;
+                            propertyDefinition.addProperty("type", "direction");
+                            JsonArray possibleDirections = new JsonArray();
+                            for (Direction direction : directionProperty.getPossibleValues()) {
+                                possibleDirections.add(direction.getSerializedName());
+                            }
+                            propertyDefinition.add("possible_values", possibleDirections);
                         }
                         default -> {
                             LOGGER.error("Unrecognized Property instance {} failed to be serialized to NBT!", canonicalPropertyName);
@@ -314,14 +613,6 @@ public class BlockInWorldPredicateBuilder {
         }
 
         return toReturn;
-    }
-
-    public boolean isRequiredProperty(Property<?> property) {
-        return this.properties.containsKey(property);
-    }
-
-    public boolean isExactMatch() {
-        return this.exactMatch;
     }
 
     @Nullable
@@ -382,7 +673,7 @@ public class BlockInWorldPredicateBuilder {
                             for (StringRepresentable value : enumProperty.getPossibleValues()) {
                                 validValues.add(StringTag.valueOf(value.getSerializedName()));
                             }
-                            propertyNbt.put("valid_values", validValues);
+                            propertyNbt.put("possible_values", validValues);
                         }
                         default -> {
                             LOGGER.error("Unrecognized Property instance {} failed to be serialized to NBT!", canonicalPropertyName);
@@ -473,7 +764,7 @@ public class BlockInWorldPredicateBuilder {
                         case "net.minecraft.world.level.block.state.properties.BooleanProperty" ->
                                 propertyForBlock = BooleanProperty.create(propertyName);
                         case "net.minecraft.world.level.block.state.properties.EnumProperty", "net.minecraft.world.level.block.state.properties.DirectionProperty" -> {
-                            ListTag validValuesTag = propertyTag.getList("valid_values", Tag.TAG_STRING);
+                            ListTag validValuesTag = propertyTag.getList("possible_values", Tag.TAG_STRING);
                             //noinspection unchecked
                             Class<T> enumClass = (Class<T>) Class.forName(valueClass);
                             Collection<T> enums = new ArrayList<>(validValuesTag.size());

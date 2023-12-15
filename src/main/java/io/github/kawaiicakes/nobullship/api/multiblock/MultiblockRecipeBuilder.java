@@ -10,10 +10,12 @@ import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
 import org.jetbrains.annotations.Nullable;
@@ -25,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
 public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     protected static final Logger LOGGER = LogUtils.getLogger();
@@ -263,37 +263,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
         public void serializeRecipeData(JsonObject pJson) {
             JsonObject keyMappings = new JsonObject();
             for (Map.Entry<String, BlockInWorldPredicateBuilder> entry : this.lookup.entrySet()) {
-                JsonObject mapping = new JsonObject();
-
-                if (entry.getValue().isExactMatch()) {
-                    JsonElement blockStateExact =
-                            BlockState.CODEC.encodeStart(JsonOps.INSTANCE, entry.getValue().getBlockState()).getOrThrow(false, LOGGER::error);
-                    mapping.add("blockstate", blockStateExact);
-                } else if (entry.getValue().getBlockState() == null) {
-                    mapping.addProperty("block_tag", entry.getValue().getBlockTagAsString());
-                } else {
-                    // Given where this method is being called, it's impossible for the registry to not be loaded.
-                    mapping.addProperty("block", entry.getValue().getBlockAsString());
-                }
-
-                // TODO
-                JsonObject properties = entry.getValue().getPropertiesAsJson();
-                if (properties == null) {
-                    LOGGER.error("Error serializing recipe {}!", this.id);
-                    throw new IllegalArgumentException();
-                }
-
-                JsonObject nbt = new JsonObject();
-                JsonObject nbtStrict = new JsonObject();
-                Tag nbtForParse = entry.getValue().getBlockEntityNbtData();
-                Tag nbtStrictForParse = entry.getValue().getBlockEntityNbtDataStrict();
-                if (nbtForParse != null) nbt.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, nbtForParse));
-                if (nbtStrictForParse != null) nbtStrict.add("nbt_strict", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, nbtStrictForParse));
-
-                if (properties.size() != 0) mapping.add("state", properties);
-                if (nbt.size() != 0) mapping.add("nbt", nbt);
-                if (nbtStrict.size() != 0) mapping.add("nbt_strict", nbtStrict);
-                keyMappings.add(entry.getKey(), mapping);
+                keyMappings.add(entry.getKey(), entry.getValue().toJson());
             }
 
             JsonObject recipePattern = new JsonObject();
