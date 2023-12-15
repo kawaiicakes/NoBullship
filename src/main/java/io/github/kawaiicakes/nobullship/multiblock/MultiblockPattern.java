@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import java.lang.reflect.Array;
 import java.util.*;
 
-import static net.minecraft.world.level.block.Blocks.AIR;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 public class MultiblockPattern extends BlockPattern {

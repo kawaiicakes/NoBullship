@@ -107,7 +107,6 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
     public MultiblockPattern build() {
         return new MultiblockPattern(
                 this.createPattern(),
-                // FIXME
                 this.lookupSimple.values().stream().map(BlockInWorldPredicateBuilder::getBlockState).toList(),
                 this.totalBlocks(),
                 this.serializePatternNbt()
@@ -149,8 +148,7 @@ public class MultiblockRecipeBuilder extends BlockPatternBuilder {
         totalCount.entrySet()
                 .stream()
                 .map(entry -> {
-                    // FIXME
-                    ItemStack itemStack = new ItemStack(this.lookupSimple.get(String.valueOf(entry.getKey())).getBlockState().getBlock());
+                    ItemStack itemStack = this.lookupSimple.get(String.valueOf(entry.getKey())).getItemized();
                     itemStack.setCount(entry.getValue());
                     return itemStack;
                 })

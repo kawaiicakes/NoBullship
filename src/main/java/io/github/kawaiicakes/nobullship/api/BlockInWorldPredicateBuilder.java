@@ -9,8 +9,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -189,12 +193,23 @@ public class BlockInWorldPredicateBuilder {
 
     /**
      * Returns the <code>BlockState</code> associated with this builder.
-     * Returns <code>null</code> if this builder matches for a block tag.
      */
-    @Nullable
     public BlockState getBlockState() {
-        if (this.blockTag != null) return null;
+        if (this.blockTag != null) //noinspection DataFlowIssue
+            return BLOCKS.tags().getTag(this.blockTag).getRandomElement(RandomSource.create()).orElseThrow().defaultBlockState();
+        assert this.blockState != null;
         return this.blockState;
+    }
+
+    public ItemStack getItemized() {
+        if (this.exactMatch && this.blockState != null) return this.blockState.getBlock().asItem().getDefaultInstance();
+        if (!this.exactMatch && this.block != null) {
+            return this.block.asItem().getDefaultInstance();
+        } else {
+            // TODO
+            //noinspection DataFlowIssue
+            return Ingredient.of(ItemTags.create(new ResourceLocation(this.blockTag.toString()))).getItems()[0];
+        }
     }
 
     @Nullable
@@ -219,7 +234,7 @@ public class BlockInWorldPredicateBuilder {
             JsonElement blockStateExact =
                     BlockState.CODEC.encodeStart(JsonOps.INSTANCE, this.getBlockState()).getOrThrow(false, LOGGER::error);
             toReturn.add("blockstate", blockStateExact);
-        } else if (this.getBlockState() == null) {
+        } else if (this.blockTag != null) {
             toReturn.addProperty("block_tag", this.getBlockTagAsString());
         } else {
             // Given where this method is being called, it's impossible for the registry to not be loaded.
