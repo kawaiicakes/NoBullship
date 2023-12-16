@@ -185,21 +185,24 @@ public class SchematicItem extends Item {
         MultiblockRecipeManager manager = MultiblockRecipeManager.getInstance();
         MultiblockRecipe recipe = manager.getRecipe(new ResourceLocation(noBsRecipe)).orElse(null);
 
-        try {
-            if (!manager.trySpawn(recipe, pContext)) return InteractionResult.FAIL;
-        } catch (RuntimeException e) {
-            return InteractionResult.FAIL;
-        }
+        MultiblockPattern pattern = null;
+        if (recipe != null) pattern = recipe.recipe();
 
-        //noinspection DataFlowIssue (#trySpawn returning true indicates recipe cannot be null.)
-        MultiblockPattern pattern = recipe.recipe();
-        int recipeSize = pattern.getDepth() * pattern.getHeight() * pattern.getWidth();
+        // arbitrary default recipe size.
+        int recipeSize = 9;
+        if (pattern != null) recipeSize = pattern.getDepth() * pattern.getHeight() * pattern.getWidth();
         int cooldownTimeTicks = Math.min(
                 Math.max((int) (recipeSize * Config.COOLDOWN_MULTIPLIER.get()), 20 * (Config.MINIMUM_COOLDOWN.get()).intValue()),
                 20 * Config.MAXIMUM_COOLDOWN.get().intValue()
         );
         pContext.getPlayer().getCooldowns().addCooldown(this, cooldownTimeTicks);
         manager.incrementGlobalCooldown(cooldownTimeTicks);
+
+        try {
+            if (!manager.trySpawn(recipe, pContext)) return InteractionResult.FAIL;
+        } catch (RuntimeException e) {
+            return InteractionResult.FAIL;
+        }
 
         return InteractionResult.FAIL;
     }
