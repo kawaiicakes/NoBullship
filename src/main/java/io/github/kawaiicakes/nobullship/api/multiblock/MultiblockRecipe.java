@@ -150,55 +150,50 @@ public record MultiblockRecipe(
             return null;
         }
 
-        ResourceLocation result = new ResourceLocation(jsonResult.getAsJsonPrimitive("entity").getAsString());
+        try {
+            ResourceLocation result = new ResourceLocation(jsonResult.getAsJsonPrimitive("entity").getAsString());
 
-        CompoundTag nbt = null;
-        if (jsonResult.has("nbt")) {
-            nbt = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, jsonResult.get("nbt"));
-        }
-
-        MultiblockPatternBuilder builder = MultiblockPatternBuilder.of(result);
-
-        for (Map.Entry<String, JsonElement> keyEntry : jsonKeys.entrySet()) {
-            if (Objects.equals(keyEntry.getKey(), " ") || Objects.equals(keyEntry.getKey(), "$")) {
-                LOGGER.error("{} is a reserved character!", keyEntry.getKey());
-                return null;
+            CompoundTag nbt = null;
+            if (jsonResult.has("nbt")) {
+                nbt = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, jsonResult.get("nbt"));
             }
 
-            try {
+            MultiblockPatternBuilder builder = MultiblockPatternBuilder.of(result);
+
+            for (Map.Entry<String, JsonElement> keyEntry : jsonKeys.entrySet()) {
+                if (Objects.equals(keyEntry.getKey(), " ") || Objects.equals(keyEntry.getKey(), "$")) {
+                    LOGGER.error("{} is a reserved character!", keyEntry.getKey());
+                    return null;
+                }
+
                 builder.where(keyEntry.getKey().charAt(0), BlockInWorldPredicateBuilder.fromJson(keyEntry.getValue().getAsJsonObject()));
-            } catch (RuntimeException e) {
-                LOGGER.error("An error occurred during deserialization of BlockInWorldPredicate from JSON!", e);
-                LOGGER.error(e.getMessage());
-                return null;
             }
-        }
 
-        for (int i = jsonRecipe.size() - 1; i >= 0 ; i--) {
-            JsonArray aisle = jsonRecipe.getAsJsonArray("layer" + i);
-            if (aisle.isEmpty()) return null;
+            for (int i = jsonRecipe.size() - 1; i >= 0 ; i--) {
+                JsonArray aisle = jsonRecipe.getAsJsonArray("layer" + i);
+                if (aisle.isEmpty()) return null;
 
-            List<String> strings = new ArrayList<>(aisle.size());
-            aisle.forEach(element -> strings.add(element.getAsString()));
+                List<String> strings = new ArrayList<>(aisle.size());
+                aisle.forEach(element -> strings.add(element.getAsString()));
 
-            try {
                 builder.aisle(strings.toArray(String[]::new));
-            } catch (IllegalArgumentException exception) {
-                LOGGER.error(exception.getMessage());
-                return null;
             }
-        }
 
-        NonNullList<ItemStack> requisites;
-        ImmutableList<ItemStack> toReturnRequisites = null;
-        if (jsonRequisites != null) {
-            requisites = NonNullList.createWithCapacity(jsonRequisites.size());
-            for (JsonElement element : jsonRequisites) {
-                if (element.isJsonObject()) requisites.add(ShapedRecipe.itemStackFromJson(element.getAsJsonObject()));
+            NonNullList<ItemStack> requisites;
+            ImmutableList<ItemStack> toReturnRequisites = null;
+            if (jsonRequisites != null) {
+                requisites = NonNullList.createWithCapacity(jsonRequisites.size());
+                for (JsonElement element : jsonRequisites) {
+                    if (element.isJsonObject()) requisites.add(ShapedRecipe.itemStackFromJson(element.getAsJsonObject()));
+                }
+                toReturnRequisites = ImmutableList.copyOf(requisites);
             }
-            toReturnRequisites = ImmutableList.copyOf(requisites);
-        }
 
-        return new MultiblockRecipe(builder.build(), result, nbt, toReturnRequisites);
+            return new MultiblockRecipe(builder.build(), result, nbt, toReturnRequisites);
+        } catch (RuntimeException e) {
+            LOGGER.error("An error occurred during deserialization of BlockInWorldPredicate from JSON!", e);
+            LOGGER.error(e.getMessage());
+            return null;
+        }
     }
 }

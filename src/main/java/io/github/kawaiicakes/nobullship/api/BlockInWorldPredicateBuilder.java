@@ -273,7 +273,6 @@ public class BlockInWorldPredicateBuilder {
     }
 
     public static BlockInWorldPredicateBuilder fromJson(JsonObject serializedBuilder) throws IllegalArgumentException {
-        JsonElement serializedPredicate;
         Set<String> keySet = serializedBuilder.keySet();
         if (keySet.isEmpty()) throw new IllegalArgumentException("Error while deserializing! Predicate is empty!");
 
@@ -287,14 +286,11 @@ public class BlockInWorldPredicateBuilder {
         }
         if (builderType == null) throw new RuntimeException("Unable to resolve predicate match type!");
 
-        serializedPredicate = serializedBuilder.get(builderType.getSerializedName());
-        if (serializedPredicate == null) throw new RuntimeException("Somehow unable to resolve predicate block in JSON!");
-
         try {
             return switch (builderType) {
-                case BLOCK -> deserializeBlockFromJson(serializedPredicate);
-                case BLOCKSTATE -> deserializeBlockStateFromJson(serializedPredicate);
-                case TAG -> deserializeBlockTagFromJson(serializedPredicate);
+                case BLOCK -> deserializeBlockFromJson(serializedBuilder);
+                case BLOCKSTATE -> deserializeBlockStateFromJson(serializedBuilder);
+                case TAG -> deserializeBlockTagFromJson(serializedBuilder);
             };
         } catch (RuntimeException e) {
             LOGGER.error("Error encountered while deserializing predicate from JSON!", e);
