@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.api;
 
+import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -15,11 +16,9 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -31,6 +30,7 @@ import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARD
  * from the original.
  */
 public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
+    protected static final Logger LOGGER = LogUtils.getLogger();
     public static final BlockInWorldPredicate WILDCARD = new BlockInWorldPredicate(Blocks.AIR, null, null, null, null, null) {
         @Override
         public BlockInWorldPredicate setFacing(Direction direction) {
@@ -42,7 +42,6 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
             return !blockInWorld.getState().isAir();
         }
     };
-
     public static final BlockInWorldPredicate AIR = new BlockInWorldPredicate(Blocks.AIR, null, null, null, null, null) {
         @Override
         public BlockInWorldPredicate setFacing(Direction direction) {
@@ -63,7 +62,7 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
     @Nullable
     protected final TagKey<Block> blockTag;
     @Nullable
-    protected final Map<Property<?>, Set<Comparable<?>>> properties;
+    protected final Map<String, Set<String>> properties;
     @Nullable
     protected final CompoundTag blockEntityNbtData;
     @Nullable
@@ -73,7 +72,7 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
      * Creates a new <code>BlockInWorldPredicate</code> facing the given direction. Any directional properties
      * will be rotated accordingly for the test.
      */
-    protected BlockInWorldPredicate(@Nullable Block block, @Nullable BlockState blockState, @Nullable TagKey<Block> blockTag, @Nullable Map<Property<?>, Set<Comparable<?>>> properties,
+    protected BlockInWorldPredicate(@Nullable Block block, @Nullable BlockState blockState, @Nullable TagKey<Block> blockTag, @Nullable Map<String, Set<String>> properties,
                                     @Nullable CompoundTag blockEntityNbtData, @Nullable CompoundTag blockEntityNbtDataStrict) {
         if (block == null && blockState == null && blockTag == null) throw new IllegalArgumentException("The block, blockstate, and block tag are all null!");
 
@@ -116,31 +115,65 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
             return (blockInWorld) -> blockInWorld.getState().is(this.blockTag);
     }
 
-    protected static Predicate<BlockInWorld> checkProperties(@Nullable Map<Property<?>, Set<Comparable<?>>> properties, Direction facing) {
+    protected static Predicate<BlockInWorld> checkProperties(@Nullable Map<String, Set<String>> properties, Direction facing) {
         if (properties == null || properties.isEmpty()) return (block) -> true;
 
         return (block) -> {
-            for (Map.Entry<Property<?>, Set<Comparable<?>>> entry : properties.entrySet()) {
-                final Set<Comparable<?>> checkedValues = entry.getValue();
-                Comparable<?> valueOfBlockInWorld;
+            for (Map.Entry<String, Set<String>> entry : properties.entrySet()) {
+                Property<?> propertyOfBlockInWorld;
 
                 try {
-                    valueOfBlockInWorld = block.getState().getValue(entry.getKey());
-                } catch (IllegalArgumentException e) {
+                    propertyOfBlockInWorld = block.getState().getValues()
+                            .keySet()
+                            .stream()
+                            .filter(property -> property.getName().equals(entry.getKey()))
+                            .findFirst()
+                            .orElseThrow();
+                } catch (IllegalArgumentException | NoSuchElementException e) {
+                    // These errors are expected if the property is not found in the blockstate.
+                    return false;
+                } catch (RuntimeException e) {
+                    LOGGER.error("Unexpected error while checking properties!", e);
+                    LOGGER.error(e.getMessage());
                     return false;
                 }
 
-                if (entry.getKey() instanceof DirectionProperty directionProperty
-                        && directionProperty.getPossibleValues().containsAll(List.of(CARDINAL))) {
+                String valueAtPropertyOfBlockInWorld;
+                try {
+                    valueAtPropertyOfBlockInWorld = block.getState().getValue(propertyOfBlockInWorld).toString();
+                } catch (RuntimeException e) {
+                    LOGGER.error("Exception encountered!", e);
+                    LOGGER.error("Error while determining value at property {} of block {}!", entry.getKey(), block.getPos());
+                    LOGGER.error(e.getMessage());
+                    return false;
+                }
 
-                    Set<Direction> setOfDirections = checkedValues.stream().map(value -> rotateValue(value, facing)).collect(Collectors.toSet());
+                if (propertyOfBlockInWorld instanceof DirectionProperty) {
+                    Set<Direction> setOfDirectionsDefault;
 
-                    if (!(valueOfBlockInWorld instanceof Direction)) return false;
-                    if (!(setOfDirections.contains(valueOfBlockInWorld))) return false;
+                    try {
+                        setOfDirectionsDefault = entry.getValue()
+                                .stream()
+                                .map(BlockInWorldPredicate::parseFromString)
+                                .collect(Collectors.toSet());
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Error casting values to direction!", e);
+                        return false;
+                    }
+
+                    Set<Direction> setOfDirections = setOfDirectionsDefault.stream().map(value -> rotateValue(value, facing)).collect(Collectors.toSet());
+
+                    Direction directionOfBlockInWorld = Direction.byName(valueAtPropertyOfBlockInWorld);
+                    if (directionOfBlockInWorld == null) {
+                        LOGGER.error("Value {} is not a direction for property {} at {}!", valueAtPropertyOfBlockInWorld, entry.getKey(), block.getPos());
+                        return false;
+                    }
+
+                    if (!(setOfDirections.contains(directionOfBlockInWorld))) return false;
                     continue;
                 }
 
-                if (!checkedValues.contains(valueOfBlockInWorld)) return false;
+                if (!entry.getValue().contains(valueAtPropertyOfBlockInWorld)) return false;
             }
             return true;
         };
@@ -220,5 +253,11 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
             case EAST -> originalDirection.getClockWise();
             default -> originalDirection;
         };
+    }
+
+    protected static Direction parseFromString(String direction) {
+        Direction toReturn = Direction.byName(direction);
+        if (toReturn == null) throw new IllegalArgumentException(direction + " is not a valid direction name!");
+        return toReturn;
     }
 }

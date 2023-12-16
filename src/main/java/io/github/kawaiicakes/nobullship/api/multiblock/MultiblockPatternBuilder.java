@@ -261,7 +261,12 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         public void serializeRecipeData(JsonObject pJson) {
             JsonObject keyMappings = new JsonObject();
             for (Map.Entry<String, BlockInWorldPredicateBuilder> entry : this.lookup.entrySet()) {
-                keyMappings.add(entry.getKey(), entry.getValue().toJson());
+                try {
+                    keyMappings.add(entry.getKey(), entry.getValue().toJson());
+                } catch (RuntimeException e) {
+                    LOGGER.error("Error serializing recipe!", e);
+                    return;
+                }
             }
 
             JsonObject recipePattern = new JsonObject();
