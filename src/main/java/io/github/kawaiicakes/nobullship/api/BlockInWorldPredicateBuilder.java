@@ -11,7 +11,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -718,16 +717,79 @@ public class BlockInWorldPredicateBuilder {
             DE/SERIALIZATION HELPER METHODS END HERE
      */
 
-    // TODO: figure out wtf the palette field does; I forgot lmao. Then redo it so that this method doesn't exist ad hoc.
     /**
-     * Returns the <code>BlockState</code> associated with this builder. This method is mainly used for the palette in the
+     * Returns a <code>Set</code> of all possible <code>BlockState</code>s satisfying this builder. This method is mainly used for the palette in the
      * <code>MultiblockPattern</code>.
      */
-    public BlockState getBlockState() {
-        if (this.blockTag != null) //noinspection DataFlowIssue
-            return BLOCKS.tags().getTag(this.blockTag).getRandomElement(RandomSource.create()).orElseThrow().defaultBlockState();
-        else //noinspection DataFlowIssue
-            return Objects.requireNonNullElseGet(this.blockState, () -> this.block.defaultBlockState());
+    public Set<BlockState> getValidBlockstates() {
+        return switch (this.matchType) {
+            case BLOCK -> {
+                assert this.block != null;
+                yield this.allValidStatesForBlock(this.block);
+            }
+            case BLOCKSTATE -> {
+                assert this.blockState != null;
+                yield Collections.singleton(this.blockState);
+            }
+            case TAG -> {
+                assert this.blockTag != null;
+                Set<BlockState> toReturn = new HashSet<>();
+                for (Block block : Objects.requireNonNull(BLOCKS.tags()).getTag(this.blockTag)) {
+                    toReturn.addAll(this.allValidStatesForBlock(block));
+                }
+                yield toReturn;
+            }
+        };
+    }
+
+    protected <T extends Comparable<T>, V extends T> Set<BlockState> allValidStatesForBlock(Block block) {
+        Set<BlockState> toReturn = new HashSet<>();
+
+        Set<Map<String, String>> allProperties = new HashSet<>();
+        for (Map.Entry<String, Set<String>> stringEntry : this.properties.entrySet()) {
+            // TODO
+            // allProperties.add();
+        }
+
+        try {
+            for (Map<String, String> stringMap : allProperties) {
+                BlockState blockState = block.defaultBlockState();
+                for (Map.Entry<String, String> stringEntry : stringMap.entrySet()) {
+
+                    //noinspection unchecked
+                    Property<T> property = (Property<T>) blockState
+                            .getProperties()
+                            .stream()
+                            .filter(property1 -> property1.getName().equals(stringEntry.getKey()))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (property == null) {
+                        blockState = null;
+                        break;
+                    }
+
+                    //noinspection unchecked
+                    V value = (V) property.getValue(stringEntry.getValue()).orElse(null);
+
+                    if (value == null) {
+                        blockState = null;
+                        break;
+                    }
+
+                    blockState = blockState.setValue(property, value);
+                }
+
+                if (blockState == null) continue;
+                toReturn.add(blockState);
+            }
+
+            return toReturn;
+        } catch (RuntimeException e) {
+            LOGGER.error("Unable to return valid blockstates for builder of block " + block + " !", e);
+            LOGGER.error(e.getMessage());
+            return new HashSet<>();
+        }
     }
 
     public ItemStack getItemized() {

@@ -107,7 +107,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
     public MultiblockPattern build() {
         return new MultiblockPattern(
                 this.createPattern(),
-                this.lookupSimple.values().stream().map(BlockInWorldPredicateBuilder::getBlockState).toList(),
+                (List<BlockInWorldPredicateBuilder>) this.lookupSimple.values(),
                 this.totalBlocks(),
                 this.serializePatternNbt()
         );

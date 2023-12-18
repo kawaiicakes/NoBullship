@@ -3,6 +3,7 @@ package io.github.kawaiicakes.nobullship.multiblock;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
@@ -27,6 +28,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.BakedModelWrapper;
@@ -35,13 +37,9 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.WILDCARD_BLOCK;
-import static net.minecraft.world.level.block.Blocks.AIR;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshopBlockEntity> {
@@ -70,13 +68,18 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
             LOGGER.error("Unable to set recipe {} as pattern for render is null or empty!", recipe.getId());
             return;
         }
-        Map<Character, BlockState> mapForRender = MultiblockPattern.rawPaletteFromNbt(patternTag, facing);
-        if (mapForRender == null || mapForRender.isEmpty()) {
-            LOGGER.error("Unable to set recipe {} as palette for render is null or empty!", recipe.getId());
+        Map<Character, BlockInWorldPredicateBuilder> predicateMap = MultiblockPattern.rawPaletteFromNbt(patternTag);
+        if (predicateMap == null || predicateMap.isEmpty()) {
+            LOGGER.error("Unable to set recipe {} as palette is null or empty!", recipe.getId());
             return;
         }
 
-        RENDER_QUEUE.put(origin, new RenderInstructions(forRender.result(), mapForRender, listForRender, facing));
+        Map<Character, BlockIngredient> paletteMap = new HashMap<>();
+        for (Map.Entry<Character, BlockInWorldPredicateBuilder> stateEntry : predicateMap.entrySet()) {
+            // TODO
+        }
+
+        RENDER_QUEUE.put(origin, new RenderInstructions(forRender.result(), paletteMap, listForRender, facing));
     }
 
     public static void stopRenderAt(BlockPos entityPos) {
@@ -110,10 +113,10 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
         ModelBlockRenderer.enableCaching();
 
-        Map<Character, BlockState> palette = entry.palette;
-        Direction facing = entry.direction;
-        palette.put(' ', AIR.defaultBlockState());
-        palette.put('$', WILDCARD_BLOCK.get().defaultBlockState().setValue(HORIZONTAL_FACING, facing));
+        Map<Character, BlockIngredient> palette = entry.palette;
+        Direction facing = entry.facing;
+        palette.put(' ', BlockIngredient.AIR);
+        palette.put('$', BlockIngredient.WILDCARD);
 
         BlockPos previewPosition = posOfEntity.mutable().move(facing, -(zSize + 1)).offset(0, ySize - 1, 0).immutable();
 
@@ -124,7 +127,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                 if (!pBlockEntity.verticalRenderSlicing && layerForRender != j) continue;
 
                 for(int k = 0; k < xSize; ++k) {
-                    BlockState forRender = palette.get((pattern.get(i))[j].charAt(k));
+                    BlockIngredient forRender = palette.get((pattern.get(i))[j].charAt(k));
                     if (forRender == null) continue;
 
                     BlockPos newPos = MultiblockPattern.translateAndRotate(previewPosition, facing, Direction.UP, k, j, i);
@@ -195,50 +198,50 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                         if (pBlockEntity.verticalRenderSlicing) {
                             if (direction.equals(workshopFacing) || direction.equals(workshopFacing.getOpposite())) continue;
 
-                            BlockState toLeft = AIR.defaultBlockState();
+                            BlockIngredient toLeft = BlockIngredient.AIR;
                             if (k - 1 >= 0) toLeft = palette.get((pattern.get(i))[j].charAt(k - 1));
 
-                            BlockState toRight = AIR.defaultBlockState();
+                            BlockIngredient toRight = BlockIngredient.AIR;
                             if (k + 1 < xSize) toRight = palette.get((pattern.get(i))[j].charAt(k + 1));
 
-                            BlockState above = AIR.defaultBlockState();
+                            BlockIngredient above = BlockIngredient.AIR;
                             if (j - 1 >= 0) above = palette.get((pattern.get(i))[j - 1].charAt(k));
 
-                            BlockState below = AIR.defaultBlockState();
+                            BlockIngredient below = BlockIngredient.AIR;
                             if (j + 1 < ySize) below = palette.get((pattern.get(i))[j + 1].charAt(k));
 
-                            if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender, toLeft)) continue;
-                            if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender, toRight)) continue;
-                            if (direction.equals(Direction.UP) && blockDoesNotOccludeFace(forRender, above)) continue;
-                            if (direction.equals(Direction.DOWN) && blockDoesNotOccludeFace(forRender, below)) continue;
+                            if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), toLeft.getCurrentlySelected())) continue;
+                            if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), toRight.getCurrentlySelected())) continue;
+                            if (direction.equals(Direction.UP) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), above.getCurrentlySelected())) continue;
+                            if (direction.equals(Direction.DOWN) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), below.getCurrentlySelected())) continue;
 
                             hiddenFaces.add(direction);
                             continue;
                         }
                         if (direction.equals(Direction.UP) || direction.equals(Direction.DOWN)) continue;
 
-                        BlockState toLeft = AIR.defaultBlockState();
+                        BlockIngredient toLeft = BlockIngredient.AIR;
                         if (k - 1 >= 0) toLeft = palette.get((pattern.get(i))[j].charAt(k - 1));
 
-                        BlockState toRight = AIR.defaultBlockState();
+                        BlockIngredient toRight = BlockIngredient.AIR;
                         if (k + 1 < xSize) toRight = palette.get((pattern.get(i))[j].charAt(k + 1));
 
-                        BlockState toFront = AIR.defaultBlockState();
+                        BlockIngredient toFront = BlockIngredient.AIR;
                         if (i - 1 >= 0) toFront = palette.get((pattern.get(i - 1))[j].charAt(k));
 
-                        BlockState behind = AIR.defaultBlockState();
+                        BlockIngredient behind = BlockIngredient.AIR;
                         if (i + 1 < zSize) behind = palette.get((pattern.get(i + 1))[j].charAt(k));
 
-                        if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender, toLeft)) continue;
-                        if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender, toRight)) continue;
-                        if (direction.equals(workshopFacing.getOpposite()) && blockDoesNotOccludeFace(forRender, toFront)) continue;
-                        if (direction.equals(workshopFacing) && blockDoesNotOccludeFace(forRender, behind)) continue;
+                        if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), toLeft.getCurrentlySelected())) continue;
+                        if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), toRight.getCurrentlySelected())) continue;
+                        if (direction.equals(workshopFacing.getOpposite()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), toFront.getCurrentlySelected())) continue;
+                        if (direction.equals(workshopFacing) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), behind.getCurrentlySelected())) continue;
 
                         hiddenFaces.add(direction);
                     }
 
                     this.renderGhostBlock(
-                            forRender, newPos,
+                            forRender.getCurrentlySelected(), newPos,
                             clientLevel, pPoseStack,
                             proxyBuffer, true,
                             clientLevel.getRandom(),
@@ -310,5 +313,27 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         return block.getRenderShape() == RenderShape.INVISIBLE || block.is(WILDCARD_BLOCK.get());
     }
 
-    public record RenderInstructions(ResourceLocation id, Map<Character, BlockState> palette, List<String[]> pattern, Direction direction) {}
+    public static class BlockIngredient {
+        public static final BlockIngredient AIR = new BlockIngredient(Collections.singleton(Blocks.AIR.defaultBlockState()), null);
+        public static final BlockIngredient WILDCARD = new BlockIngredient(Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null);
+
+        protected static int INCREMENT;
+        protected final Set<BlockState> validBlockStates;
+
+        public BlockIngredient(BlockInWorldPredicateBuilder builder, @Nullable Direction facing) {
+            this(builder.getValidBlockstates(), facing);
+        }
+
+        public BlockIngredient(Set<BlockState> validBlockStates, @Nullable Direction facing) {
+            // TODO: facing
+            this.validBlockStates = validBlockStates;
+        }
+
+        public BlockState getCurrentlySelected() {
+            // TODO
+            return Blocks.AIR.defaultBlockState();
+        }
+    }
+
+    public record RenderInstructions(ResourceLocation id, Map<Character, BlockIngredient> palette, List<String[]> pattern, Direction facing) {}
 }
