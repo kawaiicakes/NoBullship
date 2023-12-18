@@ -76,7 +76,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
         Map<Character, BlockIngredient> paletteMap = new HashMap<>();
         for (Map.Entry<Character, BlockInWorldPredicateBuilder> stateEntry : predicateMap.entrySet()) {
-            // TODO
+            paletteMap.put(stateEntry.getKey(), new BlockIngredient(stateEntry.getValue(), facing));
         }
 
         RENDER_QUEUE.put(origin, new RenderInstructions(forRender.result(), paletteMap, listForRender, facing));
@@ -316,21 +316,23 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
     public static class BlockIngredient {
         public static final BlockIngredient AIR = new BlockIngredient(Collections.singleton(Blocks.AIR.defaultBlockState()), null);
         public static final BlockIngredient WILDCARD = new BlockIngredient(Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null);
-
         protected static int INCREMENT;
+
         protected final Set<BlockState> validBlockStates;
+        protected final Direction facing;
 
         public BlockIngredient(BlockInWorldPredicateBuilder builder, @Nullable Direction facing) {
             this(builder.getValidBlockstates(), facing);
         }
 
         public BlockIngredient(Set<BlockState> validBlockStates, @Nullable Direction facing) {
-            // TODO: facing
             this.validBlockStates = validBlockStates;
+            this.facing = facing == null ? Direction.NORTH : facing;
         }
 
         public BlockState getCurrentlySelected() {
-            // TODO
+            // TODO: return a random blockstate from validBlockStates that is not the same as the previous and changes to a new state as the others. (static field INCREMENT)
+            // TODO rotate returned state according to BlockInWorldPredicate#rotateValue and $facing
             return Blocks.AIR.defaultBlockState();
         }
     }

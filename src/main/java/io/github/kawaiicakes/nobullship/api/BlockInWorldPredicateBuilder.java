@@ -747,7 +747,7 @@ public class BlockInWorldPredicateBuilder {
 
         Set<Map<String, String>> allProperties = new HashSet<>();
         for (Map.Entry<String, Set<String>> stringEntry : this.properties.entrySet()) {
-            // TODO
+            // TODO: put all possible permutations of properties into allProperties
             // allProperties.add();
         }
 
