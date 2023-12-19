@@ -324,7 +324,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         public static final BlockIngredient WILDCARD = new BlockIngredient(Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null);
         protected static int INCREMENT;
 
-        protected final Set<BlockState> validBlockStates;
+        protected final List<BlockState> validBlockStates;
         protected final Direction facing;
 
         public BlockIngredient(BlockInWorldPredicateBuilder builder, @Nullable Direction facing) {
@@ -332,13 +332,13 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         }
 
         public BlockIngredient(Set<BlockState> validBlockStates, @Nullable Direction facing) {
-            this.validBlockStates = validBlockStates;
+            this.validBlockStates = validBlockStates.stream().toList();
             this.facing = facing == null ? Direction.NORTH : facing;
         }
 
         public BlockState getCurrentlySelected() {
             // TODO: return a random blockstate from validBlockStates that is not the same as the previous and changes to a new state as the others. (static field INCREMENT)
-            return getRotated(Blocks.AIR.defaultBlockState(), this.facing);
+            return getRotated(this.validBlockStates.get(0), this.facing);
         }
 
         public static <T extends Comparable<T>> BlockState getRotated(BlockState original, Direction facing) {
