@@ -3,6 +3,7 @@ package io.github.kawaiicakes.nobullship.multiblock;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
@@ -31,6 +32,8 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
@@ -38,8 +41,10 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.WILDCARD_BLOCK;
+import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARDINAL;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshopBlockEntity> {
@@ -314,6 +319,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
     }
 
     public static class BlockIngredient {
+        public static final Set<String> CARDINAL_NAMES = Arrays.stream(CARDINAL).map(Direction::getName).collect(Collectors.toSet());
         public static final BlockIngredient AIR = new BlockIngredient(Collections.singleton(Blocks.AIR.defaultBlockState()), null);
         public static final BlockIngredient WILDCARD = new BlockIngredient(Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null);
         protected static int INCREMENT;
@@ -332,8 +338,33 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
         public BlockState getCurrentlySelected() {
             // TODO: return a random blockstate from validBlockStates that is not the same as the previous and changes to a new state as the others. (static field INCREMENT)
-            // TODO rotate returned state according to BlockInWorldPredicate#rotateValue and $facing
-            return Blocks.AIR.defaultBlockState();
+            return getRotated(Blocks.AIR.defaultBlockState(), this.facing);
+        }
+
+        public static <T extends Comparable<T>> BlockState getRotated(BlockState original, Direction facing) {
+            if (facing.equals(Direction.NORTH)) return original;
+
+            BlockState toReturn = original;
+
+            try {
+                for (Property<?> p : toReturn.getProperties()) {
+                    //noinspection unchecked
+                    Property<T> propertyOfOriginal = (Property<T>) p;
+
+                    // TODO: account for more states that indicate direction; such as signs (int property), fences/walls (boolean properties), etc.
+                    if (propertyOfOriginal instanceof DirectionProperty directionProperty) {
+                        Direction originalValue = toReturn.getValue(directionProperty);
+                        Direction rotatedValue = BlockInWorldPredicate.rotateValue(originalValue, facing);
+                        toReturn = toReturn.setValue(directionProperty, rotatedValue);
+                    }
+                }
+            } catch (ClassCastException e) {
+                LOGGER.error("Class cast exception while attempting to rotate blockstate for render!", e);
+                LOGGER.error(e.getMessage());
+                return original;
+            }
+
+            return toReturn;
         }
     }
 
