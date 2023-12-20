@@ -743,6 +743,9 @@ public class BlockInWorldPredicateBuilder {
     }
 
     protected <T extends Comparable<T>, V extends T> Set<BlockState> allValidStatesForBlock(Block block) {
+        if (block.getStateDefinition().getPossibleStates().size() == 1)
+            return Collections.singleton(block.defaultBlockState());
+
         Set<BlockState> toReturn = new HashSet<>();
 
         Set<Map<String, String>> allProperties = new HashSet<>();
