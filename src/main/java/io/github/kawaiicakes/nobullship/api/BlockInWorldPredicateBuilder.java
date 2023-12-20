@@ -614,7 +614,7 @@ public class BlockInWorldPredicateBuilder {
             if (block == null) throw new RuntimeException("Block was null during deserialization!");
             toReturn = BlockInWorldPredicateBuilder.of(block);
 
-            JsonObject propertiesJson = predicateObj.getAsJsonObject("Properties");
+            JsonObject propertiesJson = blockAsJson.getAsJsonObject("Properties");
             if (propertiesJson == null) propertiesJson = new JsonObject();
             for (Map.Entry<String, JsonElement> propertyEntryJson : propertiesJson.entrySet()) {
                 JsonArray propertyValuesJson = propertyEntryJson.getValue().getAsJsonArray();
