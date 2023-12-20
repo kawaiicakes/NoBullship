@@ -322,7 +322,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         public static final Set<String> CARDINAL_NAMES = Arrays.stream(CARDINAL).map(Direction::getName).collect(Collectors.toSet());
         public static final BlockIngredient AIR = new BlockIngredient(Collections.singleton(Blocks.AIR.defaultBlockState()), null);
         public static final BlockIngredient WILDCARD = new BlockIngredient(Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null);
-        protected static Random RANDOM_SRC;
+        protected static Random RANDOM_SRC = new Random();
         protected static int INCREMENT;
 
         protected final List<BlockState> validBlockStates;
