@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.api;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -748,11 +749,7 @@ public class BlockInWorldPredicateBuilder {
 
         Set<BlockState> toReturn = new HashSet<>();
 
-        Set<Map<String, String>> allProperties = new HashSet<>();
-        for (Map.Entry<String, Set<String>> stringEntry : this.properties.entrySet()) {
-            // TODO: put all possible permutations of properties into allProperties
-            // allProperties.add();
-        }
+        Set<Map<String, String>> allProperties = getPropertyPermutations(this.properties);
 
         try {
             for (Map<String, String> stringMap : allProperties) {
@@ -827,6 +824,33 @@ public class BlockInWorldPredicateBuilder {
 
     public boolean isForTag() {
         return this.matchType.equals(MatchType.TAG);
+    }
+
+    // erm ackshually these are combinations but the word permutation is cooler
+    protected static Set<Map<String, String>> getPropertyPermutations(Map<String, Set<String>> properties) {
+        Set<Map<String, String>> toReturn = new HashSet<>();
+
+        List<Map.Entry<String, Set<String>>> propertiesList = properties.entrySet().stream().toList();
+
+        List<List<String>> valuesList = new ArrayList<>(propertiesList.size());
+        for (Map.Entry<String, Set<String>> propertyEntries : propertiesList) {
+            valuesList.add(propertyEntries.getValue().stream().toList());
+        }
+        List<List<String>> cartesianProduct = Lists.cartesianProduct(valuesList);
+
+        for (List<String> strings : cartesianProduct) {
+            Map<String, String> propertyMap = new HashMap<>();
+
+            for (String string : strings) {
+                int indexOfString = strings.indexOf(string);
+                String correspondingPropertyName = propertiesList.get(indexOfString).getKey();
+                propertyMap.put(correspondingPropertyName, string);
+            }
+
+            toReturn.add(propertyMap);
+        }
+
+        return toReturn;
     }
 
     public enum MatchType implements StringRepresentable {
