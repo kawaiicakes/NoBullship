@@ -322,6 +322,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         public static final Set<String> CARDINAL_NAMES = Arrays.stream(CARDINAL).map(Direction::getName).collect(Collectors.toSet());
         public static final BlockIngredient AIR = new BlockIngredient(Collections.singleton(Blocks.AIR.defaultBlockState()), null);
         public static final BlockIngredient WILDCARD = new BlockIngredient(Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null);
+        protected static Random RANDOM_SRC;
         protected static int INCREMENT;
 
         protected final List<BlockState> validBlockStates;
@@ -337,8 +338,10 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         }
 
         public BlockState getCurrentlySelected() {
-            // TODO: return a random blockstate from validBlockStates that is not the same as the previous and changes to a new state as the others. (static field INCREMENT)
-            return getRotated(this.validBlockStates.get(0), this.facing);
+            // Prevents ArrayIndexOutOfBoundsException when rendering preview for first time
+            if (this.validBlockStates.isEmpty()) return Blocks.AIR.defaultBlockState();
+            int randomIndex = RANDOM_SRC.nextInt(this.validBlockStates.size());
+            return getRotated(this.validBlockStates.get(randomIndex), this.facing);
         }
 
         public static <T extends Comparable<T>> BlockState getRotated(BlockState original, Direction facing) {
@@ -365,6 +368,12 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
             }
 
             return toReturn;
+        }
+
+        public static void tickRandomSeedChange() {
+            if (INCREMENT++ < 60) return;
+            INCREMENT = 0;
+            RANDOM_SRC = new Random();
         }
     }
 

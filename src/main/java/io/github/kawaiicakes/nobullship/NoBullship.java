@@ -138,6 +138,15 @@ public class NoBullship
         event.addListener(MultiblockRecipeManager.getInstance());
     }
 
+    @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+    public static class ClientEvents {
+        @SubscribeEvent
+        public static void onClientLevelTick(TickEvent.LevelTickEvent event) {
+            if (!event.level.isClientSide || !event.phase.equals(TickEvent.Phase.START)) return;
+            SchematicRenderer.BlockIngredient.tickRandomSeedChange();
+        }
+    }
+
     @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ClientSetup {
         @SubscribeEvent
