@@ -22,11 +22,13 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class MultiblockPatternBuilder extends BlockPatternBuilder {
     protected static final Logger LOGGER = LogUtils.getLogger();
@@ -107,7 +109,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
     public MultiblockPattern build() {
         return new MultiblockPattern(
                 this.createPattern(),
-                (List<BlockInWorldPredicateBuilder>) this.lookupSimple.values(),
+                new ArrayList<>(this.lookupSimple.values()),
                 this.totalBlocks(),
                 this.serializePatternNbt()
         );
