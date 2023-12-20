@@ -104,10 +104,9 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         int ySize = pattern.get(0).length;
         int xSize = pattern.get(0)[0].length();
 
-        // FIXME: zero will appear twice when renderedLayer is near 0
         int layerForRender = pBlockEntity.verticalRenderSlicing
-                ? (pBlockEntity.renderedLayer < 0 ? zSize - Math.abs(pBlockEntity.renderedLayer % zSize) - 1 : pBlockEntity.renderedLayer % zSize)
-                : (pBlockEntity.renderedLayer < 0 ? ySize - Math.abs(pBlockEntity.renderedLayer % ySize) - 1 : pBlockEntity.renderedLayer % ySize);
+                ? returnDisplayNumber(pBlockEntity.renderedLayer, zSize)
+                : returnDisplayNumber(pBlockEntity.renderedLayer, ySize);
 
         pBlockEntity.actualRenderedLayer = layerForRender;
 
@@ -316,6 +315,12 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
     public static boolean blockDoesNotOccludeFace(BlockState occludedBlock, BlockState block) {
         if (occludedBlock.is(WILDCARD_BLOCK.get()) && block.is(WILDCARD_BLOCK.get())) return false;
         return block.getRenderShape() == RenderShape.INVISIBLE || block.is(WILDCARD_BLOCK.get());
+    }
+
+    public static int returnDisplayNumber(int renderedLayer, int size) {
+        if (renderedLayer >= 0) return renderedLayer % size;
+        else if (renderedLayer >= -size) return (renderedLayer + size) % size;
+        else return size - (Math.abs(renderedLayer) & size);
     }
 
     public static class BlockIngredient {
