@@ -327,6 +327,9 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
         protected final List<BlockState> validBlockStates;
         protected final Direction facing;
+        protected Random seed;
+        protected int randomIndexOld = 0;
+        protected int randomIndex = 0;
 
         public BlockIngredient(BlockInWorldPredicateBuilder builder, @Nullable Direction facing) {
             this(builder.getValidBlockstates(), facing);
@@ -340,8 +343,18 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         public BlockState getCurrentlySelected() {
             // Prevents ArrayIndexOutOfBoundsException when rendering preview for first time
             if (this.validBlockStates.isEmpty()) return Blocks.AIR.defaultBlockState();
-            int randomIndex = RANDOM_SRC.nextInt(this.validBlockStates.size());
-            return getRotated(this.validBlockStates.get(randomIndex), this.facing);
+            int arraySize = this.validBlockStates.size();
+
+            if (!RANDOM_SRC.equals(this.seed)) {
+                this.randomIndex = RANDOM_SRC.nextInt(arraySize);
+                this.seed = RANDOM_SRC;
+
+                if (this.randomIndexOld == this.randomIndex) this.randomIndex
+                        += this.randomIndex == (arraySize - 1) ? -arraySize + 1 : 1;
+            }
+
+            this.randomIndexOld = this.randomIndex;
+            return getRotated(this.validBlockStates.get(this.randomIndex), this.facing);
         }
 
         public static <T extends Comparable<T>> BlockState getRotated(BlockState original, Direction facing) {
