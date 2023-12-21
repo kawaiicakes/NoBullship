@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.multiblock;
 
+import com.google.common.math.IntMath;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
@@ -105,8 +106,8 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         int xSize = pattern.get(0)[0].length();
 
         int layerForRender = pBlockEntity.verticalRenderSlicing
-                ? returnDisplayNumber(pBlockEntity.renderedLayer, zSize)
-                : returnDisplayNumber(pBlockEntity.renderedLayer, ySize);
+                ? IntMath.mod(pBlockEntity.renderedLayer, zSize)
+                : IntMath.mod(pBlockEntity.renderedLayer, ySize);
 
         pBlockEntity.actualRenderedLayer = layerForRender;
 
@@ -315,12 +316,6 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
     public static boolean blockDoesNotOccludeFace(BlockState occludedBlock, BlockState block) {
         if (occludedBlock.is(WILDCARD_BLOCK.get()) && block.is(WILDCARD_BLOCK.get())) return false;
         return block.getRenderShape() == RenderShape.INVISIBLE || block.is(WILDCARD_BLOCK.get());
-    }
-
-    public static int returnDisplayNumber(int renderedLayer, int size) {
-        if (renderedLayer >= 0) return renderedLayer % size;
-        else if (renderedLayer >= -size) return (renderedLayer + size) % size;
-        else return size - (Math.abs(renderedLayer) & size);
     }
 
     public static class BlockIngredient {
