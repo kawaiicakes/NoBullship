@@ -27,7 +27,7 @@ ___
 
 ___
 
-## This mod is currently in alpha and under active development! Please back up your worlds prior to and routinely following installation!
+## This mod is currently in beta and under active development! Please back up your worlds prior to and routinely following installation!
 
 </div>
 
