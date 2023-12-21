@@ -59,6 +59,7 @@ This mod is intended for modpackers to use & configure; however, it will come wi
 - [Straight-forward datapack creation for multiblock & schematic recipes](https://github.com/kawaiicakes/NoBullship/wiki)
 - Multiblocks may require extra items in the inventory to make!
 - Supports NBT and blockstate data for both crafted entities and ingredient blocks!
+- Supports block tags!
 - Compatible with nearly any mod!
 - Lots of config options!
 
@@ -68,8 +69,6 @@ ___
 
 - JEI compatibility for multiblocks themselves
 - Support for rendering block entities with NBT data in the workshop schematic previews
-- More aggressive disposal of invalid recipes
-- Permitting block and/or item tags to be used as multiblock ingredients
 - NBT structure support; convert NBT structures to/from multiblock recipes!
 - "Structure block" permitting reasonable performance for huge recipes (think over 20x20x20)
 - Configurable drop prevention, even for hard-coded drops (e.g. Simple Planes planes)
