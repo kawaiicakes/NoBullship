@@ -33,8 +33,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.block.state.properties.*;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
@@ -363,19 +362,47 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
             BlockState toReturn = original;
 
             try {
+                Map<String, Boolean> mapOfBooleanDirectionProperties = null;
+                Map<String, WallSide> mapOfWallSideProperties = null;
+
                 for (Property<?> p : toReturn.getProperties()) {
                     //noinspection unchecked
                     Property<T> propertyOfOriginal = (Property<T>) p;
 
-                    // TODO: account for more states that indicate direction; such as signs (int property), fences/walls (boolean properties), etc.
+                    // TODO: account for more states that indicate direction; such as signs (int property), etc.
+                    // TODO: maybe use of generics and extraction of this shit to a new method would be cleaner
                     if (propertyOfOriginal instanceof DirectionProperty directionProperty) {
                         Direction originalValue = toReturn.getValue(directionProperty);
-                        Direction rotatedValue = BlockInWorldPredicate.rotateValue(originalValue, facing);
+                        Direction rotatedValue = BlockInWorldPredicate.rotateDirection(originalValue, facing);
                         toReturn = toReturn.setValue(directionProperty, rotatedValue);
+                    } else if (propertyOfOriginal instanceof EnumProperty<?> enumProperty) {
+                        if (enumProperty.getValueClass().equals(Direction.Axis.class)) {
+                            //noinspection unchecked
+                            EnumProperty<Direction.Axis> axisProperty = (EnumProperty<Direction.Axis>) enumProperty;
+
+                            Direction.Axis originalAxis = toReturn.getValue(axisProperty);
+                            Direction.Axis rotatedAxis = BlockInWorldPredicate.rotateAxis(originalAxis, facing);
+                            toReturn = toReturn.setValue(axisProperty, rotatedAxis);
+                        } else if (enumProperty.getValueClass().equals(WallSide.class)) {
+                            //noinspection unchecked
+                            EnumProperty<WallSide> axisProperty = (EnumProperty<WallSide>) enumProperty;
+                            if (mapOfWallSideProperties == null) mapOfWallSideProperties = new HashMap<>();
+                            mapOfWallSideProperties.put(axisProperty.getName(), toReturn.getValue(axisProperty));
+                        }
+                    } else if (propertyOfOriginal instanceof BooleanProperty booleanProperty) {
+                        if (!CARDINAL_NAMES.contains(booleanProperty.getName())) continue;
+                        if (mapOfBooleanDirectionProperties == null) mapOfBooleanDirectionProperties = new HashMap<>();
+                        mapOfBooleanDirectionProperties.put(booleanProperty.getName(), toReturn.getValue(booleanProperty));
                     }
                 }
+
+                // TODO: handling of maps declared in this block
             } catch (ClassCastException e) {
                 LOGGER.error("Class cast exception while attempting to rotate blockstate for render!", e);
+                LOGGER.error(e.getMessage());
+                return original;
+            } catch (RuntimeException e) {
+                LOGGER.error("An exception was caught while attempting to rotate blockstate for render!", e);
                 LOGGER.error(e.getMessage());
                 return original;
             }

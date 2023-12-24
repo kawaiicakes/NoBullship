@@ -13,8 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.block.state.properties.*;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -23,6 +22,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARDINAL;
+import static io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer.BlockIngredient.CARDINAL_NAMES;
 
 /**
  * This is a <code>Predicate</code> implementation allowing for dynamic checking of rotations in directional
@@ -119,6 +119,9 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
         if (properties == null || properties.isEmpty()) return (block) -> true;
 
         return (block) -> {
+            Map<String, Boolean> mapOfBooleanDirectionProperties = null;
+            Map<String, WallSide> mapOfWallSideProperties = null;
+
             for (Map.Entry<String, Set<String>> entry : properties.entrySet()) {
                 Property<?> propertyOfBlockInWorld;
 
@@ -148,20 +151,24 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
                     return false;
                 }
 
+                // TODO: account for more states that indicate direction; such as signs (int property), etc.
+                // TODO: maybe use of generics and extraction of this shit to a new method would be cleaner
                 if (propertyOfBlockInWorld instanceof DirectionProperty) {
                     Set<Direction> setOfDirectionsDefault;
 
                     try {
                         setOfDirectionsDefault = entry.getValue()
                                 .stream()
-                                .map(BlockInWorldPredicate::parseFromString)
+                                .map(Direction::byName)
                                 .collect(Collectors.toSet());
+
+                        if (setOfDirectionsDefault.contains(null)) throw new IllegalArgumentException("Value set contains invalid string!");
                     } catch (RuntimeException e) {
                         LOGGER.error("Error casting values to direction!", e);
                         return false;
                     }
 
-                    Set<Direction> setOfDirections = setOfDirectionsDefault.stream().map(value -> rotateValue(value, facing)).collect(Collectors.toSet());
+                    Set<Direction> setOfDirections = setOfDirectionsDefault.stream().map(value -> rotateDirection(value, facing)).collect(Collectors.toSet());
 
                     Direction directionOfBlockInWorld = Direction.byName(valueAtPropertyOfBlockInWorld);
                     if (directionOfBlockInWorld == null) {
@@ -170,11 +177,61 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
                     }
 
                     if (!(setOfDirections.contains(directionOfBlockInWorld))) return false;
-                    continue;
+                } else if (propertyOfBlockInWorld instanceof EnumProperty<?> enumProperty) {
+                    if (enumProperty.getValueClass().equals(Direction.Axis.class)) {
+                        Set<Direction.Axis> setOfValidAxesDefault;
+
+                        try {
+                            setOfValidAxesDefault = entry.getValue()
+                                    .stream()
+                                    .map(Direction.Axis::byName)
+                                    .collect(Collectors.toSet());
+
+                            if (setOfValidAxesDefault.contains(null))
+                                throw new IllegalArgumentException("Value set contains invalid string!");
+                        } catch (RuntimeException e) {
+                            LOGGER.error("Error casting values to axis!", e);
+                            return false;
+                        }
+
+                        if (setOfValidAxesDefault.contains(Direction.Axis.X) && setOfValidAxesDefault.contains(Direction.Axis.Z))
+                            continue;
+
+                        Set<Direction.Axis> setOfValidAxes = setOfValidAxesDefault.stream().map(value -> rotateAxis(value, facing)).collect(Collectors.toSet());
+
+                        Direction.Axis axisOfBlockInWorld = Direction.Axis.byName(valueAtPropertyOfBlockInWorld);
+                        if (axisOfBlockInWorld == null) {
+                            LOGGER.error("Value {} is not a valid axis for property {} at {}!", valueAtPropertyOfBlockInWorld, entry.getKey(), block.getPos());
+                            return false;
+                        }
+
+                        if (!(setOfValidAxes.contains(axisOfBlockInWorld))) return false;
+                    } else if (enumProperty.getValueClass().equals(WallSide.class)) {
+                        //noinspection unchecked
+                        EnumProperty<WallSide> axisProperty = (EnumProperty<WallSide>) enumProperty;
+                        if (mapOfWallSideProperties == null) mapOfWallSideProperties = new HashMap<>();
+                        WallSide wallSide;
+
+                        try {
+                            wallSide = WallSide.valueOf(valueAtPropertyOfBlockInWorld);
+                        } catch (IllegalArgumentException e) {
+                            LOGGER.error("Illegal value {} is not a WallSide value!", valueAtPropertyOfBlockInWorld);
+                            return false;
+                        }
+
+                        mapOfWallSideProperties.put(axisProperty.getName(), wallSide);
+                    }
+                } else if (propertyOfBlockInWorld instanceof BooleanProperty booleanProperty) {
+                    if (!CARDINAL_NAMES.contains(booleanProperty.getName())) continue;
+                    if (mapOfBooleanDirectionProperties == null) mapOfBooleanDirectionProperties = new HashMap<>();
+                    mapOfBooleanDirectionProperties.put(booleanProperty.getName(), Boolean.parseBoolean(valueAtPropertyOfBlockInWorld));
                 }
 
                 if (!entry.getValue().contains(valueAtPropertyOfBlockInWorld)) return false;
             }
+
+            // TODO: handling of maps declared in this block
+
             return true;
         };
     }
@@ -243,7 +300,7 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
         };
     }
 
-    public static Direction rotateValue(Comparable<?> original, Direction rotated) {
+    public static Direction rotateDirection(Comparable<?> original, Direction rotated) {
         if (!(original instanceof Direction originalDirection))
             throw new IllegalArgumentException("Argument 'original' is not a direction!");
 
@@ -255,9 +312,11 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
         };
     }
 
-    protected static Direction parseFromString(String direction) {
-        Direction toReturn = Direction.byName(direction);
-        if (toReturn == null) throw new IllegalArgumentException(direction + " is not a valid direction name!");
-        return toReturn;
+    public static Direction.Axis rotateAxis(Direction.Axis axis, Direction rotated) {
+        if (axis.isVertical()) return axis;
+        return switch (rotated) {
+            case EAST, WEST -> axis.equals(Direction.Axis.X) ? Direction.Axis.Z : Direction.Axis.X;
+            default -> axis;
+        };
     }
 }
