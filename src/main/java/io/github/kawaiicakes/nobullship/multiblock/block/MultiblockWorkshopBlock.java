@@ -31,7 +31,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
-import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
+import static io.github.kawaiicakes.nobullship.Registry.WORKSHOP_BLOCK_ENTITY;
 
 public class MultiblockWorkshopBlock extends BaseEntityBlock {
     protected static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;

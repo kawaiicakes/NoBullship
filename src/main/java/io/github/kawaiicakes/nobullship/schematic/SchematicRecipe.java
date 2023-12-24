@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import java.util.*;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
-import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
+import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 import static io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity.SHAPELESS_SLOTS;
 import static net.minecraft.world.item.Items.AIR;

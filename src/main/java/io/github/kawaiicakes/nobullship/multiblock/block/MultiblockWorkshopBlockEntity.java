@@ -27,8 +27,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 
-import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
-import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK_ENTITY;
+import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC;
+import static io.github.kawaiicakes.nobullship.Registry.WORKSHOP_BLOCK_ENTITY;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 /**

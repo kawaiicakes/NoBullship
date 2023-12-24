@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
-import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_BLOCK;
+import static io.github.kawaiicakes.nobullship.Registry.WORKSHOP_BLOCK;
 
 @JeiPlugin
 public class NoBullshipJEI implements IModPlugin {

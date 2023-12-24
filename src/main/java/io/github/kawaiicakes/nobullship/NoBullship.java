@@ -1,32 +1,19 @@
 package io.github.kawaiicakes.nobullship;
 
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
-import io.github.kawaiicakes.nobullship.block.WildcardBlock;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
-import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
-import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen;
 import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacket;
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
-import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.event.TickEvent;
@@ -37,15 +24,12 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.NotNull;
 
 import static io.github.kawaiicakes.nobullship.Config.CONFIG;
-import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.Serializer.INSTANCE;
+import static io.github.kawaiicakes.nobullship.Registry.*;
 import static net.minecraft.world.level.Level.OVERWORLD;
 import static net.minecraftforge.fml.config.ModConfig.Type.COMMON;
-import static net.minecraftforge.registries.ForgeRegistries.*;
 
 @Mod(NoBullship.MOD_ID)
 public class NoBullship
@@ -59,42 +43,6 @@ public class NoBullship
         }
     };
 
-    private static final DeferredRegister<Block> BLOCK_REGISTRY = DeferredRegister.create(BLOCKS, MOD_ID);
-    private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_REGISTRY =
-            DeferredRegister.create(BLOCK_ENTITY_TYPES, MOD_ID);
-    private static final DeferredRegister<Item> ITEM_REGISTRY = DeferredRegister.create(ITEMS, MOD_ID);
-    private static final DeferredRegister<MenuType<?>> MENU_REGISTRY = DeferredRegister.create(MENU_TYPES, MOD_ID);
-    private static final DeferredRegister<SoundEvent> SOUND_REGISTRY = DeferredRegister.create(SOUND_EVENTS, MOD_ID);
-    private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER_REGISTRY
-            = DeferredRegister.create(RECIPE_SERIALIZERS, MOD_ID);
-
-    public static final RegistryObject<Block> WILDCARD_BLOCK
-            = BLOCK_REGISTRY.register("wildcard", WildcardBlock::new);
-    public static final RegistryObject<Block> WORKSHOP_BLOCK
-            = BLOCK_REGISTRY.register("workshop", MultiblockWorkshopBlock::new);
-    public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
-            = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
-    public static final RegistryObject<BlockItem> WILDCARD_ITEM
-            = ITEM_REGISTRY.register(
-                    "wildcard",
-            () -> new BlockItem(WILDCARD_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB)));
-    public static final RegistryObject<BlockItem> WORKSHOP_ITEM
-            = ITEM_REGISTRY.register(
-                    "workshop",
-            () -> new BlockItem(WORKSHOP_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB)));
-    public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
-            = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));
-    public static final RegistryObject<SchematicItem> SCHEMATIC
-            = ITEM_REGISTRY.register("schematic", SchematicItem::new);
-    public static final RegistryObject<SoundEvent> CONSTRUCT_SUCCESS
-            = SOUND_REGISTRY.register("construct_success", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_success")));
-    public static final RegistryObject<SoundEvent> CONSTRUCT_FAILED
-            = SOUND_REGISTRY.register("construct_failed", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_failed")));
-    public static final RegistryObject<SoundEvent> CONSTRUCT_EXPENDED
-            = SOUND_REGISTRY.register("construct_expended", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_expended")));
-    public static final RegistryObject<SchematicRecipe.Serializer> SCHEMATIC_SERIALIZER
-            = RECIPE_SERIALIZER_REGISTRY.register("schematic_workbench", () -> INSTANCE);
-
     public NoBullship()
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -104,12 +52,7 @@ public class NoBullship
 
         modEventBus.addListener(this::commonSetup);
 
-        BLOCK_REGISTRY.register(modEventBus);
-        BLOCK_ENTITY_REGISTRY.register(modEventBus);
-        ITEM_REGISTRY.register(modEventBus);
-        MENU_REGISTRY.register(modEventBus);
-        RECIPE_SERIALIZER_REGISTRY.register(modEventBus);
-        SOUND_REGISTRY.register(modEventBus);
+        Registry.register(modEventBus);
 
         ModLoadingContext.get().registerConfig(COMMON, CONFIG);
     }

@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
-import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
+import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSummedContents;
 import static net.minecraft.ChatFormatting.*;
 import static net.minecraft.nbt.Tag.*;

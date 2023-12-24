@@ -44,7 +44,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.github.kawaiicakes.nobullship.NoBullship.WILDCARD_BLOCK;
+import static io.github.kawaiicakes.nobullship.Registry.WILDCARD_BLOCK;
 import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARDINAL;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 

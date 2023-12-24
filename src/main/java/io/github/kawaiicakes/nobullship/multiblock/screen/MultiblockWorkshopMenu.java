@@ -1,8 +1,8 @@
 package io.github.kawaiicakes.nobullship.multiblock.screen;
 
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
-import io.github.kawaiicakes.nobullship.api.schematic.SchematicResultSlot;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
+import io.github.kawaiicakes.nobullship.api.schematic.SchematicResultSlot;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.nbt.ListTag;
@@ -23,8 +23,8 @@ import net.minecraftforge.items.SlotItemHandler;
 import java.util.Objects;
 import java.util.Optional;
 
-import static io.github.kawaiicakes.nobullship.NoBullship.SCHEMATIC;
-import static io.github.kawaiicakes.nobullship.NoBullship.WORKSHOP_MENU;
+import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC;
+import static io.github.kawaiicakes.nobullship.Registry.WORKSHOP_MENU;
 import static io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity.EMPTY_SCHEM_SLOT;
 import static io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity.FILLED_SCHEM_SLOT;
 

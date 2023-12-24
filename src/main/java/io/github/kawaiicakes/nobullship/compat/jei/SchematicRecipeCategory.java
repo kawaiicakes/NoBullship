@@ -33,6 +33,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.*;
+import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC;
+import static io.github.kawaiicakes.nobullship.Registry.WORKSHOP_ITEM;
 import static io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen.TEXTURE;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.Type.ID;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSummedContents;

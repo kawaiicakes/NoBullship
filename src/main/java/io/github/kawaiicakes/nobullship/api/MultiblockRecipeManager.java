@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 
 import java.util.*;
 
-import static io.github.kawaiicakes.nobullship.NoBullship.*;
+import static io.github.kawaiicakes.nobullship.Registry.*;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.compareSummedContents;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSummedContents;
 import static net.minecraft.ChatFormatting.RED;
