@@ -5,11 +5,11 @@ issueTrackerURL="https://github.com/kawaiicakes/NoBullship/issues"
 
 [[mods]]
 modId="nobullship"
-version="1.19.2-1.2.0"
+version="1.19.2-1.2.1"
 displayName="No Bullship!"
 displayURL="https://github.com/kawaiicakes/NoBullship/"
 logoFile="nobullship.png"
-credits="I would like to thank blackbirdantlion, embeddedt, and 1whohears!"
+credits="I would like to thank blackbirdantlion, Aspennly, embeddedt, and 1whohears for help with art & code!"
 authors="kawaiicakes"
 description='''
 Highly-configurable data-driven crafting recipes using multiblocks.
