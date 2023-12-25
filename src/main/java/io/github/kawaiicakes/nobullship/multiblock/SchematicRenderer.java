@@ -4,7 +4,6 @@ import com.google.common.math.IntMath;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
-import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
@@ -30,10 +29,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.*;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
@@ -41,10 +41,8 @@ import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.Registry.WILDCARD_BLOCK;
-import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARDINAL;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshopBlockEntity> {
@@ -214,10 +212,10 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                             BlockIngredient below = BlockIngredient.AIR;
                             if (j + 1 < ySize) below = palette.get((pattern.get(i))[j + 1].charAt(k));
 
-                            if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), toLeft.getCurrentlySelected())) continue;
-                            if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), toRight.getCurrentlySelected())) continue;
-                            if (direction.equals(Direction.UP) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), above.getCurrentlySelected())) continue;
-                            if (direction.equals(Direction.DOWN) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), below.getCurrentlySelected())) continue;
+                            if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), toLeft.getCurrentlySelected(clientLevel, newPos))) continue;
+                            if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), toRight.getCurrentlySelected(clientLevel, newPos))) continue;
+                            if (direction.equals(Direction.UP) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), above.getCurrentlySelected(clientLevel, newPos))) continue;
+                            if (direction.equals(Direction.DOWN) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), below.getCurrentlySelected(clientLevel, newPos))) continue;
 
                             hiddenFaces.add(direction);
                             continue;
@@ -236,16 +234,16 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                         BlockIngredient behind = BlockIngredient.AIR;
                         if (i + 1 < zSize) behind = palette.get((pattern.get(i + 1))[j].charAt(k));
 
-                        if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), toLeft.getCurrentlySelected())) continue;
-                        if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), toRight.getCurrentlySelected())) continue;
-                        if (direction.equals(workshopFacing.getOpposite()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), toFront.getCurrentlySelected())) continue;
-                        if (direction.equals(workshopFacing) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(), behind.getCurrentlySelected())) continue;
+                        if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), toLeft.getCurrentlySelected(clientLevel, newPos))) continue;
+                        if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), toRight.getCurrentlySelected(clientLevel, newPos))) continue;
+                        if (direction.equals(workshopFacing.getOpposite()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), toFront.getCurrentlySelected(clientLevel, newPos))) continue;
+                        if (direction.equals(workshopFacing) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), behind.getCurrentlySelected(clientLevel, newPos))) continue;
 
                         hiddenFaces.add(direction);
                     }
 
                     this.renderGhostBlock(
-                            forRender.getCurrentlySelected(), newPos,
+                            forRender.getCurrentlySelected(clientLevel, newPos), newPos,
                             clientLevel, pPoseStack,
                             proxyBuffer, true,
                             clientLevel.getRandom(),
@@ -318,7 +316,6 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
     }
 
     public static class BlockIngredient {
-        public static final Set<String> CARDINAL_NAMES = Arrays.stream(CARDINAL).map(Direction::getName).collect(Collectors.toSet());
         public static final BlockIngredient AIR = new BlockIngredient(Collections.singleton(Blocks.AIR.defaultBlockState()), null);
         public static final BlockIngredient WILDCARD = new BlockIngredient(Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null);
         protected static Random RANDOM_SRC = new Random();
@@ -339,7 +336,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
             this.facing = facing == null ? Direction.NORTH : facing;
         }
 
-        public BlockState getCurrentlySelected() {
+        public BlockState getCurrentlySelected(LevelAccessor levelAccessor, BlockPos pos) {
             // Prevents ArrayIndexOutOfBoundsException when rendering preview for first time
             if (this.validBlockStates.isEmpty()) return Blocks.AIR.defaultBlockState();
             int arraySize = this.validBlockStates.size();
@@ -353,67 +350,32 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
             }
 
             this.randomIndexOld = this.randomIndex;
-            return getRotated(this.validBlockStates.get(this.randomIndex), this.facing);
-        }
-
-        public static <T extends Comparable<T>> BlockState getRotated(BlockState original, Direction facing) {
-            if (facing.equals(Direction.NORTH)) return original;
-
-            BlockState toReturn = original;
-
-            try {
-                Map<String, Boolean> mapOfBooleanDirectionProperties = null;
-                Map<String, WallSide> mapOfWallSideProperties = null;
-
-                for (Property<?> p : toReturn.getProperties()) {
-                    //noinspection unchecked
-                    Property<T> propertyOfOriginal = (Property<T>) p;
-
-                    // TODO: account for more states that indicate direction; such as signs (int property), etc.
-                    // TODO: maybe use of generics and extraction of this shit to a new method would be cleaner
-                    if (propertyOfOriginal instanceof DirectionProperty directionProperty) {
-                        Direction originalValue = toReturn.getValue(directionProperty);
-                        Direction rotatedValue = BlockInWorldPredicate.rotateDirection(originalValue, facing);
-                        toReturn = toReturn.setValue(directionProperty, rotatedValue);
-                    } else if (propertyOfOriginal instanceof EnumProperty<?> enumProperty) {
-                        if (enumProperty.getValueClass().equals(Direction.Axis.class)) {
-                            //noinspection unchecked
-                            EnumProperty<Direction.Axis> axisProperty = (EnumProperty<Direction.Axis>) enumProperty;
-
-                            Direction.Axis originalAxis = toReturn.getValue(axisProperty);
-                            Direction.Axis rotatedAxis = BlockInWorldPredicate.rotateAxis(originalAxis, facing);
-                            toReturn = toReturn.setValue(axisProperty, rotatedAxis);
-                        } else if (enumProperty.getValueClass().equals(WallSide.class)) {
-                            //noinspection unchecked
-                            EnumProperty<WallSide> axisProperty = (EnumProperty<WallSide>) enumProperty;
-                            if (mapOfWallSideProperties == null) mapOfWallSideProperties = new HashMap<>();
-                            mapOfWallSideProperties.put(axisProperty.getName(), toReturn.getValue(axisProperty));
-                        }
-                    } else if (propertyOfOriginal instanceof BooleanProperty booleanProperty) {
-                        if (!CARDINAL_NAMES.contains(booleanProperty.getName())) continue;
-                        if (mapOfBooleanDirectionProperties == null) mapOfBooleanDirectionProperties = new HashMap<>();
-                        mapOfBooleanDirectionProperties.put(booleanProperty.getName(), toReturn.getValue(booleanProperty));
-                    }
-                }
-
-                // TODO: handling of maps declared in this block
-            } catch (ClassCastException e) {
-                LOGGER.error("Class cast exception while attempting to rotate blockstate for render!", e);
-                LOGGER.error(e.getMessage());
-                return original;
-            } catch (RuntimeException e) {
-                LOGGER.error("An exception was caught while attempting to rotate blockstate for render!", e);
-                LOGGER.error(e.getMessage());
-                return original;
-            }
-
-            return toReturn;
+            return this.validBlockStates.get(this.randomIndex).rotate(
+                    levelAccessor,
+                    pos,
+                    rotationFromNorth(this.facing)
+            );
         }
 
         public static void tickRandomSeedChange() {
             if (INCREMENT++ < 60) return;
             INCREMENT = 0;
             RANDOM_SRC = new Random();
+        }
+
+        /**
+         * Returns the <code>Rotation</code> necessary to rotate the passed argument from north to the direction of this ingredient.
+         * This is written solely for use in the horizontal plane.
+         * @param facing the <code>Direction</code> something is facing. Meaningless for values of UP or DOWN.
+         * @return the <code>Rotation</code> necessary to point towards the passed <code>Direction</code>.
+         */
+        public static Rotation rotationFromNorth(Direction facing) {
+            return switch (facing) {
+                case SOUTH -> Rotation.CLOCKWISE_180;
+                case WEST -> Rotation.COUNTERCLOCKWISE_90;
+                case EAST -> Rotation.CLOCKWISE_90;
+                default -> Rotation.NONE;
+            };
         }
     }
 
