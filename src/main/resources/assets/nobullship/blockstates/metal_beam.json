@@ -1,0 +1,20 @@
+{
+  "multipart": [
+    {
+      "when": {"AND": [{"horizontal_axis": "z"}, {"vertical": "false"}]},
+      "apply": {"model": "nobullship:block/metal_beam"}
+    },
+    {
+      "when": {"AND": [{"horizontal_axis": "z"}, {"vertical": "true"}]},
+      "apply": {"model": "nobullship:block/metal_beam", "x": 90}
+    },
+    {
+      "when": {"AND": [{"horizontal_axis": "x"}, {"vertical": "false"}]},
+      "apply": {"model": "nobullship:block/metal_beam", "y": 90}
+    },
+    {
+      "when": {"AND": [{"horizontal_axis": "x"}, {"vertical": "true"}]},
+      "apply": {"model": "nobullship:block/metal_beam", "x": 90, "y": 90}
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship;
 
+import io.github.kawaiicakes.nobullship.block.BeamBlock;
 import io.github.kawaiicakes.nobullship.block.WildcardBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
@@ -13,7 +14,10 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -39,6 +43,12 @@ public class Registry {
             = BLOCK_REGISTRY.register("wildcard", WildcardBlock::new);
     public static final RegistryObject<Block> WORKSHOP_BLOCK
             = BLOCK_REGISTRY.register("workshop", MultiblockWorkshopBlock::new);
+    public static final RegistryObject<Block> METAL_BEAM_BLOCK
+            = BLOCK_REGISTRY.register("metal_beam", () -> new BeamBlock(
+                    BlockBehaviour.Properties.of(Material.METAL)
+                            .sound(SoundType.ANVIL)
+                            .noOcclusion()
+            ));
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
             = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
     public static final RegistryObject<BlockItem> WILDCARD_ITEM
@@ -49,6 +59,10 @@ public class Registry {
             = ITEM_REGISTRY.register(
             "workshop",
             () -> new BlockItem(WORKSHOP_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB)));
+    public static final RegistryObject<BlockItem> METAL_BEAM_ITEM
+            = ITEM_REGISTRY.register(
+                    "metal_beam",
+            () -> new BlockItem(METAL_BEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB)));
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));
     public static final RegistryObject<SchematicItem> SCHEMATIC

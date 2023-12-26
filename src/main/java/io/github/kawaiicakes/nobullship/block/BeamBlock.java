@@ -57,7 +57,16 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        return super.getStateForPlacement(pContext);
+        Direction.Axis axisDirection = pContext.getHorizontalDirection().getAxis();
+
+        boolean isVertical = pContext.getClickedFace().getAxis().equals(Direction.Axis.Y);
+
+        boolean isInWater = pContext.getLevel().getFluidState(pContext.getClickedPos()).getType() == Fluids.WATER;
+
+        return this.defaultBlockState()
+                .setValue(HORIZONTAL_AXIS, axisDirection)
+                .setValue(VERTICAL, isVertical)
+                .setValue(WATERLOGGED, isInWater);
     }
 
     @SuppressWarnings("deprecation")
