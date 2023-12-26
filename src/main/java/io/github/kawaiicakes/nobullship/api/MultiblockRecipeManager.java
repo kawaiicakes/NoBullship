@@ -12,6 +12,7 @@ import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacket;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -119,7 +120,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
      * Pass a recipe ID and the context using it into here to attempt to spawn the result.
      */
     public boolean trySpawn(@Nullable MultiblockRecipe recipe, UseOnContext context) throws RuntimeException {
-        // TODO: config whether fake players can use this schematic...
+        // TODO: Fake player compat & config whether fake players can use this schematic...
         if (!(context.getLevel() instanceof ServerLevel level)) return false;
         if (recipe == null) {
             level.playSound(null, context.getClickedPos(), CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
@@ -164,7 +165,6 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             return false;
         }
 
-        // TODO: optimizations for pattern logic
         for (int i = 0; i < pattern.getDepth(); ++i) {
             for (int j = 0; j < pattern.getWidth(); ++j) {
                 for (int k = 0; k < pattern.getHeight(); ++k) {
@@ -182,10 +182,47 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
         if (nbt == null) nbt = new CompoundTag();
         nbt.putString("id", resultLocation.toString());
-        BlockPos blockpos = match.getBlock(match.getWidth() / 2, match.getHeight() / 2, match.getDepth() / 2).getPos();
 
+        boolean matchWidthIsEven = (match.getWidth() ^ 1) > match.getWidth();
+        boolean matchDepthIsEven = (match.getDepth() ^ 1) > match.getDepth();
+
+        BlockPos posForSpawn = match.getBlock(match.getWidth() / 2, match.getHeight() - 1, match.getDepth() / 2).getPos();
+
+        double xPos;
+        double zPos;
+
+        LOGGER.info("Forwards: {}", match.getForwards());
+        LOGGER.info("Match pos: {}", posForSpawn.toShortString());
+
+        Direction forwardsDirection = match.getForwards();
+
+        switch (forwardsDirection) {
+            case NORTH -> {
+                xPos = matchWidthIsEven ? posForSpawn.getX() : posForSpawn.getX() + 0.5;
+                zPos = matchDepthIsEven ? posForSpawn.getZ() + 1.0 : posForSpawn.getZ() + 0.5;
+            }
+            case SOUTH -> {
+                xPos = matchWidthIsEven ? posForSpawn.getX() + 1.0 : posForSpawn.getX() + 0.5;
+                zPos = matchDepthIsEven ? posForSpawn.getZ() : posForSpawn.getZ() + 0.5;
+            }
+            case EAST -> {
+                xPos = matchDepthIsEven ? posForSpawn.getX() : posForSpawn.getX() + 0.5;
+                zPos = matchWidthIsEven ? posForSpawn.getZ() : posForSpawn.getZ() + 0.5;
+            }
+            case WEST -> {
+                xPos = matchDepthIsEven ? posForSpawn.getX() + 1.0 : posForSpawn.getX() + 0.5;
+                zPos = matchWidthIsEven ? posForSpawn.getZ() + 1.0 : posForSpawn.getZ() + 0.5;
+            }
+            default -> {
+                xPos = posForSpawn.getX();
+                zPos = posForSpawn.getZ();
+            }
+        }
+
+        double finalXPos = xPos;
+        double finalZPos = zPos;
         Entity entity = EntityType.loadEntityRecursive(nbt, level, (entityType) -> {
-            entityType.moveTo((double)blockpos.getX() + 0.5D, (double)blockpos.getY() + 0.55D, (double)blockpos.getZ() + 0.5D, entityType.getYRot(), entityType.getXRot());
+            entityType.moveTo(finalXPos, (double)posForSpawn.getY() + 0.05D, finalZPos, entityType.getYRot(), entityType.getXRot());
             return entityType;
         });
 
