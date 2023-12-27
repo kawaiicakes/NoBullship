@@ -36,7 +36,7 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
     public static final double[] SIDE_SHAPE_MIDDLE = {8.0, 6.0, 7.5, 16, 10, 8.5};
     public static final double[] SIDE_SHAPE_TOP = {10, 10, 6.0, 16, 11, 10};
     public static final double[] TOP_SHAPE_FRONT = {6.0, 8.0, 5.0, 10.0, 16.0, 6.0};
-    public static final double[] TOP_SHAPE_MIDDLE = {7.5, 11, 6.0, 8.5, 16, 12.5};
+    public static final double[] TOP_SHAPE_MIDDLE = {7.5, 11, 6.0, 8.5, 16, 10};
     public static final double[] TOP_SHAPE_BACK = {6.0, 8.0, 10, 10.0, 16.0, 11};
 
     public static final EnumProperty<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.create(
@@ -70,10 +70,22 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
         Direction.Axis horizontalAxis = pState.getValue(HORIZONTAL_AXIS);
         boolean isVertical = pState.getValue(VERTICAL);
+        boolean hasLeft = pState.getValue(LEFT);
+        boolean hasRight = pState.getValue(RIGHT);
+        BeamConnection hasAbove = pState.getValue(UP);
+        BeamConnection hasBelow = pState.getValue(DOWN);
+
+        VoxelShape leftSide = hasLeft ? getLeftShape(isVertical, horizontalAxis) : Shapes.empty();
+        VoxelShape rightSide = hasRight ? getRightShape(isVertical, horizontalAxis) : Shapes.empty();
+        VoxelShape aboveTop = !hasAbove.equals(BeamConnection.NONE) ? getTopShape(isVertical, horizontalAxis, hasAbove) : Shapes.empty();
+        VoxelShape belowTop = !hasBelow.equals(BeamConnection.NONE) ? getBottomShape(isVertical, horizontalAxis, hasBelow) : Shapes.empty();
 
         return Shapes.or(
-                Shapes.empty(),
-                getBaseShape(isVertical, horizontalAxis)
+                getBaseShape(isVertical, horizontalAxis),
+                leftSide,
+                rightSide,
+                aboveTop,
+                belowTop
         );
     }
 
@@ -158,9 +170,9 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
         if (!isVertical) {
             return switch (horizontalAxis) {
                 case X -> generateShape(
-                        clockwiseY(BASE_SHAPE_BOTTOM),
-                        clockwiseY(BASE_SHAPE_MIDDLE),
-                        clockwiseY(BASE_SHAPE_TOP));
+                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_BOTTOM),
+                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_MIDDLE),
+                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_TOP));
                 case Z -> generateShape(
                         BASE_SHAPE_BOTTOM,
                         BASE_SHAPE_MIDDLE,
@@ -170,24 +182,234 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
         } else {
             return switch (horizontalAxis) {
                 case X -> generateShape(
-                        clockwiseZ(clockwiseY(BASE_SHAPE_BOTTOM)),
-                        clockwiseZ(clockwiseY(BASE_SHAPE_MIDDLE)),
-                        clockwiseZ(clockwiseY(BASE_SHAPE_TOP)));
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_BOTTOM)),
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_MIDDLE)),
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_TOP)));
                 case Z -> generateShape(
-                        clockwiseZ(BASE_SHAPE_BOTTOM),
-                        clockwiseZ(BASE_SHAPE_MIDDLE),
-                        clockwiseZ(BASE_SHAPE_TOP));
+                        rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, BASE_SHAPE_BOTTOM),
+                        rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, BASE_SHAPE_MIDDLE),
+                        rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, BASE_SHAPE_TOP));
                 default -> throw new IllegalArgumentException();
             };
         }
     }
 
-    public static double[] clockwiseY(double[] dimensions) {
-        return new double[]{16 - dimensions[5], dimensions[1], dimensions[0], 16 - dimensions[2], dimensions[4], dimensions[3]};
+    public static VoxelShape getLeftShape(boolean isVertical, Direction.Axis horizontalAxis) {
+        if (!isVertical) {
+            return switch (horizontalAxis) {
+                case X -> generateShape(
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_SHAPE_BOTTOM),
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_SHAPE_MIDDLE),
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_SHAPE_TOP));
+                case Z -> generateShape(
+                        SIDE_SHAPE_BOTTOM,
+                        SIDE_SHAPE_MIDDLE,
+                        SIDE_SHAPE_TOP);
+                default -> throw new IllegalArgumentException();
+            };
+        } else {
+            return switch (horizontalAxis) {
+                case X -> generateShape(
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_BOTTOM)),
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_MIDDLE)),
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_TOP)));
+                case Z -> generateShape(
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_BOTTOM),
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_MIDDLE),
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_TOP));
+                default -> throw new IllegalArgumentException();
+            };
+        }
     }
 
-    public static double[] clockwiseZ(double[] dimensions) {
-        return new double[]{16 - dimensions[4], dimensions[0], dimensions[2], 16 - dimensions[1], dimensions[3], dimensions[5]};
+    public static VoxelShape getRightShape(boolean isVertical, Direction.Axis horizontalAxis) {
+        if (!isVertical) {
+            return switch (horizontalAxis) {
+                case X -> generateShape(
+                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_BOTTOM),
+                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_MIDDLE),
+                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_TOP));
+                case Z -> generateShape(
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_SHAPE_BOTTOM),
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_SHAPE_MIDDLE),
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_SHAPE_TOP));
+                default -> throw new IllegalArgumentException();
+            };
+        } else {
+            return switch (horizontalAxis) {
+                case X -> generateShape(
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_BOTTOM)),
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_MIDDLE)),
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_TOP)));
+                case Z -> generateShape(
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_BOTTOM),
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_MIDDLE),
+                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_TOP));
+                default -> throw new IllegalArgumentException();
+            };
+        }
+    }
+
+    public static VoxelShape getTopShape(boolean isVertical, Direction.Axis horizontalAxis, BeamConnection connectionType) {
+        if (!isVertical) {
+            return switch (connectionType) {
+                case PARALLEL -> {
+                    if (horizontalAxis.equals(Direction.Axis.X)) {
+                        yield generateShape(
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT),
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE),
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK));
+                    } else {
+                        yield generateShape(
+                                TOP_SHAPE_FRONT,
+                                TOP_SHAPE_MIDDLE,
+                                TOP_SHAPE_BACK);
+                    }
+                }
+                case PERPENDICULAR -> {
+                    if (horizontalAxis.equals(Direction.Axis.Z)) {
+                        yield generateShape(
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT),
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE),
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK));
+                    } else {
+                        yield generateShape(
+                                TOP_SHAPE_FRONT,
+                                TOP_SHAPE_MIDDLE,
+                                TOP_SHAPE_BACK);
+                    }
+                }
+                default -> throw new IllegalArgumentException();
+            };
+        } else {
+            return switch (connectionType) {
+                case PARALLEL -> {
+                    if (horizontalAxis.equals(Direction.Axis.X)) {
+                        yield generateShape(
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK)));
+                    } else {
+                        yield generateShape(
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK));
+                    }
+                }
+                case PERPENDICULAR -> {
+                    if (horizontalAxis.equals(Direction.Axis.Z)) {
+                        yield generateShape(
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK)));
+                    } else {
+                        yield generateShape(
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK));
+                    }
+                }
+                default -> throw new IllegalArgumentException();
+            };
+        }
+    }
+
+    public static VoxelShape getBottomShape(boolean isVertical, Direction.Axis horizontalAxis, BeamConnection connectionType) {
+        if (!isVertical) {
+            return switch (connectionType) {
+                case PARALLEL -> {
+                    if (horizontalAxis.equals(Direction.Axis.X)) {
+                        yield generateShape(
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT),
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE),
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK));
+                    } else {
+                        yield generateShape(
+                                TOP_SHAPE_FRONT,
+                                TOP_SHAPE_MIDDLE,
+                                TOP_SHAPE_BACK);
+                    }
+                }
+                case PERPENDICULAR -> {
+                    if (horizontalAxis.equals(Direction.Axis.Z)) {
+                        yield generateShape(
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT),
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE),
+                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK));
+                    } else {
+                        yield generateShape(
+                                TOP_SHAPE_FRONT,
+                                TOP_SHAPE_MIDDLE,
+                                TOP_SHAPE_BACK);
+                    }
+                }
+                default -> throw new IllegalArgumentException();
+            };
+        } else {
+            return switch (connectionType) {
+                case PARALLEL -> {
+                    if (horizontalAxis.equals(Direction.Axis.X)) {
+                        yield generateShape(
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK)));
+                    } else {
+                        yield generateShape(
+                                TOP_SHAPE_FRONT,
+                                TOP_SHAPE_MIDDLE,
+                                TOP_SHAPE_BACK);
+                    }
+                }
+                case PERPENDICULAR -> {
+                    if (horizontalAxis.equals(Direction.Axis.Z)) {
+                        yield generateShape(
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK)));
+                    } else {
+                        yield generateShape(
+                                TOP_SHAPE_FRONT,
+                                TOP_SHAPE_MIDDLE,
+                                TOP_SHAPE_BACK);
+                    }
+                }
+                default -> throw new IllegalArgumentException();
+            };
+        }
+    }
+
+    public static double[] rotateDimensions(Direction.Axis axis, Rotation rotation, double[] dimensions) {
+        return switch (rotation) {
+            case NONE -> dimensions;
+            case CLOCKWISE_90 -> switch (axis) {
+                case X ->
+                        new double[]{dimensions[0], 16 - dimensions[5], dimensions[1], dimensions[3], 16 - dimensions[2], dimensions[4]};
+                case Y ->
+                        // 1, 2, 3, 2, 4, 6
+                        // 3, 2, 14, 6, 4, 15
+                        new double[]{dimensions[2], dimensions[1], 16 - dimensions[3], dimensions[5], dimensions[4], 16 - dimensions[0]};
+                case Z ->
+                        new double[]{16 - dimensions[4], dimensions[0], dimensions[2], 16 - dimensions[1], dimensions[3], dimensions[5]};
+            };
+            case CLOCKWISE_180 -> switch (axis) {
+                case X ->
+                        new double[]{dimensions[0], 16 - dimensions[4], 16 - dimensions[5], dimensions[3], 16 - dimensions[1], 16 - dimensions[2]};
+                case Y ->
+                        new double[]{16 - dimensions[3], dimensions[1], 16 - dimensions[5], 16 - dimensions[0], dimensions[4], 16 - dimensions[2]};
+                case Z ->
+                        new double[]{16 - dimensions[3], 16 - dimensions[4], dimensions[2], 16 - dimensions[0], 16 - dimensions[1], dimensions[5]};
+            };
+            case COUNTERCLOCKWISE_90 -> switch (axis) {
+                case X ->
+                        new double[]{dimensions[0], dimensions[2], 16 - dimensions[4], dimensions[3], dimensions[5], 16 - dimensions[1]};
+                case Y ->
+                        // 1, 2, 3, 2, 4, 6
+                        // 10, 2, 1, 13, 4, 2
+                        new double[]{16 - dimensions[5], dimensions[1], dimensions[0], 16 - dimensions[2], dimensions[4], dimensions[3]};
+                case Z ->
+                        new double[]{dimensions[1], 16 - dimensions[3], dimensions[2], dimensions[4], 16 - dimensions[0], dimensions[5]};
+            };
+        };
     }
 
     public static VoxelShape generateShape(double[]... dimensions) {
