@@ -124,7 +124,7 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(HORIZONTAL_AXIS, VERTICAL, LEFT, RIGHT, WATERLOGGED);
+        pBuilder.add(HORIZONTAL_AXIS, VERTICAL, UP, DOWN, LEFT, RIGHT, WATERLOGGED);
     }
 
     public static BlockPos getLeft(BlockPos pos, Direction.Axis beamAxis) {
