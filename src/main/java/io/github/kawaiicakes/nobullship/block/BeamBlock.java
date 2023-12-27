@@ -18,12 +18,27 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.Registry.METAL_BEAM_BLOCK;
 
-// TODO: continue overriding and implementing methods
 public class BeamBlock extends Block implements SimpleWaterloggedBlock {
+    public static final double[] BASE_SHAPE_BOTTOM = {6.0, 5.0, 0.0, 10, 6.0, 16};
+    public static final double[] BASE_SHAPE_MIDDLE = {7.5, 6.0, 0.0, 8.5, 10.0, 16.0};
+    public static final double[] BASE_SHAPE_TOP = {6.0, 10, 0.0, 10, 11, 16};
+    public static final double[] SIDE_SHAPE_BOTTOM = {10, 5.0, 6.0, 16, 6.0, 10};
+    public static final double[] SIDE_SHAPE_MIDDLE = {8.0, 6.0, 7.5, 16, 10, 8.5};
+    public static final double[] SIDE_SHAPE_TOP = {10, 10, 6.0, 16, 11, 10};
+    public static final double[] TOP_SHAPE_FRONT = {6.0, 8.0, 5.0, 10.0, 16.0, 6.0};
+    public static final double[] TOP_SHAPE_MIDDLE = {7.5, 11, 6.0, 8.5, 16, 12.5};
+    public static final double[] TOP_SHAPE_BACK = {6.0, 8.0, 10, 10.0, 16.0, 11};
+
     public static final EnumProperty<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.create(
             "horizontal_axis",
             Direction.Axis.class,
@@ -47,6 +62,18 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
                 .setValue(LEFT, Boolean.FALSE)
                 .setValue(RIGHT, Boolean.FALSE)
                 .setValue(WATERLOGGED, Boolean.FALSE)
+        );
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+        Direction.Axis horizontalAxis = pState.getValue(HORIZONTAL_AXIS);
+        boolean isVertical = pState.getValue(VERTICAL);
+
+        return Shapes.or(
+                Shapes.empty(),
+                getBaseShape(isVertical, horizontalAxis)
         );
     }
 
@@ -125,6 +152,54 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         pBuilder.add(HORIZONTAL_AXIS, VERTICAL, UP, DOWN, LEFT, RIGHT, WATERLOGGED);
+    }
+
+    public static VoxelShape getBaseShape(boolean isVertical, Direction.Axis horizontalAxis) {
+        if (!isVertical) {
+            return switch (horizontalAxis) {
+                case X -> generateShape(
+                        clockwiseY(BASE_SHAPE_BOTTOM),
+                        clockwiseY(BASE_SHAPE_MIDDLE),
+                        clockwiseY(BASE_SHAPE_TOP));
+                case Z -> generateShape(
+                        BASE_SHAPE_BOTTOM,
+                        BASE_SHAPE_MIDDLE,
+                        BASE_SHAPE_TOP);
+                default -> throw new IllegalArgumentException();
+            };
+        } else {
+            return switch (horizontalAxis) {
+                case X -> generateShape(
+                        clockwiseZ(clockwiseY(BASE_SHAPE_BOTTOM)),
+                        clockwiseZ(clockwiseY(BASE_SHAPE_MIDDLE)),
+                        clockwiseZ(clockwiseY(BASE_SHAPE_TOP)));
+                case Z -> generateShape(
+                        clockwiseZ(BASE_SHAPE_BOTTOM),
+                        clockwiseZ(BASE_SHAPE_MIDDLE),
+                        clockwiseZ(BASE_SHAPE_TOP));
+                default -> throw new IllegalArgumentException();
+            };
+        }
+    }
+
+    public static double[] clockwiseY(double[] dimensions) {
+        return new double[]{16 - dimensions[5], dimensions[1], dimensions[0], 16 - dimensions[2], dimensions[4], dimensions[3]};
+    }
+
+    public static double[] clockwiseZ(double[] dimensions) {
+        return new double[]{16 - dimensions[4], dimensions[0], dimensions[2], 16 - dimensions[1], dimensions[3], dimensions[5]};
+    }
+
+    public static VoxelShape generateShape(double[]... dimensions) {
+        List<VoxelShape> voxelShapes = new ArrayList<>(dimensions.length);
+        for (double[] arr : dimensions) {
+            voxelShapes.add(getBoxOf(arr));
+        }
+        return Shapes.or(Shapes.empty(), voxelShapes.toArray(VoxelShape[]::new));
+    }
+
+    public static VoxelShape getBoxOf(double[] dimensions) {
+        return Block.box(dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
     }
 
     public static BlockPos getLeft(BlockPos pos, Direction.Axis beamAxis) {
