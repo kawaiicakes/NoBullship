@@ -38,6 +38,9 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
     public static final double[] TOP_SHAPE_FRONT = {6.0, 8.0, 5.0, 10.0, 16.0, 6.0};
     public static final double[] TOP_SHAPE_MIDDLE = {7.5, 11, 6.0, 8.5, 16, 10};
     public static final double[] TOP_SHAPE_BACK = {6.0, 8.0, 10, 10.0, 16.0, 11};
+    public static final double[] SIDE_VERTICAL_SHAPE_BOTTOM = {8.0, 5.025, 6.0, 16, 5.975, 10};
+    public static final double[] SIDE_VERTICAL_SHAPE_MIDDLE = {8.0, 5.975, 7.5, 16, 10.025, 8.5};
+    public static final double[] SIDE_VERTICAL_SHAPE_TOP = {8.0, 10.025, 6.0, 16, 10.975, 10};
 
     public static final EnumProperty<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.create(
             "horizontal_axis",
@@ -210,13 +213,13 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
         } else {
             return switch (horizontalAxis) {
                 case X -> generateShape(
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_BOTTOM)),
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_MIDDLE)),
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_TOP)));
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_VERTICAL_SHAPE_BOTTOM),
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_VERTICAL_SHAPE_MIDDLE),
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_VERTICAL_SHAPE_TOP));
                 case Z -> generateShape(
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_BOTTOM),
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_MIDDLE),
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_TOP));
+                        SIDE_VERTICAL_SHAPE_BOTTOM,
+                        SIDE_VERTICAL_SHAPE_MIDDLE,
+                        SIDE_VERTICAL_SHAPE_TOP);
                 default -> throw new IllegalArgumentException();
             };
         }
@@ -238,13 +241,13 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
         } else {
             return switch (horizontalAxis) {
                 case X -> generateShape(
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_BOTTOM)),
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_MIDDLE)),
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_TOP)));
+                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_VERTICAL_SHAPE_BOTTOM),
+                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_VERTICAL_SHAPE_MIDDLE),
+                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_VERTICAL_SHAPE_TOP));
                 case Z -> generateShape(
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_BOTTOM),
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_MIDDLE),
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, SIDE_SHAPE_TOP));
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_VERTICAL_SHAPE_BOTTOM),
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_VERTICAL_SHAPE_MIDDLE),
+                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_VERTICAL_SHAPE_TOP));
                 default -> throw new IllegalArgumentException();
             };
         }
@@ -286,14 +289,14 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
                 case PARALLEL -> {
                     if (horizontalAxis.equals(Direction.Axis.X)) {
                         yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK)));
+                                rotateDimensions(Direction.Axis.Z, Rotation.COUNTERCLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.COUNTERCLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.COUNTERCLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK)));
                     } else {
                         yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK));
+                                rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT),
+                                rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE),
+                                rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK));
                     }
                 }
                 case PERPENDICULAR -> {
@@ -320,27 +323,27 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
                 case PARALLEL -> {
                     if (horizontalAxis.equals(Direction.Axis.X)) {
                         yield generateShape(
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT),
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE),
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK));
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK)));
                     } else {
                         yield generateShape(
-                                TOP_SHAPE_FRONT,
-                                TOP_SHAPE_MIDDLE,
-                                TOP_SHAPE_BACK);
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_FRONT),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_MIDDLE),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_BACK));
                     }
                 }
                 case PERPENDICULAR -> {
                     if (horizontalAxis.equals(Direction.Axis.Z)) {
                         yield generateShape(
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT),
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE),
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK));
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE)),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK)));
                     } else {
                         yield generateShape(
-                                TOP_SHAPE_FRONT,
-                                TOP_SHAPE_MIDDLE,
-                                TOP_SHAPE_BACK);
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_FRONT),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_MIDDLE),
+                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_BACK));
                     }
                 }
                 default -> throw new IllegalArgumentException();
@@ -355,9 +358,9 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
                                 rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK)));
                     } else {
                         yield generateShape(
-                                TOP_SHAPE_FRONT,
-                                TOP_SHAPE_MIDDLE,
-                                TOP_SHAPE_BACK);
+                                rotateDimensions(Direction.Axis.X, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT),
+                                rotateDimensions(Direction.Axis.X, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE),
+                                rotateDimensions(Direction.Axis.X, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK));
                     }
                 }
                 case PERPENDICULAR -> {
@@ -385,8 +388,6 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
                 case X ->
                         new double[]{dimensions[0], 16 - dimensions[5], dimensions[1], dimensions[3], 16 - dimensions[2], dimensions[4]};
                 case Y ->
-                        // 1, 2, 3, 2, 4, 6
-                        // 3, 2, 14, 6, 4, 15
                         new double[]{dimensions[2], dimensions[1], 16 - dimensions[3], dimensions[5], dimensions[4], 16 - dimensions[0]};
                 case Z ->
                         new double[]{16 - dimensions[4], dimensions[0], dimensions[2], 16 - dimensions[1], dimensions[3], dimensions[5]};
