@@ -66,19 +66,19 @@
     },
     {
       "when": {"AND": [{"horizontal_axis": "x"}, {"vertical": "true"}, {"right": "true"}]},
-      "apply": {"model": "nobullship:block/metal_beam_side", "y": 90}
+      "apply": {"model": "nobullship:block/metal_beam_side_vertical", "y": 90}
     },
     {
       "when": {"AND": [{"horizontal_axis": "x"}, {"vertical": "true"}, {"left": "true"}]},
-      "apply": {"model": "nobullship:block/metal_beam_side", "y": 270}
+      "apply": {"model": "nobullship:block/metal_beam_side_vertical", "y": 270}
     },
     {
       "when": {"AND": [{"horizontal_axis": "z"}, {"vertical": "true"}, {"right": "true"}]},
-      "apply": {"model": "nobullship:block/metal_beam_side", "y": 180}
+      "apply": {"model": "nobullship:block/metal_beam_side_vertical", "y": 180}
     },
     {
       "when": {"AND": [{"horizontal_axis": "z"}, {"vertical": "true"}, {"left": "true"}]},
-      "apply": {"model": "nobullship:block/metal_beam_side"}
+      "apply": {"model": "nobullship:block/metal_beam_side_vertical"}
     },
     {
       "when": {"AND": [{"horizontal_axis": "z"}, {"vertical": "true"}, {"up": "parallel"}]},
