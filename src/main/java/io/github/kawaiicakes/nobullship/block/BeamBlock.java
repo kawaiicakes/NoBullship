@@ -160,14 +160,13 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
     @SuppressWarnings("deprecation")
     @Override
     public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState, LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pNeighborPos) {
-        boolean isVertical = pState.getValue(VERTICAL);
         Direction.Axis axis = pState.getValue(HORIZONTAL_AXIS);
-        boolean waterlogged = pState.getValue(WATERLOGGED);
-
+        boolean isVertical = pState.getValue(VERTICAL);
         BeamConnection connectionAbove = pState.getValue(UP);
         BeamConnection connectionBelow = pState.getValue(DOWN);
         boolean connectionLeft = pState.getValue(LEFT);
         boolean connectionRight = pState.getValue(RIGHT);
+        boolean waterlogged = pState.getValue(WATERLOGGED);
 
         switch (pDirection) {
             case DOWN -> {
@@ -197,12 +196,32 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
                 }
             }
             case NORTH -> {
+                if (axis.equals(Direction.Axis.X)) {
+                    connectionLeft = pNeighborState.is(METAL_BEAM_BLOCK.get());
+                } else {
+                    if (isVertical) connectionBelow = !pNeighborState.is(METAL_BEAM_BLOCK.get()) ? BeamConnection.NONE : BeamConnection.PARALLEL;
+                }
             }
             case SOUTH -> {
+                if (axis.equals(Direction.Axis.X)) {
+                    connectionRight = pNeighborState.is(METAL_BEAM_BLOCK.get());
+                } else {
+                    if (isVertical) connectionAbove = !pNeighborState.is(METAL_BEAM_BLOCK.get()) ? BeamConnection.NONE : BeamConnection.PARALLEL;
+                }
             }
             case WEST -> {
+                if (axis.equals(Direction.Axis.Z)) {
+                    connectionRight = pNeighborState.is(METAL_BEAM_BLOCK.get());
+                } else {
+                    if (isVertical) connectionBelow = !pNeighborState.is(METAL_BEAM_BLOCK.get()) ? BeamConnection.NONE : BeamConnection.PARALLEL;
+                }
             }
             case EAST -> {
+                if (axis.equals(Direction.Axis.Z)) {
+                    connectionLeft = pNeighborState.is(METAL_BEAM_BLOCK.get());
+                } else {
+                    if (isVertical) connectionAbove = !pNeighborState.is(METAL_BEAM_BLOCK.get()) ? BeamConnection.NONE : BeamConnection.PARALLEL;
+                }
             }
         }
 
