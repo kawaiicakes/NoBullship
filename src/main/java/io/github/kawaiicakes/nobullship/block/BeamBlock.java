@@ -123,11 +123,23 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
         BeamConnection connectionBelow = BeamConnection.NONE;
 
         if (blockAbove.is(METAL_BEAM_BLOCK.get())) {
-            connectionAbove = BeamConnection.PARALLEL;
+            if (!isVertical) {
+                if (blockAbove.getValue(VERTICAL)) {
+                    connectionAbove = blockAbove.getValue(HORIZONTAL_AXIS).equals(axisDirection) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
+                }
+            } else {
+                connectionAbove = BeamConnection.PARALLEL;
+            }
         }
 
         if (blockBelow.is(METAL_BEAM_BLOCK.get())) {
-            connectionBelow = BeamConnection.PARALLEL;
+            if (!isVertical) {
+                if (blockBelow.getValue(VERTICAL)) {
+                    connectionBelow = blockBelow.getValue(HORIZONTAL_AXIS).equals(axisDirection) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
+                }
+            } else {
+                connectionBelow = BeamConnection.PARALLEL;
+            }
         }
 
         boolean attachesOnLeft = blockOnLeft.is(METAL_BEAM_BLOCK.get());
@@ -148,9 +160,60 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
     @SuppressWarnings("deprecation")
     @Override
     public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState, LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pNeighborPos) {
-        if (!pNeighborState.is(METAL_BEAM_BLOCK.get())) return pState;
+        boolean isVertical = pState.getValue(VERTICAL);
+        Direction.Axis axis = pState.getValue(HORIZONTAL_AXIS);
+        boolean waterlogged = pState.getValue(WATERLOGGED);
 
-        return super.updateShape(pState, pDirection, pNeighborState, pLevel, pCurrentPos, pNeighborPos);
+        BeamConnection connectionAbove = pState.getValue(UP);
+        BeamConnection connectionBelow = pState.getValue(DOWN);
+        boolean connectionLeft = pState.getValue(LEFT);
+        boolean connectionRight = pState.getValue(RIGHT);
+
+        switch (pDirection) {
+            case DOWN -> {
+                if (!isVertical) {
+                    if (!pNeighborState.is(METAL_BEAM_BLOCK.get()))
+                        connectionBelow = BeamConnection.NONE;
+                    else {
+                        if (pNeighborState.getValue(VERTICAL)) {
+                            connectionBelow = pNeighborState.getValue(HORIZONTAL_AXIS).equals(axis) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
+                        } else {
+                            connectionBelow = BeamConnection.NONE;
+                        }
+                    }
+                }
+            }
+            case UP -> {
+                if (!isVertical) {
+                    if (!pNeighborState.is(METAL_BEAM_BLOCK.get()))
+                        connectionAbove = BeamConnection.NONE;
+                    else {
+                        if (pNeighborState.getValue(VERTICAL)) {
+                            connectionAbove = pNeighborState.getValue(HORIZONTAL_AXIS).equals(axis) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
+                        } else {
+                            connectionAbove = BeamConnection.NONE;
+                        }
+                    }
+                }
+            }
+            case NORTH -> {
+            }
+            case SOUTH -> {
+            }
+            case WEST -> {
+            }
+            case EAST -> {
+            }
+        }
+
+        return this.defaultBlockState()
+                .setValue(HORIZONTAL_AXIS, axis)
+                .setValue(VERTICAL, isVertical)
+                .setValue(UP, connectionAbove)
+                .setValue(DOWN, connectionBelow)
+                .setValue(LEFT, connectionLeft)
+                .setValue(RIGHT, connectionRight)
+                .setValue(WATERLOGGED, waterlogged);
     }
 
     @SuppressWarnings("deprecation")
