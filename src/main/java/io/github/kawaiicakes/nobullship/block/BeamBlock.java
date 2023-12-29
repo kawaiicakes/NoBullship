@@ -95,13 +95,104 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
     @SuppressWarnings("deprecation")
     @Override
     public BlockState mirror(BlockState pState, Mirror pMirror) {
-        return super.mirror(pState, pMirror);
+        Direction.Axis axis = pState.getValue(HORIZONTAL_AXIS);
+
+        return switch (pMirror) {
+            case NONE -> pState;
+            case LEFT_RIGHT -> axis.equals(Direction.Axis.Z) ? this.rotate(pState, Rotation.CLOCKWISE_180) : pState;
+            case FRONT_BACK -> axis.equals(Direction.Axis.X) ? this.rotate(pState, Rotation.CLOCKWISE_180) : pState;
+        };
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public BlockState rotate(BlockState pState, Rotation pRotation) {
-        return super.rotate(pState, pRotation);
+        Direction.Axis axis = pState.getValue(HORIZONTAL_AXIS);
+        boolean isVertical = pState.getValue(VERTICAL);
+        BeamConnection connectionAbove = pState.getValue(UP);
+        BeamConnection connectionBelow = pState.getValue(DOWN);
+        boolean connectionLeft = pState.getValue(LEFT);
+        boolean connectionRight = pState.getValue(RIGHT);
+
+        final Direction.Axis rotatedAxis = axis.equals(Direction.Axis.Z) ? Direction.Axis.X : Direction.Axis.Z;
+        final boolean xorUpDownHasConnection = !connectionAbove.equals(BeamConnection.NONE) ^ !connectionBelow.equals(BeamConnection.NONE);
+        final BeamConnection invertedAbove = connectionAbove.equals(BeamConnection.PARALLEL) ? BeamConnection.PERPENDICULAR : BeamConnection.PARALLEL;
+        final BeamConnection invertedBelow = connectionBelow.equals(BeamConnection.PARALLEL) ? BeamConnection.PERPENDICULAR : BeamConnection.PARALLEL;
+
+        switch (pRotation) {
+            case NONE -> {
+                return pState;
+            }
+            case CLOCKWISE_90 -> {
+                axis = rotatedAxis;
+
+                if (isVertical) {
+                    final BeamConnection tempUp = connectionAbove;
+                    final BeamConnection tempDown = connectionBelow;
+                    final boolean tempLeft = connectionLeft;
+                    final boolean tempRight = connectionRight;
+
+                    if (connectionLeft ^ connectionRight) {
+                        connectionLeft = tempRight;
+                        connectionRight = tempLeft;
+                    }
+
+                    if (xorUpDownHasConnection) {
+                        connectionAbove = tempDown;
+                        connectionBelow = tempUp;
+                    }
+                } else {
+                    final boolean tempLeft = connectionLeft;
+                    final boolean tempRight = connectionRight;
+
+                    if (connectionLeft ^ connectionRight) {
+                        connectionLeft = tempRight;
+                        connectionRight = tempLeft;
+                    }
+
+                    if (!connectionAbove.equals(BeamConnection.NONE)) {
+                        connectionAbove = invertedAbove;
+                    }
+
+                    if (!connectionBelow.equals(BeamConnection.NONE)) {
+                        connectionBelow = invertedBelow;
+                    }
+                }
+            }
+            case CLOCKWISE_180 -> {
+                if (connectionLeft ^ connectionRight) {
+                    connectionLeft = !connectionLeft;
+                    connectionRight = !connectionRight;
+                }
+
+                if (xorUpDownHasConnection) {
+                    final BeamConnection tempAbove = connectionAbove;
+
+                    connectionAbove = connectionBelow;
+                    connectionBelow = tempAbove;
+                }
+            }
+            case COUNTERCLOCKWISE_90 -> {
+                axis = rotatedAxis;
+
+                if (!isVertical) {
+                    if (!connectionAbove.equals(BeamConnection.NONE)) {
+                        connectionAbove = invertedAbove;
+                    }
+
+                    if (!connectionBelow.equals(BeamConnection.NONE)) {
+                        connectionBelow = invertedBelow;
+                    }
+                }
+            }
+        }
+
+        return pState
+                .setValue(HORIZONTAL_AXIS, axis)
+                .setValue(UP, connectionAbove)
+                .setValue(DOWN, connectionBelow)
+                .setValue(LEFT, connectionLeft)
+                .setValue(RIGHT, connectionRight);
     }
 
     @Nullable
@@ -166,7 +257,6 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
         BeamConnection connectionBelow = pState.getValue(DOWN);
         boolean connectionLeft = pState.getValue(LEFT);
         boolean connectionRight = pState.getValue(RIGHT);
-        boolean waterlogged = pState.getValue(WATERLOGGED);
 
         switch (pDirection) {
             case DOWN -> {
@@ -225,14 +315,11 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
             }
         }
 
-        return this.defaultBlockState()
-                .setValue(HORIZONTAL_AXIS, axis)
-                .setValue(VERTICAL, isVertical)
+        return pState
                 .setValue(UP, connectionAbove)
                 .setValue(DOWN, connectionBelow)
                 .setValue(LEFT, connectionLeft)
-                .setValue(RIGHT, connectionRight)
-                .setValue(WATERLOGGED, waterlogged);
+                .setValue(RIGHT, connectionRight);
     }
 
     @SuppressWarnings("deprecation")
