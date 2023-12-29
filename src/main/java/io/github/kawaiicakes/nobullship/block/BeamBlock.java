@@ -122,16 +122,16 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
         BeamConnection connectionAbove = BeamConnection.NONE;
         BeamConnection connectionBelow = BeamConnection.NONE;
 
-        if (blockAbove.is(METAL_BEAM_BLOCK.get()) && blockAbove.getValue(VERTICAL) != isVertical) {
-            connectionAbove = axisDirection.equals(blockAbove.getValue(HORIZONTAL_AXIS)) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
+        if (blockAbove.is(METAL_BEAM_BLOCK.get())) {
+            connectionAbove = BeamConnection.PARALLEL;
         }
 
-        if (blockBelow.is(METAL_BEAM_BLOCK.get()) && blockBelow.getValue(VERTICAL) != isVertical) {
-            connectionBelow = axisDirection.equals(blockBelow.getValue(HORIZONTAL_AXIS)) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
+        if (blockBelow.is(METAL_BEAM_BLOCK.get())) {
+            connectionBelow = BeamConnection.PARALLEL;
         }
 
-        boolean attachesOnLeft = blockOnLeft.is(METAL_BEAM_BLOCK.get()) && !blockOnLeft.getValue(HORIZONTAL_AXIS).equals(axisDirection);
-        boolean attachesOnRight = blockOnRight.is(METAL_BEAM_BLOCK.get()) && !blockOnRight.getValue(HORIZONTAL_AXIS).equals(axisDirection);
+        boolean attachesOnLeft = blockOnLeft.is(METAL_BEAM_BLOCK.get());
+        boolean attachesOnRight = blockOnRight.is(METAL_BEAM_BLOCK.get());
 
         boolean isInWater = pContext.getLevel().getFluidState(placementPos).getType() == Fluids.WATER;
 
