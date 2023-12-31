@@ -24,9 +24,12 @@ public abstract class WheelBlock extends Block {
     public WheelBlock(Properties pProperties) {
         super(pProperties
                 .noOcclusion()
+                .isViewBlocking((x,y,z) -> false)
+                .isValidSpawn((w,x,y,z) -> false)
+                .requiresCorrectToolForDrops()
         );
         this.registerDefaultState(this.stateDefinition.any()
-                .setValue(FACING, Direction.EAST)
+                .setValue(FACING, Direction.SOUTH)
         );
     }
 
