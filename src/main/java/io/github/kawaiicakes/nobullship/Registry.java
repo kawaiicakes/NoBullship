@@ -8,28 +8,21 @@ import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -37,7 +30,6 @@ import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 import static io.github.kawaiicakes.nobullship.NoBullship.NO_BULLSHIP_TAB;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.Serializer.INSTANCE;
 import static net.minecraftforge.registries.ForgeRegistries.*;
-import static net.minecraftforge.registries.ForgeRegistries.RECIPE_SERIALIZERS;
 
 @ParametersAreNonnullByDefault
 public class Registry {
@@ -60,13 +52,8 @@ public class Registry {
                             .sound(SoundType.ANVIL)
                             .noOcclusion()
             ));
-    public static final RegistryObject<Block> TIRE
-            = BLOCK_REGISTRY.register("tire", () -> new WheelBlock(BlockBehaviour.Properties.of(Material.FROGLIGHT)) {
-        @Override
-        public @NotNull VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-            return Shapes.block();
-        }
-    });
+    public static final RegistryObject<Block> TIRE_BLOCK
+            = BLOCK_REGISTRY.register("tire", WheelBlock.TireBlock::new);
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
             = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
     public static final RegistryObject<BlockItem> WILDCARD_ITEM
@@ -84,7 +71,7 @@ public class Registry {
     public static final RegistryObject<BlockItem> TIRE_ITEM
             = ITEM_REGISTRY.register(
                     "tire",
-            () -> new BlockItem(TIRE.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
+            () -> new BlockItem(TIRE_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
     );
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));

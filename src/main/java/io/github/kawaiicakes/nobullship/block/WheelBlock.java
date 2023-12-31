@@ -12,8 +12,11 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+
+import static net.minecraft.world.level.block.Blocks.SHROOMLIGHT;
 
 public abstract class WheelBlock extends Block {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
@@ -60,5 +63,16 @@ public abstract class WheelBlock extends Block {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         pBuilder.add(FACING);
+    }
+
+    public static class TireBlock extends WheelBlock {
+        public TireBlock() {
+            super(Properties.copy(SHROOMLIGHT));
+        }
+
+        @Override
+        public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+            return Shapes.block();
+        }
     }
 }
