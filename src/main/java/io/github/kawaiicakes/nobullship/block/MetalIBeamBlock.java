@@ -23,16 +23,14 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static io.github.kawaiicakes.nobullship.Registry.METAL_BEAM_BLOCK;
 
 public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
     public static final List<VoxelShape> BASE_SHAPES = new ArrayList<>(4);
-    public static final Map<Direction.Axis, VoxelShape> SIDE_SHAPES = new HashMap<>(2);
-    public static final Map<Direction.Axis, VoxelShape> VERTICAL_SIDE_SHAPES = new HashMap<>(2);
+    public static final List<VoxelShape> SIDE_SHAPES = new ArrayList<>(4);
+    public static final List<VoxelShape> VERTICAL_SIDE_SHAPES = new ArrayList<>(4);
     public static final List<VoxelShape> TOP_SHAPES = new ArrayList<>(8);
 
     public static final EnumProperty<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.create(
@@ -401,26 +399,35 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
         }
     }
 
-    // TODO
     public static VoxelShape getLeftShape(boolean isVertical, Direction.Axis horizontalAxis) {
-        if (horizontalAxis.equals(Direction.Axis.Y)) throw new IllegalArgumentException();
         if (!isVertical) {
-            return SIDE_SHAPES.get(horizontalAxis);
+            return switch (horizontalAxis) {
+                case X -> SIDE_SHAPES.get(1);
+                case Z -> SIDE_SHAPES.get(0);
+                default -> throw new IllegalArgumentException();
+            };
         } else {
-            return VERTICAL_SIDE_SHAPES.get(horizontalAxis);
+            return switch (horizontalAxis) {
+                case X -> VERTICAL_SIDE_SHAPES.get(1);
+                case Z -> VERTICAL_SIDE_SHAPES.get(0);
+                default -> throw new IllegalArgumentException();
+            };
         }
     }
 
-    // TODO
     public static VoxelShape getRightShape(boolean isVertical, Direction.Axis horizontalAxis) {
-        if (horizontalAxis.equals(Direction.Axis.Y)) throw new IllegalArgumentException();
-
-        double offsetX = horizontalAxis.equals(Direction.Axis.X) ? 6.0 : 0;
-        double offsetZ = horizontalAxis.equals(Direction.Axis.Z) ? 6.0 : 0;
         if (!isVertical) {
-            return SIDE_SHAPES.get(horizontalAxis).move(offsetX, 0, offsetZ);
+            return switch (horizontalAxis) {
+                case X -> SIDE_SHAPES.get(3);
+                case Z -> SIDE_SHAPES.get(2);
+                default -> throw new IllegalArgumentException();
+            };
         } else {
-            return VERTICAL_SIDE_SHAPES.get(horizontalAxis).move(offsetX, 0, offsetZ);
+            return switch (horizontalAxis) {
+                case X -> VERTICAL_SIDE_SHAPES.get(3);
+                case Z -> VERTICAL_SIDE_SHAPES.get(2);
+                default -> throw new IllegalArgumentException();
+            };
         }
     }
 
@@ -550,6 +557,14 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
         }
         return rotatedDimensions;
     }
+    public static double[][] quickRotateYCcw(double[][] original) {
+        double[][] rotatedDimensions = new double[original.length][];
+        byte count = 0;
+        for (double[] dimensions : original) {
+            rotatedDimensions[count++] = rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, dimensions);
+        }
+        return rotatedDimensions;
+    }
 
     static {
         final double[][] baseShape = new double[][]{
@@ -582,11 +597,23 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
         // vertical X
         BASE_SHAPES.add(generateShape(quickRotateZCw(quickRotateYCw(baseShape))));
 
-        SIDE_SHAPES.put(Direction.Axis.X, generateShape(sideShape));
-        SIDE_SHAPES.put(Direction.Axis.Z, generateShape(quickRotateYCw(sideShape)));
+        // z left
+        SIDE_SHAPES.add(generateShape(sideShape));
+        // x left
+        SIDE_SHAPES.add(generateShape(quickRotateYCw(sideShape)));
+        // z right
+        SIDE_SHAPES.add(generateShape(quickRotateYCw(quickRotateYCw(sideShape))));
+        // x right
+        SIDE_SHAPES.add(generateShape(quickRotateXCw(quickRotateXCw(quickRotateYCw(sideShape)))));
 
-        VERTICAL_SIDE_SHAPES.put(Direction.Axis.X, generateShape(verticalSideShape));
-        VERTICAL_SIDE_SHAPES.put(Direction.Axis.Z, generateShape(quickRotateXCw(verticalSideShape)));
+        // z left
+        VERTICAL_SIDE_SHAPES.add(generateShape(verticalSideShape));
+        // x left
+        VERTICAL_SIDE_SHAPES.add(generateShape(quickRotateYCw(verticalSideShape)));
+        // z right
+        VERTICAL_SIDE_SHAPES.add(generateShape(quickRotateYCw(quickRotateYCw(verticalSideShape))));
+        // x right
+        VERTICAL_SIDE_SHAPES.add(generateShape(quickRotateYCcw(verticalSideShape)));
 
         // non-vertical top Z
         TOP_SHAPES.add(generateShape(topShape));
