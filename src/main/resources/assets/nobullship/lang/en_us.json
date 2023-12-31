@@ -6,6 +6,9 @@
 
   "block.nobullship.wildcard": "Any",
   "block.nobullship.workshop": "Workshop",
+  "block.nobullship.metal_beam": "Metal I-Beam",
+  "block.nobullship.tire": "Tire",
+  "block.nobullship.wood_wheel": "Wooden Wheel",
 
   "sounds.nobullship.construct_success": "[Construction sounds]",
   "sounds.nobullship.construct_expended": "[Paper tearing]",
