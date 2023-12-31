@@ -85,10 +85,10 @@ public abstract class WheelBlock extends Block {
 
         static {
             final List<Double[]> defaultShape = List.of(
-                    new Double[]{0.0, 2.0, 12.0, 3.0, 14.0, 16.0},
-                    new Double[]{13.0, 2.0, 12.0, 16.0, 14.0, 16.0},
-                    new Double[]{2.0, 0.0, 12.0, 14.0, 3.0, 16.0},
-                    new Double[]{2.0, 13.0, 12.0, 14.0, 16.0, 16.0},
+                    new Double[]{0.0, 2.0, 12.0, 4.0, 14.0, 16.0},
+                    new Double[]{12.0, 2.0, 12.0, 16.0, 14.0, 16.0},
+                    new Double[]{2.0, 0.0, 12.0, 14.0, 4.0, 16.0},
+                    new Double[]{2.0, 12.0, 12.0, 14.0, 16.0, 16.0},
                     new Double[]{6.5, 6.5, 12.0, 9.5, 9.5, 16.0}
             );
 
