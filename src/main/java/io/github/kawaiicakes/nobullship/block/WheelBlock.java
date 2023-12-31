@@ -49,7 +49,7 @@ public abstract class WheelBlock extends Block {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        return this.defaultBlockState().setValue(FACING, pContext.getClickedFace());
+        return this.defaultBlockState().setValue(FACING, pContext.getClickedFace().getOpposite());
     }
 
     @Override
