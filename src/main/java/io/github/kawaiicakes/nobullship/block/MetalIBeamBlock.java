@@ -7,10 +7,8 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -18,6 +16,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -28,7 +27,7 @@ import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.Registry.METAL_BEAM_BLOCK;
 
-public class BeamBlock extends Block implements SimpleWaterloggedBlock {
+public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
     public static final double[] BASE_SHAPE_BOTTOM = {6.0, 5.0, 0.0, 10, 6.0, 16};
     public static final double[] BASE_SHAPE_MIDDLE = {7.5, 6.0, 0.0, 8.5, 10.0, 16.0};
     public static final double[] BASE_SHAPE_TOP = {6.0, 10, 0.0, 10, 11, 16};
@@ -55,8 +54,14 @@ public class BeamBlock extends Block implements SimpleWaterloggedBlock {
     public static final BooleanProperty RIGHT = BooleanProperty.create("right");
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
-    public BeamBlock(Properties properties) {
-        super(properties);
+    public MetalIBeamBlock() {
+        super(BlockBehaviour.Properties.of(Material.METAL)
+                .sound(SoundType.ANVIL)
+                .noOcclusion()
+                .isViewBlocking((x,y,z) -> false)
+                .isValidSpawn((w,x,y,z) -> !w.getValue(VERTICAL))
+                .requiresCorrectToolForDrops()
+        );
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(HORIZONTAL_AXIS, Direction.Axis.X)
                 .setValue(VERTICAL, Boolean.FALSE)

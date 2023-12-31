@@ -70,6 +70,19 @@ public abstract class WheelBlock extends Block {
         pBuilder.add(FACING);
     }
 
+    public static class WoodWheelBlock extends WheelBlock {
+        public static final Map<Direction, VoxelShape> SHAPE_BY_DIRECTION = new HashMap<>(6);
+
+        public WoodWheelBlock(Properties pProperties) {
+            super(pProperties);
+        }
+
+        @Override
+        public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+            return null;
+        }
+    }
+
     public static class TireBlock extends WheelBlock {
         public static final Map<Direction, VoxelShape> SHAPE_BY_DIRECTION = new HashMap<>(6);
 
@@ -112,15 +125,15 @@ public abstract class WheelBlock extends Block {
                         case SOUTH -> Rotation.NONE;
                     };
 
-                    rotatedDimensions[shapeNumber++] = BeamBlock.rotateDimensions(axisOfRotation, rotation, castedDimensions);
+                    rotatedDimensions[shapeNumber++] = MetalIBeamBlock.rotateDimensions(axisOfRotation, rotation, castedDimensions);
                 }
 
                 SHAPE_BY_DIRECTION.put(direction, Shapes.or(
-                        BeamBlock.generateShape(rotatedDimensions[0]),
-                        BeamBlock.generateShape(rotatedDimensions[1]),
-                        BeamBlock.generateShape(rotatedDimensions[2]),
-                        BeamBlock.generateShape(rotatedDimensions[3]),
-                        BeamBlock.generateShape(rotatedDimensions[4])));
+                        MetalIBeamBlock.generateShape(rotatedDimensions[0]),
+                        MetalIBeamBlock.generateShape(rotatedDimensions[1]),
+                        MetalIBeamBlock.generateShape(rotatedDimensions[2]),
+                        MetalIBeamBlock.generateShape(rotatedDimensions[3]),
+                        MetalIBeamBlock.generateShape(rotatedDimensions[4])));
             }
         }
     }

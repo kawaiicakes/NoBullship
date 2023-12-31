@@ -1,6 +1,6 @@
 package io.github.kawaiicakes.nobullship;
 
-import io.github.kawaiicakes.nobullship.block.BeamBlock;
+import io.github.kawaiicakes.nobullship.block.MetalIBeamBlock;
 import io.github.kawaiicakes.nobullship.block.WheelBlock;
 import io.github.kawaiicakes.nobullship.block.WildcardBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
@@ -15,10 +15,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -47,11 +44,7 @@ public class Registry {
     public static final RegistryObject<Block> WORKSHOP_BLOCK
             = BLOCK_REGISTRY.register("workshop", MultiblockWorkshopBlock::new);
     public static final RegistryObject<Block> METAL_BEAM_BLOCK
-            = BLOCK_REGISTRY.register("metal_beam", () -> new BeamBlock(
-                    BlockBehaviour.Properties.of(Material.METAL)
-                            .sound(SoundType.ANVIL)
-                            .noOcclusion()
-            ));
+            = BLOCK_REGISTRY.register("metal_beam", MetalIBeamBlock::new);
     public static final RegistryObject<Block> TIRE_BLOCK
             = BLOCK_REGISTRY.register("tire", WheelBlock.TireBlock::new);
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
