@@ -1,27 +1,27 @@
 {
   "variants": {
     "facing=up": {
-      "model": "nobullship:block/modern_wheel",
+      "model": "nobullship:block/tire",
       "x": 90
     },
     "facing=down": {
-      "model": "nobullship:block/modern_wheel",
+      "model": "nobullship:block/tire",
       "x": 270
     },
     "facing=north": {
-      "model": "nobullship:block/modern_wheel",
-      "y": 270
-    },
-    "facing=south": {
-      "model": "nobullship:block/modern_wheel",
-      "y": 90
-    },
-    "facing=west": {
-      "model": "nobullship:block/modern_wheel",
+      "model": "nobullship:block/tire",
       "y": 180
     },
+    "facing=south": {
+      "model": "nobullship:block/tire"
+    },
+    "facing=west": {
+      "model": "nobullship:block/tire",
+      "y": 90
+    },
     "facing=east": {
-      "model": "nobullship:block/modern_wheel"
+      "model": "nobullship:block/tire",
+      "y": 270
     }
   }
 }
