@@ -23,23 +23,17 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.github.kawaiicakes.nobullship.Registry.METAL_BEAM_BLOCK;
 
 public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
-    public static final double[] BASE_SHAPE_BOTTOM = {6.0, 5.0, 0.0, 10, 6.0, 16};
-    public static final double[] BASE_SHAPE_MIDDLE = {7.5, 6.0, 0.0, 8.5, 10.0, 16.0};
-    public static final double[] BASE_SHAPE_TOP = {6.0, 10, 0.0, 10, 11, 16};
-    public static final double[] SIDE_SHAPE_BOTTOM = {10, 5.0, 6.0, 16, 6.0, 10};
-    public static final double[] SIDE_SHAPE_MIDDLE = {8.0, 6.0, 7.5, 16, 10, 8.5};
-    public static final double[] SIDE_SHAPE_TOP = {10, 10, 6.0, 16, 11, 10};
-    public static final double[] TOP_SHAPE_FRONT = {6.0, 8.0, 5.0, 10.0, 16.0, 6.0};
-    public static final double[] TOP_SHAPE_MIDDLE = {7.5, 11, 6.0, 8.5, 16, 10};
-    public static final double[] TOP_SHAPE_BACK = {6.0, 8.0, 10, 10.0, 16.0, 11};
-    public static final double[] SIDE_VERTICAL_SHAPE_BOTTOM = {8.0, 5.025, 6.0, 16, 5.975, 10};
-    public static final double[] SIDE_VERTICAL_SHAPE_MIDDLE = {8.0, 5.975, 7.5, 16, 10.025, 8.5};
-    public static final double[] SIDE_VERTICAL_SHAPE_TOP = {8.0, 10.025, 6.0, 16, 10.975, 10};
+    public static final List<VoxelShape> BASE_SHAPES = new ArrayList<>(4);
+    public static final Map<Direction.Axis, VoxelShape> SIDE_SHAPES = new HashMap<>(2);
+    public static final Map<Direction.Axis, VoxelShape> VERTICAL_SIDE_SHAPES = new HashMap<>(2);
+    public static final List<VoxelShape> TOP_SHAPES = new ArrayList<>(8);
 
     public static final EnumProperty<Direction.Axis> HORIZONTAL_AXIS = EnumProperty.create(
             "horizontal_axis",
@@ -85,8 +79,16 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
 
         VoxelShape leftSide = hasLeft ? getLeftShape(isVertical, horizontalAxis) : Shapes.empty();
         VoxelShape rightSide = hasRight ? getRightShape(isVertical, horizontalAxis) : Shapes.empty();
-        VoxelShape aboveTop = !hasAbove.equals(BeamConnection.NONE) ? getTopShape(isVertical, horizontalAxis, hasAbove) : Shapes.empty();
-        VoxelShape belowTop = !hasBelow.equals(BeamConnection.NONE) ? getBottomShape(isVertical, horizontalAxis, hasBelow) : Shapes.empty();
+        VoxelShape aboveTop;
+        VoxelShape belowTop;
+
+        if (!isVertical) {
+            aboveTop = !hasAbove.equals(BeamConnection.NONE) ? getTopShape(false, horizontalAxis, hasAbove) : Shapes.empty();
+            belowTop = !hasBelow.equals(BeamConnection.NONE) ? getBottomShape(false, horizontalAxis, hasBelow) : Shapes.empty();
+        } else {
+            aboveTop = hasAbove.equals(BeamConnection.PARALLEL) ? getTopShape(true, horizontalAxis, BeamConnection.PARALLEL) : Shapes.empty();
+            belowTop = hasBelow.equals(BeamConnection.PARALLEL) ? getBottomShape(true, horizontalAxis, BeamConnection.PARALLEL) : Shapes.empty();
+        }
 
         return Shapes.or(
                 getBaseShape(isVertical, horizontalAxis),
@@ -343,87 +345,82 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
         pBuilder.add(HORIZONTAL_AXIS, VERTICAL, UP, DOWN, LEFT, RIGHT, WATERLOGGED);
     }
 
+    public static BlockPos getLeft(BlockPos pos, Direction.Axis beamAxis) {
+        return switch (beamAxis) {
+            case X -> pos.north();
+            case Z -> pos.east();
+            default -> throw new IllegalArgumentException("Horizontal axes only!");
+        };
+    }
+
+    public static BlockPos getRight(BlockPos pos, Direction.Axis beamAxis) {
+        return switch (beamAxis) {
+            case X -> pos.south();
+            case Z -> pos.west();
+            default -> throw new IllegalArgumentException("Horizontal axes only!");
+        };
+    }
+
+    public static BlockPos getAbove(BlockPos pos, Direction.Axis beamAxis, boolean isVertical) {
+        if (isVertical) {
+            return switch (beamAxis) {
+                case X -> pos.east();
+                case Z -> pos.south();
+                default -> throw new IllegalArgumentException("Horizontal axes only!");
+            };
+        } else {
+            return pos.above();
+        }
+    }
+
+    public static BlockPos getBelow(BlockPos pos, Direction.Axis beamAxis, boolean isVertical) {
+        if (isVertical) {
+            return switch (beamAxis) {
+                case X -> pos.west();
+                case Z -> pos.north();
+                default -> throw new IllegalArgumentException("Horizontal axes only!");
+            };
+        } else {
+            return pos.below();
+        }
+    }
+
     public static VoxelShape getBaseShape(boolean isVertical, Direction.Axis horizontalAxis) {
         if (!isVertical) {
             return switch (horizontalAxis) {
-                case X -> generateShape(
-                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_BOTTOM),
-                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_MIDDLE),
-                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_TOP));
-                case Z -> generateShape(
-                        BASE_SHAPE_BOTTOM,
-                        BASE_SHAPE_MIDDLE,
-                        BASE_SHAPE_TOP);
+                case X -> BASE_SHAPES.get(1);
+                case Z -> BASE_SHAPES.get(0);
                 default -> throw new IllegalArgumentException();
             };
         } else {
             return switch (horizontalAxis) {
-                case X -> generateShape(
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_BOTTOM)),
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_MIDDLE)),
-                        rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, BASE_SHAPE_TOP)));
-                case Z -> generateShape(
-                        rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, BASE_SHAPE_BOTTOM),
-                        rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, BASE_SHAPE_MIDDLE),
-                        rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, BASE_SHAPE_TOP));
+                case X -> BASE_SHAPES.get(3);
+                case Z -> BASE_SHAPES.get(2);
                 default -> throw new IllegalArgumentException();
             };
         }
     }
 
+    // TODO
     public static VoxelShape getLeftShape(boolean isVertical, Direction.Axis horizontalAxis) {
+        if (horizontalAxis.equals(Direction.Axis.Y)) throw new IllegalArgumentException();
         if (!isVertical) {
-            return switch (horizontalAxis) {
-                case X -> generateShape(
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_SHAPE_BOTTOM),
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_SHAPE_MIDDLE),
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_SHAPE_TOP));
-                case Z -> generateShape(
-                        SIDE_SHAPE_BOTTOM,
-                        SIDE_SHAPE_MIDDLE,
-                        SIDE_SHAPE_TOP);
-                default -> throw new IllegalArgumentException();
-            };
+            return SIDE_SHAPES.get(horizontalAxis);
         } else {
-            return switch (horizontalAxis) {
-                case X -> generateShape(
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_VERTICAL_SHAPE_BOTTOM),
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_VERTICAL_SHAPE_MIDDLE),
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, SIDE_VERTICAL_SHAPE_TOP));
-                case Z -> generateShape(
-                        SIDE_VERTICAL_SHAPE_BOTTOM,
-                        SIDE_VERTICAL_SHAPE_MIDDLE,
-                        SIDE_VERTICAL_SHAPE_TOP);
-                default -> throw new IllegalArgumentException();
-            };
+            return VERTICAL_SIDE_SHAPES.get(horizontalAxis);
         }
     }
 
+    // TODO
     public static VoxelShape getRightShape(boolean isVertical, Direction.Axis horizontalAxis) {
+        if (horizontalAxis.equals(Direction.Axis.Y)) throw new IllegalArgumentException();
+
+        double offsetX = horizontalAxis.equals(Direction.Axis.X) ? 6.0 : 0;
+        double offsetZ = horizontalAxis.equals(Direction.Axis.Z) ? 6.0 : 0;
         if (!isVertical) {
-            return switch (horizontalAxis) {
-                case X -> generateShape(
-                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_BOTTOM),
-                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_MIDDLE),
-                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_SHAPE_TOP));
-                case Z -> generateShape(
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_SHAPE_BOTTOM),
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_SHAPE_MIDDLE),
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_SHAPE_TOP));
-                default -> throw new IllegalArgumentException();
-            };
+            return SIDE_SHAPES.get(horizontalAxis).move(offsetX, 0, offsetZ);
         } else {
-            return switch (horizontalAxis) {
-                case X -> generateShape(
-                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_VERTICAL_SHAPE_BOTTOM),
-                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_VERTICAL_SHAPE_MIDDLE),
-                        rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, SIDE_VERTICAL_SHAPE_TOP));
-                case Z -> generateShape(
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_VERTICAL_SHAPE_BOTTOM),
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_VERTICAL_SHAPE_MIDDLE),
-                        rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_180, SIDE_VERTICAL_SHAPE_TOP));
-                default -> throw new IllegalArgumentException();
-            };
+            return VERTICAL_SIDE_SHAPES.get(horizontalAxis).move(offsetX, 0, offsetZ);
         }
     }
 
@@ -432,62 +429,26 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
             return switch (connectionType) {
                 case PARALLEL -> {
                     if (horizontalAxis.equals(Direction.Axis.X)) {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT),
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE),
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK));
+                        yield TOP_SHAPES.get(1);
                     } else {
-                        yield generateShape(
-                                TOP_SHAPE_FRONT,
-                                TOP_SHAPE_MIDDLE,
-                                TOP_SHAPE_BACK);
+                        yield TOP_SHAPES.get(0);
                     }
                 }
                 case PERPENDICULAR -> {
                     if (horizontalAxis.equals(Direction.Axis.Z)) {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT),
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE),
-                                rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK));
+                        yield TOP_SHAPES.get(1);
                     } else {
-                        yield generateShape(
-                                TOP_SHAPE_FRONT,
-                                TOP_SHAPE_MIDDLE,
-                                TOP_SHAPE_BACK);
+                        yield TOP_SHAPES.get(0);
                     }
                 }
                 default -> throw new IllegalArgumentException();
             };
         } else {
-            return switch (connectionType) {
-                case PARALLEL -> {
-                    if (horizontalAxis.equals(Direction.Axis.X)) {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.COUNTERCLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.COUNTERCLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.COUNTERCLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK)));
-                    } else {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT),
-                                rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE),
-                                rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK));
-                    }
-                }
-                case PERPENDICULAR -> {
-                    if (horizontalAxis.equals(Direction.Axis.Z)) {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK)));
-                    } else {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK));
-                    }
-                }
-                default -> throw new IllegalArgumentException();
-            };
+            if (horizontalAxis.equals(Direction.Axis.X)) {
+                return TOP_SHAPES.get(5);
+            } else {
+                return TOP_SHAPES.get(4);
+            }
         }
     }
 
@@ -496,62 +457,26 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
             return switch (connectionType) {
                 case PARALLEL -> {
                     if (horizontalAxis.equals(Direction.Axis.X)) {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK)));
+                        yield TOP_SHAPES.get(3);
                     } else {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_FRONT),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_MIDDLE),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_BACK));
+                        yield TOP_SHAPES.get(2);
                     }
                 }
                 case PERPENDICULAR -> {
                     if (horizontalAxis.equals(Direction.Axis.Z)) {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_FRONT)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_MIDDLE)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, TOP_SHAPE_BACK)));
+                        yield TOP_SHAPES.get(3);
                     } else {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_FRONT),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_MIDDLE),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_180, TOP_SHAPE_BACK));
+                        yield TOP_SHAPES.get(2);
                     }
                 }
                 default -> throw new IllegalArgumentException();
             };
         } else {
-            return switch (connectionType) {
-                case PARALLEL -> {
-                    if (horizontalAxis.equals(Direction.Axis.X)) {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK)));
-                    } else {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.X, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT),
-                                rotateDimensions(Direction.Axis.X, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE),
-                                rotateDimensions(Direction.Axis.X, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK));
-                    }
-                }
-                case PERPENDICULAR -> {
-                    if (horizontalAxis.equals(Direction.Axis.Z)) {
-                        yield generateShape(
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_FRONT)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_MIDDLE)),
-                                rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, rotateDimensions(Direction.Axis.Y, Rotation.COUNTERCLOCKWISE_90, TOP_SHAPE_BACK)));
-                    } else {
-                        yield generateShape(
-                                TOP_SHAPE_FRONT,
-                                TOP_SHAPE_MIDDLE,
-                                TOP_SHAPE_BACK);
-                    }
-                }
-                default -> throw new IllegalArgumentException();
-            };
+            if (horizontalAxis.equals(Direction.Axis.X)) {
+                return TOP_SHAPES.get(7);
+            } else {
+                return TOP_SHAPES.get(6);
+            }
         }
     }
 
@@ -599,44 +524,86 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
         return Block.box(dimensions[0], dimensions[1], dimensions[2], dimensions[3], dimensions[4], dimensions[5]);
     }
 
-    public static BlockPos getLeft(BlockPos pos, Direction.Axis beamAxis) {
-        return switch (beamAxis) {
-            case X -> pos.north();
-            case Z -> pos.east();
-            default -> throw new IllegalArgumentException("Horizontal axes only!");
-        };
-    }
-
-    public static BlockPos getRight(BlockPos pos, Direction.Axis beamAxis) {
-        return switch (beamAxis) {
-            case X -> pos.south();
-            case Z -> pos.west();
-            default -> throw new IllegalArgumentException("Horizontal axes only!");
-        };
-    }
-
-    public static BlockPos getAbove(BlockPos pos, Direction.Axis beamAxis, boolean isVertical) {
-        if (isVertical) {
-            return switch (beamAxis) {
-                case X -> pos.east();
-                case Z -> pos.south();
-                default -> throw new IllegalArgumentException("Horizontal axes only!");
-            };
-        } else {
-            return pos.above();
+    public static double[][] quickRotateZCw(double[][] original) {
+        double[][] rotatedDimensions = new double[original.length][];
+        byte count = 0;
+        for (double[] dimensions : original) {
+            rotatedDimensions[count++] = rotateDimensions(Direction.Axis.Z, Rotation.CLOCKWISE_90, dimensions);
         }
+        return rotatedDimensions;
     }
 
-    public static BlockPos getBelow(BlockPos pos, Direction.Axis beamAxis, boolean isVertical) {
-        if (isVertical) {
-            return switch (beamAxis) {
-                case X -> pos.west();
-                case Z -> pos.north();
-                default -> throw new IllegalArgumentException("Horizontal axes only!");
-            };
-        } else {
-            return pos.below();
+    public static double[][] quickRotateYCw(double[][] original) {
+        double[][] rotatedDimensions = new double[original.length][];
+        byte count = 0;
+        for (double[] dimensions : original) {
+            rotatedDimensions[count++] = rotateDimensions(Direction.Axis.Y, Rotation.CLOCKWISE_90, dimensions);
         }
+        return rotatedDimensions;
+    }
+
+    public static double[][] quickRotateXCw(double[][] original) {
+        double[][] rotatedDimensions = new double[original.length][];
+        byte count = 0;
+        for (double[] dimensions : original) {
+            rotatedDimensions[count++] = rotateDimensions(Direction.Axis.X, Rotation.CLOCKWISE_90, dimensions);
+        }
+        return rotatedDimensions;
+    }
+
+    static {
+        final double[][] baseShape = new double[][]{
+                new double[]{6.0, 5.0, 0.0, 10, 6.0, 16},
+                new double[]{7.5, 6.0, 0.0, 8.5, 10.0, 16.0},
+                new double[]{6.0, 10, 0.0, 10, 11, 16}
+        };
+        final double[][] sideShape = new double[][]{
+                new double[]{10, 5.0, 6.0, 16, 6.0, 10},
+                new double[]{8.0, 6.0, 7.5, 16, 10, 8.5},
+                new double[]{10, 10, 6.0, 16, 11, 10}
+        };
+        final double[][] verticalSideShape = new double[][]{
+                new double[]{8.0, 5.025, 6.0, 16, 5.975, 10},
+                new double[]{8.0, 5.975, 7.5, 16, 10.025, 8.5},
+                new double[]{8.0, 10.025, 6.0, 16, 10.975, 10}
+        };
+        final double[][] topShape = new double[][]{
+                new double[]{6.0, 8.0, 5.0, 10.0, 16.0, 6.0},
+                new double[]{7.5, 11, 6.0, 8.5, 16, 10},
+                new double[]{6.0, 8.0, 10, 10.0, 16.0, 11}
+        };
+
+        // non-vertical Z
+        BASE_SHAPES.add(generateShape(baseShape));
+        // non-vertical X
+        BASE_SHAPES.add(generateShape(quickRotateYCw(baseShape)));
+        // vertical Z
+        BASE_SHAPES.add(generateShape(quickRotateXCw(baseShape)));
+        // vertical X
+        BASE_SHAPES.add(generateShape(quickRotateZCw(quickRotateYCw(baseShape))));
+
+        SIDE_SHAPES.put(Direction.Axis.X, generateShape(sideShape));
+        SIDE_SHAPES.put(Direction.Axis.Z, generateShape(quickRotateYCw(sideShape)));
+
+        VERTICAL_SIDE_SHAPES.put(Direction.Axis.X, generateShape(verticalSideShape));
+        VERTICAL_SIDE_SHAPES.put(Direction.Axis.Z, generateShape(quickRotateXCw(verticalSideShape)));
+
+        // non-vertical top Z
+        TOP_SHAPES.add(generateShape(topShape));
+        // non-vertical top X
+        TOP_SHAPES.add(generateShape(quickRotateYCw(topShape)));
+        // non-vertical bottom Z
+        TOP_SHAPES.add(generateShape(quickRotateXCw(quickRotateXCw(topShape))));
+        // non-vertical bottom X
+        TOP_SHAPES.add(generateShape(quickRotateYCw(quickRotateZCw(quickRotateZCw(topShape)))));
+        // vertical top Z
+        TOP_SHAPES.add(generateShape(quickRotateXCw(topShape)));
+        // vertical top X
+        TOP_SHAPES.add(generateShape(quickRotateYCw(quickRotateXCw(topShape))));
+        // vertical bottom Z
+        TOP_SHAPES.add(generateShape(quickRotateYCw(quickRotateYCw(quickRotateXCw(topShape)))));
+        // vertical bottom X
+        TOP_SHAPES.add(generateShape(quickRotateZCw(quickRotateYCw(topShape))));
     }
 
     public enum BeamConnection implements StringRepresentable {
