@@ -47,6 +47,8 @@ public class Registry {
             = BLOCK_REGISTRY.register("metal_beam", MetalIBeamBlock::new);
     public static final RegistryObject<Block> TIRE_BLOCK
             = BLOCK_REGISTRY.register("tire", WheelBlock.TireBlock::new);
+    public static final RegistryObject<Block> WOOD_WHEEL_BLOCK
+            = BLOCK_REGISTRY.register("wood_wheel", WheelBlock.WoodWheelBlock::new);
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
             = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
     public static final RegistryObject<BlockItem> WILDCARD_ITEM
@@ -65,6 +67,11 @@ public class Registry {
             = ITEM_REGISTRY.register(
                     "tire",
             () -> new BlockItem(TIRE_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
+    public static final RegistryObject<BlockItem> WOOD_WHEEL_ITEM
+            = ITEM_REGISTRY.register(
+            "wood_wheel",
+            () -> new BlockItem(WOOD_WHEEL_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
     );
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));

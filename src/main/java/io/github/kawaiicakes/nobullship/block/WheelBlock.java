@@ -18,12 +18,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static net.minecraft.world.level.block.Blocks.OAK_WOOD;
 import static net.minecraft.world.level.block.Blocks.SHROOMLIGHT;
 
 public abstract class WheelBlock extends Block {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
 
-    public WheelBlock(Properties pProperties) {
+    protected WheelBlock(Properties pProperties) {
         super(pProperties
                 .noOcclusion()
                 .isViewBlocking((x,y,z) -> false)
@@ -73,13 +74,54 @@ public abstract class WheelBlock extends Block {
     public static class WoodWheelBlock extends WheelBlock {
         public static final Map<Direction, VoxelShape> SHAPE_BY_DIRECTION = new HashMap<>(6);
 
-        public WoodWheelBlock(Properties pProperties) {
-            super(pProperties);
+        public WoodWheelBlock() {
+            super(Properties.copy(OAK_WOOD));
         }
 
         @Override
         public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-            return null;
+            if (!SHAPE_BY_DIRECTION.containsKey(pState.getValue(FACING))) throw new IllegalArgumentException();
+            return SHAPE_BY_DIRECTION.get(pState.getValue(FACING));
+        }
+
+        static {
+            final double[][] defaultShape = new double[][]{
+                    new double[]{0.0, 2.0, 14.0, 3.0, 14.0, 16.0},
+                    new double[]{13.0, 2.0, 14.0, 16.0, 14.0, 16.0},
+                    new double[]{2.0, 0.0, 14.0, 14.0, 3.0, 16.0},
+                    new double[]{2.0, 13.0, 14.0, 14.0, 16.0, 16.0},
+                    new double[]{7.1587, 2.0, 14.25, 8.8413, 14, 15.75},
+                    new double[]{2.0, 7.1587, 14.25, 14, 8.8413, 15.75},
+                    new double[]{6.5, 6.5, 14.0, 9.5, 9.5, 16.0}
+            };
+
+            for (Direction direction : Direction.values()) {
+                double[][] rotatedDimensions = new double[7][];
+
+                int shapeNumber = 0;
+                for (double[] dimensions : defaultShape) {
+                    Direction.Axis axisOfRotation = !direction.equals(Direction.UP) && !direction.equals(Direction.DOWN)
+                            ? Direction.Axis.Y : Direction.Axis.X;
+
+                    Rotation rotation = switch (direction) {
+                        case DOWN, EAST -> Rotation.CLOCKWISE_90;
+                        case UP, WEST -> Rotation.COUNTERCLOCKWISE_90;
+                        case NORTH -> Rotation.CLOCKWISE_180;
+                        case SOUTH -> Rotation.NONE;
+                    };
+
+                    rotatedDimensions[shapeNumber++] = MetalIBeamBlock.rotateDimensions(axisOfRotation, rotation, dimensions);
+                }
+
+                SHAPE_BY_DIRECTION.put(direction, Shapes.or(
+                        MetalIBeamBlock.generateShape(rotatedDimensions[0]),
+                        MetalIBeamBlock.generateShape(rotatedDimensions[1]),
+                        MetalIBeamBlock.generateShape(rotatedDimensions[2]),
+                        MetalIBeamBlock.generateShape(rotatedDimensions[3]),
+                        MetalIBeamBlock.generateShape(rotatedDimensions[4]),
+                        MetalIBeamBlock.generateShape(rotatedDimensions[5]),
+                        MetalIBeamBlock.generateShape(rotatedDimensions[6])));
+            }
         }
     }
 

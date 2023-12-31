@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "nobullship:block/wood_wheel",
+      "x": 90
+    },
+    "facing=down": {
+      "model": "nobullship:block/wood_wheel",
+      "x": 270
+    },
+    "facing=north": {
+      "model": "nobullship:block/wood_wheel",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "nobullship:block/wood_wheel"
+    },
+    "facing=west": {
+      "model": "nobullship:block/wood_wheel",
+      "y": 90
+    },
+    "facing=east": {
+      "model": "nobullship:block/wood_wheel",
+      "y": 270
+    }
+  }
+}
