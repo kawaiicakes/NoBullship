@@ -16,6 +16,8 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.*;
+
 import static net.minecraft.world.level.block.Blocks.SHROOMLIGHT;
 
 public abstract class WheelBlock extends Block {
@@ -69,13 +71,57 @@ public abstract class WheelBlock extends Block {
     }
 
     public static class TireBlock extends WheelBlock {
+        public static final Map<Direction, VoxelShape> SHAPE_BY_DIRECTION = new HashMap<>(6);
+
         public TireBlock() {
             super(Properties.copy(SHROOMLIGHT));
         }
 
         @Override
         public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-            return Shapes.block();
+            if (!SHAPE_BY_DIRECTION.containsKey(pState.getValue(FACING))) throw new IllegalArgumentException();
+            return SHAPE_BY_DIRECTION.get(pState.getValue(FACING));
+        }
+
+        static {
+            final List<Double[]> defaultShape = List.of(
+                    new Double[]{0.0, 2.0, 12.0, 3.0, 14.0, 16.0},
+                    new Double[]{13.0, 2.0, 12.0, 16.0, 14.0, 16.0},
+                    new Double[]{2.0, 0.0, 12.0, 14.0, 3.0, 16.0},
+                    new Double[]{2.0, 13.0, 12.0, 14.0, 16.0, 16.0},
+                    new Double[]{6.5, 6.5, 12.0, 9.5, 9.5, 16.0}
+            );
+
+            for (Direction direction : Direction.values()) {
+                double[][] rotatedDimensions = new double[5][];
+
+                int shapeNumber = 0;
+                for (Double[] dimensions : defaultShape) {
+                    double[] castedDimensions = new double[6];
+                    for (int i = 0; i < 6; i++) {
+                        castedDimensions[i] = dimensions[i];
+                    }
+
+                    Direction.Axis axisOfRotation = !direction.equals(Direction.UP) && !direction.equals(Direction.DOWN)
+                            ? Direction.Axis.Y : Direction.Axis.X;
+
+                    Rotation rotation = switch (direction) {
+                        case DOWN, EAST -> Rotation.CLOCKWISE_90;
+                        case UP, WEST -> Rotation.COUNTERCLOCKWISE_90;
+                        case NORTH -> Rotation.CLOCKWISE_180;
+                        case SOUTH -> Rotation.NONE;
+                    };
+
+                    rotatedDimensions[shapeNumber++] = BeamBlock.rotateDimensions(axisOfRotation, rotation, castedDimensions);
+                }
+
+                SHAPE_BY_DIRECTION.put(direction, Shapes.or(
+                        BeamBlock.generateShape(rotatedDimensions[0]),
+                        BeamBlock.generateShape(rotatedDimensions[1]),
+                        BeamBlock.generateShape(rotatedDimensions[2]),
+                        BeamBlock.generateShape(rotatedDimensions[3]),
+                        BeamBlock.generateShape(rotatedDimensions[4])));
+            }
         }
     }
 }
