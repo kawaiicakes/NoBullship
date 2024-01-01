@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship;
 
 import io.github.kawaiicakes.nobullship.block.MetalIBeamBlock;
+import io.github.kawaiicakes.nobullship.block.SimpleBeamBlock;
 import io.github.kawaiicakes.nobullship.block.WheelBlock;
 import io.github.kawaiicakes.nobullship.block.WildcardBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
@@ -16,6 +17,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -49,6 +52,8 @@ public class Registry {
             = BLOCK_REGISTRY.register("tire", WheelBlock.TireBlock::new);
     public static final RegistryObject<Block> WOOD_WHEEL_BLOCK
             = BLOCK_REGISTRY.register("wood_wheel", WheelBlock.WoodWheelBlock::new);
+    public static final RegistryObject<Block> SIMPLE_WOOD_BEAM_BLOCK
+            = BLOCK_REGISTRY.register("simple_wood_beam", () -> new SimpleBeamBlock.ThinBeamBlock(BlockBehaviour.Properties.of(Material.NETHER_WOOD)));
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
             = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
     public static final RegistryObject<BlockItem> WILDCARD_ITEM
@@ -72,6 +77,11 @@ public class Registry {
             = ITEM_REGISTRY.register(
             "wood_wheel",
             () -> new BlockItem(WOOD_WHEEL_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
+    public static final RegistryObject<BlockItem> SIMPLE_WOOD_BEAM_ITEM
+            = ITEM_REGISTRY.register(
+            "simple_wood_beam",
+            () -> new BlockItem(SIMPLE_WOOD_BEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
     );
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));

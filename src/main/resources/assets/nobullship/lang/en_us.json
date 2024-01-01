@@ -9,6 +9,7 @@
   "block.nobullship.metal_beam": "Metal I-Beam",
   "block.nobullship.tire": "Tire",
   "block.nobullship.wood_wheel": "Wooden Wheel",
+  "block.nobullship.simple_wood_beam": "Wooden Beam",
 
   "sounds.nobullship.construct_success": "[Construction sounds]",
   "sounds.nobullship.construct_expended": "[Paper tearing]",
