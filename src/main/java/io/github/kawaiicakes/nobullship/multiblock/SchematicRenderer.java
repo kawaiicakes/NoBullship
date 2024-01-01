@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.multiblock;
 
 import com.google.common.math.IntMath;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
@@ -113,6 +114,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         ClientLevel clientLevel = Minecraft.getInstance().level;
         if (clientLevel == null) return;
 
+        RenderSystem.disableCull();
         ModelBlockRenderer.enableCaching();
 
         Map<Character, BlockIngredient> palette = entry.palette;
@@ -258,6 +260,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         }
 
         ModelBlockRenderer.clearCache();
+        RenderSystem.enableCull();
     }
 
     @Override
