@@ -7,10 +7,14 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -21,8 +25,9 @@ import java.util.*;
 import static net.minecraft.world.level.block.Blocks.OAK_WOOD;
 import static net.minecraft.world.level.block.Blocks.SHROOMLIGHT;
 
-public abstract class WheelBlock extends Block {
+public abstract class WheelBlock extends Block implements SimpleWaterloggedBlock {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     protected WheelBlock(Properties pProperties) {
         super(pProperties
@@ -33,6 +38,7 @@ public abstract class WheelBlock extends Block {
         );
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.SOUTH)
+                .setValue(WATERLOGGED, false)
         );
     }
 
@@ -58,7 +64,10 @@ public abstract class WheelBlock extends Block {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        return this.defaultBlockState().setValue(FACING, pContext.getClickedFace().getOpposite());
+        boolean isInWater = pContext.getLevel().getFluidState(pContext.getClickedPos()).getType() == Fluids.WATER;
+        return this.defaultBlockState()
+                .setValue(FACING, pContext.getClickedFace().getOpposite())
+                .setValue(WATERLOGGED, isInWater);
     }
 
     @Override
@@ -66,9 +75,15 @@ public abstract class WheelBlock extends Block {
         return true;
     }
 
+    @SuppressWarnings("deprecation")
+    @Override
+    public FluidState getFluidState(BlockState pState) {
+        return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
+    }
+
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(FACING);
+        pBuilder.add(FACING, WATERLOGGED);
     }
 
     public static class WoodWheelBlock extends WheelBlock {
