@@ -16,6 +16,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Material;
@@ -53,7 +54,9 @@ public class Registry {
     public static final RegistryObject<Block> WOOD_WHEEL_BLOCK
             = BLOCK_REGISTRY.register("wood_wheel", WheelBlock.WoodWheelBlock::new);
     public static final RegistryObject<Block> SIMPLE_WOOD_BEAM_BLOCK
-            = BLOCK_REGISTRY.register("simple_wood_beam", () -> new SimpleBeamBlock.ThinBeamBlock(BlockBehaviour.Properties.of(Material.NETHER_WOOD)));
+            = BLOCK_REGISTRY.register("simple_wood_beam", () -> new SimpleBeamBlock.ThinBeamBlock(BlockBehaviour.Properties.of(Material.WOOD).sound(SoundType.BAMBOO)));
+    public static final RegistryObject<Block> SIMPLE_METAL_BEAM_BLOCK
+            = BLOCK_REGISTRY.register("simple_metal_beam", () -> new SimpleBeamBlock.ThinBeamBlock(BlockBehaviour.Properties.of(Material.METAL).sound(SoundType.METAL)));
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
             = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
     public static final RegistryObject<BlockItem> WILDCARD_ITEM
@@ -82,6 +85,11 @@ public class Registry {
             = ITEM_REGISTRY.register(
             "simple_wood_beam",
             () -> new BlockItem(SIMPLE_WOOD_BEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
+    public static final RegistryObject<BlockItem> SIMPLE_METAL_BEAM_ITEM
+            = ITEM_REGISTRY.register(
+            "simple_metal_beam",
+            () -> new BlockItem(SIMPLE_METAL_BEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
     );
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));
