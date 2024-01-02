@@ -2,6 +2,7 @@ package io.github.kawaiicakes.nobullship;
 
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.NoBullshipBlockTags;
+import io.github.kawaiicakes.nobullship.block.NoBullshipRecipeProvider;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen;
@@ -70,6 +71,11 @@ public class NoBullship
     public void onDatagen(GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
         ExistingFileHelper fileHelper = event.getExistingFileHelper();
+
+        generator.addProvider(
+                event.includeServer(),
+                new NoBullshipRecipeProvider(generator)
+        );
 
         generator.addProvider(
                 event.includeServer(),
