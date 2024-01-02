@@ -19,7 +19,6 @@
     {
       "apply": {
         "model": "nobullship:block/simple_wood_beam_side",
-        "uvlock": true,
         "y": 90
       },
       "when": {
@@ -29,7 +28,6 @@
     {
       "apply": {
         "model": "nobullship:block/simple_wood_beam_side",
-        "uvlock": true,
         "y": 180
       },
       "when": {
@@ -39,7 +37,6 @@
     {
       "apply": {
         "model": "nobullship:block/simple_wood_beam_side",
-        "uvlock": true,
         "y": 270
       },
       "when": {
@@ -49,7 +46,6 @@
     {
       "apply": {
         "model": "nobullship:block/simple_wood_beam_side",
-        "uvlock": true,
         "x": 270
       },
       "when": {
@@ -59,7 +55,6 @@
     {
       "apply": {
         "model": "nobullship:block/simple_wood_beam_side",
-        "uvlock": true,
         "x": 90
       },
       "when": {
