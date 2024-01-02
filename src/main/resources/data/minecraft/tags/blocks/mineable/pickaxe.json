@@ -1,5 +1,7 @@
 {
   "values": [
-    "nobullship:workshop"
+    "nobullship:workshop",
+    "nobullship:metal_beam",
+    "nobullship:simple_metal_beam"
   ]
 }

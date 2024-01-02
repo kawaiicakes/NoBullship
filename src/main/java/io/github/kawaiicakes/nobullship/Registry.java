@@ -54,9 +54,15 @@ public class Registry {
     public static final RegistryObject<Block> WOOD_WHEEL_BLOCK
             = BLOCK_REGISTRY.register("wood_wheel", WheelBlock.WoodWheelBlock::new);
     public static final RegistryObject<Block> SIMPLE_WOOD_BEAM_BLOCK
-            = BLOCK_REGISTRY.register("simple_wood_beam", () -> new SimpleBeamBlock.ThinBeamBlock(BlockBehaviour.Properties.of(Material.WOOD).sound(SoundType.BAMBOO)));
+            = BLOCK_REGISTRY.register("simple_wood_beam", () -> new SimpleBeamBlock.ThinBeamBlock(BlockBehaviour.Properties
+            .of(Material.WOOD)
+            .sound(SoundType.BAMBOO)
+            .strength(2.0F)));
     public static final RegistryObject<Block> SIMPLE_METAL_BEAM_BLOCK
-            = BLOCK_REGISTRY.register("simple_metal_beam", () -> new SimpleBeamBlock.ThinBeamBlock(BlockBehaviour.Properties.of(Material.METAL).sound(SoundType.METAL)));
+            = BLOCK_REGISTRY.register("simple_metal_beam", () -> new SimpleBeamBlock.ThinBeamBlock(BlockBehaviour.Properties
+            .of(Material.METAL)
+            .sound(SoundType.METAL)
+            .strength(5.0F, 6.0F)));
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
             = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
     public static final RegistryObject<BlockItem> WILDCARD_ITEM

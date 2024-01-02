@@ -53,6 +53,7 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
                 .isViewBlocking((x,y,z) -> false)
                 .isValidSpawn((w,x,y,z) -> !w.getValue(VERTICAL))
                 .requiresCorrectToolForDrops()
+                .strength(5.0F, 6.0F)
         );
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(HORIZONTAL_AXIS, Direction.Axis.X)

@@ -77,7 +77,13 @@ public class MultiblockWorkshopBlock extends BaseEntityBlock {
     }
 
     public MultiblockWorkshopBlock() {
-        super(BlockBehaviour.Properties.of(Material.METAL).noOcclusion().isViewBlocking((a, b, c) -> false).strength(5).requiresCorrectToolForDrops());
+        super(BlockBehaviour.Properties
+                .of(Material.METAL)
+                .noOcclusion()
+                .isViewBlocking((a,b,c) -> false)
+                .isValidSpawn((w,x,y,z) -> false)
+                .isSuffocating((x,y,z) -> false)
+                .strength(4.0F, 6.0F));
     }
 
     @SuppressWarnings("deprecation")

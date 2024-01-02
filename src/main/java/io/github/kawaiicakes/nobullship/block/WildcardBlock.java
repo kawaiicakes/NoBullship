@@ -24,9 +24,11 @@ public class WildcardBlock extends Block {
                 .noOcclusion()
                 .isViewBlocking((x,y,z) -> false)
                 .isSuffocating((x,y,z) -> false)
+                .isValidSpawn((w,x,y,z) -> false)
                 .noLootTable()
                 .explosionResistance(3600000.0F)
                 .strength(-1.0F)
+                .requiresCorrectToolForDrops()
         );
     }
 

@@ -2,12 +2,13 @@ package io.github.kawaiicakes.nobullship.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -15,6 +16,9 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -22,8 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static net.minecraft.world.level.block.Blocks.OAK_WOOD;
-import static net.minecraft.world.level.block.Blocks.SHROOMLIGHT;
+import static net.minecraft.world.level.block.Blocks.*;
 
 public abstract class WheelBlock extends Block implements SimpleWaterloggedBlock {
     public static final DirectionProperty FACING = BlockStateProperties.FACING;
@@ -34,6 +37,7 @@ public abstract class WheelBlock extends Block implements SimpleWaterloggedBlock
                 .noOcclusion()
                 .isViewBlocking((x,y,z) -> false)
                 .isValidSpawn((w,x,y,z) -> false)
+                .isSuffocating((x,y,z) -> false)
                 .requiresCorrectToolForDrops()
         );
         this.registerDefaultState(this.stateDefinition.any()
@@ -90,7 +94,7 @@ public abstract class WheelBlock extends Block implements SimpleWaterloggedBlock
         public static final Map<Direction, VoxelShape> SHAPE_BY_DIRECTION = new HashMap<>(6);
 
         public WoodWheelBlock() {
-            super(Properties.copy(OAK_WOOD));
+            super(Properties.copy(OAK_WOOD).strength(2.0F).sound(SoundType.WOOD));
         }
 
         @Override
@@ -144,7 +148,34 @@ public abstract class WheelBlock extends Block implements SimpleWaterloggedBlock
         public static final Map<Direction, VoxelShape> SHAPE_BY_DIRECTION = new HashMap<>(6);
 
         public TireBlock() {
-            super(Properties.copy(SHROOMLIGHT));
+            super(Properties
+                    .of(Material.CLAY, MaterialColor.GRASS)
+                    .sound(SoundType.SHROOMLIGHT)
+                    .strength(4.0F)
+            );
+        }
+
+        @Override
+        public void fallOn(Level pLevel, BlockState pState, BlockPos pPos, Entity pEntity, float pFallDistance) {
+            if (pEntity.isSuppressingBounce()) {
+                super.fallOn(pLevel, pState, pPos, pEntity, pFallDistance);
+            } else {
+                pEntity.causeFallDamage(pFallDistance, 0.0F, DamageSource.FALL);
+            }
+
+        }
+
+        @Override
+        public void updateEntityAfterFallOn(BlockGetter pLevel, Entity pEntity) {
+            if (pEntity.isSuppressingBounce()) {
+                super.updateEntityAfterFallOn(pLevel, pEntity);
+            } else {
+                Vec3 vec3 = pEntity.getDeltaMovement();
+                if (vec3.y < 0.0D) {
+                    double d0 = pEntity instanceof LivingEntity ? 1.0D : 0.8D;
+                    pEntity.setDeltaMovement(vec3.x, -vec3.y * d0, vec3.z);
+                }
+            }
         }
 
         @Override
