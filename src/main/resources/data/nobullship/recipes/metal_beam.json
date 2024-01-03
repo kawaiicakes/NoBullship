@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "no_bs_i-beams",
+  "key": {
+    "-": {
+      "tag": "forge:ingots/iron"
+    },
+    "|": {
+      "item": "nobullship:simple_metal_beam"
+    }
+  },
+  "pattern": [
+    "---",
+    " | ",
+    "---"
+  ],
+  "result": {
+    "count": 6,
+    "item": "nobullship:metal_beam"
+  }
+}
