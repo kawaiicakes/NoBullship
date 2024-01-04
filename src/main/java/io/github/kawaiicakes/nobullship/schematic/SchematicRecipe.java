@@ -29,11 +29,12 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     private final ResourceLocation resultId;
     private final ImmutableList<Ingredient> shaped;
     private final ImmutableList<ItemStack> shapeless;
+    private final @Nullable ImmutableList<ItemStack> requisites;
     private final int maximumSchematicUsage;
     public final byte actualShapedWidth;
     public final byte actualShapedHeight;
 
-    public SchematicRecipe(ResourceLocation recipeId, ResourceLocation resultId, ImmutableList<Ingredient> shaped, ImmutableList<ItemStack> shapeless, int maximumSchematicUsage, byte actualShapedWidth, byte actualShapedHeight) {
+    public SchematicRecipe(ResourceLocation recipeId, ResourceLocation resultId, ImmutableList<Ingredient> shaped, ImmutableList<ItemStack> shapeless, @Nullable ImmutableList<ItemStack> requisites, int maximumSchematicUsage, byte actualShapedWidth, byte actualShapedHeight) {
         this.recipeId = recipeId;
         this.resultId = resultId;
         this.shaped = shaped;
@@ -41,6 +42,7 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         this.maximumSchematicUsage = maximumSchematicUsage;
         this.actualShapedWidth = actualShapedWidth;
         this.actualShapedHeight = actualShapedHeight;
+        this.requisites = requisites;
     }
 
     public ImmutableList<Ingredient> getShapedIngredients() {
@@ -55,6 +57,16 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public ImmutableList<ItemStack> getShapelessIngredients() {
         ImmutableList.Builder<ItemStack> toReturn = ImmutableList.builder();
         for (ItemStack stack : this.shapeless) {
+            toReturn.add(stack.copy());
+        }
+        return toReturn.build();
+    }
+
+    @Nullable
+    public ImmutableList<ItemStack> getRequisites() {
+        if (this.requisites == null) return null;
+        ImmutableList.Builder<ItemStack> toReturn = ImmutableList.builder();
+        for (ItemStack stack : this.requisites) {
             toReturn.add(stack.copy());
         }
         return toReturn.build();
@@ -355,11 +367,21 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
             ImmutableList<ItemStack> shapelessInput = ImmutableList.copyOf(itemsFromJson(GsonHelper.getAsJsonArray(pSerializedRecipe, "shapeless_input")));
             if (shapelessInput.size() > 9) throw new JsonParseException("Too many ingredients for shapeless recipe. The maximum is 9");
 
+            ImmutableList<ItemStack> requisiteList = null;
+            JsonArray requisiteArray = null;
+            try {
+                requisiteArray = GsonHelper.getAsJsonArray(pSerializedRecipe, "requisites");
+            } catch (JsonSyntaxException ignored) {}
+
+            if (requisiteArray != null && !requisiteArray.isEmpty()) {
+                requisiteList = ImmutableList.copyOf(itemsFromJson(requisiteArray));
+            }
+
             JsonPrimitive jsonUsages = pSerializedRecipe.getAsJsonPrimitive("max_usages");
             int usages = 0;
             if (jsonUsages != null && jsonUsages.isNumber() && jsonUsages.getAsInt() >= 1) usages = jsonUsages.getAsInt();
 
-            return new SchematicRecipe(pRecipeId, resultId, shapedInput, shapelessInput, usages, recipeWidth, recipeHeight);
+            return new SchematicRecipe(pRecipeId, resultId, shapedInput, shapelessInput, requisiteList, usages, recipeWidth, recipeHeight);
         }
 
         @Override
@@ -374,7 +396,15 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
 
             NonNullList<ItemStack> shapelessList = pBuffer.readCollection(NonNullList::createWithCapacity, FriendlyByteBuf::readItem);
 
-            return new SchematicRecipe(pRecipeId, new ResourceLocation(resultId), ImmutableList.copyOf(shapedList), ImmutableList.copyOf(shapelessList), usages, width, height);
+            NonNullList<ItemStack> requisiteList = pBuffer.readCollection(NonNullList::createWithCapacity, FriendlyByteBuf::readItem);
+            ImmutableList<ItemStack> requisiteForArgument;
+            if (requisiteList.isEmpty()) {
+                requisiteForArgument = null;
+            } else {
+                requisiteForArgument = ImmutableList.copyOf(requisiteList);
+            }
+
+            return new SchematicRecipe(pRecipeId, new ResourceLocation(resultId), ImmutableList.copyOf(shapedList), ImmutableList.copyOf(shapelessList), requisiteForArgument, usages, width, height);
         }
 
         @Override
@@ -389,6 +419,12 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
             }
 
             pBuffer.writeCollection(pRecipe.getShapelessIngredients(), FriendlyByteBuf::writeItem);
+
+            ImmutableList<ItemStack> requisiteList = ImmutableList.of();
+            if (pRecipe.getRequisites() != null) {
+                requisiteList = pRecipe.getRequisites();
+            }
+            pBuffer.writeCollection(requisiteList, FriendlyByteBuf::writeItem);
         }
 
         protected static JsonSyntaxException throwNewSyntaxError(ResourceLocation pRecipeId, String message) {

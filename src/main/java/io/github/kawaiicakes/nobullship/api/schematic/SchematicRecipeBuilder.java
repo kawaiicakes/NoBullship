@@ -25,6 +25,7 @@ public class SchematicRecipeBuilder {
     protected final List<String> pattern = new ArrayList<>();
     protected final Map<Character, Ingredient> key = new LinkedHashMap<>();
     protected final NonNullList<ItemStack> shapeless = NonNullList.withSize(9, ItemStack.EMPTY);
+    protected final NonNullList<ItemStack> requisites = NonNullList.create();
     protected int maximumSchematicUsage;
     protected byte cursor = 0;
 
@@ -91,6 +92,20 @@ public class SchematicRecipeBuilder {
         return this;
     }
 
+    public SchematicRecipeBuilder addRequisite(ItemStack requisite) {
+        if (requisite.isEmpty()) throw new IllegalArgumentException("Passed requisite may not be empty!");
+        this.requisites.add(requisite);
+        return this;
+    }
+
+    public SchematicRecipeBuilder addRequisites(NonNullList<ItemStack> requisites) {
+        if (requisites.stream().anyMatch(ItemStack::isEmpty)) {
+            throw new IllegalArgumentException("Passed list has an empty item!");
+        }
+        this.requisites.addAll(requisites);
+        return this;
+    }
+
     public SchematicRecipeBuilder maxUsages(int maxUsages) {
         if (maxUsages < 1) throw new IllegalArgumentException("Max usages must be an integer greater than or equal to 1!");
         this.maximumSchematicUsage = maxUsages;
@@ -99,7 +114,7 @@ public class SchematicRecipeBuilder {
 
     public void save(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ResourceLocation pRecipeId) {
         this.ensureValid(pRecipeId);
-        pFinishedRecipeConsumer.accept(new Result(pRecipeId, this.resultId, this.pattern, this.key, this.shapeless, this.maximumSchematicUsage));
+        pFinishedRecipeConsumer.accept(new Result(pRecipeId, this.resultId, this.pattern, this.key, this.shapeless, this.requisites, this.maximumSchematicUsage));
     }
 
     public void ensureValid(ResourceLocation pId) {
@@ -134,14 +149,16 @@ public class SchematicRecipeBuilder {
         protected final List<String> pattern;
         protected final Map<Character, Ingredient> key;
         protected final NonNullList<ItemStack> shapeless;
+        protected final NonNullList<ItemStack> requisites;
         protected final int maximumSchematicUsage;
 
-        public Result(ResourceLocation id, ResourceLocation resultId, List<String> pattern, Map<Character, Ingredient> key, NonNullList<ItemStack> shapeless, int maximumSchematicUsage) {
+        public Result(ResourceLocation id, ResourceLocation resultId, List<String> pattern, Map<Character, Ingredient> key, NonNullList<ItemStack> shapeless, NonNullList<ItemStack> requisites, int maximumSchematicUsage) {
             this.id = id;
             this.resultId = resultId;
             this.pattern = pattern;
             this.key = key;
             this.shapeless = shapeless;
+            this.requisites = requisites;
             this.maximumSchematicUsage = maximumSchematicUsage;
         }
 
@@ -174,6 +191,15 @@ public class SchematicRecipeBuilder {
                 shapelessJson.add(serialized);
             }
             pJson.add("shapeless_input", shapelessJson);
+
+            if (!this.requisites.isEmpty()) {
+                JsonArray requisitesJson = new JsonArray();
+                for (ItemStack item : this.requisites) {
+                    JsonElement serialized = ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, item).get().orThrow();
+                    requisitesJson.add(serialized);
+                }
+                pJson.add("requisites", requisitesJson);
+            }
 
             if (maximumSchematicUsage > 0) pJson.addProperty("max_usages", this.maximumSchematicUsage);
         }
