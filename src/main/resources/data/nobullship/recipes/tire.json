@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "no_bs_wheels",
+  "key": {
+    "+": {
+      "item": "nobullship:simple_metal_beam"
+    },
+    "o": {
+      "item": "nobullship:pitch"
+    }
+  },
+  "pattern": [
+    "o+o",
+    "+++",
+    "o+o"
+  ],
+  "result": {
+    "count": 3,
+    "item": "nobullship:tire"
+  }
+}

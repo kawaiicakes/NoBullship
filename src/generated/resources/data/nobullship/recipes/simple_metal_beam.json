@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "no_bs_simple_beams",
+  "key": {
+    "m": {
+      "tag": "forge:ingots/iron"
+    },
+    "p": {
+      "item": "nobullship:pitch"
+    }
+  },
+  "pattern": [
+    "ppp",
+    "mmm",
+    "ppp"
+  ],
+  "result": {
+    "count": 6,
+    "item": "nobullship:simple_metal_beam"
+  }
+}

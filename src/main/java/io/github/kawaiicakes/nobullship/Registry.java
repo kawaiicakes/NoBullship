@@ -97,6 +97,11 @@ public class Registry {
             "simple_metal_beam",
             () -> new BlockItem(SIMPLE_METAL_BEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
     );
+    public static final RegistryObject<Item> PITCH_ITEM
+            = ITEM_REGISTRY.register(
+                    "pitch",
+            () -> new Item(new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));
     public static final RegistryObject<SchematicItem> SCHEMATIC

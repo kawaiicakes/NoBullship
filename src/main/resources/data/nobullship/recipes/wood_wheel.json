@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "no_bs_wheels",
+  "key": {
+    "+": {
+      "item": "minecraft:stick"
+    },
+    "o": {
+      "item": "nobullship:simple_wood_beam"
+    }
+  },
+  "pattern": [
+    " o ",
+    "o+o",
+    " o "
+  ],
+  "result": {
+    "count": 3,
+    "item": "nobullship:wood_wheel"
+  }
+}
