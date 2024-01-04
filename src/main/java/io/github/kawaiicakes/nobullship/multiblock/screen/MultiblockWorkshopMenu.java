@@ -190,8 +190,10 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
             }
         }
 
-        //noinspection DataFlowIssue (output is guaranteed to have a tag here since a recipe match is present)
-        output.getTag().put("nobullshipRequisites", requisiteList);
+        if (!requisiteList.isEmpty()) {
+            //noinspection DataFlowIssue (output is guaranteed to have a tag here since a recipe match is present)
+            output.getTag().put("nobullshipRequisites", requisiteList);
+        }
 
         this.entity.setActiveRecipe(optional.orElse(null));
         this.setResult(output);
