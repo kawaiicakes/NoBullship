@@ -11,6 +11,7 @@ import io.github.kawaiicakes.nobullship.Config;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacket;
+import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -143,12 +144,17 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         BlockPos pos = context.getClickedPos();
 
         Player player = context.getPlayer();
-        ImmutableList<ItemStack> requisites = recipe.requisites();
+
+        ImmutableList<ItemStack> requisites = null;
+
+        try {
+             requisites = SchematicItem.yoinkSummedRequisites(context.getItemInHand());
+        } catch (IllegalArgumentException ignored) {}
+
         if (requisites != null && !requisites.isEmpty()) {
             if (player != null && !player.isCreative()) {
                 List<ItemStack> summedContents = getSummedContents(player.getInventory().items);
-                List<ItemStack> requirementContents = getSummedContents(requisites);
-                if (!compareSummedContents(requirementContents, summedContents)) {
+                if (!compareSummedContents(requisites, summedContents)) {
                     level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
                     Objects.requireNonNull(((ServerPlayer) player))
                             .sendSystemMessage(FAIL2, true);

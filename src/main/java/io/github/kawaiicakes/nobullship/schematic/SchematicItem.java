@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.schematic;
 
+import com.google.common.collect.ImmutableList;
 import io.github.kawaiicakes.nobullship.Config;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
@@ -221,5 +222,24 @@ public class SchematicItem extends Item {
     @Override
     public boolean doesSneakBypassUse(ItemStack stack, LevelReader level, BlockPos pos, Player player) {
         return true;
+    }
+
+    /**
+     * @param schematic The <code>ItemStack</code> of a SchematicItem with valid requisite data
+     * @return an immutable list containing the summed requisites
+     */
+    public static ImmutableList<ItemStack> yoinkSummedRequisites(ItemStack schematic) throws IllegalArgumentException {
+        if (!schematic.is(SCHEMATIC.get())) throw new IllegalArgumentException("Argument is not a SchematicItem!");
+        if (!schematic.hasTag()) throw new IllegalArgumentException("Schematic does not have NBT!");
+
+        assert schematic.getTag() != null;
+        ListTag list = schematic.getTag().getList("nobullshipRequisites", TAG_COMPOUND).copy();
+
+        List<ItemStack> nonSumRequirements = list.stream()
+                .map(tag -> (CompoundTag) tag)
+                .map(ItemStack::of)
+                .toList();
+
+        return ImmutableList.copyOf(getSummedContents(nonSumRequirements));
     }
 }
