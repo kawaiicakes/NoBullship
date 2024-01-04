@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship.multiblock.screen;
 
+import com.google.common.collect.ImmutableList;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.api.schematic.SchematicResultSlot;
@@ -173,15 +174,24 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
         Optional<MultiblockRecipe> multiblockRecipeOptional
                 = MultiblockRecipeManager.getInstance().getRecipe(optional.get().getResultId());
 
+        ListTag requisiteList = new ListTag();
+
         if (multiblockRecipeOptional.isPresent() && multiblockRecipeOptional.get().requisites() != null) {
-            ListTag requisiteList = new ListTag();
             //noinspection DataFlowIssue
             for (ItemStack item : multiblockRecipeOptional.get().requisites()) {
                 requisiteList.add(item.serializeNBT());
             }
-            //noinspection DataFlowIssue (output is guaranteed to have a tag here since a recipe match is present)
-            output.getTag().put("nobullshipRequisites", requisiteList);
         }
+
+        ImmutableList<ItemStack> requisiteListFromSchematic = optional.get().getRequisites();
+        if (requisiteListFromSchematic != null) {
+            for (ItemStack item : requisiteListFromSchematic) {
+                requisiteList.add(item.serializeNBT());
+            }
+        }
+
+        //noinspection DataFlowIssue (output is guaranteed to have a tag here since a recipe match is present)
+        output.getTag().put("nobullshipRequisites", requisiteList);
 
         this.entity.setActiveRecipe(optional.orElse(null));
         this.setResult(output);
