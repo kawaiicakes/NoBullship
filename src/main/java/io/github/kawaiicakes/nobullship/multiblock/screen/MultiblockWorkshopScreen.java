@@ -10,7 +10,6 @@ import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
@@ -36,9 +35,16 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     public static final Component INCREMENT = Component.translatable("gui.nobullship.increment");
     public static final Component DECREMENT = Component.translatable("gui.nobullship.decrement");
     public static final Quaternion ROTATE_180 = Vector3f.ZP.rotationDegrees(-180F);
+
     protected boolean renderSchematic;
     public boolean verticalRenderSlicing;
     public int renderedLayer;
+    protected boolean nbtViewerActive;
+    protected NbtViewerButton nbtViewerButton;
+    protected WorkshopButton visibilityButton;
+    protected WorkshopButton verticalButton;
+    protected WorkshopButton incrementButton;
+    protected WorkshopButton decrementButton;
 
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -51,105 +57,64 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.renderSchematic = pMenu.entity.shouldRenderSchematicInWorld;
         this.verticalRenderSlicing = pMenu.entity.verticalRenderSlicing;
         this.renderedLayer = pMenu.entity.renderedLayer;
+        this.nbtViewerActive = false;
+        this.nbtViewerButton = new NbtViewerButton((button) -> this.toggleNbtViewer());
+        this.visibilityButton = new WorkshopButton(
+                16, 16,
+                115, 206, 16,
+                (button) -> this.toggleSchematicDisplay(),
+                (button, stack, mX, mY) -> this.renderTooltip(stack, VISIBILITY_BUTTON, mX, mY));
+        this.verticalButton = new WorkshopButton(
+                16, 16,
+                131, 206, 16,
+                (button) -> this.toggleSlice(),
+                (button, stack, mX, mY) -> this.renderTooltip(stack, SLICE_DIRECTION, mX, mY));
+        this.incrementButton = new WorkshopButton(
+                8, 8,
+                147, 206, 0,
+                (button) -> this.incrementLayer(),
+                (button, stack, mX, mY) -> this.renderTooltip(stack, INCREMENT, mX, mY));
+        this.decrementButton = new WorkshopButton(
+                8, 8,
+                147, 214, 0,
+                (button) -> this.decrementLayer(),
+                (button, stack, mX, mY) -> this.renderTooltip(stack, DECREMENT, mX, mY));
+        this.nbtViewerButton.active = this.nbtViewerActive;
+        this.visibilityButton.alternateTexture = !this.renderSchematic;
+        this.verticalButton.alternateTexture = this.verticalRenderSlicing;
     }
 
     @Override
     protected void init() {
         super.init();
 
-        this.addRenderableWidget(
-                new ImageButton(this.leftPos + 129, this.topPos + 71,
-                        16, 16,
-                        115, 206, 16,
-                        TEXTURE, 256, 256,
-                        (button) -> this.toggleSchematicDisplay(),
-                        (button, stack, mX, mY) -> this.renderTooltip(stack, VISIBILITY_BUTTON, mX, mY),
-                        Component.empty()) {
-                    @Override
-                    public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                        RenderSystem.setShaderTexture(0, this.resourceLocation);
+        this.visibilityButton.setPosition(this.leftPos + 129, this.topPos + 71);
+        this.verticalButton.setPosition(this.leftPos + 147, this.topPos + 71);
+        this.incrementButton.setPosition(this.leftPos + 165, this.topPos + 72);
+        this.decrementButton.setPosition(this.leftPos + 165, this.topPos + 80);
 
-                        int i = this.yTexStart;
-                        if (MultiblockWorkshopScreen.this.renderSchematic) i += this.yDiffTex;
+        this.addRenderableWidget(this.nbtViewerButton);
+        this.addRenderableWidget(this.visibilityButton);
+        this.addRenderableWidget(this.verticalButton);
+        this.addRenderableWidget(this.incrementButton);
+        this.addRenderableWidget(this.decrementButton);
+    }
 
-                        RenderSystem.enableDepthTest();
-                        blit(pPoseStack, this.x, this.y, 5, this.xTexStart, i, this.width, this.height, this.textureHeight, this.textureWidth);
-                        if (this.isHovered) {
-                            this.renderToolTip(pPoseStack, pMouseX, pMouseY);
-                        }
-                    }
-                }
-        );
+    @Override
+    protected void containerTick() {
+        super.containerTick();
 
-        this.addRenderableWidget(
-                new ImageButton(this.leftPos + 147, this.topPos + 71,
-                16, 16,
-                131, 206, 16,
-                TEXTURE, 256, 256,
-                (button) -> this.toggleSlice(),
-                (button, stack, mX, mY) -> this.renderTooltip(stack, SLICE_DIRECTION, mX, mY),
-                Component.empty()) {
-                    @Override
-                    public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                        RenderSystem.setShaderTexture(0, this.resourceLocation);
+        // TODO
+        if (this.menu.entity.getActiveRecipeResult().isPresent()) {
 
-                        int i = this.yTexStart;
-                        if (!MultiblockWorkshopScreen.this.verticalRenderSlicing) i += this.yDiffTex;
+        } else {
 
-                        RenderSystem.enableDepthTest();
-                        blit(pPoseStack, this.x, this.y, 5, this.xTexStart, i, this.width, this.height, this.textureHeight, this.textureWidth);
-                        if (this.isHovered) {
-                            this.renderToolTip(pPoseStack, pMouseX, pMouseY);
-                        }
-                    }
-                }
-        );
+        }
 
-        this.addRenderableWidget(
-                new ImageButton(this.leftPos + 165, this.topPos + 72,
-                        8, 8,
-                        147, 206, 0,
-                        TEXTURE, 256, 256,
-                        (button) -> this.incrementLayer(),
-                        (button, stack, mX, mY) -> this.renderTooltip(stack, INCREMENT, mX, mY),
-                        Component.empty()) {
-                    @Override
-                    public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                        RenderSystem.setShaderTexture(0, this.resourceLocation);
-
-                        RenderSystem.enableDepthTest();
-                        blit(pPoseStack, this.x, this.y, 5, this.xTexStart, this.yTexStart, this.width, this.height, this.textureHeight, this.textureWidth);
-                        if (this.isHovered) {
-                            this.renderToolTip(pPoseStack, pMouseX, pMouseY);
-                        }
-                    }
-                }
-        );
-
-        this.addRenderableWidget(
-                new ImageButton(this.leftPos + 165, this.topPos + 80,
-                        8, 8,
-                        147, 214, 0,
-                        TEXTURE, 256, 256,
-                        (button) -> this.decrementLayer(),
-                        (button, stack, mX, mY) -> this.renderTooltip(stack, DECREMENT, mX, mY),
-                        Component.empty()) {
-                    @Override
-                    public void renderButton(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
-                        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                        RenderSystem.setShaderTexture(0, this.resourceLocation);
-
-                        RenderSystem.enableDepthTest();
-                        blit(pPoseStack, this.x, this.y, 5, this.xTexStart, this.yTexStart, this.width, this.height, this.textureHeight, this.textureWidth);
-                        if (this.isHovered) {
-                            this.renderToolTip(pPoseStack, pMouseX, pMouseY);
-                        }
-                    }
-                }
-        );
+        this.visibilityButton.setVisibility(!this.nbtViewerActive);
+        this.verticalButton.setVisibility(!this.nbtViewerActive);
+        this.incrementButton.setVisibility(!this.nbtViewerActive);
+        this.decrementButton.setVisibility(!this.nbtViewerActive);
     }
 
     @Override
@@ -255,14 +220,20 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         drawCenteredString(pPoseStack, this.font, NO_RESULT, x, y, 16736352);
     }
 
+    protected void toggleNbtViewer() {
+        this.nbtViewerActive = !this.nbtViewerActive;
+    }
+
     protected void toggleSchematicDisplay() {
         this.renderSchematic = !this.renderSchematic;
         this.menu.entity.shouldRenderSchematicInWorld = this.renderSchematic;
+        this.visibilityButton.alternateTexture = !this.renderSchematic;
     }
 
     protected void toggleSlice() {
         this.verticalRenderSlicing = !this.verticalRenderSlicing;
         this.menu.entity.verticalRenderSlicing = this.verticalRenderSlicing;
+        this.verticalButton.alternateTexture = this.verticalRenderSlicing;
     }
 
     public void resetLayer() {
