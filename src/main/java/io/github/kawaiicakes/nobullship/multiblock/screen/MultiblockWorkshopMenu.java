@@ -131,6 +131,12 @@ public class MultiblockWorkshopMenu extends AbstractContainerMenu implements Con
     }
 
     @Override
+    public void removed(Player pPlayer) {
+        super.removed(pPlayer);
+        this.removeSlotListener(this);
+    }
+
+    @Override
     public boolean stillValid(Player pPlayer) {
         return this.entity.stillValid(pPlayer);
     }
