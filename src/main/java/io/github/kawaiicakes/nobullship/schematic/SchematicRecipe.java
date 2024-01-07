@@ -116,7 +116,11 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
         if (!this.shapedMatches(workshop)) return false;
         if (!this.shapelessMatches(workshop)) return false;
 
-        return workshop.getItem(EMPTY_SCHEM_SLOT).is(SCHEMATIC.get());
+        ItemStack emptySchematicSlot = workshop.getItem(EMPTY_SCHEM_SLOT);
+
+        //noinspection DataFlowIssue (obviously if the item has a tag it can't throw a null pointer exception)
+        return emptySchematicSlot.is(SCHEMATIC.get()) &&
+                (!emptySchematicSlot.hasTag() || !emptySchematicSlot.getTag().contains("nobullshipRecipe"));
     }
 
     public boolean shapelessMatches(MultiblockWorkshopBlockEntity workshop) {

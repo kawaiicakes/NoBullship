@@ -113,7 +113,8 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
     @Override
     public boolean canPlaceItem(int pIndex, ItemStack pStack) {
         if (pIndex == FILLED_SCHEM_SLOT) return false;
-        if (pStack.is(SCHEMATIC.get()) && pIndex == EMPTY_SCHEM_SLOT) return true;
+        //noinspection DataFlowIssue (obviously if the item has a tag it can't throw a null pointer exception)
+        if (pIndex == EMPTY_SCHEM_SLOT && pStack.is(SCHEMATIC.get()) && (!pStack.hasTag() || !pStack.getTag().contains("nobullshipRecipe"))) return true;
         return CRAFTING_SLOTS.intStream().anyMatch(integer -> integer == pIndex);
     }
 
