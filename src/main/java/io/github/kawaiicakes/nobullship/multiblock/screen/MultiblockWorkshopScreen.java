@@ -39,12 +39,12 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     protected boolean renderSchematic;
     public boolean verticalRenderSlicing;
     public int renderedLayer;
-    protected boolean nbtViewerActive;
     protected NbtViewerButton nbtViewerButton;
     protected WorkshopButton visibilityButton;
     protected WorkshopButton verticalButton;
     protected WorkshopButton incrementButton;
     protected WorkshopButton decrementButton;
+    protected boolean hasShapedMatch;
 
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -57,8 +57,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.renderSchematic = pMenu.entity.shouldRenderSchematicInWorld;
         this.verticalRenderSlicing = pMenu.entity.verticalRenderSlicing;
         this.renderedLayer = pMenu.entity.renderedLayer;
-        this.nbtViewerActive = false;
-        this.nbtViewerButton = new NbtViewerButton((button) -> this.toggleNbtViewer());
+        this.nbtViewerButton = new NbtViewerButton(pMenu.entity.getBlockPos());
         this.visibilityButton = new WorkshopButton(
                 16, 16,
                 115, 206, 16,
@@ -79,9 +78,9 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
                 147, 214, 0,
                 (button) -> this.decrementLayer(),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, DECREMENT, mX, mY));
-        this.nbtViewerButton.active = this.nbtViewerActive;
         this.visibilityButton.alternateTexture = !this.renderSchematic;
         this.verticalButton.alternateTexture = this.verticalRenderSlicing;
+        this.hasShapedMatch = false;
     }
 
     @Override
@@ -103,18 +102,8 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     @Override
     protected void containerTick() {
         super.containerTick();
-
-        // TODO
-        if (this.menu.entity.getActiveRecipeResult().isPresent()) {
-
-        } else {
-
-        }
-
-        this.visibilityButton.setVisibility(!this.nbtViewerActive);
-        this.verticalButton.setVisibility(!this.nbtViewerActive);
-        this.incrementButton.setVisibility(!this.nbtViewerActive);
-        this.decrementButton.setVisibility(!this.nbtViewerActive);
+        // TODO: change condition to check for if the multiblock recipe uses NBT
+        this.nbtViewerButton.setVisibility(this.hasShapedMatch);
     }
 
     @Override
@@ -177,7 +166,10 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
 
         if (matchingRecipe.isEmpty()) {
             drawNoResultString(pPoseStack, x + 155, y + 5);
+            this.hasShapedMatch = false;
             return;
+        } else {
+            this.hasShapedMatch = true;
         }
 
         AABB entityHitbox = this.menu.player.getBoundingBox();
@@ -218,10 +210,6 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
 
     protected void drawNoResultString(PoseStack pPoseStack, int x, int y) {
         drawCenteredString(pPoseStack, this.font, NO_RESULT, x, y, 16736352);
-    }
-
-    protected void toggleNbtViewer() {
-        this.nbtViewerActive = !this.nbtViewerActive;
     }
 
     protected void toggleSchematicDisplay() {

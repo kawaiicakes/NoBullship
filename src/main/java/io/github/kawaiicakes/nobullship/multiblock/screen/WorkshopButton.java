@@ -37,9 +37,4 @@ public class WorkshopButton extends ImageButton {
             this.renderToolTip(pPoseStack, pMouseX, pMouseY);
         }
     }
-
-    public void setVisibility(boolean isActive) {
-        this.active = isActive;
-        this.visible = isActive;
-    }
 }

@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -27,8 +26,6 @@ import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-
-import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC;
 import static io.github.kawaiicakes.nobullship.Registry.WORKSHOP_BLOCK_ENTITY;
@@ -82,14 +79,11 @@ public class MultiblockWorkshopBlockEntity extends BaseContainerBlockEntity {
         return new AABB(this.getBlockPos()).inflate(140);
     }
 
+    /**
+     * the field this setter works on only changes on the serverside as of writing this
+     */
     public void setActiveRecipe(@Nullable SchematicRecipe recipe) {
         this.hasRecipe = recipe;
-    }
-
-    public Optional<ResourceLocation> getActiveRecipeResult() {
-        Optional<ResourceLocation> toReturn = Optional.empty();
-        if (this.hasRecipe != null) toReturn = Optional.of(this.hasRecipe.getResultId());
-        return toReturn;
     }
 
     @Override

@@ -25,7 +25,7 @@ public class NoBullshipPackets {
     public static void register() {
         SimpleChannel net = NetworkRegistry.ChannelBuilder
                 .named(new ResourceLocation(MOD_ID, "messages"))
-                .networkProtocolVersion(() -> "1.0") // checks for packet compatibility
+                .networkProtocolVersion(() -> "2.0") // checks for packet compatibility
                 .clientAcceptedVersions(s -> true)
                 .serverAcceptedVersions(s -> true)
                 .simpleChannel();
@@ -36,6 +36,12 @@ public class NoBullshipPackets {
                 .decoder(ClientboundUpdateNoBullshipPacket::new)
                 .encoder(ClientboundUpdateNoBullshipPacket::toBytes)
                 .consumerMainThread(NoBullshipPackets::handleOnClient)
+                .add();
+
+        net.messageBuilder(ServerboundWorkshopOpenPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(ServerboundWorkshopOpenPacket::new)
+                .encoder(ServerboundWorkshopOpenPacket::toBytes)
+                .consumerMainThread(ServerboundWorkshopOpenPacket::handle)
                 .add();
     }
 
@@ -51,5 +57,9 @@ public class NoBullshipPackets {
             return;
         }
         INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), msg);
+    }
+
+    public static <MSG> void sendToServer(MSG msg) {
+        INSTANCE.sendToServer(msg);
     }
 }
