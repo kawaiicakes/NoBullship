@@ -174,16 +174,6 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             this.hasShapedMatch = true;
         }
 
-        AABB entityHitbox = this.menu.player.getBoundingBox();
-        double longestSide = Math.max(entityHitbox.getXsize(), Math.max(entityHitbox.getYsize(), entityHitbox.getZsize()));
-
-        int entityHeightOffset = (int) (54 / (longestSide / 1.8));
-
-        float f = (float) Math.atan(((x + 155) - pMouseX) / 40.0F);
-        float f1 = (float) Math.atan(((y + 64 - entityHeightOffset) - pMouseY) / 40.0F);
-
-        int scale = (int) (22 / (longestSide / 1.8));
-
         Entity resultEntity =
             MultiblockRecipeManager.getInstance().getEntityForRecipe(matchingRecipe.get().getResultId(), clientLevel);
         if (resultEntity == null) {
@@ -191,11 +181,21 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             return;
         }
 
+        AABB entityHitbox = resultEntity.getBoundingBox();
+        double longestSide = Math.max(entityHitbox.getXsize(), Math.max(entityHitbox.getYsize(), entityHitbox.getZsize()));
+
+        int entityHeightOffset = (int) (54 / (longestSide / 1.8));
+
+        int scale = (int) (22 / (longestSide / 1.8));
+
+        float xAngle = (float) Math.atan(((x + 155) - pMouseX) / 40.0F);
+        float yAngle = (float) Math.atan(((y + 64 - entityHeightOffset) - pMouseY) / 40.0F);
+
         if (resultEntity instanceof LivingEntity livingResult) {
-            renderLivingEntity(x + 155, y + 64, scale, f, f1, livingResult);
+            renderLivingEntity(x + 155, y + 64, scale, xAngle, yAngle, livingResult);
             drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 5, 8453920);
         } else {
-            renderEntity(x + 155, y + 64, scale, f, f1, resultEntity);
+            renderEntity(x + 155, y + 64, scale, xAngle, yAngle, resultEntity);
             drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 5, 8453920);
         }
 
