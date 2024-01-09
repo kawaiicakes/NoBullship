@@ -29,6 +29,7 @@ import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 
 public class MultiblockWorkshopScreen extends AbstractContainerScreen<MultiblockWorkshopMenu> {
     public static final ResourceLocation TEXTURE = new ResourceLocation(MOD_ID, "textures/gui/workbench_gui.png");
+    public static final Component NBT_VIEWER = Component.translatable("gui.nobullship.nbt_viewer");
     public static final Component NO_RESULT = Component.translatable("gui.nobullship.no_recipe");
     public static final Component VISIBILITY_BUTTON = Component.translatable("gui.nobullship.toggle_render");
     public static final Component SLICE_DIRECTION = Component.translatable("gui.nobullship.slice_direction");
@@ -57,7 +58,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.renderSchematic = pMenu.entity.shouldRenderSchematicInWorld;
         this.verticalRenderSlicing = pMenu.entity.verticalRenderSlicing;
         this.renderedLayer = pMenu.entity.renderedLayer;
-        this.nbtViewerButton = new NbtViewerButton(pMenu.entity.getBlockPos());
+        this.nbtViewerButton = new NbtViewerButton(pMenu.entity.getBlockPos(), (button, stack, mX, mY) -> this.renderTooltip(stack, NBT_VIEWER, mX, mY));
         this.visibilityButton = new WorkshopButton(
                 16, 16,
                 115, 206, 16,
@@ -87,6 +88,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     protected void init() {
         super.init();
 
+        this.nbtViewerButton.setPosition(this.leftPos + 108, this.topPos + 71);
         this.visibilityButton.setPosition(this.leftPos + 129, this.topPos + 71);
         this.verticalButton.setPosition(this.leftPos + 147, this.topPos + 71);
         this.incrementButton.setPosition(this.leftPos + 165, this.topPos + 72);
