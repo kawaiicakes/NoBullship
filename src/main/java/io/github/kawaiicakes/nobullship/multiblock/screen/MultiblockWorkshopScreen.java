@@ -35,6 +35,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     public static final Component SLICE_DIRECTION = Component.translatable("gui.nobullship.slice_direction");
     public static final Component INCREMENT = Component.translatable("gui.nobullship.increment");
     public static final Component DECREMENT = Component.translatable("gui.nobullship.decrement");
+    public static final Component ENTITY_HAS_NBT = Component.translatable("gui.nobullship.entity_has_nbt");
     public static final Quaternion ROTATE_180 = Vector3f.ZP.rotationDegrees(-180F);
 
     protected boolean renderSchematic;
@@ -205,7 +206,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             pPoseStack.pushPose();
             pPoseStack.translate(x + 132, y + 20, 0);
             pPoseStack.scale(0.8F, 0.8F, 1);
-            GuiComponent.drawString(pPoseStack, Minecraft.getInstance().font, "+NBT", 0, 0, 11141290);
+            GuiComponent.drawString(pPoseStack, Minecraft.getInstance().font, ENTITY_HAS_NBT, 0, 0, 11141290);
             pPoseStack.popPose();
         }
     }
