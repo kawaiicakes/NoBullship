@@ -18,17 +18,15 @@ public class NbtViewerButton extends ImageButton {
         // TODO: proper pos
         super(
                 0, 0,
-                16, 16,
+                20, 16,
                 0, 0, 16,
-                NBT_VIEWER_ICON, 16, 48,
+                NBT_VIEWER_ICON, 20, 48,
                 (button) -> Minecraft.getInstance().setScreen(new NbtViewerScreen(pos))
         );
         this.active = false;
-        this.visible = false;
     }
 
-    public void setVisibility(boolean isActive) {
+    public void setActive(boolean isActive) {
         this.active = isActive;
-        this.visible = isActive;
     }
 }

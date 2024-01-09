@@ -103,7 +103,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     protected void containerTick() {
         super.containerTick();
         // TODO: change condition to check for if the multiblock recipe uses NBT
-        this.nbtViewerButton.setVisibility(this.hasShapedMatch);
+        this.nbtViewerButton.setActive(this.hasShapedMatch);
     }
 
     @Override
