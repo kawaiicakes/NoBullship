@@ -9,7 +9,6 @@ import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
@@ -188,7 +187,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             return;
         }
 
-        Component nameForDisplay = resultRecipe.resultingEntityName() == null ? resultEntity.getDisplayName() : Component.literal(resultRecipe.resultingEntityName());
+        Component nameForDisplay = resultRecipe.resultingEntityName() == null ? resultEntity.getDisplayName() : Component.translatable(resultRecipe.resultingEntityName());
 
         AABB entityHitbox = resultEntity.getBoundingBox();
         double longestSide = Math.max(entityHitbox.getXsize(), Math.max(entityHitbox.getYsize(), entityHitbox.getZsize()));

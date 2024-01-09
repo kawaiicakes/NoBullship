@@ -71,6 +71,11 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         return new MultiblockPatternBuilder(result, nbt);
     }
 
+    /**
+     * Sets the lang key for the name displayed in the workshop for the entity. Not necessary to use; the workshop will
+     * default to using the entity's display name if the key is not set.
+     * @param name The <code>String</code> representing a lang key for the text to display. (e.g. entity.minecraft.zombie)
+     */
     public MultiblockPatternBuilder setEntityWorkshopDisplayName(String name) {
         this.resultingEntityName = name;
         return this;

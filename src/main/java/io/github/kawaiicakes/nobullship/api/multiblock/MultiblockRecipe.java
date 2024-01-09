@@ -27,7 +27,7 @@ import java.util.Objects;
 /**
  * Bears no relation to <code>FinishedMultiblockRecipe</code>. Simply an immutable data carrier intended to cache
  * multiblock recipes.
- * @param resultingEntityName a <code>String</code> representing the text displayed in the workshop for the entity this recipe creates.
+ * @param resultingEntityName a <code>String</code> representing the translatable key of the text displayed in the workshop for the entity this recipe creates.
  */
 @ParametersAreNonnullByDefault
 @FieldsAreNonnullByDefault
