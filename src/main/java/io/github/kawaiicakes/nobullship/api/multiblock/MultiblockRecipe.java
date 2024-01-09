@@ -27,10 +27,12 @@ import java.util.Objects;
 /**
  * Bears no relation to <code>FinishedMultiblockRecipe</code>. Simply an immutable data carrier intended to cache
  * multiblock recipes.
+ * @param resultingEntityName a <code>String</code> representing the text displayed in the workshop for the entity this recipe creates.
  */
 @ParametersAreNonnullByDefault
 @FieldsAreNonnullByDefault
 public record MultiblockRecipe(
+        @Nullable String resultingEntityName,
         MultiblockPattern recipe,
         ResourceLocation result,
         @Nullable CompoundTag nbt,
@@ -84,6 +86,10 @@ public record MultiblockRecipe(
 
         toReturn.put("recipe", pattern);
 
+        if (this.resultingEntityName != null) {
+            toReturn.putString("name", this.resultingEntityName);
+        }
+
         toReturn.putString("result", this.result.toString());
 
         if (this.nbt != null) toReturn.put("nbt", this.nbt);
@@ -113,6 +119,9 @@ public record MultiblockRecipe(
         MultiblockPattern pattern = MultiblockPattern.fromNbt(recipeNbt);
         if (pattern == null) return null;
 
+        String name = null;
+        if (nbt.get("name") instanceof StringTag stringTag) name = stringTag.getAsString();
+
         CompoundTag resultNbt = null;
         if (nbt.get("nbt") instanceof CompoundTag serializedResult) resultNbt = serializedResult.copy();
 
@@ -128,6 +137,7 @@ public record MultiblockRecipe(
         }
 
         return new MultiblockRecipe(
+                name,
                 pattern,
                 new ResourceLocation(stringNbt.getAsString()),
                 resultNbt,
@@ -151,6 +161,11 @@ public record MultiblockRecipe(
         }
 
         try {
+            String name = null;
+            if (jsonResult.has("name") && jsonResult.get("name").isJsonPrimitive()) {
+                name = jsonResult.getAsJsonPrimitive("name").getAsString();
+            }
+
             ResourceLocation result = new ResourceLocation(jsonResult.getAsJsonPrimitive("entity").getAsString());
 
             CompoundTag nbt = null;
@@ -189,7 +204,7 @@ public record MultiblockRecipe(
                 toReturnRequisites = ImmutableList.copyOf(requisites);
             }
 
-            return new MultiblockRecipe(builder.build(), result, nbt, toReturnRequisites);
+            return new MultiblockRecipe(name, builder.build(), result, nbt, toReturnRequisites);
         } catch (RuntimeException e) {
             LOGGER.error("An error occurred during deserialization of BlockInWorldPredicate from JSON!", e);
             LOGGER.error(e.getMessage());

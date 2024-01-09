@@ -28,10 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class MultiblockPatternBuilder extends BlockPatternBuilder {
     protected static final Logger LOGGER = LogUtils.getLogger();
+    protected String resultingEntityName = null;
     protected final ResourceLocation result;
     protected final Map<String, BlockInWorldPredicateBuilder> lookupSimple = new HashMap<>();
     @Nullable
@@ -69,6 +69,11 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
      */
     public static MultiblockPatternBuilder of(ResourceLocation result, @Nullable CompoundTag nbt) {
         return new MultiblockPatternBuilder(result, nbt);
+    }
+
+    public MultiblockPatternBuilder setEntityWorkshopDisplayName(String name) {
+        this.resultingEntityName = name;
+        return this;
     }
 
     /**
@@ -164,7 +169,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
      * Use <code>#build</code> if you need the <code>MultiblockPattern</code> instead!
      */
     public void save(Consumer<FinishedMultiblockRecipe> consumer, ResourceLocation id) {
-        consumer.accept(new Result(id, this.result, this.nbt, this.pattern, this.requisites, this.lookupSimple, this.height, this.width));
+        consumer.accept(new Result(id, this.resultingEntityName, this.result, this.nbt, this.pattern, this.requisites, this.lookupSimple, this.height, this.width));
     }
 
     /**
@@ -238,6 +243,8 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
 
     public static class Result implements FinishedMultiblockRecipe {
         protected final ResourceLocation id;
+        @Nullable
+        protected final String resultingEntityName;
         protected final ResourceLocation result;
         @Nullable
         protected final CompoundTag nbt;
@@ -248,8 +255,9 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         protected final int height;
         protected final int width;
 
-        public Result(ResourceLocation id, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, @Nullable NonNullList<ItemStack> requisites, Map<String, BlockInWorldPredicateBuilder> lookup, int height, int width) {
+        public Result(ResourceLocation id, @Nullable String resultingEntityName, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, @Nullable NonNullList<ItemStack> requisites, Map<String, BlockInWorldPredicateBuilder> lookup, int height, int width) {
             this.id = id;
+            this.resultingEntityName = resultingEntityName;
             this.result = result;
             this.nbt = nbt;
             this.recipe = recipe;
@@ -281,6 +289,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
             }
 
             JsonObject jsonResult = new JsonObject();
+            if (this.resultingEntityName != null) jsonResult.addProperty("name", this.resultingEntityName);
             jsonResult.addProperty("entity", this.result.toString());
             if (this.nbt != null) jsonResult.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, this.nbt));
 

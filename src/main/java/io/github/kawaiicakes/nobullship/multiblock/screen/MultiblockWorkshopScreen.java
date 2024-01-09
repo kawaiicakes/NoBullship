@@ -175,12 +175,20 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             this.hasShapedMatch = true;
         }
 
+        MultiblockRecipe resultRecipe = MultiblockRecipeManager.getInstance().getRecipe(matchingRecipe.get().getResultId()).orElse(null);
+        if (resultRecipe == null) {
+            drawNoResultString(pPoseStack, x + 155, y + 5);
+            return;
+        }
+
         Entity resultEntity =
             MultiblockRecipeManager.getInstance().getEntityForRecipe(matchingRecipe.get().getResultId(), clientLevel);
         if (resultEntity == null) {
             drawNoResultString(pPoseStack, x + 155, y + 5);
             return;
         }
+
+        Component nameForDisplay = resultRecipe.resultingEntityName() == null ? resultEntity.getDisplayName() : Component.literal(resultRecipe.resultingEntityName());
 
         AABB entityHitbox = resultEntity.getBoundingBox();
         double longestSide = Math.max(entityHitbox.getXsize(), Math.max(entityHitbox.getYsize(), entityHitbox.getZsize()));
@@ -194,20 +202,10 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
 
         if (resultEntity instanceof LivingEntity livingResult) {
             renderLivingEntity(x + 155, y + 64, scale, xAngle, yAngle, livingResult);
-            drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 5, 8453920);
+            drawCenteredString(pPoseStack, this.font, nameForDisplay, x + 155, y + 5, 8453920);
         } else {
             renderEntity(x + 155, y + 64, scale, xAngle, yAngle, resultEntity);
-            drawCenteredString(pPoseStack, this.font, resultEntity.getDisplayName(), x + 155, y + 5, 8453920);
-        }
-
-        MultiblockRecipe resultRecipe = MultiblockRecipeManager.getInstance().getRecipe(matchingRecipe.get().getResultId()).orElse(null);
-        if (resultRecipe == null) return;
-        if (resultRecipe.nbt() != null) {
-            pPoseStack.pushPose();
-            pPoseStack.translate(x + 132, y + 20, 0);
-            pPoseStack.scale(0.8F, 0.8F, 1);
-            GuiComponent.drawString(pPoseStack, Minecraft.getInstance().font, ENTITY_HAS_NBT, 0, 0, 11141290);
-            pPoseStack.popPose();
+            drawCenteredString(pPoseStack, this.font, nameForDisplay, x + 155, y + 5, 8453920);
         }
     }
 
