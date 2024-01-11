@@ -34,8 +34,6 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     public static final Component SLICE_DIRECTION = Component.translatable("gui.nobullship.slice_direction");
     public static final Component INCREMENT = Component.translatable("gui.nobullship.increment");
     public static final Component DECREMENT = Component.translatable("gui.nobullship.decrement");
-    public static final Component ENTITY_HAS_NBT = Component.translatable("gui.nobullship.entity_has_nbt");
-    public static final Quaternion ROTATE_180 = Vector3f.ZP.rotationDegrees(-180F);
 
     protected boolean renderSchematic;
     public boolean verticalRenderSlicing;
@@ -50,33 +48,32 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
         this.imageWidth = 202;
-        this.imageHeight = 206;
+        this.imageHeight = 192;
 
-        this.titleLabelX += 12;
-        this.inventoryLabelX += 12;
-        this.inventoryLabelY += 40;
+        this.inventoryLabelY += 28;
+
         this.renderSchematic = pMenu.entity.shouldRenderSchematicInWorld;
         this.verticalRenderSlicing = pMenu.entity.verticalRenderSlicing;
         this.renderedLayer = pMenu.entity.renderedLayer;
         this.nbtViewerButton = new NbtViewerButton(pMenu.entity.getBlockPos(), (button, stack, mX, mY) -> this.renderTooltip(stack, NBT_VIEWER, mX, mY));
         this.visibilityButton = new WorkshopButton(
                 16, 16,
-                115, 206, 16,
+                218, 0, 16,
                 (button) -> this.toggleSchematicDisplay(),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, VISIBILITY_BUTTON, mX, mY));
         this.verticalButton = new WorkshopButton(
                 16, 16,
-                131, 206, 16,
+                234, 0, 16,
                 (button) -> this.toggleSlice(),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, SLICE_DIRECTION, mX, mY));
         this.incrementButton = new WorkshopButton(
                 8, 8,
-                147, 206, 0,
+                250, 0, 0,
                 (button) -> this.incrementLayer(),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, INCREMENT, mX, mY));
         this.decrementButton = new WorkshopButton(
                 8, 8,
-                147, 214, 0,
+                250, 8, 0,
                 (button) -> this.decrementLayer(),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, DECREMENT, mX, mY));
         this.visibilityButton.alternateTexture = !this.renderSchematic;
@@ -88,11 +85,11 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     protected void init() {
         super.init();
 
-        this.nbtViewerButton.setPosition(this.leftPos + 108, this.topPos + 71);
-        this.visibilityButton.setPosition(this.leftPos + 129, this.topPos + 71);
-        this.verticalButton.setPosition(this.leftPos + 147, this.topPos + 71);
-        this.incrementButton.setPosition(this.leftPos + 165, this.topPos + 72);
-        this.decrementButton.setPosition(this.leftPos + 165, this.topPos + 80);
+        this.nbtViewerButton.setPosition(this.leftPos + 174, this.topPos + 54);
+        this.visibilityButton.setPosition(this.leftPos + 176, this.topPos + 70);
+        this.verticalButton.setPosition(this.leftPos + 176, this.topPos + 86);
+        this.incrementButton.setPosition(this.leftPos + 176, this.topPos + 102);
+        this.decrementButton.setPosition(this.leftPos + 184, this.topPos + 102);
 
         this.addRenderableWidget(this.nbtViewerButton);
         this.addRenderableWidget(this.visibilityButton);
@@ -113,7 +110,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.renderBackground(pPoseStack);
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
         this.renderTooltip(pPoseStack, pMouseX, pMouseY);
-        drawString(pPoseStack, Minecraft.getInstance().font, String.valueOf(this.menu.entity.actualRenderedLayer), this.leftPos + 174, this.topPos + 75, 0x555555);
+        drawString(pPoseStack, Minecraft.getInstance().font, String.valueOf(this.menu.entity.actualRenderedLayer), this.leftPos + 181, this.topPos + 110, 0x555555);
 
         if (this.menu.entity.queueLayerReset) this.resetLayer();
     }
@@ -128,28 +125,28 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
 
         RenderSystem.enableDepthTest();
         RenderSystem.enableBlend();
-        blit(pPoseStack, x, y, 0, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
-        blit(pPoseStack, (this.width - 16) / 2, y + 35, 1, 202, 0, 16, 16, 256, 256);
 
-        blit(pPoseStack, x - 52, y - 4, -2, 202, 16, 54, 106, 256, 256);
-        blit(pPoseStack, x - 54, y + 103, 202, 122, 54, 106);
+        blit(pPoseStack, x, y, 0, 0, 0, this.imageWidth, this.imageHeight, 305, 245);
+        blit(pPoseStack, x + 138, y + 51, 1, 202, 0, 16, 16, 305, 245);
 
-        blit(pPoseStack, x + 202, y + 110, 0, 206, 49, 50);
-        blit(pPoseStack, x + 202, y + 60, 49, 206, 49, 50);
-        blit(pPoseStack, x + 234, y + 54, 98, 206, 17, 6);
+
+        // TODO: scale cosmetic schematics on the left side down
+        blit(pPoseStack, x - 54, (this.height - 213) / 2, -1, 202, 32, 54, 213, 305, 245);
+
+        blit(pPoseStack, x + 202, (this.height - 106) / 2, -1, 256, 32, 49, 106, 305, 245);
 
         RenderSystem.disableBlend();
         RenderSystem.disableDepthTest();
 
         if (!(this.menu.player.level instanceof ClientLevel clientLevel)) return;
         if (this.menu.entity.isEmpty()) {
-            drawNoResultString(pPoseStack, x + 155, y + 5);
+            drawNoResultString(pPoseStack, (this.width / 2), y - 16);
             return;
         }
         List<SchematicRecipe> recipeList
                 = clientLevel.getRecipeManager().getAllRecipesFor(SchematicRecipe.Type.INSTANCE);
         if (recipeList.isEmpty()) {
-            drawNoResultString(pPoseStack, x + 155, y + 5);
+            drawNoResultString(pPoseStack, (this.width / 2), y - 16);
             return;
         }
 
@@ -162,7 +159,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             matchingRecipe = shapedMatches.stream().filter(recipe -> recipe.shapelessMatches(this.menu.entity)).findFirst();
 
         if (matchingRecipe.isEmpty()) {
-            drawNoResultString(pPoseStack, x + 155, y + 5);
+            drawNoResultString(pPoseStack, (this.width / 2), y - 16);
             this.hasShapedMatch = false;
             return;
         } else {
@@ -171,14 +168,14 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
 
         MultiblockRecipe resultRecipe = MultiblockRecipeManager.getInstance().getRecipe(matchingRecipe.get().getResultId()).orElse(null);
         if (resultRecipe == null) {
-            drawNoResultString(pPoseStack, x + 155, y + 5);
+            drawNoResultString(pPoseStack, (this.width / 2), y - 16);
             return;
         }
 
         Entity resultEntity =
             MultiblockRecipeManager.getInstance().getEntityForRecipe(matchingRecipe.get().getResultId(), clientLevel);
         if (resultEntity == null) {
-            drawNoResultString(pPoseStack, x + 155, y + 5);
+            drawNoResultString(pPoseStack, (this.width / 2), y - 16);
             return;
         }
 
@@ -195,11 +192,11 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         float yAngle = (float) Math.atan(((y + 64 - entityHeightOffset) - pMouseY) / 40.0F);
 
         if (resultEntity instanceof LivingEntity livingResult) {
-            renderLivingEntity(x + 155, y + 64, scale, xAngle, yAngle, livingResult);
-            drawCenteredString(pPoseStack, this.font, nameForDisplay, x + 155, y + 5, 8453920);
+            renderLivingEntity(x + 34, y + 64, scale, xAngle, yAngle, livingResult);
+            drawCenteredString(pPoseStack, this.font, nameForDisplay, this.width / 2, y - 16, 8453920);
         } else {
-            renderEntity(x + 155, y + 64, scale, xAngle, yAngle, resultEntity);
-            drawCenteredString(pPoseStack, this.font, nameForDisplay, x + 155, y + 5, 8453920);
+            renderEntity(x + 34, y + 64, scale, xAngle, yAngle, resultEntity);
+            drawCenteredString(pPoseStack, this.font, nameForDisplay, this.width / 2, y - 16, 8453920);
         }
     }
 
@@ -236,6 +233,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.menu.entity.renderedLayer = this.renderedLayer;
     }
 
+    // TODO: fix rendering entities (make them rotate on the y axis at a constant rate)
     protected static void renderLivingEntity(int pPosX, int pPosY, int pScale, float angleXComponent, float angleYComponent, LivingEntity pLivingEntity) {
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();

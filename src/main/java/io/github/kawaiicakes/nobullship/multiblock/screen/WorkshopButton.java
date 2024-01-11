@@ -16,7 +16,7 @@ public class WorkshopButton extends ImageButton {
                 0, 0,
                 pWidth, pHeight,
                 pXTexStart, pYTexStart, pYDiffTex,
-                TEXTURE, 256, 256,
+                TEXTURE, 305, 245,
                 pOnPress,
                 onTooltip,
                 Component.empty()
@@ -32,7 +32,8 @@ public class WorkshopButton extends ImageButton {
         if (!this.alternateTexture) i += this.yDiffTex;
 
         RenderSystem.enableDepthTest();
-        blit(pPoseStack, this.x, this.y, 5, this.xTexStart, i, this.width, this.height, this.textureHeight, this.textureWidth);
+        //noinspection SuspiciousNameCombination (bruh. the param names are mixed up)
+        blit(pPoseStack, this.x, this.y, 5, this.xTexStart, i, this.width, this.height, this.textureWidth, this.textureHeight);
         if (this.isHovered) {
             this.renderToolTip(pPoseStack, pMouseX, pMouseY);
         }
