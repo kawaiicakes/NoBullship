@@ -48,7 +48,12 @@ public class SchematicRecipe implements Recipe<MultiblockWorkshopBlockEntity> {
     public ImmutableList<Ingredient> getShapedIngredients() {
         ImmutableList.Builder<Ingredient> toReturn = ImmutableList.builder();
         for (Ingredient ingredient : this.shaped) {
-            // This is done to absolutely ensure this recipe's contents cannot be mutated.
+            // This is done to absolutely ensure this recipe's contents will not be mutated.
+            if (ingredient.isEmpty()) {
+                // this block avoids a JsonSyntax exception when trying to parse an empty ingredient
+                toReturn.add(Ingredient.EMPTY);
+                continue;
+            }
             toReturn.add(Ingredient.fromJson(ingredient.toJson()));
         }
         return toReturn.build();
