@@ -150,9 +150,11 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         blit(pPoseStack, x, y, 0, 0, 0, this.imageWidth, this.imageHeight, 305, 245);
         blit(pPoseStack, x + 138, y + 51, 1, 202, 0, 16, 16, 305, 245);
 
-
-        // TODO: scale cosmetic schematics on the left side down
-        blit(pPoseStack, x - 54, (this.height - 213) / 2, -1, 202, 32, 54, 213, 305, 245);
+        pPoseStack.pushPose();
+        pPoseStack.translate(x - 48.6, (this.height - 191.7) / 2, -1);
+        pPoseStack.scale(0.9F, 0.9F, 0);
+        blit(pPoseStack, 0, 0, 0, 202, 32, 54, 213, 305, 245);
+        pPoseStack.popPose();
 
         blit(pPoseStack, x + 202, (this.height - 106) / 2, -1, 256, 32, 49, 106, 305, 245);
 
