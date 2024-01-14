@@ -42,12 +42,12 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     protected boolean renderSchematic;
     public boolean verticalRenderSlicing;
     public int renderedLayer;
-    protected RequisitesButton requisitesButton;
-    protected NbtViewerButton nbtViewerButton;
-    protected WorkshopButton visibilityButton;
-    protected WorkshopButton verticalButton;
-    protected WorkshopButton incrementButton;
-    protected WorkshopButton decrementButton;
+    protected DisplayButton requisitesButton;
+    protected DisplayButton nbtViewerButton;
+    protected DisplayButton visibilityButton;
+    protected DisplayButton verticalButton;
+    protected DisplayButton incrementButton;
+    protected DisplayButton decrementButton;
     protected boolean hasShapedMatch;
     protected boolean matchHasRequisites;
     protected boolean multiblockUsesNbt;
@@ -63,35 +63,42 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.verticalRenderSlicing = pMenu.entity.verticalRenderSlicing;
         this.renderedLayer = pMenu.entity.renderedLayer;
 
-        this.requisitesButton = new RequisitesButton(pMenu.entity.getBlockPos(), (button, stack, mX, mY) -> {
-            if (button.active) this.renderTooltip(stack, REQUISITES, mX, mY);
-        });
-        this.nbtViewerButton = new NbtViewerButton(pMenu.entity.getBlockPos(), (button, stack, mX, mY) -> {
-            if (button.active) this.renderTooltip(stack, NBT_VIEWER, mX, mY);
-        });
+        this.requisitesButton = new DisplayButton(
+                16, 16,
+                64, 192, 16,
+                ((button) -> Minecraft.getInstance().setScreen(new RequisiteScreen(pMenu.entity.getBlockPos()))),
+                (button, stack, mX, mY) -> this.renderTooltip(stack, REQUISITES, mX, mY));
+        this.nbtViewerButton = new DisplayButton(
+                20, 16,
+                80, 192, 16,
+                (button) -> Minecraft.getInstance().setScreen(new NbtViewerScreen(pMenu.entity.getBlockPos())),
+                (button, stack, mX, mY) -> this.renderTooltip(stack, NBT_VIEWER, mX, mY));
 
-        this.visibilityButton = new WorkshopButton(
+        this.visibilityButton = new DisplayButton(
                 16, 16,
-                218, 0, 16,
+                0, 192, 16,
                 (button) -> this.toggleSchematicDisplay(),
-                (button, stack, mX, mY) -> this.renderTooltip(stack, VISIBILITY_BUTTON, mX, mY));
-        this.verticalButton = new WorkshopButton(
+                (button, stack, mX, mY) -> this.renderTooltip(stack, VISIBILITY_BUTTON, mX, mY),
+                false);
+        this.verticalButton = new DisplayButton(
                 16, 16,
-                234, 0, 16,
+                16, 192, 16,
                 (button) -> this.toggleSlice(),
-                (button, stack, mX, mY) -> this.renderTooltip(stack, SLICE_DIRECTION, mX, mY));
-        this.incrementButton = new WorkshopButton(
-                8, 8,
-                250, 0, 0,
+                (button, stack, mX, mY) -> this.renderTooltip(stack, SLICE_DIRECTION, mX, mY),
+                false);
+        this.incrementButton = new DisplayButton(
+                16, 16,
+                32, 192, 16,
                 (button) -> this.incrementLayer(),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, INCREMENT, mX, mY));
-        this.decrementButton = new WorkshopButton(
-                8, 8,
-                250, 8, 0,
+        this.decrementButton = new DisplayButton(
+                16, 16,
+                48, 192, 16,
                 (button) -> this.decrementLayer(),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, DECREMENT, mX, mY));
-        this.visibilityButton.alternateTexture = !this.renderSchematic;
-        this.verticalButton.alternateTexture = this.verticalRenderSlicing;
+
+        this.visibilityButton.altTexture = this.renderSchematic;
+        this.verticalButton.altTexture = this.verticalRenderSlicing;
 
         this.hasShapedMatch = false;
         this.matchHasRequisites = false;
@@ -105,10 +112,10 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.requisitesButton.setPosition(this.leftPos + 176, this.topPos + 38);
         this.nbtViewerButton.setPosition(this.leftPos + 174, this.topPos + 54);
 
-        this.visibilityButton.setPosition(this.leftPos + 176, this.topPos + 70);
-        this.verticalButton.setPosition(this.leftPos + 176, this.topPos + 86);
-        this.incrementButton.setPosition(this.leftPos + 176, this.topPos + 102);
-        this.decrementButton.setPosition(this.leftPos + 184, this.topPos + 102);
+        this.visibilityButton.setPosition(this.leftPos + 176, this.topPos + 90);
+        this.verticalButton.setPosition(this.leftPos + 176, this.topPos + 106);
+        this.incrementButton.setPosition(this.leftPos + 176, this.topPos + 122);
+        this.decrementButton.setPosition(this.leftPos + 176, this.topPos + 147);
 
         this.addRenderableWidget(this.requisitesButton);
         this.addRenderableWidget(this.nbtViewerButton);
@@ -120,20 +127,20 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     }
 
     @Override
-    protected void containerTick() {
-        super.containerTick();
-        this.requisitesButton.setActive(this.hasShapedMatch && this.matchHasRequisites);
-        this.nbtViewerButton.setActive(this.hasShapedMatch && this.multiblockUsesNbt);
-    }
-
-    @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+        if (this.menu.entity.queueLayerReset) this.resetLayer();
+
         this.renderBackground(pPoseStack);
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
         this.renderTooltip(pPoseStack, pMouseX, pMouseY);
-        drawString(pPoseStack, Minecraft.getInstance().font, String.valueOf(this.menu.entity.actualRenderedLayer), this.leftPos + 181, this.topPos + 110, 0x555555);
 
-        if (this.menu.entity.queueLayerReset) this.resetLayer();
+        String layer;
+        if (this.hasShapedMatch && this.visibilityButton.altTexture) {
+            layer = String.valueOf(this.menu.entity.actualRenderedLayer);
+        } else {
+            layer = "-";
+        }
+        drawString(pPoseStack, Minecraft.getInstance().font, layer, this.leftPos + 181, this.topPos + 141, 0x555555);
     }
 
     @Override
@@ -164,12 +171,14 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         if (!(this.menu.player.level instanceof ClientLevel clientLevel)) return;
         if (this.menu.entity.isEmpty()) {
             drawNoResultString(pPoseStack, (this.width / 2), y - 16);
+            this.updateButtonStates();
             return;
         }
         List<SchematicRecipe> recipeList
                 = clientLevel.getRecipeManager().getAllRecipesFor(SchematicRecipe.Type.INSTANCE);
         if (recipeList.isEmpty()) {
             drawNoResultString(pPoseStack, (this.width / 2), y - 16);
+            this.updateButtonStates();
             return;
         }
 
@@ -186,6 +195,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             this.hasShapedMatch = false;
             this.matchHasRequisites = false;
             this.multiblockUsesNbt = false;
+            this.updateButtonStates();
             return;
         } else {
             this.hasShapedMatch = true;
@@ -196,6 +206,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             drawNoResultString(pPoseStack, (this.width / 2), y - 16);
             this.matchHasRequisites = false;
             this.multiblockUsesNbt = false;
+            this.updateButtonStates();
             return;
         }
 
@@ -206,6 +217,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             MultiblockRecipeManager.getInstance().getEntityForRecipe(matchingRecipe.get().getResultId(), clientLevel);
         if (resultEntity == null) {
             drawNoResultString(pPoseStack, (this.width / 2), y - 16);
+            this.updateButtonStates();
             return;
         }
 
@@ -228,6 +240,19 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             renderEntity(x + 34, y + 64, scale, xAngle, yAngle, resultEntity);
             drawCenteredString(pPoseStack, this.font, nameForDisplay, this.width / 2, y - 16, 8453920);
         }
+
+        this.updateButtonStates();
+    }
+
+    protected void updateButtonStates() {
+        this.requisitesButton.setActive(this.hasShapedMatch && this.matchHasRequisites);
+        this.nbtViewerButton.setActive(this.hasShapedMatch && this.multiblockUsesNbt);
+
+        this.visibilityButton.setActive(this.hasShapedMatch);
+        this.verticalButton.setActive(this.hasShapedMatch && this.visibilityButton.altTexture);
+
+        this.incrementButton.setActive(this.hasShapedMatch && this.visibilityButton.altTexture);
+        this.decrementButton.setActive(this.hasShapedMatch && this.visibilityButton.altTexture);
     }
 
     protected void drawNoResultString(PoseStack pPoseStack, int x, int y) {
@@ -237,13 +262,13 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     protected void toggleSchematicDisplay() {
         this.renderSchematic = !this.renderSchematic;
         this.menu.entity.shouldRenderSchematicInWorld = this.renderSchematic;
-        this.visibilityButton.alternateTexture = !this.renderSchematic;
+        this.visibilityButton.altTexture = this.renderSchematic;
     }
 
     protected void toggleSlice() {
         this.verticalRenderSlicing = !this.verticalRenderSlicing;
         this.menu.entity.verticalRenderSlicing = this.verticalRenderSlicing;
-        this.verticalButton.alternateTexture = this.verticalRenderSlicing;
+        this.verticalButton.altTexture = this.verticalRenderSlicing;
     }
 
     public void resetLayer() {
