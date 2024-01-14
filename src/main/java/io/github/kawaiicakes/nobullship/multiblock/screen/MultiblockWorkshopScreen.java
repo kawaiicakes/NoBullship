@@ -207,7 +207,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             return;
         }
 
-        String nameForDisplay = resultRecipe.resultingEntityName() == null ? String.valueOf(resultEntity.getDisplayName()) : resultRecipe.resultingEntityName();
+        String nameForDisplay = resultRecipe.resultingEntityName() == null ? resultEntity.getDisplayName().getString() : resultRecipe.resultingEntityName();
 
         AABB entityHitbox = resultEntity.getBoundingBox();
         double longestSide = Math.max(entityHitbox.getXsize(), Math.max(entityHitbox.getYsize(), entityHitbox.getZsize()));
