@@ -826,6 +826,13 @@ public class BlockInWorldPredicateBuilder {
         return this.matchType.equals(MatchType.TAG);
     }
 
+    /**
+     * Simple method indicating if this BIWPredicate contains NBT data.
+     */
+    public boolean requiresNbt() {
+        return this.blockEntityNbtData != null || this.blockEntityNbtDataStrict != null;
+    }
+
     // erm ackshually these are combinations but the word permutation is cooler
     protected static Set<Map<String, String>> getPropertyPermutations(Map<String, Set<String>> properties) {
         Set<Map<String, String>> toReturn = new HashSet<>();

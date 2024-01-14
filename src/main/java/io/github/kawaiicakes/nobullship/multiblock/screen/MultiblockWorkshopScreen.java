@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
@@ -28,7 +29,10 @@ import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 
 public class MultiblockWorkshopScreen extends AbstractContainerScreen<MultiblockWorkshopMenu> {
     public static final ResourceLocation TEXTURE = new ResourceLocation(MOD_ID, "textures/gui/workbench_gui.png");
+
+    public static final Component REQUISITES = Component.translatable("gui.nobullship.requisites");
     public static final Component NBT_VIEWER = Component.translatable("gui.nobullship.nbt_viewer");
+
     public static final Component NO_RESULT = Component.translatable("gui.nobullship.no_recipe");
     public static final Component VISIBILITY_BUTTON = Component.translatable("gui.nobullship.toggle_render");
     public static final Component SLICE_DIRECTION = Component.translatable("gui.nobullship.slice_direction");
@@ -38,12 +42,15 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     protected boolean renderSchematic;
     public boolean verticalRenderSlicing;
     public int renderedLayer;
+    protected RequisitesButton requisitesButton;
     protected NbtViewerButton nbtViewerButton;
     protected WorkshopButton visibilityButton;
     protected WorkshopButton verticalButton;
     protected WorkshopButton incrementButton;
     protected WorkshopButton decrementButton;
     protected boolean hasShapedMatch;
+    protected boolean matchHasRequisites;
+    protected boolean multiblockUsesNbt;
 
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -55,7 +62,14 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.renderSchematic = pMenu.entity.shouldRenderSchematicInWorld;
         this.verticalRenderSlicing = pMenu.entity.verticalRenderSlicing;
         this.renderedLayer = pMenu.entity.renderedLayer;
-        this.nbtViewerButton = new NbtViewerButton(pMenu.entity.getBlockPos(), (button, stack, mX, mY) -> this.renderTooltip(stack, NBT_VIEWER, mX, mY));
+
+        this.requisitesButton = new RequisitesButton(pMenu.entity.getBlockPos(), (button, stack, mX, mY) -> {
+            if (button.active) this.renderTooltip(stack, REQUISITES, mX, mY);
+        });
+        this.nbtViewerButton = new NbtViewerButton(pMenu.entity.getBlockPos(), (button, stack, mX, mY) -> {
+            if (button.active) this.renderTooltip(stack, NBT_VIEWER, mX, mY);
+        });
+
         this.visibilityButton = new WorkshopButton(
                 16, 16,
                 218, 0, 16,
@@ -78,20 +92,27 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
                 (button, stack, mX, mY) -> this.renderTooltip(stack, DECREMENT, mX, mY));
         this.visibilityButton.alternateTexture = !this.renderSchematic;
         this.verticalButton.alternateTexture = this.verticalRenderSlicing;
+
         this.hasShapedMatch = false;
+        this.matchHasRequisites = false;
+        this.multiblockUsesNbt = false;
     }
 
     @Override
     protected void init() {
         super.init();
 
+        this.requisitesButton.setPosition(this.leftPos + 176, this.topPos + 38);
         this.nbtViewerButton.setPosition(this.leftPos + 174, this.topPos + 54);
+
         this.visibilityButton.setPosition(this.leftPos + 176, this.topPos + 70);
         this.verticalButton.setPosition(this.leftPos + 176, this.topPos + 86);
         this.incrementButton.setPosition(this.leftPos + 176, this.topPos + 102);
         this.decrementButton.setPosition(this.leftPos + 184, this.topPos + 102);
 
+        this.addRenderableWidget(this.requisitesButton);
         this.addRenderableWidget(this.nbtViewerButton);
+
         this.addRenderableWidget(this.visibilityButton);
         this.addRenderableWidget(this.verticalButton);
         this.addRenderableWidget(this.incrementButton);
@@ -101,8 +122,8 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     @Override
     protected void containerTick() {
         super.containerTick();
-        // TODO: change condition to check for if the multiblock recipe uses NBT
-        this.nbtViewerButton.setActive(this.hasShapedMatch);
+        this.requisitesButton.setActive(this.hasShapedMatch && this.matchHasRequisites);
+        this.nbtViewerButton.setActive(this.hasShapedMatch && this.multiblockUsesNbt);
     }
 
     @Override
@@ -161,6 +182,8 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         if (matchingRecipe.isEmpty()) {
             drawNoResultString(pPoseStack, (this.width / 2), y - 16);
             this.hasShapedMatch = false;
+            this.matchHasRequisites = false;
+            this.multiblockUsesNbt = false;
             return;
         } else {
             this.hasShapedMatch = true;
@@ -169,8 +192,13 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         MultiblockRecipe resultRecipe = MultiblockRecipeManager.getInstance().getRecipe(matchingRecipe.get().getResultId()).orElse(null);
         if (resultRecipe == null) {
             drawNoResultString(pPoseStack, (this.width / 2), y - 16);
+            this.matchHasRequisites = false;
+            this.multiblockUsesNbt = false;
             return;
         }
+
+        this.matchHasRequisites = resultRecipe.requisites() != null;
+        this.multiblockUsesNbt = resultRecipe.recipe().getPalette().stream().anyMatch(BlockInWorldPredicateBuilder::requiresNbt);
 
         Entity resultEntity =
             MultiblockRecipeManager.getInstance().getEntityForRecipe(matchingRecipe.get().getResultId(), clientLevel);

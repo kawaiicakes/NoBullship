@@ -27,6 +27,7 @@
   "tooltip.nobullship.items": "Required items:",
   "tooltip.nobullship.remaining_uses": "Remaining usages:",
 
+  "gui.nobullship.requisites": "View requisite items",
   "gui.nobullship.nbt_viewer": "View block NBT data",
   "gui.nobullship.no_recipe": "No schematic!",
   "gui.nobullship.toggle_render": "Toggle render in world",
