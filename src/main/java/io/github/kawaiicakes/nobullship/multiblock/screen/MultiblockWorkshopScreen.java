@@ -210,7 +210,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
             return;
         }
 
-        this.matchHasRequisites = resultRecipe.requisites() != null;
+        this.matchHasRequisites = resultRecipe.requisites() != null || matchingRecipe.get().getRequisites() != null;
         this.multiblockUsesNbt = resultRecipe.recipe().getPalette().stream().anyMatch(BlockInWorldPredicateBuilder::requiresNbt);
 
         Entity resultEntity =
