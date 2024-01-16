@@ -36,6 +36,7 @@ public class RequisiteScreen extends Screen {
     protected final ImmutableList<ItemStack> requisites;
     protected final int maxPages;
     protected int page = 0;
+    protected int currentColour = 0x000000;
 
     protected RequisiteScreen(BlockPos blockEntityPos) {
         super(Component.empty());
