@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.multiblock.screen;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
@@ -9,9 +10,13 @@ import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
 import io.github.kawaiicakes.nobullship.network.ServerboundWorkshopOpenPacket;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -20,15 +25,20 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.List;
 import java.util.Optional;
 
+import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
+
 @OnlyIn(Dist.CLIENT)
 public class RequisiteScreen extends Screen {
+    public static final ResourceLocation REQUISITES = new ResourceLocation(MOD_ID, "textures/gui/requisites.png");
+
     protected final BlockPos blockEntityPos;
     protected final ImmutableList<ItemStack> requisites;
     protected final int maxPages;
-    protected int page;
+    protected int page = 0;
 
     protected RequisiteScreen(BlockPos blockEntityPos) {
         super(Component.empty());
+
         this.blockEntityPos = blockEntityPos;
         if (Minecraft.getInstance().level == null) throw new IllegalArgumentException("No client level yet a screen attempted to be instantiated!");
 
@@ -78,13 +88,84 @@ public class RequisiteScreen extends Screen {
 
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+        this.renderBackground(pPoseStack);
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
 
-        for (ItemStack stack : this.requisites) {
+        int guiX = (this.width - 176) / 2;
+        int guiY = (this.height - 194) / 2;
+
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, REQUISITES);
+
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableBlend();
+
+        blit(pPoseStack, guiX, guiY, -5, 0, 0, 176, 194, 256, 256);
+
+        RenderSystem.disableDepthTest();
+        RenderSystem.disableBlend();
+
+        Font font = Minecraft.getInstance().font;
+
+        final int currentPage = this.page;
+        for (int i = 0; i < 36; i++) {
+            if (i > (this.requisites.size() - 1)) break;
+
+            int slotNumber = i + (36 * currentPage);
+            if (slotNumber > (this.requisites.size() - 1)) break;
+
+            int slotX = 8 + ((i % 9) * 18);
+            int slotY = 28 + ((i / 9) * 18);
+
+            ItemStack stack = this.requisites.get(slotNumber);
+
             if (stack == null || stack.isEmpty()) continue;
-            // TODO: fix rendering items lol (including making/using pages)
-            // Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(stack, pMouseX, pMouseY, 0);
-            // this.renderTooltip(pPoseStack, stack, pMouseX, pMouseY);
+
+            Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(stack, slotX + guiX, slotY + guiY);
+            Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(font, stack, slotX + guiX, slotY + guiY);
+            if (this.isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
+                this.renderTooltip(pPoseStack, stack, pMouseX, pMouseY);
+        }
+
+        Player player = Minecraft.getInstance().player;
+        if (player == null) return;
+
+        List<ItemStack> invItems = player.getInventory().items;
+        for (int i = 0; i < 9; ++i) {
+            ItemStack stack;
+            try {
+                stack = invItems.get(i);
+            } catch (RuntimeException ignored) {
+                continue;
+            }
+            if (stack.isEmpty()) continue;
+
+            int slotX = 8 + i * 18;
+            int slotY = 170;
+            Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(stack, slotX + guiX, slotY + guiY);
+            Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(font, stack, slotX + guiX, slotY + guiY);
+            if (this.isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
+                this.renderTooltip(pPoseStack, stack, pMouseX, pMouseY);
+        }
+
+        for (int i = 0; i < 3; ++i) {
+            for (int l = 0; l < 9; ++l) {
+                ItemStack stack;
+                try {
+                    stack = invItems.get(l + i * 9 + 9);
+                } catch (RuntimeException ignored) {
+                    continue;
+                }
+                if (stack.isEmpty()) continue;
+
+                int slotX = 8 + l * 18;
+                int slotY = (i * 18) + 112;
+                Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(stack, slotX + guiX, slotY + guiY);
+                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(font, stack, slotX + guiX, slotY + guiY);
+                if (this.isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
+                    this.renderTooltip(pPoseStack, stack, pMouseX, pMouseY);
+            }
         }
     }
 
@@ -92,5 +173,12 @@ public class RequisiteScreen extends Screen {
     public void removed() {
         super.removed();
         NoBullshipPackets.sendToServer(new ServerboundWorkshopOpenPacket(blockEntityPos));
+    }
+
+    protected boolean isHovering(int guiX, int guiY, int pX, int pY, double pMouseX, double pMouseY) {
+        pMouseX -= guiX;
+        pMouseY -= guiY;
+
+        return pMouseX >= (double)(pX - 1) && pMouseX < (double)(pX + 16 + 1) && pMouseY >= (double)(pY - 1) && pMouseY < (double)(pY + 16 + 1);
     }
 }
