@@ -30,6 +30,7 @@ import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 @OnlyIn(Dist.CLIENT)
 public class RequisiteScreen extends Screen {
     public static final ResourceLocation REQUISITES = new ResourceLocation(MOD_ID, "textures/gui/requisites.png");
+    public static final Component REQ_MESSAGE = Component.translatable("gui.nobullship.requisite_screen");
 
     protected final BlockPos blockEntityPos;
     protected final ImmutableList<ItemStack> requisites;
@@ -107,6 +108,7 @@ public class RequisiteScreen extends Screen {
         RenderSystem.disableBlend();
 
         Font font = Minecraft.getInstance().font;
+        drawCenteredString(pPoseStack, font, REQ_MESSAGE, this.width / 2, guiY + 15, 555555);
 
         final int currentPage = this.page;
         for (int i = 0; i < 36; i++) {

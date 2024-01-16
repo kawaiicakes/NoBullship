@@ -34,6 +34,7 @@
   "gui.nobullship.slice_direction": "Toggle rendering direction",
   "gui.nobullship.increment": "Render next layer",
   "gui.nobullship.decrement": "Render previous layer",
+  "gui.nobullship.requisite_screen": "Requisite Items",
 
   "config.nobullship.cooldown": "The multiplier on cooldown times for schematics.",
   "config.nobullship.min_cooldown": "The minimum cooldown time possible in seconds.",
