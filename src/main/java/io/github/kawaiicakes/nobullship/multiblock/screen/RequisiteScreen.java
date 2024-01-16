@@ -36,7 +36,6 @@ public class RequisiteScreen extends Screen {
     protected final ImmutableList<ItemStack> requisites;
     protected final int maxPages;
     protected int page = 0;
-    protected int currentColour = 0x000000;
 
     protected RequisiteScreen(BlockPos blockEntityPos) {
         super(Component.empty());
@@ -127,7 +126,7 @@ public class RequisiteScreen extends Screen {
 
             Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(stack, slotX + guiX, slotY + guiY);
             Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(font, stack, slotX + guiX, slotY + guiY);
-            if (this.isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
+            if (isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
                 this.renderTooltip(pPoseStack, stack, pMouseX, pMouseY);
         }
 
@@ -148,7 +147,7 @@ public class RequisiteScreen extends Screen {
             int slotY = 170;
             Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(stack, slotX + guiX, slotY + guiY);
             Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(font, stack, slotX + guiX, slotY + guiY);
-            if (this.isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
+            if (isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
                 this.renderTooltip(pPoseStack, stack, pMouseX, pMouseY);
         }
 
@@ -166,7 +165,7 @@ public class RequisiteScreen extends Screen {
                 int slotY = (i * 18) + 112;
                 Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(stack, slotX + guiX, slotY + guiY);
                 Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(font, stack, slotX + guiX, slotY + guiY);
-                if (this.isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
+                if (isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
                     this.renderTooltip(pPoseStack, stack, pMouseX, pMouseY);
             }
         }
@@ -178,7 +177,7 @@ public class RequisiteScreen extends Screen {
         NoBullshipPackets.sendToServer(new ServerboundWorkshopOpenPacket(blockEntityPos));
     }
 
-    protected boolean isHovering(int guiX, int guiY, int pX, int pY, double pMouseX, double pMouseY) {
+    protected static boolean isHovering(int guiX, int guiY, int pX, int pY, double pMouseX, double pMouseY) {
         pMouseX -= guiX;
         pMouseY -= guiY;
 
