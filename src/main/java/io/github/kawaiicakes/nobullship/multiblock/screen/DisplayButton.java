@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import static io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen.TEXTURE;
 
@@ -12,12 +13,12 @@ public class DisplayButton extends ImageButton {
     protected final boolean renderDefault;
     protected boolean altTexture;
 
-    public DisplayButton(int pWidth, int pHeight, int pXTexStart, int pYTexStart, int pYDiffTex, OnPress pOnPress, OnTooltip onTooltip) {
+    public DisplayButton(int pWidth, int pHeight, int pXTexStart, int pYTexStart, int pYDiffTex, ResourceLocation texture, int texWidth, int texHeight, OnPress pOnPress, OnTooltip onTooltip) {
         super(
                 0, 0,
                 pWidth, pHeight,
                 pXTexStart, pYTexStart, pYDiffTex,
-                TEXTURE, 305, 245,
+                texture, texWidth, texHeight,
                 pOnPress,
                 onTooltip,
                 Component.empty()

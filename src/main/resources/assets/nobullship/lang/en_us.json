@@ -35,6 +35,8 @@
   "gui.nobullship.increment": "Render next layer",
   "gui.nobullship.decrement": "Render previous layer",
   "gui.nobullship.requisite_screen": "Requisite Items",
+  "gui.nobullship.close": "Close menu.",
+  "gui.nobullship.pg_number": "Page %1$s of %2$s",
 
   "config.nobullship.cooldown": "The multiplier on cooldown times for schematics.",
   "config.nobullship.min_cooldown": "The minimum cooldown time possible in seconds.",

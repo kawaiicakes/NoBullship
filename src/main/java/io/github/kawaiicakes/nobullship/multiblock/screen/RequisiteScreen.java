@@ -31,14 +31,37 @@ import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 public class RequisiteScreen extends Screen {
     public static final ResourceLocation REQUISITES = new ResourceLocation(MOD_ID, "textures/gui/requisites.png");
     public static final Component REQ_MESSAGE = Component.translatable("gui.nobullship.requisite_screen");
+    public static final Component CLOSE_MSG = Component.translatable("gui.nobullship.close");
 
     protected final BlockPos blockEntityPos;
     protected final ImmutableList<ItemStack> requisites;
+    protected final DisplayButton close;
+    protected final DisplayButton leftPg;
+    protected final DisplayButton rightPg;
     protected final int maxPages;
     protected int page = 0;
 
     protected RequisiteScreen(BlockPos blockEntityPos) {
         super(Component.empty());
+
+        this.close = new DisplayButton(
+                16, 16,
+                176, 0, 16,
+                REQUISITES, 256, 256,
+                (button) -> Minecraft.getInstance().setScreen(null),
+                (button, stack, mX, mY) -> this.renderTooltip(stack, CLOSE_MSG, mX, mY));
+        this.leftPg = new DisplayButton(
+                16, 16,
+                192, 0, 16,
+                REQUISITES, 256, 256,
+                (button) -> this.page--,
+                (button, stack, mX, mY) -> {});
+        this.rightPg = new DisplayButton(
+                16, 16,
+                208, 0, 16,
+                REQUISITES, 256, 256,
+                (button) -> this.page++,
+                (button, stack, mX, mY) -> {});
 
         this.blockEntityPos = blockEntityPos;
         if (Minecraft.getInstance().level == null) throw new IllegalArgumentException("No client level yet a screen attempted to be instantiated!");
@@ -83,14 +106,40 @@ public class RequisiteScreen extends Screen {
         
         this.requisites = requisiteBuilder.build();
 
-        // TODO: make this more precise
-        this.maxPages = (this.requisites.size() / 36) + 1;
+        if (((((float) this.requisites.size()) / 36F) == (float) (this.requisites.size() / 36))) {
+            this.maxPages = this.requisites.size() / 36;
+        } else {
+            this.maxPages = (this.requisites.size() / 36) + 1;
+        }
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        int guiX = (this.width - 176) / 2;
+        int guiY = (this.height - 194) / 2;
+
+        this.close.setActive(true);
+        this.leftPg.setActive(this.maxPages > 1);
+        this.rightPg.setActive(this.maxPages > 1);
+
+        this.close.setPosition(8 + guiX, 7 + guiY);
+        this.leftPg.setPosition(134 + guiX, 7 + guiY);
+        this.rightPg.setPosition(152 + guiX, 7 + guiY);
+
+        this.addRenderableWidget(this.close);
+        this.addRenderableWidget(this.leftPg);
+        this.addRenderableWidget(this.rightPg);
     }
 
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         this.renderBackground(pPoseStack);
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
+
+        if (this.page < 0) this.page = this.maxPages - 1;
+        if (this.page > this.maxPages - 1) this.page = 0;
 
         int guiX = (this.width - 176) / 2;
         int guiY = (this.height - 194) / 2;
@@ -108,7 +157,8 @@ public class RequisiteScreen extends Screen {
         RenderSystem.disableBlend();
 
         Font font = Minecraft.getInstance().font;
-        drawCenteredString(pPoseStack, font, REQ_MESSAGE, this.width / 2, guiY + 15, 555555);
+        drawCenteredString(pPoseStack, font, REQ_MESSAGE, this.width / 2, guiY + 6, 16777215);
+        drawCenteredString(pPoseStack, font, Component.translatable("gui.nobullship.pg_number", this.page + 1, this.maxPages), this.width / 2, guiY + 16, 0xAAAAAA);
 
         final int currentPage = this.page;
         for (int i = 0; i < 36; i++) {

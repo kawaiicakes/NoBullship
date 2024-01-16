@@ -66,11 +66,13 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.requisitesButton = new DisplayButton(
                 16, 16,
                 64, 192, 16,
+                TEXTURE, 305, 245,
                 ((button) -> Minecraft.getInstance().setScreen(new RequisiteScreen(pMenu.entity.getBlockPos()))),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, REQUISITES, mX, mY));
         this.nbtViewerButton = new DisplayButton(
                 20, 16,
                 80, 192, 16,
+                TEXTURE, 305, 245,
                 (button) -> Minecraft.getInstance().setScreen(new NbtViewerScreen(pMenu.entity.getBlockPos())),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, NBT_VIEWER, mX, mY));
 
@@ -89,11 +91,13 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.incrementButton = new DisplayButton(
                 16, 16,
                 32, 192, 16,
+                TEXTURE, 305, 245,
                 (button) -> this.incrementLayer(),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, INCREMENT, mX, mY));
         this.decrementButton = new DisplayButton(
                 16, 16,
                 48, 192, 16,
+                TEXTURE, 305, 245,
                 (button) -> this.decrementLayer(),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, DECREMENT, mX, mY));
 
