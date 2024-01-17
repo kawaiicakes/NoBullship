@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.multiblock.screen;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
@@ -135,6 +136,16 @@ public class NbtViewerScreen extends Screen {
         this.addRenderableWidget(this.close);
         this.addRenderableWidget(this.leftPg);
         this.addRenderableWidget(this.rightPg);
+    }
+
+    @Override
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        InputConstants.Key key = InputConstants.getKey(pKeyCode, pScanCode);
+        if (Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key)) {
+            this.onClose();
+            return true;
+        }
+        return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }
 
     @Override
