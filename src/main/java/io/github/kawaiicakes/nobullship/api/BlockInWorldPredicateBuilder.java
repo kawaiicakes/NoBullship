@@ -794,7 +794,30 @@ public class BlockInWorldPredicateBuilder {
 
     public ItemStack getItemized() {
         if (this.block != null) {
-            return this.block.asItem().getDefaultInstance();
+            if (this.blockEntityNbtDataStrict == null) return this.block.asItem().getDefaultInstance();
+
+            CompoundTag ogTag = this.block.asItem().getDefaultInstance().getOrCreateTag().copy();
+
+                    // TODO: redo nbt system by allowing specification of how a tag should be checked.
+                    /*
+                        There is also the issue of determining how to display non-strict data.
+
+                        Consider a system where "helper" data is parsed with the NBT during deserialization from JSON;
+                        this helper data then examines the given NBT data using criteria the helper specifies.
+
+                        Having a strict and non-strict set of data (like as of now) complicates things for me. It will
+                        be difficult for me to maintain compatibility with different edge cases.
+                        In this scenario, merging $blockEntityNbtData into the itemized BIWPredicateBuilder
+                        will not give an appropriate representation for stuff like containers.
+                     */
+
+            CompoundTag blockEntityTag = new CompoundTag();
+            blockEntityTag.put("BlockEntityTag", this.blockEntityNbtDataStrict);
+            ogTag.merge(blockEntityTag);
+
+            ItemStack toReturn = this.block.asItem().getDefaultInstance();
+            toReturn.setTag(ogTag);
+            return toReturn;
         } else {
             // TODO proper ingredient thingy
             //noinspection DataFlowIssue
