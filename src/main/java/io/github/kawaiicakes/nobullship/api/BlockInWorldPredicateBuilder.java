@@ -351,8 +351,8 @@ public class BlockInWorldPredicateBuilder {
                 case TAG -> deserializeBlockTagFromNbt(serializedPredicate);
             };
 
-            if (!serializedPredicate.getCompound("nbt").isEmpty()) toReturn.requireNbt(serializedPredicate.getCompound("nbt"));
-            if (!serializedPredicate.getCompound("nbt_strict").isEmpty()) toReturn.requireStrictNbt(serializedPredicate.getCompound("nbt_strict"));
+            if (!nbt.getCompound("nbt").isEmpty()) toReturn.requireNbt(nbt.getCompound("nbt"));
+            if (!nbt.getCompound("nbt_strict").isEmpty()) toReturn.requireStrictNbt(nbt.getCompound("nbt_strict"));
 
             return toReturn;
         } catch (RuntimeException e) {
