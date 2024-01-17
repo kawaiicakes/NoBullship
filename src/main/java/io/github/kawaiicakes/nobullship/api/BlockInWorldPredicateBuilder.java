@@ -244,6 +244,16 @@ public class BlockInWorldPredicateBuilder {
     }
 
     /**
+     * Returns an arbitrarily made copy of the NBT data this builder holds (if any exists).
+     */
+    public CompoundTag getNaiveNbt() {
+        CompoundTag toReturn = new CompoundTag();
+        if (this.getBlockEntityNbtData() != null) toReturn.merge(this.getBlockEntityNbtData());
+        if (this.getBlockEntityNbtDataStrict() != null) toReturn.merge(this.getBlockEntityNbtDataStrict());
+        return toReturn;
+    }
+
+    /**
      * Returns a <code>BlockInWorldPredicate</code> whose <code>#test</code> looks for the criteria
      * specified by this builder. This overload only works if there are no directional properties specified as
      * a requisite.
@@ -812,7 +822,7 @@ public class BlockInWorldPredicateBuilder {
                      */
 
             CompoundTag blockEntityTag = new CompoundTag();
-            blockEntityTag.put("BlockEntityTag", this.blockEntityNbtDataStrict);
+            blockEntityTag.put("BlockEntityTag", this.getNaiveNbt());
             ogTag.merge(blockEntityTag);
 
             ItemStack toReturn = this.block.asItem().getDefaultInstance();

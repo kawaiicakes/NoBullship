@@ -30,15 +30,19 @@ import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.ModelData;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -49,7 +53,9 @@ import static io.github.kawaiicakes.nobullship.Registry.ITEM_MARKER_PARTICLE;
 import static io.github.kawaiicakes.nobullship.Registry.WILDCARD_BLOCK;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
+@OnlyIn(Dist.CLIENT)
 public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshopBlockEntity> {
+    protected static final Map<CompoundTag, Item> NBT_ITEM = new HashMap<>();
     protected static final Logger LOGGER = LogUtils.getLogger();
     protected static final Map<BlockPos, RenderInstructions> RENDER_QUEUE = new HashMap<>();
 
@@ -248,12 +254,12 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                         hiddenFaces.add(direction);
                     }
 
-                    if (forRender.hasNbt()) {
+                    if (forRender.hasNbt() && forRender.biwPredicateBuilder != null) {
                         pPoseStack.scale(0.5F, 0.5F, 0.5F);
                         pPoseStack.translate(0.5F, 0, 0.5F);
 
                         clientLevel.addParticle(
-                                new ItemParticleOption(ITEM_MARKER_PARTICLE.get(), Items.STICK.getDefaultInstance()),
+                                new ItemParticleOption(ITEM_MARKER_PARTICLE.get(), getNbtDisplayEntry(forRender.biwPredicateBuilder.getNaiveNbt())),
                                 newPos.getX() + 0.5,
                                 newPos.getY() + 0.8,
                                 newPos.getZ() + 0.5,
@@ -337,12 +343,19 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         return block.getRenderShape() == RenderShape.INVISIBLE || block.is(WILDCARD_BLOCK.get());
     }
 
+    public static ItemStack getNbtDisplayEntry(CompoundTag strictNbt) {
+        //noinspection OptionalGetWithoutIsPresent
+        return NBT_ITEM.computeIfAbsent(strictNbt, (key) -> ForgeRegistries.ITEMS.getValues().stream().findAny().get()).getDefaultInstance();
+    }
+
     public static class BlockIngredient {
-        public static final BlockIngredient AIR = new BlockIngredient(Collections.singleton(Blocks.AIR.defaultBlockState()), null, false);
-        public static final BlockIngredient WILDCARD = new BlockIngredient(Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null, false);
+        public static final BlockIngredient AIR = new BlockIngredient(null, Collections.singleton(Blocks.AIR.defaultBlockState()), null, false);
+        public static final BlockIngredient WILDCARD = new BlockIngredient(null, Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null, false);
         protected static Random RANDOM_SRC = new Random();
         protected static int INCREMENT;
 
+        @Nullable
+        protected final BlockInWorldPredicateBuilder biwPredicateBuilder;
         protected final List<BlockState> validBlockStates;
         protected final Direction facing;
         protected Random seed;
@@ -351,10 +364,11 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         protected final boolean hasNbt;
 
         public BlockIngredient(BlockInWorldPredicateBuilder builder, @Nullable Direction facing) {
-            this(builder.getValidBlockstates(), facing, builder.requiresNbt());
+            this(builder, builder.getValidBlockstates(), facing, builder.requiresNbt());
         }
 
-        public BlockIngredient(Set<BlockState> validBlockStates, @Nullable Direction facing, boolean hasNbt) {
+        public BlockIngredient(@Nullable BlockInWorldPredicateBuilder biwPredicateBuilder, Set<BlockState> validBlockStates, @Nullable Direction facing, boolean hasNbt) {
+            this.biwPredicateBuilder = biwPredicateBuilder;
             this.validBlockStates = validBlockStates.stream().toList();
             this.facing = facing == null ? Direction.NORTH : facing;
             this.hasNbt = hasNbt;

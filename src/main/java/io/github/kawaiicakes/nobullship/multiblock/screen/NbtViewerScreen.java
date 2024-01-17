@@ -4,8 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
+import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
 import io.github.kawaiicakes.nobullship.network.ServerboundWorkshopOpenPacket;
@@ -15,6 +17,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -182,6 +185,10 @@ public class NbtViewerScreen extends Screen {
 
             ItemStack stack = this.nbtBlockList.get(slotNumber);
             if (stack == null || stack.isEmpty()) continue;
+            if (stack.getTag() == null) continue;
+
+            CompoundTag tag = stack.getTag().getCompound("BlockEntityTag");
+            if (tag.isEmpty()) continue;
 
             int slotX = 14 + ((i % 2) * 82);
             int slotY = 39 + ((i / 2) * 34);
@@ -196,7 +203,11 @@ public class NbtViewerScreen extends Screen {
             if (isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
                 this.renderTooltip(pPoseStack, stack, pMouseX, pMouseY);
 
+            ItemStack nbtKey = SchematicRenderer.getNbtDisplayEntry(tag);
             drawCenteredString(pPoseStack, font, Component.literal("NBT #" + nbtId++), slotX + guiX + 43, slotY + guiY - 3, 0xAAAAAA);
+            Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(nbtKey, slotX + guiX + 18, slotY + guiY + 5);
+            if (isHovering(guiX, guiY, slotX + 18, slotY + 5, pMouseX, pMouseY))
+                this.renderTooltip(pPoseStack, Component.translatable("gui.nobullship.nbt_key", nbtKey.getDisplayName()), pMouseX, pMouseY);
         }
 
         RenderSystem.disableDepthTest();
