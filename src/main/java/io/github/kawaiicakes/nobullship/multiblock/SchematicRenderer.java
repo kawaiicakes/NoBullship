@@ -26,9 +26,11 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -43,6 +45,7 @@ import org.slf4j.Logger;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static io.github.kawaiicakes.nobullship.Registry.ITEM_MARKER_PARTICLE;
 import static io.github.kawaiicakes.nobullship.Registry.WILDCARD_BLOCK;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
@@ -115,6 +118,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         if (clientLevel == null) return;
 
         RenderSystem.disableCull();
+        RenderSystem.enableBlend();
         ModelBlockRenderer.enableCaching();
 
         Map<Character, BlockIngredient> palette = entry.palette;
@@ -244,6 +248,20 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                         hiddenFaces.add(direction);
                     }
 
+                    if (forRender.hasNbt()) {
+                        pPoseStack.scale(0.5F, 0.5F, 0.5F);
+                        pPoseStack.translate(0.5F, 0, 0.5F);
+
+                        clientLevel.addParticle(
+                                new ItemParticleOption(ITEM_MARKER_PARTICLE.get(), Items.STICK.getDefaultInstance()),
+                                newPos.getX() + 0.5,
+                                newPos.getY() + 0.8,
+                                newPos.getZ() + 0.5,
+                                0, 0, 0);
+
+                        hiddenFaces.clear();
+                    }
+
                     this.renderGhostBlock(
                             forRender.getCurrentlySelected(clientLevel, newPos), newPos,
                             clientLevel, pPoseStack,
@@ -261,6 +279,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
 
         ModelBlockRenderer.clearCache();
         RenderSystem.enableCull();
+        RenderSystem.disableBlend();
     }
 
     @Override
@@ -319,8 +338,8 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
     }
 
     public static class BlockIngredient {
-        public static final BlockIngredient AIR = new BlockIngredient(Collections.singleton(Blocks.AIR.defaultBlockState()), null);
-        public static final BlockIngredient WILDCARD = new BlockIngredient(Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null);
+        public static final BlockIngredient AIR = new BlockIngredient(Collections.singleton(Blocks.AIR.defaultBlockState()), null, false);
+        public static final BlockIngredient WILDCARD = new BlockIngredient(Collections.singleton(WILDCARD_BLOCK.get().defaultBlockState()), null, false);
         protected static Random RANDOM_SRC = new Random();
         protected static int INCREMENT;
 
@@ -329,14 +348,20 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         protected Random seed;
         protected int randomIndexOld = 0;
         protected int randomIndex = 0;
+        protected final boolean hasNbt;
 
         public BlockIngredient(BlockInWorldPredicateBuilder builder, @Nullable Direction facing) {
-            this(builder.getValidBlockstates(), facing);
+            this(builder.getValidBlockstates(), facing, builder.requiresNbt());
         }
 
-        public BlockIngredient(Set<BlockState> validBlockStates, @Nullable Direction facing) {
+        public BlockIngredient(Set<BlockState> validBlockStates, @Nullable Direction facing, boolean hasNbt) {
             this.validBlockStates = validBlockStates.stream().toList();
             this.facing = facing == null ? Direction.NORTH : facing;
+            this.hasNbt = hasNbt;
+        }
+
+        public boolean hasNbt() {
+            return this.hasNbt;
         }
 
         public BlockState getCurrentlySelected(LevelAccessor levelAccessor, BlockPos pos) {

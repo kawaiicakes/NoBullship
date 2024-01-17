@@ -1,5 +1,6 @@
 package io.github.kawaiicakes.nobullship;
 
+import com.mojang.serialization.Codec;
 import io.github.kawaiicakes.nobullship.block.MetalIBeamBlock;
 import io.github.kawaiicakes.nobullship.block.SimpleBeamBlock;
 import io.github.kawaiicakes.nobullship.block.WheelBlock;
@@ -9,6 +10,8 @@ import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.inventory.MenuType;
@@ -24,6 +27,7 @@ import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -42,6 +46,8 @@ public class Registry {
     private static final DeferredRegister<SoundEvent> SOUND_REGISTRY = DeferredRegister.create(SOUND_EVENTS, MOD_ID);
     private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZER_REGISTRY
             = DeferredRegister.create(RECIPE_SERIALIZERS, MOD_ID);
+    private static final DeferredRegister<ParticleType<?>> PARTICLE_REGISTRY
+            = DeferredRegister.create(PARTICLE_TYPES, MOD_ID);
 
     public static final RegistryObject<Block> WILDCARD_BLOCK
             = BLOCK_REGISTRY.register("wildcard", WildcardBlock::new);
@@ -114,6 +120,13 @@ public class Registry {
             = SOUND_REGISTRY.register("construct_expended", () -> new SoundEvent(new ResourceLocation(MOD_ID, "construct_expended")));
     public static final RegistryObject<SchematicRecipe.Serializer> SCHEMATIC_SERIALIZER
             = RECIPE_SERIALIZER_REGISTRY.register("schematic_workbench", () -> INSTANCE);
+    public static final RegistryObject<ParticleType<ItemParticleOption>> ITEM_MARKER_PARTICLE
+            = PARTICLE_REGISTRY.register("item_marker", () -> new ParticleType<>(true, ItemParticleOption.DESERIALIZER) {
+        @Override
+        public @NotNull Codec<ItemParticleOption> codec() {
+            return ItemParticleOption.codec(this);
+        }
+    });
 
     public static void register(IEventBus modEventBus) {
         BLOCK_REGISTRY.register(modEventBus);
@@ -122,5 +135,6 @@ public class Registry {
         MENU_REGISTRY.register(modEventBus);
         RECIPE_SERIALIZER_REGISTRY.register(modEventBus);
         SOUND_REGISTRY.register(modEventBus);
+        PARTICLE_REGISTRY.register(modEventBus);
     }
 }

@@ -8,6 +8,7 @@ import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen;
 import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacket;
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
+import io.github.kawaiicakes.nobullship.particle.ItemMarker;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.data.DataGenerator;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
@@ -56,6 +58,7 @@ public class NoBullship
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::onDatagen);
+        modEventBus.addListener(this::registerParticleFactory);
 
         Registry.register(modEventBus);
 
@@ -65,6 +68,11 @@ public class NoBullship
     @SubscribeEvent
     public void commonSetup(FMLCommonSetupEvent event) {
         NoBullshipPackets.register();
+    }
+
+    @SubscribeEvent
+    public void registerParticleFactory(RegisterParticleProvidersEvent event) {
+        event.register(ITEM_MARKER_PARTICLE.get(), new ItemMarker.Provider());
     }
 
     @SubscribeEvent
