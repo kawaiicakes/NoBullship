@@ -157,34 +157,39 @@ public class NbtViewerScreen extends Screen {
 
         blit(pPoseStack, guiX, guiY, -5, 0, 0, 176, 194, 256, 256);
 
-        RenderSystem.disableDepthTest();
-        RenderSystem.disableBlend();
-
         Font font = Minecraft.getInstance().font;
         drawCenteredString(pPoseStack, font, NBT_VIEWER_MSG, this.width / 2, guiY + 6, 16777215);
         drawCenteredString(pPoseStack, font, Component.translatable("gui.nobullship.pg_number", this.page + 1, this.maxPages), this.width / 2, guiY + 16, 0xAAAAAA);
 
         final int currentPage = this.page;
+        int nbtId = 0;
         for (int i = 0; i < 4; i++) {
             if (i > (this.nbtBlockList.size() - 1)) break;
 
             int slotNumber = i + (4 * currentPage);
             if (slotNumber > (this.nbtBlockList.size() - 1)) break;
 
-            // TODO: render backing element
+            ItemStack stack = this.nbtBlockList.get(slotNumber);
+            if (stack == null || stack.isEmpty()) continue;
 
             int slotX = 14 + ((i % 2) * 82);
-            int slotY = 14 + ((i / 2) * 34);
+            int slotY = 39 + ((i / 2) * 34);
 
-            ItemStack stack = this.nbtBlockList.get(slotNumber);
-
-            if (stack == null || stack.isEmpty()) continue;
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderTexture(0, NBT_VIEWER_TEX);
+            blit(pPoseStack, slotX + guiX - 8, slotY + guiY - 8, -4, 176, 96, 80, 32, 256, 256);
 
             Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(stack, slotX + guiX, slotY + guiY);
             Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(font, stack, slotX + guiX, slotY + guiY);
             if (isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
                 this.renderTooltip(pPoseStack, stack, pMouseX, pMouseY);
+
+            drawCenteredString(pPoseStack, font, Component.literal("NBT #" + nbtId++), slotX + guiX + 43, slotY + guiY - 3, 0xAAAAAA);
         }
+
+        RenderSystem.disableDepthTest();
+        RenderSystem.disableBlend();
 
         Player player = Minecraft.getInstance().player;
         if (player == null) return;
