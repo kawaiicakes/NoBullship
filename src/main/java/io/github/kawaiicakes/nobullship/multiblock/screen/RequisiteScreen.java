@@ -33,6 +33,7 @@ public class RequisiteScreen extends Screen {
     public static final ResourceLocation REQUISITES = new ResourceLocation(MOD_ID, "textures/gui/requisites.png");
     public static final Component REQ_MESSAGE = Component.translatable("gui.nobullship.requisite_screen");
     public static final Component CLOSE_MSG = Component.translatable("gui.nobullship.close");
+    public static final Component VIEW_DATA = Component.translatable("gui.nobullship.view_data");
 
     protected final BlockPos blockEntityPos;
     protected final ImmutableList<ItemStack> requisites;

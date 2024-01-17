@@ -40,6 +40,7 @@ public class DisplayButton extends ImageButton {
                 Component.empty()
         );
 
+        this.visible = true;
         this.active = false;
         this.renderDefault = renderDefault;
         this.altTexture = false;
@@ -62,6 +63,10 @@ public class DisplayButton extends ImageButton {
         this.active = isActive;
     }
 
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
     protected void renderDefault(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, this.resourceLocation);
@@ -73,7 +78,8 @@ public class DisplayButton extends ImageButton {
         }
 
         RenderSystem.enableDepthTest();
-        blit(pPoseStack, this.x, this.y, (float)this.xTexStart, (float)i, this.width, this.height, this.textureWidth, this.textureHeight);
+        //noinspection SuspiciousNameCombination
+        blit(pPoseStack, this.x, this.y, 3, (float)this.xTexStart, (float)i, this.width, this.height, this.textureWidth, this.textureHeight);
     }
 
     protected void renderModified(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
@@ -87,6 +93,7 @@ public class DisplayButton extends ImageButton {
         }
 
         RenderSystem.enableDepthTest();
-        blit(pPoseStack, this.x, this.y, (float)this.xTexStart, (float)i, this.width, this.height, this.textureWidth, this.textureHeight);
+        //noinspection SuspiciousNameCombination
+        blit(pPoseStack, this.x, this.y, 3, (float)this.xTexStart, (float)i, this.width, this.height, this.textureWidth, this.textureHeight);
     }
 }

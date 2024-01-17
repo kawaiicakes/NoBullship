@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
@@ -31,8 +30,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
-import static io.github.kawaiicakes.nobullship.multiblock.screen.RequisiteScreen.CLOSE_MSG;
-import static io.github.kawaiicakes.nobullship.multiblock.screen.RequisiteScreen.isHovering;
+import static io.github.kawaiicakes.nobullship.multiblock.screen.RequisiteScreen.*;
 
 @OnlyIn(Dist.CLIENT)
 public class NbtViewerScreen extends Screen {
@@ -44,6 +42,10 @@ public class NbtViewerScreen extends Screen {
     protected final DisplayButton close;
     protected final DisplayButton leftPg;
     protected final DisplayButton rightPg;
+    protected final DisplayButton topLeft;
+    protected final DisplayButton topRight;
+    protected final DisplayButton bottomLeft;
+    protected final DisplayButton bottomRight;
     protected final int maxPages;
     protected int page = 0;
 
@@ -69,6 +71,30 @@ public class NbtViewerScreen extends Screen {
                 NBT_VIEWER_TEX, 256, 256,
                 (button) -> this.page++,
                 (button, stack, mX, mY) -> {});
+        this.topLeft = new DisplayButton(
+                20, 16,
+                224, 0, 16,
+                NBT_VIEWER_TEX, 256, 256,
+                (button) -> {},
+                (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
+        this.topRight = new DisplayButton(
+                20, 16,
+                224, 0, 16,
+                NBT_VIEWER_TEX, 256, 256,
+                (button) -> {},
+                (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
+        this.bottomLeft = new DisplayButton(
+                20, 16,
+                224, 0, 16,
+                NBT_VIEWER_TEX, 256, 256,
+                (button) -> {},
+                (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
+        this.bottomRight = new DisplayButton(
+                20, 16,
+                224, 0, 16,
+                NBT_VIEWER_TEX, 256, 256,
+                (button) -> {},
+                (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
 
         if (Minecraft.getInstance().level == null) throw new IllegalArgumentException("No client level yet a screen attempted to be instantiated!");
 
@@ -119,6 +145,11 @@ public class NbtViewerScreen extends Screen {
         } else {
             this.maxPages = (this.nbtBlockList.size() / 36) + 1;
         }
+
+        this.topLeft.setVisible(true);
+        this.topRight.setVisible(false);
+        this.bottomLeft.setVisible(false);
+        this.bottomRight.setVisible(false);
     }
 
     @Override
@@ -131,14 +162,26 @@ public class NbtViewerScreen extends Screen {
         this.close.setActive(true);
         this.leftPg.setActive(this.maxPages > 1);
         this.rightPg.setActive(this.maxPages > 1);
+        this.topLeft.setActive(true);
+        this.topRight.setActive(true);
+        this.bottomLeft.setActive(true);
+        this.bottomRight.setActive(true);
 
         this.close.setPosition(8 + guiX, 7 + guiY);
         this.leftPg.setPosition(134 + guiX, 7 + guiY);
         this.rightPg.setPosition(152 + guiX, 7 + guiY);
+        this.topLeft.setPosition(57 + guiX, guiY + 44);
+        this.topRight.setPosition(139 + guiX, guiY + 44);
+        this.bottomLeft.setPosition(57 + guiX, guiY + 78);
+        this.bottomRight.setPosition(139 + guiX, guiY + 78);
 
         this.addRenderableWidget(this.close);
         this.addRenderableWidget(this.leftPg);
         this.addRenderableWidget(this.rightPg);
+        this.addRenderableWidget(this.topLeft);
+        this.addRenderableWidget(this.topRight);
+        this.addRenderableWidget(this.bottomLeft);
+        this.addRenderableWidget(this.bottomRight);
     }
 
     @Override
@@ -154,7 +197,6 @@ public class NbtViewerScreen extends Screen {
     @Override
     public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
         this.renderBackground(pPoseStack);
-        super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
 
         if (this.page < 0) this.page = this.maxPages - 1;
         if (this.page > this.maxPages - 1) this.page = 0;
@@ -205,10 +247,12 @@ public class NbtViewerScreen extends Screen {
 
             ItemStack nbtKey = SchematicRenderer.getNbtDisplayEntry(tag);
             drawCenteredString(pPoseStack, font, Component.literal("NBT #" + nbtId++), slotX + guiX + 43, slotY + guiY - 3, 0xAAAAAA);
-            Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(nbtKey, slotX + guiX + 18, slotY + guiY + 5);
-            if (isHovering(guiX, guiY, slotX + 18, slotY + 5, pMouseX, pMouseY))
+            Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(nbtKey, slotX + guiX + 26, slotY + guiY + 5);
+            if (isHovering(guiX, guiY, slotX + 26, slotY + 5, pMouseX, pMouseY))
                 this.renderTooltip(pPoseStack, Component.translatable("gui.nobullship.nbt_key", nbtKey.getDisplayName()), pMouseX, pMouseY);
         }
+
+        super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
 
         RenderSystem.disableDepthTest();
         RenderSystem.disableBlend();
