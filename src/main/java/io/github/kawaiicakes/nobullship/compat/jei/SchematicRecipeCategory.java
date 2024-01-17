@@ -31,6 +31,7 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static io.github.kawaiicakes.nobullship.NoBullship.*;
 import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC;
@@ -53,7 +54,10 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
     protected SchematicRecipe currentRecipe;
 
     public SchematicRecipeCategory(IGuiHelper helper) {
-        this.background = helper.createDrawable(TEXTURE, 20, 12, 162, 94);
+        this.background = helper
+                .drawableBuilder(TEXTURE, 7, 15, 163, 77)
+                .setTextureSize(305, 245)
+                .build();
         this.icon = helper.createDrawableIngredient(ITEM_STACK, new ItemStack(WORKSHOP_ITEM.get()));
     }
 
@@ -84,7 +88,7 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
         for(int i = 0; i < 3; ++i) {
             for(int j = 0; j < 3; ++j) {
                 if (j + i * 3 >= shapedIngredients.size()) break;
-                builder.addSlot(INPUT, 1 + j * 18, 5 + i * 18).addIngredients(shapedIngredients.get(j + i * 3));
+                builder.addSlot(INPUT, 55 + j * 18, 2 + i * 18).addIngredients(shapedIngredients.get(j + i * 3));
             }
         }
 
@@ -92,11 +96,11 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
 
         for (int i = 0; i < 9; ++i) {
             if (i >= shapelessIngredients.size()) break;
-            builder.addSlot(INPUT, 1 + i * 18, 77).addItemStack(shapelessIngredients.get(i));
+            builder.addSlot(INPUT, 1 + i * 18, 60).addItemStack(shapelessIngredients.get(i));
         }
 
-        builder.addSlot(INPUT, 73, 23).addItemStack(SCHEMATIC.get().getDefaultInstance());
-        builder.addSlot(OUTPUT, 73, 1).addItemStack(recipe.getResultItem());
+        builder.addSlot(INPUT, 131, 36).addItemStack(SCHEMATIC.get().getDefaultInstance());
+        builder.addSlot(OUTPUT, 131, 11).addItemStack(recipe.getResultItem());
     }
 
     @Override
@@ -112,28 +116,19 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
         if (level == null) return;
         Entity entity = MultiblockRecipeManager.getInstance().getEntityForRecipe(this.currentRecipe.getResultId(), level);
         if (entity == null) return;
-        if (Minecraft.getInstance().player == null) return;
-        AABB entityHitbox = Minecraft.getInstance().player.getBoundingBox();
+        Optional<MultiblockRecipe> multiblockRecipe = MultiblockRecipeManager.getInstance().getRecipe(this.currentRecipe.getResultId());
+        if (multiblockRecipe.isEmpty()) return;
+        AABB entityHitbox = entity.getBoundingBox();
         double longestSide = Math.max(entityHitbox.getXsize(), Math.max(entityHitbox.getYsize(), entityHitbox.getZsize()));
         int scale = (int) (22 / (longestSide / 1.8));
 
-        renderEntity(136, 50, stack, scale, 130 - mouseX, entity);
+        renderEntity(26, 50, stack, scale, 130 - mouseX, entity);
+
+        String stringForDisplay = multiblockRecipe.get().resultingEntityName() != null ? multiblockRecipe.get().resultingEntityName() : entity.getDisplayName().getString();
 
         stack.pushPose();
-        stack.translate(136, 59, 0);
-        GuiComponent.drawCenteredString(stack, Minecraft.getInstance().font, entity.getDisplayName(), 0, 0, 8453920);
-
-        MultiblockRecipe resultRecipe = MultiblockRecipeManager.getInstance().getRecipe(this.currentRecipe.getResultId()).orElse(null);
-        if (resultRecipe == null) {
-            stack.popPose();
-            return;
-        }
-
-        if (resultRecipe.nbt() != null) {
-            stack.scale(0.8F, 0.8F, 1);
-            GuiComponent.drawCenteredString(stack, Minecraft.getInstance().font, "+NBT", 0, 12, 11141290);
-        }
-
+        stack.translate(81, -15, 0);
+        GuiComponent.drawCenteredString(stack, Minecraft.getInstance().font, stringForDisplay, 0, 0, 8453920);
         stack.popPose();
     }
 
