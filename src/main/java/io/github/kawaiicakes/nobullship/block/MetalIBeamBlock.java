@@ -8,7 +8,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -26,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.Registry.METAL_BEAM_BLOCK;
+import static io.github.kawaiicakes.nobullship.block.WheelBlock.FACING;
 
 public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
     public static final List<VoxelShape> BASE_SHAPES = new ArrayList<>(4);
@@ -47,7 +47,7 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public MetalIBeamBlock() {
-        super(BlockBehaviour.Properties.of(Material.METAL)
+        super(Properties.of(Material.METAL)
                 .sound(SoundType.ANVIL)
                 .noOcclusion()
                 .isViewBlocking((x,y,z) -> false)
@@ -219,6 +219,31 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
         BeamConnection connectionAbove = BeamConnection.NONE;
         BeamConnection connectionBelow = BeamConnection.NONE;
 
+        Direction upAttachmentDirection =
+                switch (axisDirection) {
+                    case X -> {
+                        if (isVertical) yield Direction.WEST;
+                        yield Direction.DOWN;
+                    }
+                    case Z -> {
+                        if (isVertical) yield Direction.NORTH;
+                        yield Direction.DOWN;
+                    }
+                    default -> throw new IllegalArgumentException();
+                };
+        Direction downAttachmentDirection =
+                switch (axisDirection) {
+                    case X -> {
+                        if (isVertical) yield Direction.EAST;
+                        yield Direction.UP;
+                    }
+                    case Z -> {
+                        if (isVertical) yield Direction.SOUTH;
+                        yield Direction.UP;
+                    }
+                    default -> throw new IllegalArgumentException();
+                };
+
         if (blockAbove.is(METAL_BEAM_BLOCK.get())) {
             if (!isVertical) {
                 if (blockAbove.getValue(VERTICAL)) {
@@ -227,6 +252,8 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
             } else {
                 connectionAbove = BeamConnection.PARALLEL;
             }
+        } else if (blockAbove.getBlock() instanceof WheelBlock && blockAbove.getValue(FACING).equals(upAttachmentDirection)) {
+            connectionAbove = BeamConnection.PARALLEL;
         }
 
         if (blockBelow.is(METAL_BEAM_BLOCK.get())) {
@@ -237,10 +264,28 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
             } else {
                 connectionBelow = BeamConnection.PARALLEL;
             }
+        } else if (blockBelow.getBlock() instanceof WheelBlock && blockBelow.getValue(FACING).equals(downAttachmentDirection)) {
+            connectionBelow = BeamConnection.PARALLEL;
         }
 
-        boolean attachesOnLeft = blockOnLeft.is(METAL_BEAM_BLOCK.get());
-        boolean attachesOnRight = blockOnRight.is(METAL_BEAM_BLOCK.get());
+        Direction leftAttachmentDirection =
+                switch (axisDirection) {
+                    case X -> Direction.SOUTH;
+                    case Z -> Direction.WEST;
+                    default -> throw new IllegalArgumentException();
+                };
+        Direction rightAttachmentDirection =
+                switch (axisDirection) {
+                    case X -> Direction.NORTH;
+                    case Z -> Direction.EAST;
+                    default -> throw new IllegalArgumentException();
+                };
+
+        boolean attachesOnLeft =
+                blockOnLeft.is(METAL_BEAM_BLOCK.get()) ||
+                (blockOnLeft.getBlock() instanceof WheelBlock && blockOnLeft.getValue(FACING).equals(leftAttachmentDirection));
+        boolean attachesOnRight = blockOnRight.is(METAL_BEAM_BLOCK.get())||
+                (blockOnRight.getBlock() instanceof WheelBlock && blockOnRight.getValue(FACING).equals(rightAttachmentDirection));
 
         boolean isInWater = pContext.getLevel().getFluidState(placementPos).getType() == Fluids.WATER;
 
@@ -264,59 +309,97 @@ public class MetalIBeamBlock extends Block implements SimpleWaterloggedBlock {
         boolean connectionLeft = pState.getValue(LEFT);
         boolean connectionRight = pState.getValue(RIGHT);
 
+        Block neighborBlock = pNeighborState.getBlock();
+        boolean neighborIsMetalIBeam = neighborBlock instanceof MetalIBeamBlock;
+        boolean isNeighborVertical = neighborIsMetalIBeam ? pNeighborState.getValue(VERTICAL) : false;
+        boolean neighborIsWheel = neighborBlock instanceof WheelBlock;
+        Direction wheelDirection = neighborIsWheel ? pNeighborState.getValue(FACING) : null;
+
         switch (pDirection) {
             case DOWN -> {
                 if (!isVertical) {
-                    if (!pNeighborState.is(METAL_BEAM_BLOCK.get()))
-                        connectionBelow = BeamConnection.NONE;
-                    else {
-                        if (pNeighborState.getValue(VERTICAL)) {
+                    if (neighborIsMetalIBeam) {
+                        if (isNeighborVertical) {
                             connectionBelow = pNeighborState.getValue(HORIZONTAL_AXIS).equals(axis) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
+                        } else {
+                            connectionBelow = BeamConnection.NONE;
+                        }
+                    } else if (Direction.UP.equals(wheelDirection)) {
+                        connectionBelow = BeamConnection.PARALLEL;
+                    } else {
+                        connectionBelow = BeamConnection.NONE;
+                    }
+                }
+            }
+            case UP -> {
+                if (!isVertical) {
+                    if (neighborIsMetalIBeam) {
+                        if (isNeighborVertical) {
+                            connectionAbove = pNeighborState.getValue(HORIZONTAL_AXIS).equals(axis) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
+                        } else {
+                            connectionAbove = BeamConnection.NONE;
+                        }
+                    } else if (Direction.DOWN.equals(wheelDirection)) {
+                        connectionAbove = BeamConnection.PARALLEL;
+                    } else {
+                        connectionAbove = BeamConnection.NONE;
+                    }
+                }
+            }
+            case NORTH -> {
+                if (axis.equals(Direction.Axis.X)) {
+                    connectionLeft = neighborIsMetalIBeam ||
+                            (Direction.SOUTH.equals(wheelDirection));
+                } else {
+                    if (isVertical) {
+                        if (neighborIsMetalIBeam || Direction.SOUTH.equals(wheelDirection)) {
+                            connectionBelow = BeamConnection.PARALLEL;
                         } else {
                             connectionBelow = BeamConnection.NONE;
                         }
                     }
                 }
             }
-            case UP -> {
-                if (!isVertical) {
-                    if (!pNeighborState.is(METAL_BEAM_BLOCK.get()))
-                        connectionAbove = BeamConnection.NONE;
-                    else {
-                        if (pNeighborState.getValue(VERTICAL)) {
-                            connectionAbove = pNeighborState.getValue(HORIZONTAL_AXIS).equals(axis) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
+            case SOUTH -> {
+                if (axis.equals(Direction.Axis.X)) {
+                    connectionRight = neighborIsMetalIBeam ||
+                            (Direction.NORTH.equals(wheelDirection));
+                } else {
+                    if (isVertical) {
+                        if (neighborIsMetalIBeam || Direction.NORTH.equals(wheelDirection)) {
+                            connectionAbove = BeamConnection.PARALLEL;
                         } else {
                             connectionAbove = BeamConnection.NONE;
                         }
                     }
                 }
             }
-            case NORTH -> {
-                if (axis.equals(Direction.Axis.X)) {
-                    connectionLeft = pNeighborState.is(METAL_BEAM_BLOCK.get());
-                } else {
-                    if (isVertical) connectionBelow = !pNeighborState.is(METAL_BEAM_BLOCK.get()) ? BeamConnection.NONE : BeamConnection.PARALLEL;
-                }
-            }
-            case SOUTH -> {
-                if (axis.equals(Direction.Axis.X)) {
-                    connectionRight = pNeighborState.is(METAL_BEAM_BLOCK.get());
-                } else {
-                    if (isVertical) connectionAbove = !pNeighborState.is(METAL_BEAM_BLOCK.get()) ? BeamConnection.NONE : BeamConnection.PARALLEL;
-                }
-            }
             case WEST -> {
                 if (axis.equals(Direction.Axis.Z)) {
-                    connectionRight = pNeighborState.is(METAL_BEAM_BLOCK.get());
+                    connectionRight = neighborIsMetalIBeam ||
+                            (Direction.EAST.equals(wheelDirection));
                 } else {
-                    if (isVertical) connectionBelow = !pNeighborState.is(METAL_BEAM_BLOCK.get()) ? BeamConnection.NONE : BeamConnection.PARALLEL;
+                    if (isVertical) {
+                        if (neighborIsMetalIBeam || Direction.EAST.equals(wheelDirection)) {
+                            connectionBelow = BeamConnection.PARALLEL;
+                        } else {
+                            connectionBelow = BeamConnection.NONE;
+                        }
+                    }
                 }
             }
             case EAST -> {
                 if (axis.equals(Direction.Axis.Z)) {
-                    connectionLeft = pNeighborState.is(METAL_BEAM_BLOCK.get());
+                    connectionLeft = neighborIsMetalIBeam ||
+                            (Direction.WEST.equals(wheelDirection));
                 } else {
-                    if (isVertical) connectionAbove = !pNeighborState.is(METAL_BEAM_BLOCK.get()) ? BeamConnection.NONE : BeamConnection.PARALLEL;
+                    if (isVertical) {
+                        if (neighborIsMetalIBeam || Direction.WEST.equals(wheelDirection)) {
+                            connectionAbove = BeamConnection.PARALLEL;
+                        } else {
+                            connectionAbove = BeamConnection.NONE;
+                        }
+                    }
                 }
             }
         }

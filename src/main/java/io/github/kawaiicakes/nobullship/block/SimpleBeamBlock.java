@@ -16,6 +16,8 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import org.jetbrains.annotations.Nullable;
 
+import static io.github.kawaiicakes.nobullship.block.WheelBlock.FACING;
+
 public abstract class SimpleBeamBlock extends PipeBlock implements SimpleWaterloggedBlock {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
@@ -93,19 +95,19 @@ public abstract class SimpleBeamBlock extends PipeBlock implements SimpleWaterlo
         BlockState west = level.getBlockState(pos.west());
 
         return this.defaultBlockState()
-                .setValue(DOWN, below.is(this) || below.getBlock() instanceof SimpleBeamBlock)
-                .setValue(UP, above.is(this) || above.getBlock() instanceof SimpleBeamBlock)
-                .setValue(NORTH, north.is(this) || north.getBlock() instanceof SimpleBeamBlock)
-                .setValue(EAST, east.is(this) || east.getBlock() instanceof SimpleBeamBlock)
-                .setValue(SOUTH, south.is(this) || south.getBlock() instanceof SimpleBeamBlock)
-                .setValue(WEST, west.is(this) || west.getBlock() instanceof SimpleBeamBlock)
+                .setValue(DOWN, this.isAttachableTo(below, Direction.DOWN))
+                .setValue(UP, this.isAttachableTo(above, Direction.UP))
+                .setValue(NORTH, this.isAttachableTo(north, Direction.NORTH))
+                .setValue(EAST, this.isAttachableTo(east, Direction.EAST))
+                .setValue(SOUTH, this.isAttachableTo(south, Direction.SOUTH))
+                .setValue(WEST, this.isAttachableTo(west, Direction.WEST))
                 .setValue(WATERLOGGED, isInWater);
     }
 
     @SuppressWarnings("deprecation")
     @Override
     public BlockState updateShape(BlockState pState, Direction pDirection, BlockState pNeighborState, LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pNeighborPos) {
-        boolean flag = pNeighborState.is(this) || pNeighborState.getBlock() instanceof SimpleBeamBlock;
+        boolean flag = this.isAttachableTo(pNeighborState, pDirection);
         return pState.setValue(PROPERTY_BY_DIRECTION.get(pDirection), flag);
     }
 
@@ -118,6 +120,13 @@ public abstract class SimpleBeamBlock extends PipeBlock implements SimpleWaterlo
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
         pBuilder.add(NORTH, EAST, SOUTH, WEST, UP, DOWN, WATERLOGGED);
+    }
+
+    public boolean isAttachableTo(BlockState blockState, Direction attachmentDirection) {
+        Block block = blockState.getBlock();
+        return blockState.is(this)
+                || block instanceof SimpleBeamBlock
+                || (block instanceof WheelBlock && blockState.getValue(FACING).equals(attachmentDirection.getOpposite()));
     }
 
     public static class ThinBeamBlock extends SimpleBeamBlock {
