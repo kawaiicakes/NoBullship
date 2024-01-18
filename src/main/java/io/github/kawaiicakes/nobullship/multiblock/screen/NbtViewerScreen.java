@@ -271,7 +271,7 @@ public class NbtViewerScreen extends Screen {
             if (stack.isEmpty()) continue;
 
             int slotX = 8 + i * 18;
-            int slotY = 170;
+            int slotY = 162;
             Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(stack, slotX + guiX, slotY + guiY);
             Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(font, stack, slotX + guiX, slotY + guiY);
             if (isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
@@ -289,7 +289,7 @@ public class NbtViewerScreen extends Screen {
                 if (stack.isEmpty()) continue;
 
                 int slotX = 8 + l * 18;
-                int slotY = (i * 18) + 112;
+                int slotY = (i * 18) + 104;
                 Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(stack, slotX + guiX, slotY + guiY);
                 Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(font, stack, slotX + guiX, slotY + guiY);
                 if (isHovering(guiX, guiY, slotX, slotY, pMouseX, pMouseY))
