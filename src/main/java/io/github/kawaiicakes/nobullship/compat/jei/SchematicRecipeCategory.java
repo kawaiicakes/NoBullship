@@ -40,8 +40,7 @@ import static io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorks
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.Type.ID;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.getSummedContents;
 import static mezz.jei.api.constants.VanillaTypes.ITEM_STACK;
-import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
-import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
+import static mezz.jei.api.recipe.RecipeIngredientRole.*;
 
 public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>, IRecipeCategoryExtension {
     public static final ResourceLocation UID = new ResourceLocation(MOD_ID, ID);
@@ -52,11 +51,13 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
 
     @Nullable
     protected SchematicRecipe currentRecipe;
+    protected ImmutableList<ItemStack> requisites;
 
     public SchematicRecipeCategory(IGuiHelper helper) {
         this.background = helper
                 .drawableBuilder(TEXTURE, 7, 15, 163, 77)
                 .setTextureSize(305, 245)
+                .addPadding(0, 49, 0, 0)
                 .build();
         this.icon = helper.createDrawableIngredient(ITEM_STACK, new ItemStack(WORKSHOP_ITEM.get()));
     }
@@ -101,6 +102,26 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
 
         builder.addSlot(INPUT, 131, 36).addItemStack(SCHEMATIC.get().getDefaultInstance());
         builder.addSlot(OUTPUT, 131, 11).addItemStack(recipe.getResultItem());
+
+        MultiblockRecipe resultRecipe = MultiblockRecipeManager.getInstance().getRecipe(this.currentRecipe.getResultId()).orElse(null);
+        if (resultRecipe == null) {
+            this.requisites = null;
+            return;
+        }
+
+        ImmutableList.Builder<ItemStack> requisiteBuilder = ImmutableList.builder();
+        if (this.currentRecipe.getRequisites() != null) requisiteBuilder.addAll(this.currentRecipe.getRequisites());
+        if (resultRecipe.requisites() != null) //noinspection DataFlowIssue
+            requisiteBuilder.addAll(resultRecipe.requisites());
+
+        this.requisites = requisiteBuilder.build();
+
+        int i = 0;
+        for (ItemStack item : this.requisites) {
+            int slotX = 1 + ((i++ % 9) * 18);
+            int slotY = 80 + ((i / 9) * 18);
+            builder.addSlot(RENDER_ONLY, slotX, slotY).addItemStack(item);
+        }
     }
 
     @Override
