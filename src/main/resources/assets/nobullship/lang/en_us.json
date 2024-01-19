@@ -40,6 +40,8 @@
   "gui.nobullship.pg_number": "Page %1$s of %2$s",
   "gui.nobullship.nbt_key": "This block corresponds to %1$s.",
   "gui.nobullship.view_data": "View full data (This feature has not been added yet!)",
+  "gui.nobullship.empty_block_entity": "Block Entity",
+  "gui.nobullship.proxy_screen": "Nobody here but us chickens!",
 
   "config.nobullship.cooldown": "The multiplier on cooldown times for schematics.",
   "config.nobullship.min_cooldown": "The minimum cooldown time possible in seconds.",

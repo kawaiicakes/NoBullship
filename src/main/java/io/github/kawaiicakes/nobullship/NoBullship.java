@@ -6,6 +6,7 @@ import io.github.kawaiicakes.nobullship.block.NoBullshipRecipeProvider;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopScreen;
+import io.github.kawaiicakes.nobullship.multiblock.screen.ProxyScreen;
 import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacket;
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
 import io.github.kawaiicakes.nobullship.particle.ItemMarker;
@@ -129,6 +130,7 @@ public class NoBullship
         @SubscribeEvent
         public static void registerMenuType(FMLClientSetupEvent event) {
             MenuScreens.register(WORKSHOP_MENU.get(), MultiblockWorkshopScreen::new);
+            MenuScreens.register(PROXY_MENU.get(), ProxyScreen::new);
         }
     }
 }

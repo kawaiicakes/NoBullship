@@ -8,6 +8,7 @@ import io.github.kawaiicakes.nobullship.block.WildcardBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.MultiblockWorkshopMenu;
+import io.github.kawaiicakes.nobullship.multiblock.screen.ProxyMenu;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -110,6 +111,8 @@ public class Registry {
     );
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));
+    public static final RegistryObject<MenuType<ProxyMenu>> PROXY_MENU
+            = MENU_REGISTRY.register("proxy_menu", () -> IForgeMenuType.create(ProxyMenu::new));
     public static final RegistryObject<SchematicItem> SCHEMATIC
             = ITEM_REGISTRY.register("schematic", SchematicItem::new);
     public static final RegistryObject<SoundEvent> CONSTRUCT_SUCCESS
