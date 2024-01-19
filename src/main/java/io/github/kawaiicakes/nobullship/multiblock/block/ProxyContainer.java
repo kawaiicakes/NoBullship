@@ -31,7 +31,7 @@ public class ProxyContainer<T extends BlockEntity> extends BaseContainerBlockEnt
     protected final T originalContainer;
     protected final AbstractContainerMenu menu;
 
-    public ProxyContainer(T originalContainer, BlockPos pPos, BlockState pBlockState) {
+    public ProxyContainer(T originalContainer, BlockPos pPos, BlockState pBlockState, int containerId) {
         super(originalContainer.getType(), pPos, pBlockState);
         this.originalContainer = originalContainer;
 
@@ -47,13 +47,13 @@ public class ProxyContainer<T extends BlockEntity> extends BaseContainerBlockEnt
             Inventory pInventory = Minecraft.getInstance().player.getInventory();
             AbstractContainerMenu menu;
             try {
-                menu = menuProvider.createMenu(0, pInventory, pInventory.player);
-                if (menu == null) menu = new ProxyMenu(0, pInventory, new FriendlyByteBuf(Unpooled.buffer()));
+                menu = menuProvider.createMenu(containerId, pInventory, pInventory.player);
+                if (menu == null) menu = new ProxyMenu(containerId, pInventory, new FriendlyByteBuf(Unpooled.buffer()));
             } catch (RuntimeException e) {
                 LOGGER.error("Error attempting to deduce menu type!", e);
                 assert originalLevel != null;
                 Objects.requireNonNull(this.originalContainer).setLevel(originalLevel);
-                menu = new ProxyMenu(0, pInventory, new FriendlyByteBuf(Unpooled.buffer()));
+                menu = new ProxyMenu(containerId, pInventory, new FriendlyByteBuf(Unpooled.buffer()));
             }
             this.menu = menu;
         } else {
@@ -62,7 +62,7 @@ public class ProxyContainer<T extends BlockEntity> extends BaseContainerBlockEnt
             final Level originalLevel = Objects.requireNonNull(this.originalContainer).getLevel();
             assert originalLevel != null;
             Objects.requireNonNull(this.originalContainer).setLevel(originalLevel);
-            this.menu = new ProxyMenu(0, pInventory, new FriendlyByteBuf(Unpooled.buffer()));
+            this.menu = new ProxyMenu(containerId, pInventory, new FriendlyByteBuf(Unpooled.buffer()));
         }
     }
 
@@ -79,17 +79,7 @@ public class ProxyContainer<T extends BlockEntity> extends BaseContainerBlockEnt
 
     @Override
     protected AbstractContainerMenu createMenu(int pContainerId, Inventory pInventory) {
-        try {
-            if (this.originalContainer instanceof MenuProvider menuProvider) {
-                AbstractContainerMenu menu = menuProvider.createMenu(pContainerId, pInventory, pInventory.player);
-                return menu != null ? menu : new ProxyMenu(pContainerId, pInventory);
-            } else {
-                return new ProxyMenu(pContainerId, pInventory);
-            }
-        } catch (RuntimeException e) {
-            LOGGER.error("Error attempting to create menu for proxy container!", e);
-            return new ProxyMenu(pContainerId, pInventory);
-        }
+        return this.menu;
     }
 
     @Override

@@ -12,6 +12,7 @@ import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.block.ProxyContainer;
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
+import io.github.kawaiicakes.nobullship.network.ServerboundRequestContainerIdPacket;
 import io.github.kawaiicakes.nobullship.network.ServerboundWorkshopOpenPacket;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import io.netty.buffer.Unpooled;
@@ -49,6 +50,7 @@ public class NbtViewerScreen extends Screen {
     protected static final Logger LOGGER = LogUtils.getLogger();
     public static final ResourceLocation NBT_VIEWER_TEX = new ResourceLocation(MOD_ID, "textures/gui/nbt_viewer.png");
     public static final Component NBT_VIEWER_MSG = Component.translatable("gui.nobullship.nbt_viewer_screen");
+    protected static int CONTAINER_COUNT;
 
     protected final BlockPos blockEntityPos;
     protected final ImmutableList<ItemStack> nbtBlockList;
@@ -69,6 +71,8 @@ public class NbtViewerScreen extends Screen {
     protected NbtViewerScreen(BlockPos blockEntityPos) {
         super(Component.empty());
         this.blockEntityPos = blockEntityPos;
+
+        NoBullshipPackets.sendToServer(new ServerboundRequestContainerIdPacket());
 
         this.close = new DisplayButton(
                 16, 16,
@@ -93,7 +97,7 @@ public class NbtViewerScreen extends Screen {
                 224, 0, 16,
                 NBT_VIEWER_TEX, 256, 256,
                 (button) ->
-                        this.createProxyContainer(this.blockEntityPos.atY(30), this.topLeftBlock.getFirst(), this.topLeftBlock.getSecond()),
+                        this.createProxyContainer(this.blockEntityPos.above(), this.topLeftBlock.getFirst(), this.topLeftBlock.getSecond()),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
         this.topRight = new DisplayButton(
                 20, 16,
@@ -171,6 +175,10 @@ public class NbtViewerScreen extends Screen {
         this.topRight.setVisible(false);
         this.bottomLeft.setVisible(false);
         this.bottomRight.setVisible(false);
+    }
+
+    public static void setContainerCount(int count) {
+        CONTAINER_COUNT = count;
     }
 
     @Override
@@ -398,11 +406,11 @@ public class NbtViewerScreen extends Screen {
             assert Minecraft.getInstance().level != null;
             originalContainer.setLevel(Minecraft.getInstance().level);
 
-            ProxyContainer<?> proxyContainer = new ProxyContainer<>(originalContainer, blockPos, block.defaultBlockState());
+            ProxyContainer<?> proxyContainer = new ProxyContainer<>(originalContainer, blockPos, block.defaultBlockState(), CONTAINER_COUNT);
 
-            MenuScreens.getScreenFactory(proxyContainer.getMenuType(), Minecraft.getInstance(), 0, proxyContainer.getDisplayName()).ifPresent(f -> {
+            MenuScreens.getScreenFactory(proxyContainer.getMenuType(), Minecraft.getInstance(), CONTAINER_COUNT, proxyContainer.getDisplayName()).ifPresent(f -> {
                 assert Minecraft.getInstance().player != null;
-                AbstractContainerMenu c = proxyContainer.getMenuType().create(0, Minecraft.getInstance().player.getInventory(), new FriendlyByteBuf(Unpooled.buffer()));
+                AbstractContainerMenu c = proxyContainer.getMenuType().create(CONTAINER_COUNT, Minecraft.getInstance().player.getInventory(), new FriendlyByteBuf(Unpooled.buffer()));
 
                 @SuppressWarnings("unchecked") Screen s = ((MenuScreens.ScreenConstructor<AbstractContainerMenu, ?>) f).create(c, Minecraft.getInstance().player.getInventory(), proxyContainer.getDisplayName());
                 Minecraft.getInstance().player.containerMenu = ((MenuAccess<?>) s).getMenu();

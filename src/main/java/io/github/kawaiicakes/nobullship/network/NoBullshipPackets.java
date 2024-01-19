@@ -43,6 +43,18 @@ public class NoBullshipPackets {
                 .encoder(ServerboundWorkshopOpenPacket::toBytes)
                 .consumerMainThread(ServerboundWorkshopOpenPacket::handle)
                 .add();
+
+        net.messageBuilder(ServerboundRequestContainerIdPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .decoder(ServerboundRequestContainerIdPacket::new)
+                .encoder(ServerboundRequestContainerIdPacket::toBytes)
+                .consumerMainThread(ServerboundRequestContainerIdPacket::handle)
+                .add();
+
+        net.messageBuilder(ClientboundUpdateNbtViewerPacket.class, id(), NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(ClientboundUpdateNbtViewerPacket::new)
+                .encoder(ClientboundUpdateNbtViewerPacket::toBytes)
+                .consumerMainThread(ClientboundUpdateNbtViewerPacket::handle)
+                .add();
     }
 
     protected static void handleOnClient(ClientboundUpdateNoBullshipPacket msg, Supplier<NetworkEvent.Context> event) {
