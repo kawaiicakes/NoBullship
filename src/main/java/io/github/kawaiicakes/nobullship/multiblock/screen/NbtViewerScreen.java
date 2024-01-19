@@ -4,26 +4,38 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
+import io.github.kawaiicakes.nobullship.multiblock.block.ProxyContainer;
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
 import io.github.kawaiicakes.nobullship.network.ServerboundWorkshopOpenPacket;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +46,7 @@ import static io.github.kawaiicakes.nobullship.multiblock.screen.RequisiteScreen
 
 @OnlyIn(Dist.CLIENT)
 public class NbtViewerScreen extends Screen {
+    protected static final Logger LOGGER = LogUtils.getLogger();
     public static final ResourceLocation NBT_VIEWER_TEX = new ResourceLocation(MOD_ID, "textures/gui/nbt_viewer.png");
     public static final Component NBT_VIEWER_MSG = Component.translatable("gui.nobullship.nbt_viewer_screen");
 
@@ -46,6 +59,10 @@ public class NbtViewerScreen extends Screen {
     protected final DisplayButton topRight;
     protected final DisplayButton bottomLeft;
     protected final DisplayButton bottomRight;
+    protected Pair<Block, CompoundTag> topLeftBlock;
+    protected Pair<Block, CompoundTag> topRightBlock;
+    protected Pair<Block, CompoundTag> bottomLeftBlock;
+    protected Pair<Block, CompoundTag> bottomRightBlock;
     protected final int maxPages;
     protected int page = 0;
 
@@ -75,25 +92,29 @@ public class NbtViewerScreen extends Screen {
                 20, 16,
                 224, 0, 16,
                 NBT_VIEWER_TEX, 256, 256,
-                (button) -> {},
+                (button) ->
+                        this.createProxyContainer(this.blockEntityPos.atY(30), this.topLeftBlock.getFirst(), this.topLeftBlock.getSecond()),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
         this.topRight = new DisplayButton(
                 20, 16,
                 224, 0, 16,
                 NBT_VIEWER_TEX, 256, 256,
-                (button) -> {},
+                (button) ->
+                        this.createProxyContainer(this.blockEntityPos.atY(30), this.topRightBlock.getFirst(), this.topRightBlock.getSecond()),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
         this.bottomLeft = new DisplayButton(
                 20, 16,
                 224, 0, 16,
                 NBT_VIEWER_TEX, 256, 256,
-                (button) -> {},
+                (button) ->
+                        this.createProxyContainer(this.blockEntityPos.atY(30), this.bottomLeftBlock.getFirst(), this.bottomLeftBlock.getSecond()),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
         this.bottomRight = new DisplayButton(
                 20, 16,
                 224, 0, 16,
                 NBT_VIEWER_TEX, 256, 256,
-                (button) -> {},
+                (button) ->
+                        this.createProxyContainer(this.blockEntityPos.atY(30), this.bottomRightBlock.getFirst(), this.bottomRightBlock.getSecond()),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
 
         if (Minecraft.getInstance().level == null) throw new IllegalArgumentException("No client level yet a screen attempted to be instantiated!");
@@ -220,17 +241,75 @@ public class NbtViewerScreen extends Screen {
         final int currentPage = this.page;
         int nbtId = 0;
         for (int i = 0; i < 4; i++) {
-            if (i > (this.nbtBlockList.size() - 1)) break;
+            Block entityBlock = null;
+            CompoundTag tag = null;
+
+            if (i > (this.nbtBlockList.size() - 1)) {
+                switch (i) {
+                    case 0 -> this.topLeftBlock = Pair.of(entityBlock, tag);
+                    case 1 -> this.topRightBlock = Pair.of(entityBlock, tag);
+                    case 2 -> this.bottomLeftBlock = Pair.of(entityBlock, tag);
+                    case 3 -> this.bottomRightBlock = Pair.of(entityBlock, tag);
+                    default -> throw new IllegalArgumentException();
+                }
+                break;
+            }
 
             int slotNumber = i + (4 * currentPage);
-            if (slotNumber > (this.nbtBlockList.size() - 1)) break;
+            if (slotNumber > (this.nbtBlockList.size() - 1)) {
+                switch (i) {
+                    case 0 -> this.topLeftBlock = Pair.of(entityBlock, tag);
+                    case 1 -> this.topRightBlock = Pair.of(entityBlock, tag);
+                    case 2 -> this.bottomLeftBlock = Pair.of(entityBlock, tag);
+                    case 3 -> this.bottomRightBlock = Pair.of(entityBlock, tag);
+                    default -> throw new IllegalArgumentException();
+                }
+                break;
+            }
 
             ItemStack stack = this.nbtBlockList.get(slotNumber);
-            if (stack == null || stack.isEmpty()) continue;
-            if (stack.getTag() == null) continue;
+            if (stack == null || stack.isEmpty()) {
+                switch (i) {
+                    case 0 -> this.topLeftBlock = Pair.of(entityBlock, tag);
+                    case 1 -> this.topRightBlock = Pair.of(entityBlock, tag);
+                    case 2 -> this.bottomLeftBlock = Pair.of(entityBlock, tag);
+                    case 3 -> this.bottomRightBlock = Pair.of(entityBlock, tag);
+                    default -> throw new IllegalArgumentException();
+                }
+                continue;
+            }
+            if (stack.getTag() == null) {
+                switch (i) {
+                    case 0 -> this.topLeftBlock = Pair.of(entityBlock, tag);
+                    case 1 -> this.topRightBlock = Pair.of(entityBlock, tag);
+                    case 2 -> this.bottomLeftBlock = Pair.of(entityBlock, tag);
+                    case 3 -> this.bottomRightBlock = Pair.of(entityBlock, tag);
+                    default -> throw new IllegalArgumentException();
+                }
+                continue;
+            }
 
-            CompoundTag tag = stack.getTag().getCompound("BlockEntityTag");
-            if (tag.isEmpty()) continue;
+            tag = stack.getTag().getCompound("BlockEntityTag");
+            if (tag.isEmpty()) {
+                switch (i) {
+                    case 0 -> this.topLeftBlock = Pair.of(entityBlock, tag);
+                    case 1 -> this.topRightBlock = Pair.of(entityBlock, tag);
+                    case 2 -> this.bottomLeftBlock = Pair.of(entityBlock, tag);
+                    case 3 -> this.bottomRightBlock = Pair.of(entityBlock, tag);
+                    default -> throw new IllegalArgumentException();
+                }
+                continue;
+            }
+
+            Block block = stack.getItem() instanceof BlockItem blockItem ? blockItem.getBlock() : null;
+            if (block instanceof EntityBlock entityBlock1) entityBlock = (Block) entityBlock1;
+            switch (i) {
+                case 0 -> this.topLeftBlock = Pair.of(entityBlock, tag);
+                case 1 -> this.topRightBlock = Pair.of(entityBlock, tag);
+                case 2 -> this.bottomLeftBlock = Pair.of(entityBlock, tag);
+                case 3 -> this.bottomRightBlock = Pair.of(entityBlock, tag);
+                default -> throw new IllegalArgumentException();
+            }
 
             int slotX = 14 + ((i % 2) * 82);
             int slotY = 39 + ((i / 2) * 34);
@@ -305,5 +384,32 @@ public class NbtViewerScreen extends Screen {
         // from the bits I did see though, I'm not sure if doing it from the client would be safe anyway...
         // oh btw future ashley, setting screen to null does indeed exit the current screen :)
         NoBullshipPackets.sendToServer(new ServerboundWorkshopOpenPacket(blockEntityPos));
+    }
+
+    public void createProxyContainer(BlockPos blockPos, Block block, CompoundTag tag) {
+        try {
+            if (!(block instanceof EntityBlock entityBlock)) throw new IllegalArgumentException("Passed block is not an EntityBlock!");
+            BlockEntity originalContainer = entityBlock.newBlockEntity(blockPos, block.defaultBlockState());
+            if (originalContainer == null) {
+                LOGGER.error("Unable to create proxy container; spoofed block entity could not be made!");
+                return;
+            }
+            originalContainer.load(tag);
+            assert Minecraft.getInstance().level != null;
+            originalContainer.setLevel(Minecraft.getInstance().level);
+
+            ProxyContainer<?> proxyContainer = new ProxyContainer<>(originalContainer, blockPos, block.defaultBlockState());
+
+            MenuScreens.getScreenFactory(proxyContainer.getMenuType(), Minecraft.getInstance(), 0, proxyContainer.getDisplayName()).ifPresent(f -> {
+                assert Minecraft.getInstance().player != null;
+                AbstractContainerMenu c = proxyContainer.getMenuType().create(0, Minecraft.getInstance().player.getInventory(), new FriendlyByteBuf(Unpooled.buffer()));
+
+                @SuppressWarnings("unchecked") Screen s = ((MenuScreens.ScreenConstructor<AbstractContainerMenu, ?>) f).create(c, Minecraft.getInstance().player.getInventory(), proxyContainer.getDisplayName());
+                Minecraft.getInstance().player.containerMenu = ((MenuAccess<?>) s).getMenu();
+                Minecraft.getInstance().setScreen(s);
+            });
+        } catch (RuntimeException e) {
+            LOGGER.error("Unable to create proxy container!", e);
+        }
     }
 }
