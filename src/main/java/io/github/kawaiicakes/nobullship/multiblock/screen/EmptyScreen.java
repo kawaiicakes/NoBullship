@@ -14,10 +14,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import static io.github.kawaiicakes.nobullship.NoBullship.MOD_ID;
 
 @OnlyIn(Dist.CLIENT)
-public class ProxyScreen extends AbstractContainerScreen<ProxyMenu> {
-    public static final ResourceLocation TEXTURE = new ResourceLocation(MOD_ID, "textures/gui/proxy_screen.png");
+public class EmptyScreen extends AbstractContainerScreen<EmptyMenu> {
+    public static final ResourceLocation TEXTURE = new ResourceLocation(MOD_ID, "textures/gui/empty_screen.png");
 
-    public ProxyScreen(ProxyMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
+    public EmptyScreen(EmptyMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
 
         this.imageWidth = 202;

@@ -1,11 +1,10 @@
 package io.github.kawaiicakes.nobullship.multiblock.block;
 
 import com.mojang.logging.LogUtils;
+import io.github.kawaiicakes.nobullship.multiblock.screen.EmptyMenu;
 import io.github.kawaiicakes.nobullship.multiblock.screen.ProxyMenu;
-import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
@@ -48,21 +47,21 @@ public class ProxyContainer<T extends BlockEntity> extends BaseContainerBlockEnt
             AbstractContainerMenu menu;
             try {
                 menu = menuProvider.createMenu(containerId, pInventory, pInventory.player);
-                if (menu == null) menu = new ProxyMenu(containerId, pInventory, new FriendlyByteBuf(Unpooled.buffer()));
+                if (menu == null) menu = new EmptyMenu(containerId, pInventory);
             } catch (RuntimeException e) {
                 LOGGER.error("Error attempting to deduce menu type!", e);
                 assert originalLevel != null;
                 Objects.requireNonNull(this.originalContainer).setLevel(originalLevel);
-                menu = new ProxyMenu(containerId, pInventory, new FriendlyByteBuf(Unpooled.buffer()));
+                menu = new EmptyMenu(containerId, pInventory);
             }
-            this.menu = menu;
+            this.menu = new ProxyMenu(menu, containerId, pInventory);
         } else {
             assert Minecraft.getInstance().player != null;
             Inventory pInventory = Minecraft.getInstance().player.getInventory();
             final Level originalLevel = Objects.requireNonNull(this.originalContainer).getLevel();
             assert originalLevel != null;
             Objects.requireNonNull(this.originalContainer).setLevel(originalLevel);
-            this.menu = new ProxyMenu(containerId, pInventory, new FriendlyByteBuf(Unpooled.buffer()));
+            this.menu = new EmptyMenu(containerId, pInventory);
         }
     }
 
