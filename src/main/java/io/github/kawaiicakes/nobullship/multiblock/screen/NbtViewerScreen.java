@@ -67,6 +67,7 @@ public class NbtViewerScreen extends Screen {
     protected Pair<Block, CompoundTag> bottomRightBlock;
     protected final int maxPages;
     protected int page = 0;
+    protected boolean noWorkshopOpen = false;
 
     protected NbtViewerScreen(BlockPos blockEntityPos) {
         super(Component.empty());
@@ -96,29 +97,25 @@ public class NbtViewerScreen extends Screen {
                 20, 16,
                 224, 0, 16,
                 NBT_VIEWER_TEX, 256, 256,
-                (button) ->
-                        this.createProxyContainer(this.blockEntityPos.above(), this.topLeftBlock.getFirst(), this.topLeftBlock.getSecond()),
+                (button) -> {}, //this.createProxyContainer(this.blockEntityPos.above(), this.topLeftBlock.getFirst(), this.topLeftBlock.getSecond())
                 (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
         this.topRight = new DisplayButton(
                 20, 16,
                 224, 0, 16,
                 NBT_VIEWER_TEX, 256, 256,
-                (button) ->
-                        this.createProxyContainer(this.blockEntityPos.atY(30), this.topRightBlock.getFirst(), this.topRightBlock.getSecond()),
+                (button) -> {}, //this.createProxyContainer(this.blockEntityPos.atY(30), this.topRightBlock.getFirst(), this.topRightBlock.getSecond()),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
         this.bottomLeft = new DisplayButton(
                 20, 16,
                 224, 0, 16,
                 NBT_VIEWER_TEX, 256, 256,
-                (button) ->
-                        this.createProxyContainer(this.blockEntityPos.atY(30), this.bottomLeftBlock.getFirst(), this.bottomLeftBlock.getSecond()),
+                (button) -> {}, //this.createProxyContainer(this.blockEntityPos.atY(30), this.bottomLeftBlock.getFirst(), this.bottomLeftBlock.getSecond()),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
         this.bottomRight = new DisplayButton(
                 20, 16,
                 224, 0, 16,
                 NBT_VIEWER_TEX, 256, 256,
-                (button) ->
-                        this.createProxyContainer(this.blockEntityPos.atY(30), this.bottomRightBlock.getFirst(), this.bottomRightBlock.getSecond()),
+                (button) -> {}, //this.createProxyContainer(this.blockEntityPos.atY(30), this.bottomRightBlock.getFirst(), this.bottomRightBlock.getSecond()),
                 (button, stack, mX, mY) -> this.renderTooltip(stack, VIEW_DATA, mX, mY));
 
         if (Minecraft.getInstance().level == null) throw new IllegalArgumentException("No client level yet a screen attempted to be instantiated!");
@@ -391,10 +388,12 @@ public class NbtViewerScreen extends Screen {
         // a packet is used here because I can't be bothered to figure out how to force it open from the client
         // from the bits I did see though, I'm not sure if doing it from the client would be safe anyway...
         // oh btw future ashley, setting screen to null does indeed exit the current screen :)
-        NoBullshipPackets.sendToServer(new ServerboundWorkshopOpenPacket(blockEntityPos));
+        if (!this.noWorkshopOpen)
+            NoBullshipPackets.sendToServer(new ServerboundWorkshopOpenPacket(blockEntityPos));
     }
 
     public void createProxyContainer(BlockPos blockPos, Block block, CompoundTag tag) {
+        this.noWorkshopOpen = true;
         try {
             if (!(block instanceof EntityBlock entityBlock)) throw new IllegalArgumentException("Passed block is not an EntityBlock!");
             BlockEntity originalContainer = entityBlock.newBlockEntity(blockPos, block.defaultBlockState());
