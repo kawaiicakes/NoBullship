@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -323,7 +324,19 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
             if (this.requisites != null && !this.requisites.isEmpty()) {
                 JsonArray jsonRequisites = new JsonArray();
                 for (ItemStack item : this.requisites) {
-                    JsonElement serialized = ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, item).get().orThrow();
+                    JsonObject serialized = new JsonObject();
+
+                    ResourceLocation itemName = ForgeRegistries.ITEMS.getKey(item.getItem());
+                    if (itemName == null) continue;
+                    serialized.addProperty("item", itemName.toString());
+
+                    if (!item.isEmpty() && item.hasTag()) {
+                        JsonElement itemTag = NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, item.getOrCreateTag());
+                        if (itemTag.isJsonObject()) serialized.add("nbt", itemTag);
+                    }
+
+                    if (item.getCount() > 1) serialized.addProperty("count", item.getCount());
+
                     jsonRequisites.add(serialized);
                 }
                 pJson.add("requisites", jsonRequisites);

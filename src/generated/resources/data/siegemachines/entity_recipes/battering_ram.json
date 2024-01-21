@@ -277,8 +277,8 @@
   },
   "requisites": [
     {
-      "Count": 2,
-      "id": "minecraft:leather"
+      "count": 2,
+      "item": "minecraft:leather"
     }
   ],
   "result": {
