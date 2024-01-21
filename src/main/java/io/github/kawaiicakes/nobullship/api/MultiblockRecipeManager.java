@@ -37,6 +37,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -61,14 +62,18 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
     protected int globalCooldownTime = 0;
     protected int maxGlobalCooldownTime = 400000;
+    protected final ICondition.IContext conditionContext;
 
     /**
      * A map available on the serverside containing the recipe id as a key.
      */
     private Map<ResourceLocation, MultiblockRecipe> recipes = ImmutableMap.of();
 
-    protected MultiblockRecipeManager() {
+    public MultiblockRecipeManager(ICondition.IContext conditionContext) {
         super(GSON, "entity_recipes");
+        this.conditionContext = conditionContext;
+
+        INSTANCE = this;
     }
 
     public void replaceRecipes(ClientboundUpdateNoBullshipPacket packet) {
@@ -278,7 +283,6 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     }
 
     public static MultiblockRecipeManager getInstance() {
-        if (INSTANCE == null) INSTANCE = new MultiblockRecipeManager();
         return INSTANCE;
     }
 
@@ -352,11 +356,8 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
             try {
                 MultiblockRecipe deserializedRecipe
-                        = MultiblockRecipe.fromJson(GsonHelper.convertToJsonObject(entry.getValue(), "top element"));
-                if (deserializedRecipe == null) {
-                    LOGGER.error("Skipping recipe " + recipeId + " due to invalid syntax!");
-                    continue;
-                }
+                        = MultiblockRecipe.fromJson(GsonHelper.convertToJsonObject(entry.getValue(), "top element"), this.conditionContext);
+                if (deserializedRecipe == null) continue;
 
                 builder.put(recipeId, deserializedRecipe);
             } catch (IllegalArgumentException | JsonParseException jsonParseException) {

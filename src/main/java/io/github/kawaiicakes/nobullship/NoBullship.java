@@ -102,7 +102,7 @@ public class NoBullship
 
     @SubscribeEvent
     public void addReloadListener(AddReloadListenerEvent event) {
-        event.addListener(MultiblockRecipeManager.getInstance());
+        event.addListener(new MultiblockRecipeManager(event.getConditionContext()));
     }
 
     @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)

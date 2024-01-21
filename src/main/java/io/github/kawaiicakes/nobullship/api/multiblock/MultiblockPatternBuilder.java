@@ -18,6 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPatternBuilder;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.conditions.ICondition;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -31,6 +33,8 @@ import java.util.function.Predicate;
 
 public class MultiblockPatternBuilder extends BlockPatternBuilder {
     protected static final Logger LOGGER = LogUtils.getLogger();
+    protected List<ICondition> conditions = new ArrayList<>();
+    protected List<ICondition[]> currentConditions = new ArrayList<>();
     protected String resultingEntityName = null;
     protected final ResourceLocation result;
     protected final Map<String, BlockInWorldPredicateBuilder> lookupSimple = new HashMap<>();
@@ -69,6 +73,11 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
      */
     public static MultiblockPatternBuilder of(ResourceLocation result, @Nullable CompoundTag nbt) {
         return new MultiblockPatternBuilder(result, nbt);
+    }
+
+    public MultiblockPatternBuilder addCondition(ICondition condition) {
+        this.conditions.add(condition);
+        return this;
     }
 
     /**
@@ -174,7 +183,8 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
      * Use <code>#build</code> if you need the <code>MultiblockPattern</code> instead!
      */
     public void save(Consumer<FinishedMultiblockRecipe> consumer, ResourceLocation id) {
-        consumer.accept(new Result(id, this.resultingEntityName, this.result, this.nbt, this.pattern, this.requisites, this.lookupSimple, this.height, this.width));
+        this.currentConditions.add(conditions.toArray(new ICondition[currentConditions.size()]));
+        consumer.accept(new Result(id, this.currentConditions, this.resultingEntityName, this.result, this.nbt, this.pattern, this.requisites, this.lookupSimple, this.height, this.width));
     }
 
     /**
@@ -247,6 +257,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
     }
 
     public static class Result implements FinishedMultiblockRecipe {
+        protected List<ICondition[]> conditions;
         protected final ResourceLocation id;
         @Nullable
         protected final String resultingEntityName;
@@ -260,7 +271,8 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         protected final int height;
         protected final int width;
 
-        public Result(ResourceLocation id, @Nullable String resultingEntityName, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, @Nullable NonNullList<ItemStack> requisites, Map<String, BlockInWorldPredicateBuilder> lookup, int height, int width) {
+        public Result(ResourceLocation id, List<ICondition[]> conditions, @Nullable String resultingEntityName, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, @Nullable NonNullList<ItemStack> requisites, Map<String, BlockInWorldPredicateBuilder> lookup, int height, int width) {
+            this.conditions = conditions;
             this.id = id;
             this.resultingEntityName = resultingEntityName;
             this.result = result;
@@ -283,6 +295,12 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
                     return;
                 }
             }
+
+            JsonArray conditionsArray = new JsonArray();
+            for (ICondition[] condition : this.conditions) {
+                for (ICondition c : condition) conditionsArray.add(CraftingHelper.serialize(c));
+            }
+            if (!conditionsArray.isEmpty()) pJson.add("conditions", conditionsArray);
 
             JsonObject recipePattern = new JsonObject();
             for (int i = 0; i < this.recipe.size(); i++) {
