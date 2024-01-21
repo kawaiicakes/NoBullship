@@ -836,7 +836,7 @@ public class BlockInWorldPredicateBuilder {
         } else {
             // TODO proper ingredient thingy
             //noinspection DataFlowIssue
-            return Ingredient.of(ItemTags.create(new ResourceLocation(this.blockTag.toString()))).getItems()[0];
+            return Ingredient.of(ItemTags.create(new ResourceLocation(this.blockTag.location().toString()))).getItems()[0];
         }
     }
 
