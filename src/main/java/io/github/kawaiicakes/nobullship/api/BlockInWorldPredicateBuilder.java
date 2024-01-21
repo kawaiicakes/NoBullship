@@ -271,8 +271,8 @@ public class BlockInWorldPredicateBuilder {
 
         try {
             toReturn = switch (this.matchType) {
-                case BLOCK -> this.serializeBlockStateToJson();
-                case BLOCKSTATE -> this.serializeBlockToJson();
+                case BLOCK -> this.serializeBlockToJson();
+                case BLOCKSTATE -> this.serializeBlockStateToJson();
                 case TAG -> this.serializeBlockTagToJson();
             };
         } catch (RuntimeException e) {
