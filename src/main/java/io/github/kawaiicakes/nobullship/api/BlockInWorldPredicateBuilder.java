@@ -459,7 +459,8 @@ public class BlockInWorldPredicateBuilder {
         try {
             block.addProperty("Name", Objects.requireNonNull(BLOCKS.getKey(this.block)).toString());
             toReturn.add("block", block);
-            this.serializeNbtToJson(toReturn);
+            if (this.requiresNbt())
+                this.serializeNbtToJson(toReturn);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
@@ -475,7 +476,8 @@ public class BlockInWorldPredicateBuilder {
         try {
             blockstate = BlockState.CODEC.encodeStart(JsonOps.INSTANCE, this.blockState).getOrThrow(false, LOGGER::error);
             toReturn.add("blockstate", blockstate);
-            this.serializeNbtToJson(toReturn);
+            if (this.requiresNbt())
+                this.serializeNbtToJson(toReturn);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
@@ -501,7 +503,8 @@ public class BlockInWorldPredicateBuilder {
         try {
             tag.addProperty("Name", this.blockTag.location().toString());
             toReturn.add("tag", tag);
-            this.serializeNbtToJson(toReturn);
+            if (this.requiresNbt())
+                this.serializeNbtToJson(toReturn);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
@@ -511,6 +514,8 @@ public class BlockInWorldPredicateBuilder {
 
     protected void serializeNbtToJson(JsonObject root) throws RuntimeException {
         if (this.block != null && (!(this.block instanceof EntityBlock)))
+            throw new RuntimeException("This builder cannot support NBT as it matches against a block which cannot be an entity!");
+        if (this.blockState != null && (!(this.blockState.getBlock() instanceof EntityBlock)))
             throw new RuntimeException("This builder cannot support NBT as it matches against a block which cannot be an entity!");
 
         JsonElement jsonNbt = null;
