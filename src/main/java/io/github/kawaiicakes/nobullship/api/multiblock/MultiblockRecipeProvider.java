@@ -8,9 +8,8 @@ import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import static net.minecraft.data.DataGenerator.Target.DATA_PACK;
-import static net.minecraft.world.level.block.Blocks.REDSTONE_ORE;
+import static net.minecraft.world.level.block.Blocks.EMERALD_BLOCK;
 
 public class MultiblockRecipeProvider implements DataProvider {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -47,23 +46,16 @@ public class MultiblockRecipeProvider implements DataProvider {
     }
 
     protected void buildRecipes(Consumer<FinishedMultiblockRecipe> consumer) {
-        CompoundTag tag = new CompoundTag();
-        tag.putBoolean("powered", true);
-        tag.putInt("ExplosionRadius", 60);
-
         MultiblockPatternBuilder
-                .of(new ResourceLocation("creeper"))
+                .of(new ResourceLocation("end_crystal"))
+                .addCondition(new ModLoadedCondition("forge"))
                 .where('#', BlockInWorldPredicateBuilder
-                        .of(REDSTONE_ORE)
-                        .requireProperty(BooleanProperty.create("lit"), false)
+                        .of(EMERALD_BLOCK)
                 )
                 .aisle(
-                        " # ",
-                        " # ",
-                        "###"
+                        "#"
                 )
-                .setTagOfResult(tag)
-                .save(consumer, new ResourceLocation("ballsmungus"));
+                .save(consumer, new ResourceLocation("end_crystal"));
     }
 
     private static void saveRecipe(CachedOutput pOutput, JsonObject pRecipeJson, Path pPath) {

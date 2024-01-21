@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
@@ -14,7 +13,6 @@ import net.minecraft.FieldsAreNonnullByDefault;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraftforge.common.crafting.CraftingHelper;
@@ -218,19 +216,5 @@ public record MultiblockRecipe(
             LOGGER.error(e.getMessage());
             return null;
         }
-    }
-
-    public static boolean processConditions(JsonArray conditions, ICondition.IContext context)
-    {
-        for (int x = 0; x < conditions.size(); x++)
-        {
-            if (!conditions.get(x).isJsonObject())
-                throw new JsonSyntaxException("Conditions must be an array of JsonObjects");
-
-            JsonObject json = conditions.get(x).getAsJsonObject();
-            if (!CraftingHelper.getCondition(json).test(context))
-                return false;
-        }
-        return true;
     }
 }
