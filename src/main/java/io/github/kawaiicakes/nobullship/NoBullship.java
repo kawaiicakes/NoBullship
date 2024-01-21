@@ -59,7 +59,6 @@ public class NoBullship
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::onDatagen);
-        modEventBus.addListener(this::registerParticleFactory);
 
         Registry.register(modEventBus);
 
@@ -69,11 +68,6 @@ public class NoBullship
     @SubscribeEvent
     public void commonSetup(FMLCommonSetupEvent event) {
         NoBullshipPackets.register();
-    }
-
-    @SubscribeEvent
-    public void registerParticleFactory(RegisterParticleProvidersEvent event) {
-        event.register(ITEM_MARKER_PARTICLE.get(), new ItemMarker.Provider());
     }
 
     @SubscribeEvent
@@ -131,6 +125,11 @@ public class NoBullship
         public static void registerMenuType(FMLClientSetupEvent event) {
             MenuScreens.register(WORKSHOP_MENU.get(), MultiblockWorkshopScreen::new);
             MenuScreens.register(EMPTY_MENU.get(), EmptyScreen::new);
+        }
+
+        @SubscribeEvent
+        public void registerParticleFactory(RegisterParticleProvidersEvent event) {
+            event.register(ITEM_MARKER_PARTICLE.get(), new ItemMarker.Provider());
         }
     }
 }
