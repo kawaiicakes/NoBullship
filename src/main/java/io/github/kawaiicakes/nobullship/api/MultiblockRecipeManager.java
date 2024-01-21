@@ -69,6 +69,10 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
      */
     private Map<ResourceLocation, MultiblockRecipe> recipes = ImmutableMap.of();
 
+    public MultiblockRecipeManager() {
+        this(ICondition.IContext.EMPTY);
+    }
+
     public MultiblockRecipeManager(ICondition.IContext conditionContext) {
         super(GSON, "entity_recipes");
         this.conditionContext = conditionContext;
@@ -283,6 +287,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     }
 
     public static MultiblockRecipeManager getInstance() {
+        if (INSTANCE == null) new MultiblockRecipeManager();
         return INSTANCE;
     }
 
