@@ -1,14 +1,15 @@
 package io.github.kawaiicakes.nobullship.api.schematic;
 
-import net.minecraft.core.NonNullList;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.crafting.ConditionalRecipe;
+import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 
-import java.util.Map;
 import java.util.function.Consumer;
+
+import static io.github.kawaiicakes.nobullship.Registry.SIMPLE_WOOD_BEAM_BLOCK;
 
 /**
  * Use this class to datagen schematic recipes. Works pretty much exactly like subclassing <code>RecipeProvider</code>
@@ -19,14 +20,22 @@ import java.util.function.Consumer;
  * using resources.
  */
 public class SchematicRecipeProvider extends RecipeProvider {
-    protected final Map<ResourceLocation, NonNullList<ItemStack>> blocksForDrops;
-
-    public SchematicRecipeProvider(DataGenerator pGenerator, Map<ResourceLocation, NonNullList<ItemStack>> blocksForDrops) {
+    public SchematicRecipeProvider(DataGenerator pGenerator) {
         super(pGenerator);
-        this.blocksForDrops = blocksForDrops;
     }
 
     @Override
     protected void buildCraftingRecipes(Consumer<FinishedRecipe> pFinishedRecipeConsumer) {
+        // TODO: proper provider usage
+        //noinspection SpellCheckingInspection
+        ConditionalRecipe.builder()
+                .addCondition(new ModLoadedCondition("siegemachines"))
+                .addRecipe((consumer) ->
+                        SchematicRecipeBuilder
+                                .of(new ResourceLocation("siegemachines:battering_ram"))
+                                .defineShaped('o', SIMPLE_WOOD_BEAM_BLOCK.get())
+                                .shapedPattern("o")
+                                .save(consumer, new ResourceLocation("siegemachines:battering_ram")))
+                .build(pFinishedRecipeConsumer, new ResourceLocation("siegemachines:battering_ram"));
     }
 }

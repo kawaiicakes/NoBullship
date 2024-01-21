@@ -3,6 +3,7 @@ package io.github.kawaiicakes.nobullship;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.NoBullshipBlockTags;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
+import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeProvider;
 import io.github.kawaiicakes.nobullship.block.NoBullshipRecipeProvider;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
@@ -79,6 +80,11 @@ public class NoBullship
         generator.addProvider(
                 event.includeServer(),
                 new MultiblockRecipeProvider(generator)
+        );
+
+        generator.addProvider(
+                event.includeServer(),
+                new SchematicRecipeProvider(generator)
         );
 
         generator.addProvider(

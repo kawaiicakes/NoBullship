@@ -1,0 +1,28 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "siegemachines"
+        }
+      ],
+      "recipe": {
+        "type": "nobullship:schematic_workbench",
+        "declaration": {
+          "key": {
+            "o": {
+              "item": "nobullship:simple_wood_beam"
+            }
+          },
+          "output_id": "siegemachines:battering_ram",
+          "shaped_input": [
+            "o"
+          ]
+        },
+        "shapeless_input": []
+      }
+    }
+  ]
+}
