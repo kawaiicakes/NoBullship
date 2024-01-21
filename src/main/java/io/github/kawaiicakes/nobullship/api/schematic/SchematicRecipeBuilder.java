@@ -137,8 +137,6 @@ public class SchematicRecipeBuilder {
 
             if (!set.isEmpty()) {
                 throw new IllegalStateException("Ingredients are defined but not used in pattern for recipe " + pId);
-            } else if (this.pattern.size() == 1 && this.pattern.get(0).length() == 1) {
-                throw new IllegalStateException("Shaped recipe " + pId + " only takes in a single item - should it be a shapeless recipe instead?");
             }
         }
     }
@@ -187,6 +185,7 @@ public class SchematicRecipeBuilder {
 
             JsonArray shapelessJson = new JsonArray();
             for (ItemStack item : this.shapeless) {
+                if (item.isEmpty()) continue;
                 JsonElement serialized = ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, item).get().orThrow();
                 shapelessJson.add(serialized);
             }
