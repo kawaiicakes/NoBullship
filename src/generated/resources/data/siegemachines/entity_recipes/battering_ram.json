@@ -1,0 +1,290 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "siegemachines"
+    }
+  ],
+  "key": {
+    "*": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "down": [
+            "true"
+          ],
+          "north": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "+": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "down": [
+            "true"
+          ],
+          "east": [
+            "true"
+          ],
+          "north": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ]
+        }
+      }
+    },
+    "-": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    ".": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "north": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ]
+        }
+      }
+    },
+    "<": {
+      "block": {
+        "Name": "nobullship:wood_wheel",
+        "Properties": {
+          "facing": [
+            "east"
+          ]
+        }
+      }
+    },
+    ">": {
+      "block": {
+        "Name": "nobullship:wood_wheel",
+        "Properties": {
+          "facing": [
+            "west"
+          ]
+        }
+      }
+    },
+    "A": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "north": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ],
+          "up": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "G": {
+      "block": {
+        "Name": "minecraft:iron_block"
+      }
+    },
+    "O": {
+      "tag": {
+        "Name": "minecraft:logs",
+        "Properties": {
+          "axis": [
+            "z"
+          ]
+        }
+      }
+    },
+    "a": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ],
+          "up": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "b": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "north": [
+            "true"
+          ],
+          "up": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "l": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "down": [
+            "true"
+          ],
+          "east": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ]
+        }
+      }
+    },
+    "r": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "down": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "v": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "down": [
+            "true"
+          ],
+          "east": [
+            "true"
+          ],
+          "north": [
+            "true"
+          ]
+        }
+      }
+    },
+    "w": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "down": [
+            "true"
+          ],
+          "north": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "|": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "down": [
+            "true"
+          ],
+          "up": [
+            "true"
+          ]
+        }
+      }
+    }
+  },
+  "recipe": {
+    "layer0": [
+      " l-r ",
+      " |O| ",
+      "<a-a>"
+    ],
+    "layer1": [
+      " . . ",
+      "  O  ",
+      " . . "
+    ],
+    "layer2": [
+      " +-* ",
+      " |O| ",
+      "<A-A>"
+    ],
+    "layer3": [
+      " . . ",
+      "  O  ",
+      " . . "
+    ],
+    "layer4": [
+      " v-w ",
+      " |O| ",
+      "<b-b>"
+    ],
+    "layer5": [
+      "     ",
+      "  G  ",
+      "     "
+    ]
+  },
+  "requisites": [
+    {
+      "Count": 2,
+      "id": "minecraft:leather"
+    }
+  ],
+  "result": {
+    "entity": "siegemachines:battering_ram",
+    "nbt": {
+      "Health": 500.0
+    }
+  }
+}
