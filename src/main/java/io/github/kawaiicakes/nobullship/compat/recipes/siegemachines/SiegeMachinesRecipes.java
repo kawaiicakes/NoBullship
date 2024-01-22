@@ -135,9 +135,9 @@ public class SiegeMachinesRecipes {
                                 "     "
                         )
                         .aisle(
-                                " v-w ",
+                                " l-r ",
                                 " |O| ",
-                                "<b-b>"
+                                "<a-a>"
                         )
                         .aisle(
                                 " . . ",
@@ -155,9 +155,9 @@ public class SiegeMachinesRecipes {
                                 " . . "
                         )
                         .aisle(
-                                " l-r ",
+                                " v-w ",
                                 " |O| ",
-                                "<a-a>"
+                                "<b-b>"
                         )
                         .setTagOfResult(ramTag)
                         .addRequisite(leather)
