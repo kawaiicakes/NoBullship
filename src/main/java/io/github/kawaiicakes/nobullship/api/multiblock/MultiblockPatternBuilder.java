@@ -194,6 +194,8 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
      * is considered the x-length of the pattern, whereas the number of args (otherwise, the size of the array)
      * passed is the y-height of the pattern. It then follows that the number of calls to <code>#aisle</code>
      * in this builder is the z-width of the pattern.
+     * <br><br>
+     * The first call to this will be the "front" layer of the recipe.
      */
     @Override
     public MultiblockPatternBuilder aisle(String... pAisle) {

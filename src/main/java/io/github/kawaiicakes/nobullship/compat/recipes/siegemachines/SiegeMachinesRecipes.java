@@ -130,15 +130,20 @@ public class SiegeMachinesRecipes {
                                 .requireProperty(UP, true))
                         .where('G', BlockInWorldPredicateBuilder.of(IRON_BLOCK))
                         .aisle(
-                                " l-r ",
+                                "     ",
+                                "  G  ",
+                                "     "
+                        )
+                        .aisle(
+                                " v-w ",
                                 " |O| ",
-                                "<a-a>"
+                                "<b-b>"
                         )
                         .aisle(
                                 " . . ",
                                 "  O  ",
                                 " . . "
-                                )
+                        )
                         .aisle(
                                 " +-* ",
                                 " |O| ",
@@ -150,14 +155,9 @@ public class SiegeMachinesRecipes {
                                 " . . "
                         )
                         .aisle(
-                                " v-w ",
+                                " l-r ",
                                 " |O| ",
-                                "<b-b>"
-                        )
-                        .aisle(
-                                "     ",
-                                "  G  ",
-                                "     "
+                                "<a-a>"
                         )
                         .setTagOfResult(ramTag)
                         .addRequisite(leather)
