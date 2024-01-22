@@ -140,7 +140,7 @@ public class NoBullship
         }
 
         @SubscribeEvent
-        public void registerParticleFactory(RegisterParticleProvidersEvent event) {
+        public static void registerParticleFactory(RegisterParticleProvidersEvent event) {
             event.register(ITEM_MARKER_PARTICLE.get(), new ItemMarker.Provider());
         }
     }
