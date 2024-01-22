@@ -682,7 +682,7 @@ public class BlockInWorldPredicateBuilder {
             TagKey<Block> tag = BlockTags.create(new ResourceLocation(blockAsJson.getAsJsonPrimitive("Name").getAsString()));
             toReturn = BlockInWorldPredicateBuilder.of(tag);
 
-            JsonObject propertiesJson = predicateObj.getAsJsonObject("Properties");
+            JsonObject propertiesJson = blockAsJson.getAsJsonObject("Properties");
             if (propertiesJson == null) propertiesJson = new JsonObject();
             for (Map.Entry<String, JsonElement> propertyEntryJson : propertiesJson.entrySet()) {
                 JsonArray propertyValuesJson = propertyEntryJson.getValue().getAsJsonArray();
