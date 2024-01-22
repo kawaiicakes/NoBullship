@@ -47,6 +47,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ChunkRenderTypeSet;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
@@ -63,6 +64,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
     protected static final Map<CompoundTag, Item> NBT_ITEM = new HashMap<>();
     protected static final Logger LOGGER = LogUtils.getLogger();
     protected static final Map<BlockPos, RenderInstructions> RENDER_QUEUE = new HashMap<>();
+    protected static final Map<BakedModel, ChunkRenderTypeSet> RENDER_TYPE_CACHE = new HashMap<>();
 
     public SchematicRenderer(BlockEntityRendererProvider.Context context) {}
 
@@ -247,8 +249,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                             clientLevel, pPoseStack,
                             proxyBuffer,
                             clientLevel.getRandom(),
-                            ModelData.EMPTY,
-                            RenderType.translucent()
+                            ModelData.EMPTY
                     );
 
                     pPoseStack.popPose();
@@ -294,7 +295,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         }
     }
 
-    public void renderGhostBlock(Map<Direction, BlockIngredient> neighbours, BlockIngredient forRender, BlockPos pPos, BlockAndTintGetter pLevel, PoseStack pPoseStack, VertexConsumer pConsumer, RandomSource pRandom, ModelData modelData, RenderType renderType) {
+    public void renderGhostBlock(Map<Direction, BlockIngredient> neighbours, BlockIngredient forRender, BlockPos pPos, BlockAndTintGetter pLevel, PoseStack pPoseStack, VertexConsumer pConsumer, RandomSource pRandom, ModelData modelData) {
         Level clientLevel = Minecraft.getInstance().level;
         if (clientLevel == null) return;
         BlockState stateForRender = forRender.getCurrentlySelected(clientLevel, pPos);
@@ -305,7 +306,17 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                 BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
                 ModelBlockRenderer modelRenderer = blockRenderer.getModelRenderer();
 
-                BakedModel ogModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(stateForRender);
+                BakedModel ogModel = blockRenderer.getBlockModel(stateForRender);
+                RENDER_TYPE_CACHE.put(ogModel, ogModel.getRenderTypes(stateForRender, pRandom, ModelData.EMPTY));
+
+                RenderType renderType = RenderType.solid();
+                if (!RENDER_TYPE_CACHE.get(ogModel).asList().contains(RenderType.solid())) {
+                    try {
+                        renderType = RENDER_TYPE_CACHE.get(ogModel).asList().stream().findAny().orElseThrow();
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Unable to render BakedModel for preview!", e);
+                    }
+                }
 
                 this.tessellateWithAO(neighbours, modelRenderer, pLevel, ogModel, forRender.hasNbt, stateForRender, pPos, pPoseStack, pConsumer, pRandom, stateForRender.getSeed(pPos), OverlayTexture.NO_OVERLAY, modelData, renderType);
             }
