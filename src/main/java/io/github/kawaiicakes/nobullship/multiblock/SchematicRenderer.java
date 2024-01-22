@@ -10,6 +10,7 @@ import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
+import it.unimi.dsi.fastutil.objects.Object2ByteLinkedOpenHashMap;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -33,17 +34,21 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
@@ -51,7 +56,7 @@ import java.util.*;
 
 import static io.github.kawaiicakes.nobullship.Registry.ITEM_MARKER_PARTICLE;
 import static io.github.kawaiicakes.nobullship.Registry.WILDCARD_BLOCK;
-import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
+import static net.minecraft.client.renderer.LevelRenderer.DIRECTIONS;
 
 @OnlyIn(Dist.CLIENT)
 public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshopBlockEntity> {
@@ -144,6 +149,23 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                     BlockIngredient forRender = palette.get((pattern.get(i))[j].charAt(k));
                     if (forRender == null) continue;
 
+                    boolean isVertical = pBlockEntity.verticalRenderSlicing;
+
+                    BlockIngredient inFront = !isVertical && (i - 1 >= 0) ? palette.get((pattern.get(i - 1))[j].charAt(k)) : BlockIngredient.AIR;
+                    BlockIngredient behind = !isVertical && (i + 1 < zSize) ? palette.get((pattern.get(i + 1))[j].charAt(k)) : BlockIngredient.AIR;
+                    BlockIngredient toLeft = (k - 1 >= 0) ? palette.get((pattern.get(i))[j].charAt(k - 1)) : BlockIngredient.AIR;
+                    BlockIngredient toRight = (k + 1 < xSize) ? palette.get((pattern.get(i))[j].charAt(k + 1)) : BlockIngredient.AIR;
+                    BlockIngredient above = isVertical && (j - 1 >= 0) ? palette.get((pattern.get(i))[j - 1].charAt(k)) : BlockIngredient.AIR;
+                    BlockIngredient below = isVertical && (j + 1 < ySize) ? palette.get((pattern.get(i))[j + 1].charAt(k)) : BlockIngredient.AIR;
+
+                    Map<Direction, BlockIngredient> blockIngredientByDirection = new HashMap<>(6);
+                    blockIngredientByDirection.put(facing, behind);
+                    blockIngredientByDirection.put(facing.getOpposite(), inFront);
+                    blockIngredientByDirection.put(Direction.UP, above);
+                    blockIngredientByDirection.put(Direction.DOWN, below);
+                    blockIngredientByDirection.put(facing.getCounterClockWise(), toLeft);
+                    blockIngredientByDirection.put(facing.getClockWise(), toRight);
+
                     BlockPos newPos = MultiblockPattern.translateAndRotate(previewPosition, facing, Direction.UP, k, j, i);
                     if (!clientLevel.isEmptyBlock(newPos)) continue;
                     BlockPos offset = newPos.subtract(previewPosition).mutable().move(facing, -(zSize + 1)).offset(0, ySize - 1, 0).immutable();
@@ -206,54 +228,6 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                     pPoseStack.pushPose();
                     pPoseStack.translate(offset.getX(), offset.getY(), offset.getZ());
 
-                    List<Direction> hiddenFaces = new ArrayList<>();
-                    Direction workshopFacing = pBlockEntity.getBlockState().getValue(HORIZONTAL_FACING);
-                    for (Direction direction : Direction.values()) {
-                        if (pBlockEntity.verticalRenderSlicing) {
-                            if (direction.equals(workshopFacing) || direction.equals(workshopFacing.getOpposite())) continue;
-
-                            BlockIngredient toLeft = BlockIngredient.AIR;
-                            if (k - 1 >= 0) toLeft = palette.get((pattern.get(i))[j].charAt(k - 1));
-
-                            BlockIngredient toRight = BlockIngredient.AIR;
-                            if (k + 1 < xSize) toRight = palette.get((pattern.get(i))[j].charAt(k + 1));
-
-                            BlockIngredient above = BlockIngredient.AIR;
-                            if (j - 1 >= 0) above = palette.get((pattern.get(i))[j - 1].charAt(k));
-
-                            BlockIngredient below = BlockIngredient.AIR;
-                            if (j + 1 < ySize) below = palette.get((pattern.get(i))[j + 1].charAt(k));
-
-                            if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), toLeft.getCurrentlySelected(clientLevel, newPos))) continue;
-                            if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), toRight.getCurrentlySelected(clientLevel, newPos))) continue;
-                            if (direction.equals(Direction.UP) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), above.getCurrentlySelected(clientLevel, newPos))) continue;
-                            if (direction.equals(Direction.DOWN) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), below.getCurrentlySelected(clientLevel, newPos))) continue;
-
-                            hiddenFaces.add(direction);
-                            continue;
-                        }
-                        if (direction.equals(Direction.UP) || direction.equals(Direction.DOWN)) continue;
-
-                        BlockIngredient toLeft = BlockIngredient.AIR;
-                        if (k - 1 >= 0) toLeft = palette.get((pattern.get(i))[j].charAt(k - 1));
-
-                        BlockIngredient toRight = BlockIngredient.AIR;
-                        if (k + 1 < xSize) toRight = palette.get((pattern.get(i))[j].charAt(k + 1));
-
-                        BlockIngredient toFront = BlockIngredient.AIR;
-                        if (i - 1 >= 0) toFront = palette.get((pattern.get(i - 1))[j].charAt(k));
-
-                        BlockIngredient behind = BlockIngredient.AIR;
-                        if (i + 1 < zSize) behind = palette.get((pattern.get(i + 1))[j].charAt(k));
-
-                        if (direction.equals(workshopFacing.getCounterClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), toLeft.getCurrentlySelected(clientLevel, newPos))) continue;
-                        if (direction.equals(workshopFacing.getClockWise()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), toRight.getCurrentlySelected(clientLevel, newPos))) continue;
-                        if (direction.equals(workshopFacing.getOpposite()) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), toFront.getCurrentlySelected(clientLevel, newPos))) continue;
-                        if (direction.equals(workshopFacing) && blockDoesNotOccludeFace(forRender.getCurrentlySelected(clientLevel, newPos), behind.getCurrentlySelected(clientLevel, newPos))) continue;
-
-                        hiddenFaces.add(direction);
-                    }
-
                     if (forRender.hasNbt() && forRender.biwPredicateBuilder != null) {
                         pPoseStack.scale(0.5F, 0.5F, 0.5F);
                         pPoseStack.translate(0.5F, 0, 0.5F);
@@ -264,18 +238,17 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
                                 newPos.getY() + 0.8,
                                 newPos.getZ() + 0.5,
                                 0, 0, 0);
-
-                        hiddenFaces.clear();
                     }
 
                     this.renderGhostBlock(
-                            forRender.getCurrentlySelected(clientLevel, newPos), newPos,
+                            blockIngredientByDirection,
+                            forRender,
+                            newPos,
                             clientLevel, pPoseStack,
-                            proxyBuffer, true,
+                            proxyBuffer,
                             clientLevel.getRandom(),
-                            ModelData.EMPTY, RenderType.translucent(),
-                            true,
-                            hiddenFaces
+                            ModelData.EMPTY,
+                            RenderType.translucent()
                     );
 
                     pPoseStack.popPose();
@@ -293,54 +266,101 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         return true;
     }
 
-    public void renderGhostBlock(BlockState pState, BlockPos pPos, BlockAndTintGetter pLevel, PoseStack pPoseStack, VertexConsumer pConsumer, boolean pCheckSides, RandomSource pRandom, ModelData modelData, RenderType renderType, boolean queryModelSpecificData, List<Direction> hiddenFaces) {
+    public void tessellateWithAO(Map<Direction, BlockIngredient> neighbours, ModelBlockRenderer pRenderer, BlockAndTintGetter pLevel, BakedModel pModel, boolean stateHasNbt, BlockState pState, BlockPos pPos, PoseStack pStack, VertexConsumer pConsumer, RandomSource pRandom, long pSeed, int pPackedOverlay, ModelData modelData, RenderType renderType) {
+        float[] afloat = new float[DIRECTIONS.length * 2];
+        BitSet bitset = new BitSet(3);
+        ModelBlockRenderer.AmbientOcclusionFace modelblockrenderer$ambientocclusionface = new ModelBlockRenderer.AmbientOcclusionFace();
+        BlockPos.MutableBlockPos neighbourPos = pPos.mutable();
+
+        ClientLevel clientLevel = Minecraft.getInstance().level;
+        if (clientLevel == null) return;
+
+        for(Direction direction : DIRECTIONS) {
+            neighbourPos.setWithOffset(pPos, direction);
+            BlockState neighbourState = neighbours.get(direction).getCurrentlySelected(clientLevel, neighbourPos);
+            boolean neighbourHasNbt = neighbours.get(direction).hasNbt;
+
+            pRandom.setSeed(pSeed);
+            List<BakedQuad> list = pModel.getQuads(pState, direction, pRandom, modelData, renderType);
+            if (!list.isEmpty() && this.shouldRenderFace(pLevel, stateHasNbt || neighbourHasNbt, pPos, neighbourPos, pState, neighbourState, direction)) {
+                pRenderer.renderModelFaceAO(pLevel, pState, pPos, pStack, pConsumer, list, afloat, bitset, modelblockrenderer$ambientocclusionface, pPackedOverlay);
+            }
+        }
+
+        pRandom.setSeed(pSeed);
+        List<BakedQuad> quadList = pModel.getQuads(pState, null, pRandom, modelData, renderType);
+        if (!quadList.isEmpty()) {
+            pRenderer.renderModelFaceAO(pLevel, pState, pPos, pStack, pConsumer, quadList, afloat, bitset, modelblockrenderer$ambientocclusionface, pPackedOverlay);
+        }
+    }
+
+    public void renderGhostBlock(Map<Direction, BlockIngredient> neighbours, BlockIngredient forRender, BlockPos pPos, BlockAndTintGetter pLevel, PoseStack pPoseStack, VertexConsumer pConsumer, RandomSource pRandom, ModelData modelData, RenderType renderType) {
+        Level clientLevel = Minecraft.getInstance().level;
+        if (clientLevel == null) return;
+        BlockState stateForRender = forRender.getCurrentlySelected(clientLevel, pPos);
+
         try {
-            RenderShape rendershape = pState.getRenderShape();
+            RenderShape rendershape = stateForRender.getRenderShape();
             if (rendershape == RenderShape.MODEL) {
                 BlockRenderDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
                 ModelBlockRenderer modelRenderer = blockRenderer.getModelRenderer();
 
-                BakedModel ogModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(pState);
-                BakedModelWrapper<?> model = new BakedModelWrapper<>(ogModel) {
-                    @Override
-                    public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource rand) {
-                        if (side == null) {
-                            return super.getQuads(state, null, rand);
-                        }
+                BakedModel ogModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(stateForRender);
 
-                        for (Direction face : hiddenFaces) {
-                            if (face.equals(side)) return new ArrayList<>();
-                        }
-                        return super.getQuads(state, side, rand);
-                    }
-
-                    @Override
-                    public @NotNull List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @NotNull RandomSource rand, @NotNull ModelData extraData, @Nullable RenderType renderType) {
-                        if (side == null) {
-                            return super.getQuads(state, null, rand, extraData, renderType);
-                        }
-
-                        for (Direction face : hiddenFaces) {
-                            if (face.equals(side)) return new ArrayList<>();
-                        }
-                        return super.getQuads(state, side, rand, extraData, renderType);
-                    }
-                };
-
-                modelRenderer.tesselateBlock(pLevel, model, pState, pPos, pPoseStack, pConsumer, pCheckSides, pRandom, pState.getSeed(pPos), OverlayTexture.NO_OVERLAY, modelData, renderType, queryModelSpecificData);
+                this.tessellateWithAO(neighbours, modelRenderer, pLevel, ogModel, forRender.hasNbt, stateForRender, pPos, pPoseStack, pConsumer, pRandom, stateForRender.getSeed(pPos), OverlayTexture.NO_OVERLAY, modelData, renderType);
             }
 
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.forThrowable(throwable, "Tessellating block in world");
             CrashReportCategory crashreportcategory = crashreport.addCategory("Block being tessellated");
-            CrashReportCategory.populateBlockDetails(crashreportcategory, pLevel, pPos, pState);
+            CrashReportCategory.populateBlockDetails(crashreportcategory, pLevel, pPos, stateForRender);
             throw new ReportedException(crashreport);
         }
     }
 
-    public static boolean blockDoesNotOccludeFace(BlockState occludedBlock, BlockState block) {
-        if (occludedBlock.is(WILDCARD_BLOCK.get()) && block.is(WILDCARD_BLOCK.get())) return false;
-        return block.getRenderShape() == RenderShape.INVISIBLE || block.is(WILDCARD_BLOCK.get());
+    /**
+     * Basically copied from {@link Block#shouldRenderFace(BlockState, BlockGetter, BlockPos, Direction, BlockPos)}.
+     * The difference is simply the adaptation to work with the <code>SchematicRenderer</code>, who does not put
+     * physical blocks in the world. This quirk means the original method would fail to work.
+     * @param containsNbt whether either <code>BlockState</code> has NBT inside its <code>BlockEntity</code>.
+     * @param pPos the <code>BlockPos</code> representing the coordinates of the block whose faces are being scrutinized.
+     * @param pNeighbourPos the <code>BlockPos</code> representing the coordinates of the block adjacent to the <code>pPos</code>
+     *             block in the <code>Direction</code> given by <code>pFace</code>.
+     * @param pState the <code>BlockState</code> of the block whose faces are being scrutinized.
+     * @param pFace the <code>Direction</code> representing the face on the block <code>pState</code> being scrutinized.
+     * @return <code>true</code> if the passed arguments represent a circumstance where the face should render.
+     * <code>false</code> otherwise.
+     */
+    public boolean shouldRenderFace(BlockAndTintGetter pLevel, boolean containsNbt, BlockPos pPos, BlockPos pNeighbourPos, BlockState pState, BlockState pNeighbourState, Direction pFace) {
+        if (containsNbt) return true;
+        if (pState.skipRendering(pNeighbourState, pFace)) {
+            return false;
+        } else if (pState.supportsExternalFaceHiding() && pNeighbourState.hidesNeighborFace(pLevel, pNeighbourPos, pState, pFace.getOpposite())) {
+            return false;
+        } else if (pNeighbourState.canOcclude()) {
+            Block.BlockStatePairKey blockStatePairKey = new Block.BlockStatePairKey(pState, pNeighbourState, pFace);
+            Object2ByteLinkedOpenHashMap<Block.BlockStatePairKey> occlusionCache = Block.OCCLUSION_CACHE.get();
+            byte b0 = occlusionCache.getAndMoveToFirst(blockStatePairKey);
+            if (b0 != 127) {
+                return b0 != 0;
+            } else {
+                VoxelShape voxelshape = pState.getFaceOcclusionShape(pLevel, pPos, pFace);
+                if (voxelshape.isEmpty()) {
+                    return true;
+                } else {
+                    VoxelShape faceOcclusionShape = pNeighbourState.getFaceOcclusionShape(pLevel, pNeighbourPos, pFace.getOpposite());
+                    boolean flag = Shapes.joinIsNotEmpty(voxelshape, faceOcclusionShape, BooleanOp.ONLY_FIRST);
+                    if (occlusionCache.size() == 2048) {
+                        occlusionCache.removeLastByte();
+                    }
+
+                    occlusionCache.putAndMoveToFirst(blockStatePairKey, (byte)(flag ? 1 : 0));
+                    return flag;
+                }
+            }
+        } else {
+            return true;
+        }
     }
 
     public static ItemStack getNbtDisplayEntry(CompoundTag strictNbt) {
