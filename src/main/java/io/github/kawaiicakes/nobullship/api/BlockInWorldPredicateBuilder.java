@@ -779,23 +779,16 @@ public class BlockInWorldPredicateBuilder {
                             .findFirst()
                             .orElse(null);
 
-                    if (property == null) {
-                        blockState = null;
-                        break;
-                    }
+                    if (property == null) continue;
 
                     //noinspection unchecked
                     V value = (V) property.getValue(stringEntry.getValue()).orElse(null);
 
-                    if (value == null) {
-                        blockState = null;
-                        break;
-                    }
+                    if (value == null) continue;
 
                     blockState = blockState.setValue(property, value);
                 }
 
-                if (blockState == null) continue;
                 toReturn.add(blockState);
             }
 
@@ -878,7 +871,9 @@ public class BlockInWorldPredicateBuilder {
         List<Map.Entry<String, Set<String>>> propertiesList = properties.entrySet().stream().toList();
 
         List<List<String>> valuesList = new ArrayList<>(propertiesList.size());
+        List<String> keyList = new ArrayList<>(propertiesList.size());
         for (Map.Entry<String, Set<String>> propertyEntries : propertiesList) {
+            keyList.add(propertyEntries.getKey());
             valuesList.add(propertyEntries.getValue().stream().toList());
         }
         List<List<String>> cartesianProduct = Lists.cartesianProduct(valuesList);
@@ -886,10 +881,8 @@ public class BlockInWorldPredicateBuilder {
         for (List<String> strings : cartesianProduct) {
             Map<String, String> propertyMap = new HashMap<>();
 
-            for (String string : strings) {
-                int indexOfString = strings.indexOf(string);
-                String correspondingPropertyName = propertiesList.get(indexOfString).getKey();
-                propertyMap.put(correspondingPropertyName, string);
+            for (int i = 0; i < strings.size(); i++) {
+                propertyMap.put(keyList.get(i), strings.get(i));
             }
 
             toReturn.add(propertyMap);
