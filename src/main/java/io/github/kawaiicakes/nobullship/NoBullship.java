@@ -2,9 +2,10 @@ package io.github.kawaiicakes.nobullship;
 
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.NoBullshipBlockTags;
+import io.github.kawaiicakes.nobullship.api.NoBullshipItemTags;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeProvider;
-import io.github.kawaiicakes.nobullship.block.NoBullshipRecipeProvider;
+import io.github.kawaiicakes.nobullship.api.NoBullshipRecipeProvider;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.EmptyScreen;
@@ -15,6 +16,7 @@ import io.github.kawaiicakes.nobullship.particle.ItemMarker;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -76,6 +78,7 @@ public class NoBullship
     public void onDatagen(GatherDataEvent event) {
         DataGenerator generator = event.getGenerator();
         ExistingFileHelper fileHelper = event.getExistingFileHelper();
+        BlockTagsProvider blockTagsProvider = new NoBullshipBlockTags(generator, MOD_ID, fileHelper);
 
         generator.addProvider(
                 event.includeServer(),
@@ -94,7 +97,12 @@ public class NoBullship
 
         generator.addProvider(
                 event.includeServer(),
-                new NoBullshipBlockTags(generator, MOD_ID, fileHelper)
+                new NoBullshipItemTags(generator, blockTagsProvider, MOD_ID, fileHelper)
+        );
+
+        generator.addProvider(
+                event.includeServer(),
+                blockTagsProvider
         );
     }
 

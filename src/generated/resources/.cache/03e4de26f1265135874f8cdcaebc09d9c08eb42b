@@ -1,0 +1,10 @@
+// 1.19.2	2024-01-23T02:16:11.7427062	Tags for minecraft:item
+4f51fdb164c9332141364751b2d4a27deb5997ed data/forge/tags/items/beams/iron.json
+87fd0102c155d7718eabff4aa1026fd4113b413e data/forge/tags/items/beams/wood.json
+b24f7e126dbfe764ebf22de6238b8c9f2a3652f1 data/forge/tags/items/circuits.json
+b24f7e126dbfe764ebf22de6238b8c9f2a3652f1 data/forge/tags/items/circuits/basic.json
+c2687eec46abd94b603aec499fc5aa9a6e511703 data/forge/tags/items/lenses.json
+a0c1d8acd0b3e95af2eac91eda8c6fa58c12768c data/forge/tags/items/nails/iron.json
+958af7b575f52efc41f64df7565c817c5eba097d data/forge/tags/items/tar.json
+a044ae0c113b52337417687d6440376985ea2f80 data/nobullship/tags/items/building_material.json
+3a75d8cdd40393ff0426f09e59370ded4a0b02ce data/nobullship/tags/items/component.json

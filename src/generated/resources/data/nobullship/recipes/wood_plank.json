@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "no_bs_planks",
+  "key": {
+    "s": {
+      "tag": "minecraft:wooden_slabs"
+    }
+  },
+  "pattern": [
+    "sss"
+  ],
+  "result": {
+    "count": 6,
+    "item": "nobullship:wood_plank"
+  }
+}

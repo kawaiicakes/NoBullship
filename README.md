@@ -100,6 +100,8 @@ Anyhow, don't expect the structure of data files for this mod to change. I will 
 
 The models and textures were made by me. Massive thanks to [Aspennly](https://twitter.com/Aspennly_) who made the very pretty icon for me!
 
+Further thanks for the nails, circuit, plank, and lens goes to [Milkyfur!](https://www.curseforge.com/members/milkyfur/projects)
+
 Credit to **blackbirdantlion** on Discord for the lovely GUI texture. I've modified it a bit as I am reusing it from another project I am working on, which I have permission to do. You may find his Twitter [here](https://twitter.com/BlackbirdieAnt).
 
 I also want to thank [embeddedt](https://github.com/embeddedt), his Discord community members and [1whohears](https://github.com/1whohears) for miscellaneous advising.

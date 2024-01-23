@@ -4,7 +4,10 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +20,10 @@ public class NoBullshipBlockTags extends BlockTagsProvider {
 
     public NoBullshipBlockTags(DataGenerator pGenerator, String modId, @Nullable ExistingFileHelper existingFileHelper) {
         super(pGenerator, modId, existingFileHelper);
+    }
+
+    protected TagKey<Block> tag(String name) {
+        return BlockTags.create(new ResourceLocation(name));
     }
 
     @Override
@@ -34,6 +41,21 @@ public class NoBullshipBlockTags extends BlockTagsProvider {
                 SIMPLE_WOOD_BEAM_BLOCK.get(),
                 SIMPLE_METAL_BEAM_BLOCK.get()
         );
+
+        this.tag(tag("forge:beams/wood"))
+                .add(SIMPLE_WOOD_BEAM_BLOCK.get());
+
+        this.tag(tag("forge:beams/iron"))
+                .add(
+                        SIMPLE_METAL_BEAM_BLOCK.get(),
+                        METAL_BEAM_BLOCK.get()
+                );
+
+        this.tag(tag("forge:wheels"))
+                .add(
+                        TIRE_BLOCK.get(),
+                        WOOD_WHEEL_BLOCK.get()
+                );
     }
 
     protected static TagKey<Block> create(String pName) {

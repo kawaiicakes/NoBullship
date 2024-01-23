@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "no_bs_circuits",
+  "key": {
+    "c": {
+      "item": "minecraft:comparator"
+    },
+    "e": {
+      "item": "minecraft:repeater"
+    },
+    "g": {
+      "tag": "forge:ingots/gold"
+    },
+    "l": {
+      "item": "minecraft:lightning_rod"
+    },
+    "r": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "rg ",
+    "rcl",
+    "rel"
+  ],
+  "result": {
+    "count": 2,
+    "item": "nobullship:circuit"
+  }
+}

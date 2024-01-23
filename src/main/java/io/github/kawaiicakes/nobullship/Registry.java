@@ -109,6 +109,26 @@ public class Registry {
                     "pitch",
             () -> new Item(new Item.Properties().tab(NO_BULLSHIP_TAB))
     );
+    public static final RegistryObject<Item> NAILS_ITEM
+            = ITEM_REGISTRY.register(
+                    "nails",
+            () -> new Item(new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
+    public static final RegistryObject<Item> CIRCUIT_ITEM
+            = ITEM_REGISTRY.register(
+            "circuit",
+            () -> new Item(new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
+    public static final RegistryObject<Item> LENS_ITEM
+            = ITEM_REGISTRY.register(
+            "lens",
+            () -> new Item(new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
+    public static final RegistryObject<Item> WOOD_PLANK_ITEM
+            = ITEM_REGISTRY.register(
+            "wood_plank",
+            () -> new Item(new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));
     public static final RegistryObject<MenuType<EmptyMenu>> EMPTY_MENU
