@@ -43,6 +43,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.github.kawaiicakes.nobullship.Registry.*;
 import static io.github.kawaiicakes.nobullship.schematic.SchematicRecipe.compareSummedContents;
@@ -68,6 +69,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
      * A map available on the serverside containing the recipe id as a key.
      */
     private Map<ResourceLocation, MultiblockRecipe> recipes = ImmutableMap.of();
+    private LinkedList<ResourceLocation> resultNameCache;
 
     public MultiblockRecipeManager() {
         this(ICondition.IContext.EMPTY);
@@ -84,10 +86,38 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         this.recipes = packet.recipes;
         this.globalCooldownTime = packet.globalCooldownTime;
         this.maxGlobalCooldownTime = packet.maxGlobalCooldownTime;
+
+        List<ResourceLocation> whiteList = packet.whiteList;
+        List<ResourceLocation> blackList = packet.blackList;
+
+        this.resultNameCache = this.recipes
+                .values()
+                .stream()
+                .map(MultiblockRecipe::result)
+                .filter(location -> !whiteList.contains(location))
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        this.resultNameCache.addAll(blackList);
     }
 
     public Map<ResourceLocation, MultiblockRecipe> getRecipes() {
         return this.recipes;
+    }
+
+    /**
+     * Less expensive search method to determine if a drop produced by an itemized entity dying can exist whatsoever.
+     * Uses a <code>LinkedList</code> whose most recent access becomes the first element to decrease time spent
+     * iterating.
+     */
+    public boolean isValidResultLocation(ResourceLocation entityId) {
+        if (this.resultNameCache.contains(entityId)) {
+            if (this.resultNameCache.getFirst().equals(entityId)) return true;
+
+            this.resultNameCache.removeFirstOccurrence(entityId);
+            this.resultNameCache.addFirst(entityId);
+            return true;
+        }
+        return false;
     }
 
     public int getGlobalCooldownTime() {
@@ -371,6 +401,19 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         }
 
         this.recipes = builder.build();
+
+        List<ResourceLocation> whiteList = Config.DROP_WHITELIST.get().stream().map(ResourceLocation::new).toList();
+        List<ResourceLocation> blackList = Config.DROP_BLACKLIST.get().stream().map(ResourceLocation::new).toList();
+
+        this.resultNameCache = this.recipes
+                .values()
+                .stream()
+                .map(MultiblockRecipe::result)
+                .filter(whiteList::contains)
+                .collect(Collectors.toCollection(LinkedList::new));
+
+        this.resultNameCache.addAll(blackList);
+
         LOGGER.info("Loaded {} recipes", recipes.size());
     }
 }

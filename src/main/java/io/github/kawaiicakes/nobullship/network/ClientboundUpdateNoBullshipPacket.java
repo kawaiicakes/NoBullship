@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship.network;
 
 import com.mojang.logging.LogUtils;
+import io.github.kawaiicakes.nobullship.Config;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import net.minecraft.client.Minecraft;
@@ -11,13 +12,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkEvent;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
 public class ClientboundUpdateNoBullshipPacket {
     public static Logger LOGGER = LogUtils.getLogger();
     public Map<ResourceLocation, MultiblockRecipe> recipes;
+    public List<ResourceLocation> whiteList;
+    public List<ResourceLocation> blackList;
     public int globalCooldownTime;
     public int maxGlobalCooldownTime;
 
@@ -25,6 +30,9 @@ public class ClientboundUpdateNoBullshipPacket {
         this.recipes = manager.getRecipes();
         this.globalCooldownTime = manager.getGlobalCooldownTime();
         this.maxGlobalCooldownTime = manager.getMaxGlobalCooldownTime();
+
+        this.whiteList = Config.DROP_WHITELIST.get().stream().map(ResourceLocation::new).toList();
+        this.blackList = Config.DROP_BLACKLIST.get().stream().map(ResourceLocation::new).toList();
     }
 
     public ClientboundUpdateNoBullshipPacket(FriendlyByteBuf buffer) {
@@ -59,6 +67,8 @@ public class ClientboundUpdateNoBullshipPacket {
             newRecipes.put(new ResourceLocation(key), fromNbt);
         }
         this.recipes = newRecipes;
+        this.whiteList = buffer.readCollection(ArrayList::new, FriendlyByteBuf::readResourceLocation);
+        this.blackList = buffer.readCollection(ArrayList::new, FriendlyByteBuf::readResourceLocation);
     }
 
     public void toBytes(FriendlyByteBuf buffer) {
@@ -75,6 +85,8 @@ public class ClientboundUpdateNoBullshipPacket {
         buffer.writeInt(this.globalCooldownTime);
         buffer.writeInt(this.maxGlobalCooldownTime);
         buffer.writeNbt(serialized);
+        buffer.writeCollection(this.whiteList, FriendlyByteBuf::writeResourceLocation);
+        buffer.writeCollection(this.blackList, FriendlyByteBuf::writeResourceLocation);
     }
 
     public void handle(Supplier<NetworkEvent.Context> contextSupplier) {

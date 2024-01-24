@@ -6,6 +6,7 @@ import io.github.kawaiicakes.nobullship.api.NoBullshipItemTags;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeProvider;
 import io.github.kawaiicakes.nobullship.api.NoBullshipRecipeProvider;
+import io.github.kawaiicakes.nobullship.event.BullshipEvents;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.EmptyScreen;
@@ -60,6 +61,7 @@ public class NoBullship
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(SchematicItem.class);
         MinecraftForge.EVENT_BUS.register(MultiblockWorkshopBlockEntity.class);
+        MinecraftForge.EVENT_BUS.register(BullshipEvents.class);
 
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::onDatagen);

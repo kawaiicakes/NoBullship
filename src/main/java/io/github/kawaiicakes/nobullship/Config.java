@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
 
 import java.util.List;
@@ -10,7 +11,7 @@ public class Config {
 
     public static ForgeConfigSpec.DoubleValue COOLDOWN_MULTIPLIER, MINIMUM_COOLDOWN, MAXIMUM_COOLDOWN, DROP_RAW_PERCENT;
     public static ForgeConfigSpec.BooleanValue DISABLE_DROP, DROP_RAW, DISABLE_GLOBAL_COOLDOWN;
-    public static ForgeConfigSpec.ConfigValue<List<? extends String>> EXCEPTION_DROP;
+    public static ForgeConfigSpec.ConfigValue<List<? extends String>> DROP_WHITELIST, DROP_BLACKLIST;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -42,10 +43,10 @@ public class Config {
                 .defineInRange("raw_drops_percent", 0.67, 0, 1.00);
 
         DISABLE_DROP = builder
-                .comment("Whether entities with a multiblock recipe may drop as an item. CURRENTLY DOES NOTHING")
+                .comment("If enabled, will attempt to stop entities which have a multiblock recipe from dropping as items.")
                 .translation("config.nobullship.default_drops")
-                .comment("Default true.")
-                .define("default_drops", true);
+                .comment("Default false.")
+                .define("default_drops", false);
 
         DROP_RAW = builder
                 .comment("Whether entities with a multiblock recipe drop a portion of the raw ingredients needed to make them. CURRENTLY DOES NOTHING")
@@ -59,10 +60,17 @@ public class Config {
                 .comment("Default true.")
                 .define("disable_global_cooldown", false);
 
-        EXCEPTION_DROP = builder
-                .comment("Acts as a whitelist for automatic recipes when raw_drops is disabled, and a blacklist when enabled. CURRENTLY DOES NOTHING")
-                .translation("config.nobullship.drop_exceptions")
-                .defineList("drop_exceptions", ObjectArrayList.wrap(new String[]{}), (obj) -> obj instanceof String);
+        DROP_WHITELIST = builder
+                .comment("Acts as a whitelist for drops if an item you needed was removed by default_drops.")
+                .translation("config.nobullship.drop_whitelist")
+                .defineList("drop_whitelist", ObjectArrayList.wrap(new String[]{}), (obj) ->
+                        obj instanceof String string && ResourceLocation.isValidResourceLocation(string));
+
+        DROP_BLACKLIST = builder
+                .comment("Acts as a blacklist for drops if an item was missed by default_drops.")
+                .translation("config.nobullship.drop_blacklist")
+                .defineList("drop_blacklist", ObjectArrayList.wrap(new String[]{}), (obj) ->
+                        obj instanceof String string && ResourceLocation.isValidResourceLocation(string));
 
         CONFIG = builder.build();
     }
