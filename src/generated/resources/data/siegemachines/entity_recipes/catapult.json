@@ -1,0 +1,172 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "siegemachines"
+    }
+  ],
+  "key": {
+    "-": {
+      "block": {
+        "Name": "nobullship:metal_beam",
+        "Properties": {
+          "down": [
+            "NONE"
+          ],
+          "horizontal_axis": [
+            "x"
+          ]
+        }
+      }
+    },
+    "/": {
+      "tag": {
+        "Name": "minecraft:logs",
+        "Properties": {
+          "axis": [
+            "y"
+          ]
+        }
+      }
+    },
+    "e": {
+      "block": {
+        "Name": "minecraft:lever",
+        "Properties": {
+          "face": [
+            "WALL"
+          ],
+          "facing": [
+            "east"
+          ]
+        }
+      }
+    },
+    "g": {
+      "tag": {
+        "Name": "forge:gates/wooden",
+        "Properties": {
+          "facing": [
+            "south",
+            "north"
+          ],
+          "in_wall": [
+            "false"
+          ],
+          "open": [
+            "false"
+          ],
+          "powered": [
+            "false"
+          ]
+        }
+      }
+    },
+    "l": {
+      "tag": {
+        "Name": "minecraft:wooden_stairs",
+        "Properties": {
+          "facing": [
+            "west"
+          ],
+          "half": [
+            "bottom"
+          ],
+          "shape": [
+            "straight"
+          ],
+          "waterlogged": [
+            "false"
+          ]
+        }
+      }
+    },
+    "p": {
+      "block": {
+        "Name": "minecraft:lever",
+        "Properties": {
+          "face": [
+            "WALL"
+          ],
+          "facing": [
+            "west"
+          ]
+        }
+      }
+    },
+    "r": {
+      "tag": {
+        "Name": "minecraft:wooden_stairs",
+        "Properties": {
+          "facing": [
+            "east"
+          ],
+          "half": [
+            "bottom"
+          ],
+          "shape": [
+            "straight"
+          ],
+          "waterlogged": [
+            "false"
+          ]
+        }
+      }
+    },
+    "|": {
+      "tag": {
+        "Name": "minecraft:wooden_fences"
+      }
+    }
+  },
+  "recipe": {
+    "layer0": [
+      "     ",
+      "     ",
+      "pl-re"
+    ],
+    "layer1": [
+      "  |  ",
+      "  |  ",
+      " l|r "
+    ],
+    "layer2": [
+      "     ",
+      " /g/ ",
+      " /-/ "
+    ],
+    "layer3": [
+      "     ",
+      "     ",
+      " lgr "
+    ]
+  },
+  "requisites": [
+    {
+      "item": "minecraft:cauldron"
+    },
+    {
+      "count": 5,
+      "item": "minecraft:tripwire_hook"
+    },
+    {
+      "count": 6,
+      "item": "minecraft:leather"
+    },
+    {
+      "count": 11,
+      "item": "minecraft:lead"
+    },
+    {
+      "count": 6,
+      "item": "nobullship:wood_plank"
+    },
+    {
+      "count": 50,
+      "item": "nobullship:wood_plank"
+    }
+  ],
+  "result": {
+    "entity": "siegemachines:catapult"
+  }
+}

@@ -3,7 +3,7 @@ package io.github.kawaiicakes.nobullship.api.multiblock;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
-import io.github.kawaiicakes.nobullship.compat.recipes.siegemachines.SiegeMachinesRecipes;
+import io.github.kawaiicakes.nobullship.compat.recipes.siegemachines.SiegeMachinesMultiblocks;
 import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
@@ -44,7 +44,7 @@ public class MultiblockRecipeProvider implements DataProvider {
     }
 
     protected void buildRecipes(Consumer<FinishedMultiblockRecipe> consumer) {
-        SiegeMachinesRecipes.generateRecipes(consumer);
+        SiegeMachinesMultiblocks.generateRecipes(consumer);
     }
 
     private static void saveRecipe(CachedOutput pOutput, JsonObject pRecipeJson, Path pPath) {
