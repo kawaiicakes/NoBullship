@@ -13,8 +13,10 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
 
 import static io.github.kawaiicakes.nobullship.Registry.*;
+import static net.minecraftforge.common.Tags.Blocks.STORAGE_BLOCKS;
 
 public class NoBullshipBlockTags extends BlockTagsProvider {
+    public static final TagKey<Block> BEAM_CONNECTOR = create("simple-beam_connector");
     public static final TagKey<Block> NO_BS_MATERIAL = create("building_material");
     public static final TagKey<Block> SIMPLE_BEAM_TAG = create("simple_beam");
 
@@ -28,6 +30,11 @@ public class NoBullshipBlockTags extends BlockTagsProvider {
 
     @Override
     protected void addTags() {
+        this.tag(BEAM_CONNECTOR)
+                .addTag(BlockTags.LOGS)
+                .addTag(BlockTags.PLANKS)
+                .addTag(STORAGE_BLOCKS);
+
         this.tag(NO_BS_MATERIAL).add(
                 WILDCARD_BLOCK.get(),
                 METAL_BEAM_BLOCK.get(),
