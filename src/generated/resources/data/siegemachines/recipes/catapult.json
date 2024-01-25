@@ -12,44 +12,6 @@
         "type": "nobullship:schematic_workbench",
         "declaration": {
           "key": {
-            "#": {
-              "item": "minecraft:leather"
-            },
-            "-": {
-              "tag": "minecraft:logs"
-            },
-            ">": {
-              "item": "minecraft:iron_block"
-            },
-            "o": {
-              "item": "nobullship:wood_wheel"
-            }
-          },
-          "output_id": "siegemachines:battering_ram",
-          "shaped_input": [
-            "###",
-            "-->",
-            "o o"
-          ]
-        },
-        "shapeless_input": [
-          {
-            "item": "minecraft:feather"
-          }
-        ]
-      }
-    },
-    {
-      "conditions": [
-        {
-          "type": "forge:mod_loaded",
-          "modid": "siegemachines"
-        }
-      ],
-      "recipe": {
-        "type": "nobullship:schematic_workbench",
-        "declaration": {
-          "key": {
             "-": {
               "tag": "minecraft:logs"
             },

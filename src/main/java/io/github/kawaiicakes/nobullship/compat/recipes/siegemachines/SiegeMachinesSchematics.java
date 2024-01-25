@@ -23,15 +23,12 @@ public class SiegeMachinesSchematics {
     public static void generateRecipes(Consumer<FinishedRecipe> finished) {
         generateRecipes();
 
-        ConditionalRecipe.Builder builder = ConditionalRecipe.builder();
-
         for (Map.Entry<ResourceLocation, SchematicRecipeBuilder> entry : RECIPES.entrySet()) {
-                builder
+            ConditionalRecipe.builder()
                         .addCondition(new ModLoadedCondition("siegemachines"))
-                        .addRecipe(consumer -> entry.getValue().save(consumer, entry.getKey()));
+                        .addRecipe(consumer -> entry.getValue().save(consumer, entry.getKey()))
+                    .build(finished, entry.getKey());
         }
-
-        builder.build(finished, ezRl("no_bs_schematics"));
 
         RECIPES.clear();
     }
