@@ -44,7 +44,7 @@
     },
     "g": {
       "tag": {
-        "Name": "forge:gates/wooden",
+        "Name": "minecraft:fence_gates",
         "Properties": {
           "facing": [
             "south",

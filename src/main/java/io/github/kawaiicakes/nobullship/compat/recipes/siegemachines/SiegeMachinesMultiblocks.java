@@ -88,7 +88,7 @@ public class SiegeMachinesMultiblocks {
         ItemStack planks = WOOD_PLANK_ITEM.get().getDefaultInstance();
         ItemStack nails = NAILS_ITEM.get().getDefaultInstance();
 
-        TagKey<Block> gates = BlockTags.create(new ResourceLocation("forge:gates/wooden"));
+        TagKey<Block> gates = BlockTags.FENCE_GATES;
 
         leather.setCount(4);
         leads.setCount(6);
