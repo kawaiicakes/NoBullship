@@ -246,19 +246,19 @@ public class SiegeMachinesMultiblocks {
                         .aisle(
                                 "     ",
                                 "     ",
-                                "pl-re")
+                                " lgr ")
+                        .aisle(
+                                "     ",
+                                " /g/ ",
+                                " /-/ ")
                         .aisle(
                                 "  |  ",
                                 "  |  ",
                                 " l|r ")
                         .aisle(
                                 "     ",
-                                " /g/ ",
-                                " /-/ ")
-                        .aisle(
                                 "     ",
-                                "     ",
-                                " lgr ")
+                                "pl-re")
                         .addRequisite(cauldron)
                         .addRequisite(hooks)
                         .addRequisite(leather2)
