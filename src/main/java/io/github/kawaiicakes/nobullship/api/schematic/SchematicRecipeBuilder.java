@@ -4,10 +4,12 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.core.NonNullList;
 import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -15,7 +17,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -142,6 +146,8 @@ public class SchematicRecipeBuilder {
     }
 
     public static class Result implements FinishedRecipe {
+        protected static final Logger LOGGER = LogUtils.getLogger();
+
         protected final ResourceLocation id;
         protected final ResourceLocation resultId;
         protected final List<String> pattern;
@@ -186,8 +192,15 @@ public class SchematicRecipeBuilder {
             JsonArray shapelessJson = new JsonArray();
             for (ItemStack item : this.shapeless) {
                 if (item.isEmpty()) continue;
-                JsonElement serialized = ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, item).get().orThrow();
-                shapelessJson.add(serialized);
+                JsonObject serializedItem = new JsonObject();
+                serializedItem.addProperty("item", Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(item.getItem())).toString());
+                if (item.getCount() > 1) {
+                    serializedItem.addProperty("count", item.getCount());
+                }
+                if (item.hasTag()) {
+                    serializedItem.add("nbt", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, item.getOrCreateTag()).getOrThrow(false, LOGGER::error));
+                }
+                shapelessJson.add(serializedItem);
             }
             pJson.add("shapeless_input", shapelessJson);
 

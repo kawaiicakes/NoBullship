@@ -34,8 +34,7 @@
         },
         "shapeless_input": [
           {
-            "Count": 1,
-            "id": "minecraft:feather"
+            "item": "minecraft:feather"
           }
         ]
       }
@@ -69,9 +68,8 @@
         },
         "shapeless_input": [
           {
-            "Count": 1,
-            "id": "minecraft:bow",
-            "tag": {
+            "item": "minecraft:bow",
+            "nbt": {
               "Damage": 0
             }
           }
