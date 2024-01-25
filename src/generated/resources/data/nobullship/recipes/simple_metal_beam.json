@@ -10,9 +10,9 @@
     }
   },
   "pattern": [
-    "ppp",
+    "pmp",
     "mmm",
-    "ppp"
+    "pmp"
   ],
   "result": {
     "count": 6,

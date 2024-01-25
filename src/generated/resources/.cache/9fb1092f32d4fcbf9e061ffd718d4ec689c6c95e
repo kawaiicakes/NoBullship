@@ -1,4 +1,4 @@
-// 1.19.2	2024-01-25T08:25:43.5173699	Recipes
+// 1.19.2	2024-01-25T08:42:37.4184387	Recipes
 a2f8ee72d20bdea0087a6d94c3f78f28a8678b86 data/nobullship/advancements/recipes/nobullship_tab/circuit.json
 eee745cc707888799c2ccaa185a69690742187f3 data/nobullship/advancements/recipes/nobullship_tab/lens.json
 4eb9f2d7aafa52a82789976b50247ec09fe1eb39 data/nobullship/advancements/recipes/nobullship_tab/nails.json
@@ -8,6 +8,6 @@ f5ff525ef35207f438e59e113e6aa725705e3c7b data/nobullship/advancements/recipes/no
 8b603742777d65e00eb61498a024c63d1aecf133 data/nobullship/recipes/circuit.json
 61d8440f71436a4f98e63e0874c96e1586909da8 data/nobullship/recipes/lens.json
 e450a53162d3e05a9f913f63be9a6493f540566d data/nobullship/recipes/nails.json
-5115658bb3967adc0105a0fa5e710dc147f97c70 data/nobullship/recipes/simple_metal_beam.json
-c1168c28a4ab4e69453dff087ab1baea20714a96 data/nobullship/recipes/simple_wood_beam.json
-25c036b61860a028c8ece854e63ed1715f73c65f data/nobullship/recipes/wood_plank.json
+e936843a1c9daeb1eee5ef566ec8b205d04e17f8 data/nobullship/recipes/simple_metal_beam.json
+5e839709ea9f492a3d8de559ec2e2d6c53e456f3 data/nobullship/recipes/simple_wood_beam.json
+685b4b7f3af9c6c4128a485f22a764df007734b8 data/nobullship/recipes/wood_plank.json
