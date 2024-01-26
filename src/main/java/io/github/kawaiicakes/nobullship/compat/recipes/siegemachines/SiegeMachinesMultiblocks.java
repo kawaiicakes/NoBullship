@@ -2,7 +2,7 @@ package io.github.kawaiicakes.nobullship.compat.recipes.siegemachines;
 
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockPatternBuilder;
-import io.github.kawaiicakes.nobullship.block.MetalIBeamBlock;
+import io.github.kawaiicakes.nobullship.block.FullLengthBeamBlock;
 import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -231,8 +231,8 @@ public class SiegeMachinesMultiblocks {
                                 .of(BlockTags.LOGS)
                                 .requireProperty(AXIS, Direction.Axis.Y))
                         .where('-', BlockInWorldPredicateBuilder.of(METAL_BEAM_BLOCK.get())
-                                .requireProperty(MetalIBeamBlock.HORIZONTAL_AXIS, Direction.Axis.X)
-                                .requireProperty(MetalIBeamBlock.DOWN, MetalIBeamBlock.BeamConnection.NONE))
+                                .requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.X)
+                                .requireProperty(FullLengthBeamBlock.DOWN, FullLengthBeamBlock.BeamConnection.NONE))
                         .where('|', BlockInWorldPredicateBuilder
                                 .of(BlockTags.WOODEN_FENCES))
                         .where('p', BlockInWorldPredicateBuilder

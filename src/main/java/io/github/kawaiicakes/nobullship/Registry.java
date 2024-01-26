@@ -1,10 +1,7 @@
 package io.github.kawaiicakes.nobullship;
 
 import com.mojang.serialization.Codec;
-import io.github.kawaiicakes.nobullship.block.MetalIBeamBlock;
-import io.github.kawaiicakes.nobullship.block.SimpleBeamBlock;
-import io.github.kawaiicakes.nobullship.block.WheelBlock;
-import io.github.kawaiicakes.nobullship.block.WildcardBlock;
+import io.github.kawaiicakes.nobullship.block.*;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.EmptyMenu;

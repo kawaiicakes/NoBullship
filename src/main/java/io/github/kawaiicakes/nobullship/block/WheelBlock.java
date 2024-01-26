@@ -129,17 +129,17 @@ public abstract class WheelBlock extends Block implements SimpleWaterloggedBlock
                         case SOUTH -> Rotation.NONE;
                     };
 
-                    rotatedDimensions[shapeNumber++] = MetalIBeamBlock.rotateDimensions(axisOfRotation, rotation, dimensions);
+                    rotatedDimensions[shapeNumber++] = FullLengthBeamBlock.rotateDimensions(axisOfRotation, rotation, dimensions);
                 }
 
                 SHAPE_BY_DIRECTION.put(direction, Shapes.or(
-                        MetalIBeamBlock.generateShape(rotatedDimensions[0]),
-                        MetalIBeamBlock.generateShape(rotatedDimensions[1]),
-                        MetalIBeamBlock.generateShape(rotatedDimensions[2]),
-                        MetalIBeamBlock.generateShape(rotatedDimensions[3]),
-                        MetalIBeamBlock.generateShape(rotatedDimensions[4]),
-                        MetalIBeamBlock.generateShape(rotatedDimensions[5]),
-                        MetalIBeamBlock.generateShape(rotatedDimensions[6])));
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[0]),
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[1]),
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[2]),
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[3]),
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[4]),
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[5]),
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[6])));
             }
         }
     }
@@ -213,15 +213,15 @@ public abstract class WheelBlock extends Block implements SimpleWaterloggedBlock
                         case SOUTH -> Rotation.NONE;
                     };
 
-                    rotatedDimensions[shapeNumber++] = MetalIBeamBlock.rotateDimensions(axisOfRotation, rotation, castedDimensions);
+                    rotatedDimensions[shapeNumber++] = FullLengthBeamBlock.rotateDimensions(axisOfRotation, rotation, castedDimensions);
                 }
 
                 SHAPE_BY_DIRECTION.put(direction, Shapes.or(
-                        MetalIBeamBlock.generateShape(rotatedDimensions[0]),
-                        MetalIBeamBlock.generateShape(rotatedDimensions[1]),
-                        MetalIBeamBlock.generateShape(rotatedDimensions[2]),
-                        MetalIBeamBlock.generateShape(rotatedDimensions[3]),
-                        MetalIBeamBlock.generateShape(rotatedDimensions[4])));
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[0]),
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[1]),
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[2]),
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[3]),
+                        FullLengthBeamBlock.generateShape(rotatedDimensions[4])));
             }
         }
     }
