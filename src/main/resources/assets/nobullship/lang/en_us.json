@@ -14,8 +14,8 @@
   "block.nobullship.metal_beam": "Metal I-Beam",
   "block.nobullship.tire": "Tire",
   "block.nobullship.wood_wheel": "Wooden Wheel",
-  "block.nobullship.simple_wood_beam": "Wooden Beam",
-  "block.nobullship.simple_metal_beam": "Metal Beam",
+  "block.nobullship.simple_wood_beam": "Wood Polybeam",
+  "block.nobullship.simple_metal_beam": "Metal Polybeam",
 
   "sounds.nobullship.construct_success": "[Construction sounds]",
   "sounds.nobullship.construct_expended": "[Paper tearing]",
