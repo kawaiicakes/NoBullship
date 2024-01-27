@@ -16,22 +16,22 @@ public class WoodSupportBeamBlock extends FullLengthBeamBlock {
                         .strength(3.2F, 4.0F),
                 new double[][]{
                         new double[]{
-                                6.5, 5.0, 0, 9.5, 11, 16
+                                6, 5.0, 0, 10, 11, 16
                         }
                 },
                 new double[][]{
                         new double[]{
-                                9.5, 5.0, 6.5, 16, 11, 9.5
+                                9.5, 5.0, 6, 16, 11, 10
                         }
                 },
                 new double[][]{
                         new double[]{
-                                9.5, 5.0, 6.5, 16, 11, 9.5
+                                9.5, 5.0, 6, 16, 11, 10
                         }
                 },
                 new double[][]{
                         new double[]{
-                                6.5, 8, 5, 9.5, 16, 11
+                                6, 8, 5, 10, 16, 11
                         }
                 }
         );
