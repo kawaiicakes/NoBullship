@@ -1,20 +1,20 @@
 {
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "nobullship:blocks/wood_support_beam_side_texture",
+		"1": "nobullship:blocks/wood_support_beam_side_texture",
 		"particle": "nobullship:blocks/wood_support_beam_side_texture"
 	},
 	"elements": [
 		{
-			"from": [9.5, 5, 6],
+			"from": [10, 5, 6],
 			"to": [16, 11, 10],
 			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
 			"faces": {
-				"north": {"uv": [0, 0, 6.5, 6], "texture": "#0"},
-				"east": {"uv": [7, 8, 11, 14], "texture": "#0", "cullface": "east"},
-				"south": {"uv": [0, 6, 6.5, 12], "texture": "#0"},
-				"up": {"uv": [13.5, 4, 7, 0], "texture": "#0"},
-				"down": {"uv": [13.5, 4, 7, 8], "texture": "#0"}
+				"north": {"uv": [0, 0, 6, 6], "texture": "#1"},
+				"east": {"uv": [7, 8, 11, 14], "texture": "#1", "cullface": "east"},
+				"south": {"uv": [0, 6, 6, 12], "texture": "#1"},
+				"up": {"uv": [13.5, 4, 7, 0], "texture": "#1"},
+				"down": {"uv": [13.5, 4, 7, 8], "texture": "#1"}
 			}
 		}
 	]
