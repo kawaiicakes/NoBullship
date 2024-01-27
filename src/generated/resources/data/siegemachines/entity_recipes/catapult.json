@@ -43,21 +43,14 @@
       }
     },
     "g": {
-      "tag": {
-        "Name": "minecraft:fence_gates",
+      "block": {
+        "Name": "nobullship:wood_support_beam",
         "Properties": {
-          "facing": [
-            "south",
-            "north"
+          "down": [
+            "NONE"
           ],
-          "in_wall": [
-            "false"
-          ],
-          "open": [
-            "false"
-          ],
-          "powered": [
-            "false"
+          "horizontal_axis": [
+            "x"
           ]
         }
       }

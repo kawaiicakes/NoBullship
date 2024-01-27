@@ -7,7 +7,6 @@ import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.*;
@@ -87,8 +86,6 @@ public class SiegeMachinesMultiblocks {
         ItemStack leads = Items.LEAD.getDefaultInstance();
         ItemStack planks = WOOD_PLANK_ITEM.get().getDefaultInstance();
         ItemStack nails = NAILS_ITEM.get().getDefaultInstance();
-
-        TagKey<Block> gates = BlockTags.FENCE_GATES;
 
         leather.setCount(4);
         leads.setCount(6);
@@ -221,12 +218,9 @@ public class SiegeMachinesMultiblocks {
                                 .requireProperty(STAIRS_SHAPE, StairsShape.STRAIGHT)
                                 .requireProperty(HALF, Half.BOTTOM))
                         .where('g', BlockInWorldPredicateBuilder
-                                .of(gates)
-                                .requireProperty(FenceGateBlock.FACING, Direction.SOUTH)
-                                .requireProperty(FenceGateBlock.FACING, Direction.NORTH)
-                                .requireProperty(IN_WALL, false)
-                                .requireProperty(POWERED, false)
-                                .requireProperty(OPEN, false))
+                                .of(WOOD_SUPPORT_BEAM_BLOCK.get())
+                                .requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.X)
+                                .requireProperty(FullLengthBeamBlock.DOWN, FullLengthBeamBlock.BeamConnection.NONE))
                         .where('/', BlockInWorldPredicateBuilder
                                 .of(BlockTags.LOGS)
                                 .requireProperty(AXIS, Direction.Axis.Y))
