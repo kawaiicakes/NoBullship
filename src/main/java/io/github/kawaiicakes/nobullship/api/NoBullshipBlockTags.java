@@ -5,9 +5,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +14,8 @@ import static io.github.kawaiicakes.nobullship.Registry.*;
 import static net.minecraftforge.common.Tags.Blocks.STORAGE_BLOCKS;
 
 public class NoBullshipBlockTags extends BlockTagsProvider {
-    public static final TagKey<Block> BEAM_CONNECTOR = create("simple-beam_connector");
+    public static final TagKey<Block> POLYBEAM_CONNECTOR = create("simple-beam_connector");
+    public static final TagKey<Block> FL_BEAM_CONNECTOR = create("full_length-beam_connector");
     public static final TagKey<Block> NO_BS_MATERIAL = create("building_material");
     public static final TagKey<Block> SIMPLE_BEAM_TAG = create("simple_beam");
 
@@ -30,10 +29,14 @@ public class NoBullshipBlockTags extends BlockTagsProvider {
 
     @Override
     protected void addTags() {
-        this.tag(BEAM_CONNECTOR)
+        this.tag(POLYBEAM_CONNECTOR)
                 .addTag(BlockTags.LOGS)
                 .addTag(BlockTags.PLANKS)
                 .addTag(STORAGE_BLOCKS);
+
+        this.tag(FL_BEAM_CONNECTOR)
+                .add(METAL_BEAM_BLOCK.get())
+                .add(WOOD_SUPPORT_BEAM_BLOCK.get());
 
         this.tag(NO_BS_MATERIAL).add(
                 WILDCARD_BLOCK.get(),

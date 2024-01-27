@@ -16,7 +16,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
 import org.jetbrains.annotations.Nullable;
 
-import static io.github.kawaiicakes.nobullship.api.NoBullshipBlockTags.BEAM_CONNECTOR;
+import static io.github.kawaiicakes.nobullship.api.NoBullshipBlockTags.POLYBEAM_CONNECTOR;
 import static io.github.kawaiicakes.nobullship.block.WheelBlock.FACING;
 
 public abstract class SimpleBeamBlock extends PipeBlock implements SimpleWaterloggedBlock {
@@ -128,7 +128,7 @@ public abstract class SimpleBeamBlock extends PipeBlock implements SimpleWaterlo
         return blockState.is(this)
                 || block instanceof SimpleBeamBlock
                 || (block instanceof WheelBlock && blockState.getValue(FACING).equals(attachmentDirection.getOpposite()))
-                || blockState.is(BEAM_CONNECTOR);
+                || blockState.is(POLYBEAM_CONNECTOR);
     }
 
     public static class ThinBeamBlock extends SimpleBeamBlock {
@@ -148,6 +148,11 @@ public abstract class SimpleBeamBlock extends PipeBlock implements SimpleWaterlo
         @Override
         public boolean propagatesSkylightDown(BlockState pState, BlockGetter pReader, BlockPos pPos) {
             return true;
+        }
+
+        @Override
+        public boolean isAttachableTo(BlockState blockState, Direction attachmentDirection) {
+            return super.isAttachableTo(blockState, attachmentDirection) || blockState.getBlock() instanceof FullLengthBeamBlock;
         }
     }
 }

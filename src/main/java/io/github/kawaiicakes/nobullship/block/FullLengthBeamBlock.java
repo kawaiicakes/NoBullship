@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.github.kawaiicakes.nobullship.api.NoBullshipBlockTags.FL_BEAM_CONNECTOR;
 import static io.github.kawaiicakes.nobullship.block.WheelBlock.FACING;
 
 public abstract class FullLengthBeamBlock extends Block implements SimpleWaterloggedBlock {
@@ -105,6 +106,7 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
         };
     }
 
+    // TODO: this implementation looks like it's wrong
     @SuppressWarnings("deprecation")
     @Override
     public BlockState rotate(BlockState pState, Rotation pRotation) {
@@ -249,6 +251,8 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
             }
         } else if (blockAbove.getBlock() instanceof WheelBlock && blockAbove.getValue(FACING).equals(upAttachmentDirection)) {
             connectionAbove = BeamConnection.PARALLEL;
+        } else if (blockAbove.getBlock() instanceof SimpleBeamBlock.ThinBeamBlock || blockAbove.is(FL_BEAM_CONNECTOR)) {
+            connectionAbove = BeamConnection.PARALLEL;
         }
 
         if (blockBelow.getBlock() instanceof FullLengthBeamBlock) {
@@ -260,6 +264,8 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
                 connectionBelow = BeamConnection.PARALLEL;
             }
         } else if (blockBelow.getBlock() instanceof WheelBlock && blockBelow.getValue(FACING).equals(downAttachmentDirection)) {
+            connectionBelow = BeamConnection.PARALLEL;
+        } else if (blockBelow.getBlock() instanceof SimpleBeamBlock.ThinBeamBlock || blockBelow.is(FL_BEAM_CONNECTOR)) {
             connectionBelow = BeamConnection.PARALLEL;
         }
 
@@ -278,9 +284,11 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
 
         boolean attachesOnLeft =
                 blockOnLeft.getBlock() instanceof FullLengthBeamBlock ||
-                (blockOnLeft.getBlock() instanceof WheelBlock && blockOnLeft.getValue(FACING).equals(leftAttachmentDirection));
+                (blockOnLeft.getBlock() instanceof WheelBlock && blockOnLeft.getValue(FACING).equals(leftAttachmentDirection)) ||
+                blockOnLeft.getBlock() instanceof SimpleBeamBlock.ThinBeamBlock || blockOnLeft.is(FL_BEAM_CONNECTOR);
         boolean attachesOnRight = blockOnRight.getBlock() instanceof FullLengthBeamBlock||
-                (blockOnRight.getBlock() instanceof WheelBlock && blockOnRight.getValue(FACING).equals(rightAttachmentDirection));
+                (blockOnRight.getBlock() instanceof WheelBlock && blockOnRight.getValue(FACING).equals(rightAttachmentDirection)) ||
+                blockOnRight.getBlock() instanceof SimpleBeamBlock.ThinBeamBlock || blockOnRight.is(FL_BEAM_CONNECTOR);
 
         boolean isInWater = pContext.getLevel().getFluidState(placementPos).getType() == Fluids.WATER;
 
@@ -305,21 +313,23 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
         boolean connectionRight = pState.getValue(RIGHT);
 
         Block neighborBlock = pNeighborState.getBlock();
-        boolean neighborIsMetalIBeam = neighborBlock instanceof FullLengthBeamBlock;
-        boolean isNeighborVertical = neighborIsMetalIBeam ? pNeighborState.getValue(VERTICAL) : false;
+        boolean neighborIsFLBeam = neighborBlock instanceof FullLengthBeamBlock;
+        boolean isNeighborVertical = neighborIsFLBeam ? pNeighborState.getValue(VERTICAL) : false;
         boolean neighborIsWheel = neighborBlock instanceof WheelBlock;
+        boolean neighborIsPolybeam = neighborBlock instanceof SimpleBeamBlock.ThinBeamBlock;
+        boolean neighborIsTagged = pNeighborState.is(FL_BEAM_CONNECTOR);
         Direction wheelDirection = neighborIsWheel ? pNeighborState.getValue(FACING) : null;
 
         switch (pDirection) {
             case DOWN -> {
                 if (!isVertical) {
-                    if (neighborIsMetalIBeam) {
+                    if (neighborIsFLBeam) {
                         if (isNeighborVertical) {
                             connectionBelow = pNeighborState.getValue(HORIZONTAL_AXIS).equals(axis) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
                         } else {
                             connectionBelow = BeamConnection.NONE;
                         }
-                    } else if (Direction.UP.equals(wheelDirection)) {
+                    } else if (Direction.UP.equals(wheelDirection) || neighborIsPolybeam || neighborIsTagged) {
                         connectionBelow = BeamConnection.PARALLEL;
                     } else {
                         connectionBelow = BeamConnection.NONE;
@@ -328,13 +338,13 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
             }
             case UP -> {
                 if (!isVertical) {
-                    if (neighborIsMetalIBeam) {
+                    if (neighborIsFLBeam) {
                         if (isNeighborVertical) {
                             connectionAbove = pNeighborState.getValue(HORIZONTAL_AXIS).equals(axis) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
                         } else {
                             connectionAbove = BeamConnection.NONE;
                         }
-                    } else if (Direction.DOWN.equals(wheelDirection)) {
+                    } else if (Direction.DOWN.equals(wheelDirection) || neighborIsPolybeam || neighborIsTagged) {
                         connectionAbove = BeamConnection.PARALLEL;
                     } else {
                         connectionAbove = BeamConnection.NONE;
@@ -343,11 +353,13 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
             }
             case NORTH -> {
                 if (axis.equals(Direction.Axis.X)) {
-                    connectionLeft = neighborIsMetalIBeam ||
-                            (Direction.SOUTH.equals(wheelDirection));
+                    connectionLeft = neighborIsFLBeam ||
+                            (Direction.SOUTH.equals(wheelDirection))
+                            || neighborIsPolybeam
+                            || neighborIsTagged;
                 } else {
                     if (isVertical) {
-                        if (neighborIsMetalIBeam || Direction.SOUTH.equals(wheelDirection)) {
+                        if (neighborIsFLBeam || Direction.SOUTH.equals(wheelDirection) || neighborIsPolybeam || neighborIsTagged) {
                             connectionBelow = BeamConnection.PARALLEL;
                         } else {
                             connectionBelow = BeamConnection.NONE;
@@ -357,11 +369,13 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
             }
             case SOUTH -> {
                 if (axis.equals(Direction.Axis.X)) {
-                    connectionRight = neighborIsMetalIBeam ||
-                            (Direction.NORTH.equals(wheelDirection));
+                    connectionRight = neighborIsFLBeam ||
+                            (Direction.NORTH.equals(wheelDirection)) ||
+                            neighborIsPolybeam
+                            || neighborIsTagged;
                 } else {
                     if (isVertical) {
-                        if (neighborIsMetalIBeam || Direction.NORTH.equals(wheelDirection)) {
+                        if (neighborIsFLBeam || Direction.NORTH.equals(wheelDirection) || neighborIsPolybeam || neighborIsTagged) {
                             connectionAbove = BeamConnection.PARALLEL;
                         } else {
                             connectionAbove = BeamConnection.NONE;
@@ -371,11 +385,13 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
             }
             case WEST -> {
                 if (axis.equals(Direction.Axis.Z)) {
-                    connectionRight = neighborIsMetalIBeam ||
-                            (Direction.EAST.equals(wheelDirection));
+                    connectionRight = neighborIsFLBeam
+                            || (Direction.EAST.equals(wheelDirection))
+                            || neighborIsPolybeam
+                            || neighborIsTagged;
                 } else {
                     if (isVertical) {
-                        if (neighborIsMetalIBeam || Direction.EAST.equals(wheelDirection)) {
+                        if (neighborIsFLBeam || Direction.EAST.equals(wheelDirection) || neighborIsPolybeam || neighborIsTagged) {
                             connectionBelow = BeamConnection.PARALLEL;
                         } else {
                             connectionBelow = BeamConnection.NONE;
@@ -385,11 +401,13 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
             }
             case EAST -> {
                 if (axis.equals(Direction.Axis.Z)) {
-                    connectionLeft = neighborIsMetalIBeam ||
-                            (Direction.WEST.equals(wheelDirection));
+                    connectionLeft = neighborIsFLBeam ||
+                            (Direction.WEST.equals(wheelDirection))
+                            || neighborIsPolybeam
+                            || neighborIsTagged;
                 } else {
                     if (isVertical) {
-                        if (neighborIsMetalIBeam || Direction.WEST.equals(wheelDirection)) {
+                        if (neighborIsFLBeam || Direction.WEST.equals(wheelDirection) || neighborIsPolybeam || neighborIsTagged) {
                             connectionAbove = BeamConnection.PARALLEL;
                         } else {
                             connectionAbove = BeamConnection.NONE;
