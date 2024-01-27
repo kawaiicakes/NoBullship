@@ -53,6 +53,8 @@ public class Registry {
             = BLOCK_REGISTRY.register("workshop", MultiblockWorkshopBlock::new);
     public static final RegistryObject<Block> METAL_BEAM_BLOCK
             = BLOCK_REGISTRY.register("metal_beam", MetalIBeamBlock::new);
+    public static final RegistryObject<Block> WOOD_SUPPORT_BEAM_BLOCK
+            = BLOCK_REGISTRY.register("wood_support_beam", WoodSupportBeamBlock::new);
     public static final RegistryObject<Block> TIRE_BLOCK
             = BLOCK_REGISTRY.register("tire", WheelBlock.TireBlock::new);
     public static final RegistryObject<Block> WOOD_WHEEL_BLOCK
@@ -81,6 +83,10 @@ public class Registry {
             = ITEM_REGISTRY.register(
                     "metal_beam",
             () -> new BlockItem(METAL_BEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB)));
+    public static final RegistryObject<BlockItem> WOOD_SUPPORT_BEAM_ITEM
+            = ITEM_REGISTRY.register(
+            "wood_support_beam",
+            () -> new BlockItem(WOOD_SUPPORT_BEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB)));
     public static final RegistryObject<BlockItem> TIRE_ITEM
             = ITEM_REGISTRY.register(
                     "tire",

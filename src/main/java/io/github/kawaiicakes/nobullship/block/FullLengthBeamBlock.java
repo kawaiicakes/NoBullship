@@ -26,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.kawaiicakes.nobullship.Registry.METAL_BEAM_BLOCK;
 import static io.github.kawaiicakes.nobullship.block.WheelBlock.FACING;
 
 public abstract class FullLengthBeamBlock extends Block implements SimpleWaterloggedBlock {
@@ -240,7 +239,7 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
                     default -> throw new IllegalArgumentException();
                 };
 
-        if (blockAbove.is(METAL_BEAM_BLOCK.get())) {
+        if (blockAbove.getBlock() instanceof FullLengthBeamBlock) {
             if (!isVertical) {
                 if (blockAbove.getValue(VERTICAL)) {
                     connectionAbove = blockAbove.getValue(HORIZONTAL_AXIS).equals(axisDirection) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
@@ -252,7 +251,7 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
             connectionAbove = BeamConnection.PARALLEL;
         }
 
-        if (blockBelow.is(METAL_BEAM_BLOCK.get())) {
+        if (blockBelow.getBlock() instanceof FullLengthBeamBlock) {
             if (!isVertical) {
                 if (blockBelow.getValue(VERTICAL)) {
                     connectionBelow = blockBelow.getValue(HORIZONTAL_AXIS).equals(axisDirection) ? BeamConnection.PARALLEL : BeamConnection.PERPENDICULAR;
@@ -278,9 +277,9 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
                 };
 
         boolean attachesOnLeft =
-                blockOnLeft.is(METAL_BEAM_BLOCK.get()) ||
+                blockOnLeft.getBlock() instanceof FullLengthBeamBlock ||
                 (blockOnLeft.getBlock() instanceof WheelBlock && blockOnLeft.getValue(FACING).equals(leftAttachmentDirection));
-        boolean attachesOnRight = blockOnRight.is(METAL_BEAM_BLOCK.get())||
+        boolean attachesOnRight = blockOnRight.getBlock() instanceof FullLengthBeamBlock||
                 (blockOnRight.getBlock() instanceof WheelBlock && blockOnRight.getValue(FACING).equals(rightAttachmentDirection));
 
         boolean isInWater = pContext.getLevel().getFluidState(placementPos).getType() == Fluids.WATER;

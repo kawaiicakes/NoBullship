@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "no_bs_support_beams",
+  "key": {
+    "-": {
+      "item": "nobullship:wood_plank"
+    }
+  },
+  "pattern": [
+    "---",
+    "---"
+  ],
+  "result": {
+    "count": 4,
+    "item": "nobullship:wood_support_beam"
+  }
+}
