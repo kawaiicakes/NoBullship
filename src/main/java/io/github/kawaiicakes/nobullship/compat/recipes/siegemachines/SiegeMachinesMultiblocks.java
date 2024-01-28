@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.properties.AttachFace;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
@@ -20,9 +21,14 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static io.github.kawaiicakes.nobullship.Registry.*;
+import static io.github.kawaiicakes.nobullship.block.FullLengthBeamBlock.*;
+import static io.github.kawaiicakes.nobullship.block.FullLengthBeamBlock.DOWN;
+import static io.github.kawaiicakes.nobullship.block.FullLengthBeamBlock.UP;
 import static io.github.kawaiicakes.nobullship.block.WheelBlock.FACING;
+import static net.minecraft.world.item.Items.*;
 import static net.minecraft.world.level.block.Blocks.IRON_BLOCK;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.*;
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED;
 
 public class SiegeMachinesMultiblocks {
     protected static final Map<ResourceLocation, MultiblockPatternBuilder> RECIPES = new HashMap<>();
@@ -75,8 +81,20 @@ public class SiegeMachinesMultiblocks {
     protected static BlockInWorldPredicateBuilder udWoodBeam() {
         return BlockInWorldPredicateBuilder
                 .of(SIMPLE_WOOD_BEAM_BLOCK.get())
-                .requireProperty(UP, true)
-                .requireProperty(DOWN, true);
+                .requireProperty(BlockStateProperties.UP, true)
+                .requireProperty(BlockStateProperties.DOWN, true);
+    }
+
+    protected static BlockInWorldPredicateBuilder zAxisWoodBeam() {
+        return BlockInWorldPredicateBuilder
+                .of(WOOD_SUPPORT_BEAM_BLOCK.get())
+                .requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z);
+    }
+
+    protected static BlockInWorldPredicateBuilder xAxisWoodBeam() {
+        return BlockInWorldPredicateBuilder
+                .of(WOOD_SUPPORT_BEAM_BLOCK.get())
+                .requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.X);
     }
 
     protected static void generateRecipes() {
@@ -102,17 +120,17 @@ public class SiegeMachinesMultiblocks {
                                 .requireProperty(EAST, true)
                                 .requireProperty(WEST, true)
                                 .requireProperty(SOUTH, true)
-                                .requireProperty(UP, true))
+                                .requireProperty(BlockStateProperties.UP, true))
                         .where('r', BlockInWorldPredicateBuilder
                                 .of(simpleWoodBeam)
                                 .requireProperty(WEST, true)
                                 .requireProperty(SOUTH, true)
-                                .requireProperty(DOWN, true))
+                                .requireProperty(BlockStateProperties.DOWN, true))
                         .where('l', BlockInWorldPredicateBuilder
                                 .of(simpleWoodBeam)
                                 .requireProperty(EAST, true)
                                 .requireProperty(SOUTH, true)
-                                .requireProperty(DOWN, true))
+                                .requireProperty(BlockStateProperties.DOWN, true))
                         .where('|', udWoodBeam())
                         .where('O', BlockInWorldPredicateBuilder
                                 .of(BlockTags.LOGS)
@@ -123,36 +141,36 @@ public class SiegeMachinesMultiblocks {
                                 .requireProperty(EAST, true)
                                 .requireProperty(NORTH, true)
                                 .requireProperty(SOUTH, true)
-                                .requireProperty(DOWN, true))
+                                .requireProperty(BlockStateProperties.DOWN, true))
                         .where('*', BlockInWorldPredicateBuilder
                                 .of(simpleWoodBeam)
                                 .requireProperty(WEST, true)
                                 .requireProperty(NORTH, true)
                                 .requireProperty(SOUTH, true)
-                                .requireProperty(DOWN, true))
+                                .requireProperty(BlockStateProperties.DOWN, true))
                         .where('A', BlockInWorldPredicateBuilder
                                 .of(simpleWoodBeam)
                                 .requireProperty(EAST, true)
                                 .requireProperty(WEST, true)
                                 .requireProperty(SOUTH, true)
-                                .requireProperty(UP, true)
+                                .requireProperty(BlockStateProperties.UP, true)
                                 .requireProperty(NORTH, true))
                         .where('v', BlockInWorldPredicateBuilder
                                 .of(simpleWoodBeam)
                                 .requireProperty(EAST, true)
-                                .requireProperty(DOWN, true)
+                                .requireProperty(BlockStateProperties.DOWN, true)
                                 .requireProperty(NORTH, true))
                         .where('w', BlockInWorldPredicateBuilder
                                 .of(simpleWoodBeam)
                                 .requireProperty(WEST, true)
-                                .requireProperty(DOWN, true)
+                                .requireProperty(BlockStateProperties.DOWN, true)
                                 .requireProperty(NORTH, true))
                         .where('b', BlockInWorldPredicateBuilder
                                 .of(simpleWoodBeam)
                                 .requireProperty(EAST, true)
                                 .requireProperty(WEST, true)
                                 .requireProperty(NORTH, true)
-                                .requireProperty(UP, true))
+                                .requireProperty(BlockStateProperties.UP, true))
                         .where('G', BlockInWorldPredicateBuilder.of(IRON_BLOCK))
                         .aisle(
                                 "     ",
@@ -220,13 +238,13 @@ public class SiegeMachinesMultiblocks {
                         .where('g', BlockInWorldPredicateBuilder
                                 .of(WOOD_SUPPORT_BEAM_BLOCK.get())
                                 .requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.X)
-                                .requireProperty(FullLengthBeamBlock.DOWN, FullLengthBeamBlock.BeamConnection.NONE))
+                                .requireProperty(DOWN, FullLengthBeamBlock.BeamConnection.NONE))
                         .where('/', BlockInWorldPredicateBuilder
                                 .of(BlockTags.LOGS)
                                 .requireProperty(AXIS, Direction.Axis.Y))
                         .where('-', BlockInWorldPredicateBuilder.of(METAL_BEAM_BLOCK.get())
                                 .requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.X)
-                                .requireProperty(FullLengthBeamBlock.DOWN, FullLengthBeamBlock.BeamConnection.NONE))
+                                .requireProperty(DOWN, FullLengthBeamBlock.BeamConnection.NONE))
                         .where('|', BlockInWorldPredicateBuilder
                                 .of(BlockTags.WOODEN_FENCES))
                         .where('p', BlockInWorldPredicateBuilder
@@ -259,6 +277,73 @@ public class SiegeMachinesMultiblocks {
                         .addRequisite(leads2)
                         .addRequisite(planks2)
                         .addRequisite(nails2)
+        );
+
+        ItemStack ballistaStick = STICK.getDefaultInstance();
+        ItemStack ballistaCrossbow = CROSSBOW.getDefaultInstance();
+        ItemStack ballistaPlanks = WOOD_PLANK_ITEM.get().getDefaultInstance();
+        ItemStack ballistaSupportBeams = WOOD_SUPPORT_BEAM_ITEM.get().getDefaultInstance();
+        ItemStack ballistaIron = IRON_INGOT.getDefaultInstance();
+        ItemStack ballistaLeads = LEAD.getDefaultInstance();
+        ItemStack ballistaBars = IRON_BARS.getDefaultInstance();
+
+        ballistaStick.setCount(4);
+        ballistaPlanks.setCount(4);
+        ballistaSupportBeams.setCount(2);
+        ballistaIron.setCount(3);
+        ballistaLeads.setCount(2);
+
+        RECIPES.put(ezRl("ballista"),
+                builder("ballista")
+                        .where('|', zAxisWoodBeam().requireProperty(VERTICAL, true).requireProperty(UP, BeamConnection.PARALLEL))
+                        .where('-', zAxisWoodBeam().requireProperty(VERTICAL, false))
+                        .where('o', woodWheel(Direction.DOWN))
+                        .aisle(
+                                "o",
+                                "|"
+                        )
+                        .aisle(
+                                " ",
+                                "-"
+                        )
+                        .addRequisite(ballistaStick)
+                        .addRequisite(ballistaCrossbow)
+                        .addRequisite(ballistaPlanks)
+                        .addRequisite(ballistaSupportBeams)
+                        .addRequisite(ballistaIron)
+                        .addRequisite(ballistaLeads)
+                        .addRequisite(ballistaBars)
+        );
+
+        ItemStack mortarFlint = FLINT.getDefaultInstance();
+        ItemStack mortarIron = IRON_INGOT.getDefaultInstance();
+        ItemStack mortarIronBlock = Items.IRON_BLOCK.getDefaultInstance();
+        ItemStack mortarHooks = TRIPWIRE_HOOK.getDefaultInstance();
+        ItemStack mortarLeather = LEATHER.getDefaultInstance();
+
+        mortarIron.setCount(4);
+        mortarIronBlock.setCount(3);
+        mortarHooks.setCount(2);
+        mortarLeather.setCount(2);
+
+        RECIPES.put(ezRl("mortar"),
+                builder("mortar")
+                        .where('-', xAxisWoodBeam().requireProperty(LEFT, true).requireProperty(RIGHT, true))
+                        .where('m', xAxisWoodBeam().requireProperty(RIGHT, true))
+                        .where('+', BlockInWorldPredicateBuilder.of(METAL_BEAM_BLOCK.get()).requireProperty(LEFT, true).requireProperty(RIGHT, true))
+                        .where('r', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(WEST, true))
+                        .where('l', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(EAST, true))
+                        .where('<', woodWheel(Direction.EAST))
+                        .where('>', woodWheel(Direction.WEST))
+                        .aisle(" mm ")
+                        .aisle("<++>")
+                        .aisle(" -- ")
+                        .aisle(" lr ")
+                        .addRequisite(mortarFlint)
+                        .addRequisite(mortarIron)
+                        .addRequisite(mortarIronBlock)
+                        .addRequisite(mortarHooks)
+                        .addRequisite(mortarLeather)
         );
     }
 }

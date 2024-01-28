@@ -1,0 +1,136 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "siegemachines"
+    }
+  ],
+  "key": {
+    "+": {
+      "block": {
+        "Name": "nobullship:metal_beam",
+        "Properties": {
+          "left": [
+            "true"
+          ],
+          "right": [
+            "true"
+          ]
+        }
+      }
+    },
+    "-": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "x"
+          ],
+          "left": [
+            "true"
+          ],
+          "right": [
+            "true"
+          ]
+        }
+      }
+    },
+    "<": {
+      "block": {
+        "Name": "nobullship:wood_wheel",
+        "Properties": {
+          "facing": [
+            "east"
+          ]
+        }
+      }
+    },
+    ">": {
+      "block": {
+        "Name": "nobullship:wood_wheel",
+        "Properties": {
+          "facing": [
+            "west"
+          ]
+        }
+      }
+    },
+    "l": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "north": [
+            "true"
+          ]
+        }
+      }
+    },
+    "m": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "x"
+          ],
+          "right": [
+            "true"
+          ]
+        }
+      }
+    },
+    "r": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "north": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    }
+  },
+  "recipe": {
+    "layer0": [
+      " mm "
+    ],
+    "layer1": [
+      "<++>"
+    ],
+    "layer2": [
+      " -- "
+    ],
+    "layer3": [
+      " lr "
+    ]
+  },
+  "requisites": [
+    {
+      "item": "minecraft:flint"
+    },
+    {
+      "count": 4,
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "count": 3,
+      "item": "minecraft:iron_block"
+    },
+    {
+      "count": 2,
+      "item": "minecraft:tripwire_hook"
+    },
+    {
+      "count": 2,
+      "item": "minecraft:leather"
+    }
+  ],
+  "result": {
+    "entity": "siegemachines:mortar"
+  }
+}

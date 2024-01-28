@@ -14,8 +14,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static io.github.kawaiicakes.nobullship.Registry.WOOD_WHEEL_BLOCK;
+import static io.github.kawaiicakes.nobullship.Registry.*;
 import static io.github.kawaiicakes.nobullship.compat.recipes.siegemachines.SiegeMachinesMultiblocks.ezRl;
+import static net.minecraft.world.item.Items.CAULDRON;
+import static net.minecraft.world.item.Items.CROSSBOW;
 
 public class SiegeMachinesSchematics {
     protected static final Map<ResourceLocation, SchematicRecipeBuilder> RECIPES = new HashMap<>();
@@ -58,6 +60,23 @@ public class SiegeMachinesSchematics {
                         .addShapeless(Items.BOW.getDefaultInstance())
                         .shapedPattern("U> ")
                         .shapedPattern("---")
+        );
+
+        RECIPES.put(ezRl("ballista"),
+                builder("ballista")
+                        .defineShaped('^', Ingredient.of(CROSSBOW))
+                        .defineShaped('-', Ingredient.of(WOOD_PLANK_ITEM.get()))
+                        .shapedPattern(" ^ ")
+                        .shapedPattern("---")
+        );
+
+        RECIPES.put(ezRl("mortar"),
+                builder("mortar")
+                        .defineShaped('^', Ingredient.of(CAULDRON))
+                        .defineShaped('-', Ingredient.of(WOOD_PLANK_ITEM.get()))
+                        .defineShaped('o', Ingredient.of(WOOD_WHEEL_ITEM.get()))
+                        .shapedPattern(" ^ ")
+                        .shapedPattern("-o-")
         );
     }
 }

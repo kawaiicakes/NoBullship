@@ -1,0 +1,93 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "siegemachines"
+    }
+  ],
+  "key": {
+    "-": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "z"
+          ],
+          "vertical": [
+            "false"
+          ]
+        }
+      }
+    },
+    "o": {
+      "block": {
+        "Name": "nobullship:wood_wheel",
+        "Properties": {
+          "facing": [
+            "down"
+          ]
+        }
+      }
+    },
+    "|": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "z"
+          ],
+          "up": [
+            "PARALLEL"
+          ],
+          "vertical": [
+            "true"
+          ]
+        }
+      }
+    }
+  },
+  "recipe": {
+    "layer0": [
+      "o",
+      "|"
+    ],
+    "layer1": [
+      " ",
+      "-"
+    ]
+  },
+  "requisites": [
+    {
+      "count": 4,
+      "item": "minecraft:stick"
+    },
+    {
+      "item": "minecraft:crossbow",
+      "nbt": {
+        "Damage": 0
+      }
+    },
+    {
+      "count": 4,
+      "item": "nobullship:wood_plank"
+    },
+    {
+      "count": 2,
+      "item": "nobullship:wood_support_beam"
+    },
+    {
+      "count": 3,
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "count": 2,
+      "item": "minecraft:lead"
+    },
+    {
+      "item": "minecraft:iron_bars"
+    }
+  ],
+  "result": {
+    "entity": "siegemachines:ballista"
+  }
+}
