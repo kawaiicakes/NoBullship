@@ -4,6 +4,7 @@ import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockPatternBuilder;
 import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -16,8 +17,7 @@ import java.util.function.Consumer;
 
 import static io.github.kawaiicakes.nobullship.Registry.*;
 import static io.github.kawaiicakes.nobullship.compat.recipes.siegemachines.SiegeMachinesMultiblocks.ezRl;
-import static net.minecraft.world.item.Items.CAULDRON;
-import static net.minecraft.world.item.Items.CROSSBOW;
+import static net.minecraft.world.item.Items.*;
 
 public class SiegeMachinesSchematics {
     protected static final Map<ResourceLocation, SchematicRecipeBuilder> RECIPES = new HashMap<>();
@@ -77,6 +77,16 @@ public class SiegeMachinesSchematics {
                         .defineShaped('o', Ingredient.of(WOOD_WHEEL_ITEM.get()))
                         .shapedPattern(" ^ ")
                         .shapedPattern("-o-")
+        );
+
+        RECIPES.put(ezRl("trebuchet"),
+                builder("trebuchet")
+                        .defineShaped('w', Ingredient.of(WOOD_SUPPORT_BEAM_ITEM.get()))
+                        .defineShaped('l', Ingredient.of(LEAD))
+                        .defineShaped('-', Ingredient.of(ItemTags.LOGS))
+                        .shapedPattern(" w ")
+                        .shapedPattern(" w ")
+                        .shapedPattern("l--")
         );
     }
 }

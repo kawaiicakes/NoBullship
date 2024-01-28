@@ -1,0 +1,815 @@
+{
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "siegemachines"
+    }
+  ],
+  "key": {
+    "+": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "z"
+          ],
+          "left": [
+            "true"
+          ],
+          "right": [
+            "true"
+          ],
+          "vertical": [
+            "true"
+          ]
+        }
+      }
+    },
+    "-": {
+      "tag": {
+        "Name": "minecraft:logs",
+        "Properties": {
+          "axis": [
+            "x"
+          ]
+        }
+      }
+    },
+    ".": {
+      "tag": {
+        "Name": "minecraft:logs",
+        "Properties": {
+          "axis": [
+            "z"
+          ]
+        }
+      }
+    },
+    "<": {
+      "block": {
+        "Name": "nobullship:wood_wheel",
+        "Properties": {
+          "facing": [
+            "east"
+          ]
+        }
+      }
+    },
+    ">": {
+      "block": {
+        "Name": "nobullship:wood_wheel",
+        "Properties": {
+          "facing": [
+            "west"
+          ]
+        }
+      }
+    },
+    "A": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "z"
+          ],
+          "right": [
+            "true"
+          ],
+          "vertical": [
+            "true"
+          ]
+        }
+      }
+    },
+    "B": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "x"
+          ],
+          "vertical": [
+            "false"
+          ]
+        }
+      }
+    },
+    "^": {
+      "tag": {
+        "Name": "minecraft:logs",
+        "Properties": {
+          "axis": [
+            "y"
+          ]
+        }
+      }
+    },
+    "_": {
+      "tag": {
+        "Name": "minecraft:wooden_slabs",
+        "Properties": {
+          "type": [
+            "bottom"
+          ]
+        }
+      }
+    },
+    "b": {
+      "block": {
+        "Name": "nobullship:industrial_wood_polybeam",
+        "Properties": {
+          "north": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ]
+        }
+      }
+    },
+    "c": {
+      "block": {
+        "Name": "nobullship:metal_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "x"
+          ]
+        }
+      }
+    },
+    "d": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "e": {
+      "block": {
+        "Name": "nobullship:industrial_wood_polybeam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "north": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ]
+        }
+      }
+    },
+    "f": {
+      "block": {
+        "Name": "nobullship:industrial_wood_polybeam",
+        "Properties": {
+          "north": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "g": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ]
+        }
+      }
+    },
+    "h": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "south": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "i": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "north": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ]
+        }
+      }
+    },
+    "j": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "north": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "k": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "north": [
+            "true"
+          ]
+        }
+      }
+    },
+    "l": {
+      "block": {
+        "Name": "nobullship:industrial_wood_polybeam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ]
+        }
+      }
+    },
+    "m": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "z"
+          ],
+          "up": [
+            "PARALLEL"
+          ],
+          "vertical": [
+            "true"
+          ]
+        }
+      }
+    },
+    "n": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "down": [
+            "PARALLEL"
+          ],
+          "horizontal_axis": [
+            "z"
+          ],
+          "vertical": [
+            "true"
+          ]
+        }
+      }
+    },
+    "o": {
+      "block": {
+        "Name": "minecraft:barrel",
+        "Properties": {
+          "facing": [
+            "up",
+            "down"
+          ]
+        }
+      }
+    },
+    "p": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "z"
+          ],
+          "up": [
+            "PARALLEL"
+          ],
+          "vertical": [
+            "false"
+          ]
+        }
+      }
+    },
+    "q": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "z"
+          ],
+          "vertical": [
+            "true"
+          ]
+        }
+      }
+    },
+    "r": {
+      "block": {
+        "Name": "nobullship:industrial_wood_polybeam",
+        "Properties": {
+          "south": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "s": {
+      "block": {
+        "Name": "nobullship:industrial_wood_polybeam",
+        "Properties": {
+          "east": [
+            "true"
+          ],
+          "south": [
+            "true"
+          ],
+          "west": [
+            "true"
+          ]
+        }
+      }
+    },
+    "t": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "down": [
+            "PARALLEL"
+          ],
+          "horizontal_axis": [
+            "z"
+          ],
+          "up": [
+            "PARALLEL"
+          ],
+          "vertical": [
+            "true"
+          ]
+        }
+      }
+    },
+    "u": {
+      "tag": {
+        "Name": "minecraft:wooden_trapdoors",
+        "Properties": {
+          "facing": [
+            "west"
+          ],
+          "half": [
+            "bottom"
+          ],
+          "open": [
+            "true"
+          ]
+        }
+      }
+    },
+    "v": {
+      "tag": {
+        "Name": "minecraft:wooden_trapdoors",
+        "Properties": {
+          "facing": [
+            "east"
+          ],
+          "half": [
+            "bottom"
+          ],
+          "open": [
+            "true"
+          ]
+        }
+      }
+    },
+    "w": {
+      "block": {
+        "Name": "nobullship:metal_beam",
+        "Properties": {
+          "down": [
+            "PERPENDICULAR"
+          ],
+          "horizontal_axis": [
+            "x"
+          ],
+          "vertical": [
+            "false"
+          ]
+        }
+      }
+    },
+    "x": {
+      "block": {
+        "Name": "nobullship:industrial_wood_polybeam",
+        "Properties": {
+          "down": [
+            "true"
+          ],
+          "up": [
+            "true"
+          ]
+        }
+      }
+    },
+    "y": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "down": [
+            "true"
+          ],
+          "up": [
+            "true"
+          ]
+        }
+      }
+    },
+    "z": {
+      "block": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "horizontal_axis": [
+            "z"
+          ],
+          "left": [
+            "true"
+          ],
+          "vertical": [
+            "true"
+          ]
+        }
+      }
+    }
+  },
+  "recipe": {
+    "layer0": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "   n n   ",
+      "   n n   ",
+      "   zBA   "
+    ],
+    "layer1": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "   n n   ",
+      "   m m   ",
+      "   m m   ",
+      " kd. .dj "
+    ],
+    "layer10": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "   b_b   "
+    ],
+    "layer11": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "   b_b   "
+    ],
+    "layer12": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "   b_b   "
+    ],
+    "layer13": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "   ldr   "
+    ],
+    "layer2": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "   m m   ",
+      "   q q   ",
+      "   pop   ",
+      "    o    ",
+      "         ",
+      " i b_b i "
+    ],
+    "layer3": [
+      "    y    ",
+      "    y    ",
+      "    y    ",
+      "    y    ",
+      "    y    ",
+      "    y    ",
+      "    x    ",
+      "    x    ",
+      "    x    ",
+      "    x    ",
+      "    ^    ",
+      "    ^    ",
+      "    ^    ",
+      "   w^w   ",
+      "   q^q   ",
+      "   t^t   ",
+      "   u v   ",
+      "   q q   ",
+      "   tot   ",
+      "   qoq   ",
+      "   q q   ",
+      "hs-----sg"
+    ],
+    "layer4": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "   n n   ",
+      "   q q   ",
+      "   pop   ",
+      "    o    ",
+      "         ",
+      "i  b_b  i"
+    ],
+    "layer5": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "   m m   ",
+      "   n n   ",
+      "   n n   ",
+      "i  ._.  i"
+    ],
+    "layer6": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "   m m   ",
+      "   m m   ",
+      "kh ._. gj"
+    ],
+    "layer7": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      " i b_b i "
+    ],
+    "layer8": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      " kdf_edj "
+    ],
+    "layer9": [
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "         ",
+      "  <+c+>  ",
+      "   ^_^   "
+    ]
+  },
+  "result": {
+    "entity": "siegemachines:trebuchet"
+  }
+}

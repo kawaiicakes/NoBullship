@@ -1,0 +1,36 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "siegemachines"
+        }
+      ],
+      "recipe": {
+        "type": "nobullship:schematic_workbench",
+        "declaration": {
+          "key": {
+            "-": {
+              "tag": "minecraft:logs"
+            },
+            "l": {
+              "item": "minecraft:lead"
+            },
+            "w": {
+              "item": "nobullship:wood_support_beam"
+            }
+          },
+          "output_id": "siegemachines:trebuchet",
+          "shaped_input": [
+            " w ",
+            " w ",
+            "l--"
+          ]
+        },
+        "shapeless_input": []
+      }
+    }
+  ]
+}

@@ -10,10 +10,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.state.properties.AttachFace;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.Half;
-import net.minecraft.world.level.block.state.properties.StairsShape;
+import net.minecraft.world.level.block.state.properties.*;
 import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 
 import java.util.HashMap;
@@ -94,6 +91,12 @@ public class SiegeMachinesMultiblocks {
     protected static BlockInWorldPredicateBuilder xAxisWoodBeam() {
         return BlockInWorldPredicateBuilder
                 .of(WOOD_SUPPORT_BEAM_BLOCK.get())
+                .requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.X);
+    }
+
+    protected static BlockInWorldPredicateBuilder xAxisMetalBeam() {
+        return BlockInWorldPredicateBuilder
+                .of(METAL_BEAM_BLOCK.get())
                 .requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.X);
     }
 
@@ -344,6 +347,381 @@ public class SiegeMachinesMultiblocks {
                         .addRequisite(mortarIronBlock)
                         .addRequisite(mortarHooks)
                         .addRequisite(mortarLeather)
+        );
+
+        RECIPES.put(ezRl("trebuchet"),
+                builder("trebuchet")
+                        .where('-', BlockInWorldPredicateBuilder.of(BlockTags.LOGS).requireProperty(AXIS, Direction.Axis.X))
+                        .where('.', BlockInWorldPredicateBuilder.of(BlockTags.LOGS).requireProperty(AXIS, Direction.Axis.Z))
+                        .where('^', BlockInWorldPredicateBuilder.of(BlockTags.LOGS).requireProperty(AXIS, Direction.Axis.Y))
+                        .where('b', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(SOUTH, true))
+                        .where('l', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(EAST, true))
+                        .where('r', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(WEST, true))
+                        .where('d', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(EAST, true).requireProperty(WEST, true))
+                        .where('_', BlockInWorldPredicateBuilder.of(BlockTags.WOODEN_SLABS).requireProperty(SLAB_TYPE, SlabType.BOTTOM))
+                        .where('<', woodWheel(Direction.EAST))
+                        .where('>', woodWheel(Direction.WEST))
+                        .where('+', zAxisWoodBeam().requireProperty(VERTICAL, true).requireProperty(LEFT, true).requireProperty(RIGHT, true))
+                        .where('c', xAxisMetalBeam())
+                        .where('e', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(SOUTH, true).requireProperty(EAST, true))
+                        .where('f', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(SOUTH, true).requireProperty(WEST, true))
+                        .where('g', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(EAST, true))
+                        .where('h', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(WEST, true))
+                        .where('i', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(NORTH, true))
+                        .where('j', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(WEST, true))
+                        .where('k', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(EAST, true))
+                        .where('m', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, true).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(UP, BeamConnection.PARALLEL))
+                        .where('n', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, true).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(DOWN, BeamConnection.PARALLEL))
+                        .where('o', BlockInWorldPredicateBuilder.of(Blocks.BARREL).requireProperty(FACING, Direction.UP).requireProperty(FACING, Direction.DOWN))
+                        .where('p', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, false).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(UP, BeamConnection.PARALLEL))
+                        .where('q', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, true).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z))
+                        .where('s', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(WEST, true).requireProperty(EAST, true))
+                        .where('t', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, true).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(DOWN, BeamConnection.PARALLEL).requireProperty(UP, BeamConnection.PARALLEL))
+                        .where('u', BlockInWorldPredicateBuilder.of(BlockTags.WOODEN_TRAPDOORS).requireProperty(BlockStateProperties.FACING, Direction.WEST).requireProperty(OPEN, true).requireProperty(HALF, Half.BOTTOM))
+                        .where('v', BlockInWorldPredicateBuilder.of(BlockTags.WOODEN_TRAPDOORS).requireProperty(BlockStateProperties.FACING, Direction.EAST).requireProperty(OPEN, true).requireProperty(HALF, Half.BOTTOM))
+                        .where('w', BlockInWorldPredicateBuilder.of(METAL_BEAM_BLOCK.get()).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.X).requireProperty(VERTICAL, false).requireProperty(DOWN, BeamConnection.PERPENDICULAR))
+                        .where('x', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(BlockStateProperties.UP, true).requireProperty(BlockStateProperties.DOWN, true))
+                        .where('y', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(BlockStateProperties.UP, true).requireProperty(BlockStateProperties.DOWN, true))
+                        .where('z', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(VERTICAL, true).requireProperty(LEFT, true))
+                        .where('A', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(VERTICAL, true).requireProperty(RIGHT, true))
+                        .where('B', xAxisWoodBeam().requireProperty(VERTICAL, false))
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "   n n   ",
+                                "   n n   ",
+                                "   zBA   "
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "   n n   ",
+                                "   m m   ",
+                                "   m m   ",
+                                " kd. .dj "
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "   m m   ",
+                                "   q q   ",
+                                "   pop   ",
+                                "    o    ",
+                                "         ",
+                                " i b_b i "
+                        )
+                        .aisle(
+                                "    y    ",
+                                "    y    ",
+                                "    y    ",
+                                "    y    ",
+                                "    y    ",
+                                "    y    ",
+                                "    x    ",
+                                "    x    ",
+                                "    x    ",
+                                "    x    ",
+                                "    ^    ",
+                                "    ^    ",
+                                "    ^    ",
+                                "   w^w   ",
+                                "   q^q   ",
+                                "   t^t   ",
+                                "   u v   ",
+                                "   q q   ",
+                                "   tot   ",
+                                "   qoq   ",
+                                "   q q   ",
+                                "hs-----sg"
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "   n n   ",
+                                "   q q   ",
+                                "   pop   ",
+                                "    o    ",
+                                "         ",
+                                "i  b_b  i"
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "   m m   ",
+                                "   n n   ",
+                                "   n n   ",
+                                "i  ._.  i"
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "   m m   ",
+                                "   m m   ",
+                                "kh ._. gj"
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                " i b_b i "
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                " kdf_edj "
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "  <+c+>  ",
+                                "   ^_^   "
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "   b_b   "
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "   b_b   "
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "   b_b   "
+                        )
+                        .aisle(
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "         ",
+                                "   ldr   "
+                        )
+
         );
     }
 }
