@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "no_bs_polybeams",
+  "key": {
+    "m": {
+      "item": "nobullship:simple_metal_beam"
+    }
+  },
+  "pattern": [
+    " m ",
+    "mmm",
+    " m "
+  ],
+  "result": {
+    "count": 4,
+    "item": "nobullship:industrial_metal_polybeam"
+  }
+}

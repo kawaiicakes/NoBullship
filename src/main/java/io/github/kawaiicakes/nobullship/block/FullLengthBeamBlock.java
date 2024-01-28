@@ -251,7 +251,7 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
             }
         } else if (blockAbove.getBlock() instanceof WheelBlock && blockAbove.getValue(FACING).equals(upAttachmentDirection)) {
             connectionAbove = BeamConnection.PARALLEL;
-        } else if (blockAbove.getBlock() instanceof SimpleBeamBlock.ThinBeamBlock || blockAbove.is(FL_BEAM_CONNECTOR)) {
+        } else if (blockAbove.getBlock() instanceof SimpleBeamBlock.Polybeam || blockAbove.is(FL_BEAM_CONNECTOR)) {
             connectionAbove = BeamConnection.PARALLEL;
         }
 
@@ -265,7 +265,7 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
             }
         } else if (blockBelow.getBlock() instanceof WheelBlock && blockBelow.getValue(FACING).equals(downAttachmentDirection)) {
             connectionBelow = BeamConnection.PARALLEL;
-        } else if (blockBelow.getBlock() instanceof SimpleBeamBlock.ThinBeamBlock || blockBelow.is(FL_BEAM_CONNECTOR)) {
+        } else if (blockBelow.getBlock() instanceof SimpleBeamBlock.Polybeam || blockBelow.is(FL_BEAM_CONNECTOR)) {
             connectionBelow = BeamConnection.PARALLEL;
         }
 
@@ -285,10 +285,10 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
         boolean attachesOnLeft =
                 blockOnLeft.getBlock() instanceof FullLengthBeamBlock ||
                 (blockOnLeft.getBlock() instanceof WheelBlock && blockOnLeft.getValue(FACING).equals(leftAttachmentDirection)) ||
-                blockOnLeft.getBlock() instanceof SimpleBeamBlock.ThinBeamBlock || blockOnLeft.is(FL_BEAM_CONNECTOR);
+                blockOnLeft.getBlock() instanceof SimpleBeamBlock.Polybeam || blockOnLeft.is(FL_BEAM_CONNECTOR);
         boolean attachesOnRight = blockOnRight.getBlock() instanceof FullLengthBeamBlock||
                 (blockOnRight.getBlock() instanceof WheelBlock && blockOnRight.getValue(FACING).equals(rightAttachmentDirection)) ||
-                blockOnRight.getBlock() instanceof SimpleBeamBlock.ThinBeamBlock || blockOnRight.is(FL_BEAM_CONNECTOR);
+                blockOnRight.getBlock() instanceof SimpleBeamBlock.Polybeam || blockOnRight.is(FL_BEAM_CONNECTOR);
 
         boolean isInWater = pContext.getLevel().getFluidState(placementPos).getType() == Fluids.WATER;
 
@@ -316,7 +316,7 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
         boolean neighborIsFLBeam = neighborBlock instanceof FullLengthBeamBlock;
         boolean isNeighborVertical = neighborIsFLBeam ? pNeighborState.getValue(VERTICAL) : false;
         boolean neighborIsWheel = neighborBlock instanceof WheelBlock;
-        boolean neighborIsPolybeam = neighborBlock instanceof SimpleBeamBlock.ThinBeamBlock;
+        boolean neighborIsPolybeam = neighborBlock instanceof SimpleBeamBlock.Polybeam;
         boolean neighborIsTagged = pNeighborState.is(FL_BEAM_CONNECTOR);
         Direction wheelDirection = neighborIsWheel ? pNeighborState.getValue(FACING) : null;
 

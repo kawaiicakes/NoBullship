@@ -131,8 +131,8 @@ public abstract class SimpleBeamBlock extends PipeBlock implements SimpleWaterlo
                 || blockState.is(POLYBEAM_CONNECTOR);
     }
 
-    public static class ThinBeamBlock extends SimpleBeamBlock {
-        public ThinBeamBlock(Properties pProperties) {
+    public static class Polybeam extends SimpleBeamBlock {
+        public Polybeam(Properties pProperties) {
             super(0.125F, pProperties
                     .noOcclusion()
                     .requiresCorrectToolForDrops()
@@ -153,6 +153,26 @@ public abstract class SimpleBeamBlock extends PipeBlock implements SimpleWaterlo
         @Override
         public boolean isAttachableTo(BlockState blockState, Direction attachmentDirection) {
             return super.isAttachableTo(blockState, attachmentDirection) || blockState.getBlock() instanceof FullLengthBeamBlock;
+        }
+    }
+
+    public static class IndustrialPolybeam extends SimpleBeamBlock {
+        public IndustrialPolybeam(Properties pProperties) {
+            super(0.25F, pProperties
+                    .noOcclusion()
+                    .requiresCorrectToolForDrops()
+                    .isViewBlocking((x,y,z) -> false)
+                    .isValidSpawn((w,x,y,z) -> false));
+        }
+
+        @Override
+        public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
+            return false;
+        }
+
+        @Override
+        public boolean propagatesSkylightDown(BlockState pState, BlockGetter pReader, BlockPos pPos) {
+            return true;
         }
     }
 }

@@ -60,15 +60,25 @@ public class Registry {
     public static final RegistryObject<Block> WOOD_WHEEL_BLOCK
             = BLOCK_REGISTRY.register("wood_wheel", WheelBlock.WoodWheelBlock::new);
     public static final RegistryObject<Block> SIMPLE_WOOD_BEAM_BLOCK
-            = BLOCK_REGISTRY.register("simple_wood_beam", () -> new SimpleBeamBlock.ThinBeamBlock(BlockBehaviour.Properties
+            = BLOCK_REGISTRY.register("simple_wood_beam", () -> new SimpleBeamBlock.Polybeam(BlockBehaviour.Properties
             .of(Material.WOOD)
             .sound(SoundType.BAMBOO)
             .strength(2.0F)));
     public static final RegistryObject<Block> SIMPLE_METAL_BEAM_BLOCK
-            = BLOCK_REGISTRY.register("simple_metal_beam", () -> new SimpleBeamBlock.ThinBeamBlock(BlockBehaviour.Properties
+            = BLOCK_REGISTRY.register("simple_metal_beam", () -> new SimpleBeamBlock.Polybeam(BlockBehaviour.Properties
             .of(Material.METAL)
             .sound(SoundType.METAL)
             .strength(5.0F, 6.0F)));
+    public static final RegistryObject<Block> INDUSTRIAL_WOOD_POLYBEAM_BLOCK
+            = BLOCK_REGISTRY.register("industrial_wood_polybeam", () -> new SimpleBeamBlock.IndustrialPolybeam(BlockBehaviour.Properties
+            .of(Material.WOOD)
+            .sound(SoundType.LADDER)
+            .strength(3.0F)));
+    public static final RegistryObject<Block> INDUSTRIAL_METAL_POLYBEAM_BLOCK
+            = BLOCK_REGISTRY.register("industrial_metal_polybeam", () -> new SimpleBeamBlock.IndustrialPolybeam(BlockBehaviour.Properties
+            .of(Material.METAL)
+            .sound(SoundType.METAL)
+            .strength(5.6F, 6.6F)));
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
             = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
     public static final RegistryObject<BlockItem> WILDCARD_ITEM
@@ -105,7 +115,16 @@ public class Registry {
     public static final RegistryObject<BlockItem> SIMPLE_METAL_BEAM_ITEM
             = ITEM_REGISTRY.register(
             "simple_metal_beam",
-            () -> new BlockItem(SIMPLE_METAL_BEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
+            () -> new BlockItem(SIMPLE_METAL_BEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB)));
+    public static final RegistryObject<BlockItem> INDUSTRIAL_WOOD_POLYBEAM_ITEM
+            = ITEM_REGISTRY.register(
+            "industrial_wood_polybeam",
+            () -> new BlockItem(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
+    public static final RegistryObject<BlockItem> INDUSTRIAL_METAL_POLYBEAM_ITEM
+            = ITEM_REGISTRY.register(
+            "industrial_metal_polybeam",
+            () -> new BlockItem(INDUSTRIAL_METAL_POLYBEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
     );
     public static final RegistryObject<Item> PITCH_ITEM
             = ITEM_REGISTRY.register(

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_beam_block.nobullship.simple_metal_beam": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "nobullship:simple_metal_beam"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "nobullship:industrial_metal_polybeam"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_beam_block.nobullship.simple_metal_beam",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "nobullship:industrial_metal_polybeam"
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "nobullship:block/industrial_wood_polybeam"
+      },
+      "when": {
+        "north": "true|false"
+      }
+    },
+    {
+      "apply": {
+        "model": "nobullship:block/industrial_wood_polybeam_side"
+      },
+      "when": {
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "nobullship:block/industrial_wood_polybeam_side",
+        "y": 90
+      },
+      "when": {
+        "east": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "nobullship:block/industrial_wood_polybeam_side",
+        "y": 180
+      },
+      "when": {
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "nobullship:block/industrial_wood_polybeam_side",
+        "y": 270
+      },
+      "when": {
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "nobullship:block/industrial_wood_polybeam_side",
+        "x": 270
+      },
+      "when": {
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "nobullship:block/industrial_wood_polybeam_side",
+        "x": 90
+      },
+      "when": {
+        "down": "true"
+      }
+    }
+  ]
+}

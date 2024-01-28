@@ -23,8 +23,10 @@ public class NoBullshipRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildCraftingRecipes(Consumer<FinishedRecipe> pFinishedRecipeConsumer) {
-        materialToSimpleBeam(pFinishedRecipeConsumer, ItemTags.PLANKS, SIMPLE_WOOD_BEAM_BLOCK.get());
-        materialToSimpleBeam(pFinishedRecipeConsumer, Tags.Items.INGOTS_IRON, SIMPLE_METAL_BEAM_BLOCK.get());
+        materialToPolybeam(pFinishedRecipeConsumer, ItemTags.PLANKS, SIMPLE_WOOD_BEAM_BLOCK.get());
+        materialToPolybeam(pFinishedRecipeConsumer, Tags.Items.INGOTS_IRON, SIMPLE_METAL_BEAM_BLOCK.get());
+        itemToPolybeam(pFinishedRecipeConsumer, SIMPLE_WOOD_BEAM_ITEM.get(), INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get());
+        itemToPolybeam(pFinishedRecipeConsumer, SIMPLE_METAL_BEAM_ITEM.get(), INDUSTRIAL_METAL_POLYBEAM_BLOCK.get());
 
         ShapedRecipeBuilder.shaped(WOOD_PLANK_ITEM.get(), 16)
                 .define('s', Ingredient.of(ItemTags.WOODEN_SLABS))
@@ -69,15 +71,26 @@ public class NoBullshipRecipeProvider extends RecipeProvider {
                 .save(pFinishedRecipeConsumer);
     }
 
-    public static void materialToSimpleBeam(Consumer<FinishedRecipe> pFinishedRecipeConsumer, TagKey<Item> material, Block beam) {
+    public static void materialToPolybeam(Consumer<FinishedRecipe> pFinishedRecipeConsumer, TagKey<Item> material, Block beam) {
         ShapedRecipeBuilder.shaped(beam, 6)
                 .define('m', material)
                 .define('p', Ingredient.of(PITCH_ITEM.get()))
                 .pattern("pmp")
                 .pattern("mmm")
                 .pattern("pmp")
-                .group("no_bs_simple_beams")
+                .group("no_bs_polybeams")
                 .unlockedBy("has_beam_" + material.location().getPath(), has(material))
+                .save(pFinishedRecipeConsumer);
+    }
+
+    public static void itemToPolybeam(Consumer<FinishedRecipe> pFinishedRecipeConsumer, Item material, Block beam) {
+        ShapedRecipeBuilder.shaped(beam, 4)
+                .define('m', material)
+                .pattern(" m ")
+                .pattern("mmm")
+                .pattern(" m ")
+                .group("no_bs_polybeams")
+                .unlockedBy("has_beam_" + material.getDescriptionId(), has(material))
                 .save(pFinishedRecipeConsumer);
     }
 }
