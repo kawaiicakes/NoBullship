@@ -106,94 +106,47 @@ public abstract class FullLengthBeamBlock extends Block implements SimpleWaterlo
         };
     }
 
-    // TODO: this implementation looks like it's wrong
     @SuppressWarnings("deprecation")
     @Override
     public BlockState rotate(BlockState pState, Rotation pRotation) {
         Direction.Axis axis = pState.getValue(HORIZONTAL_AXIS);
-        boolean isVertical = pState.getValue(VERTICAL);
-        BeamConnection connectionAbove = pState.getValue(UP);
-        BeamConnection connectionBelow = pState.getValue(DOWN);
         boolean connectionLeft = pState.getValue(LEFT);
         boolean connectionRight = pState.getValue(RIGHT);
 
         final Direction.Axis rotatedAxis = axis.equals(Direction.Axis.Z) ? Direction.Axis.X : Direction.Axis.Z;
-        final boolean xorUpDownHasConnection = !connectionAbove.equals(BeamConnection.NONE) ^ !connectionBelow.equals(BeamConnection.NONE);
-        final BeamConnection invertedAbove = connectionAbove.equals(BeamConnection.PARALLEL) ? BeamConnection.PERPENDICULAR : BeamConnection.PARALLEL;
-        final BeamConnection invertedBelow = connectionBelow.equals(BeamConnection.PARALLEL) ? BeamConnection.PERPENDICULAR : BeamConnection.PARALLEL;
 
         switch (pRotation) {
             case NONE -> {
                 return pState;
             }
             case CLOCKWISE_90 -> {
-                axis = rotatedAxis;
-
-                if (isVertical) {
-                    final BeamConnection tempUp = connectionAbove;
-                    final BeamConnection tempDown = connectionBelow;
-                    final boolean tempLeft = connectionLeft;
-                    final boolean tempRight = connectionRight;
-
-                    if (connectionLeft ^ connectionRight) {
-                        connectionLeft = tempRight;
-                        connectionRight = tempLeft;
-                    }
-
-                    if (xorUpDownHasConnection) {
-                        connectionAbove = tempDown;
-                        connectionBelow = tempUp;
-                    }
-                } else {
-                    final boolean tempLeft = connectionLeft;
-                    final boolean tempRight = connectionRight;
-
-                    if (connectionLeft ^ connectionRight) {
-                        connectionLeft = tempRight;
-                        connectionRight = tempLeft;
-                    }
-
-                    if (!connectionAbove.equals(BeamConnection.NONE)) {
-                        connectionAbove = invertedAbove;
-                    }
-
-                    if (!connectionBelow.equals(BeamConnection.NONE)) {
-                        connectionBelow = invertedBelow;
-                    }
+                if (axis.equals(Direction.Axis.X)) {
+                    axis = rotatedAxis;
+                    break;
                 }
+
+                axis = rotatedAxis;
+                connectionLeft = connectionRight;
+                connectionRight = pState.getValue(LEFT);
             }
             case CLOCKWISE_180 -> {
-                if (connectionLeft ^ connectionRight) {
-                    connectionLeft = !connectionLeft;
-                    connectionRight = !connectionRight;
-                }
-
-                if (xorUpDownHasConnection) {
-                    final BeamConnection tempAbove = connectionAbove;
-
-                    connectionAbove = connectionBelow;
-                    connectionBelow = tempAbove;
-                }
+                connectionLeft = connectionRight;
+                connectionRight = pState.getValue(LEFT);
             }
             case COUNTERCLOCKWISE_90 -> {
-                axis = rotatedAxis;
-
-                if (!isVertical) {
-                    if (!connectionAbove.equals(BeamConnection.NONE)) {
-                        connectionAbove = invertedAbove;
-                    }
-
-                    if (!connectionBelow.equals(BeamConnection.NONE)) {
-                        connectionBelow = invertedBelow;
-                    }
+                if (axis.equals(Direction.Axis.Z)) {
+                    axis = rotatedAxis;
+                    break;
                 }
+
+                axis = rotatedAxis;
+                connectionLeft = connectionRight;
+                connectionRight = pState.getValue(LEFT);
             }
         }
 
         return pState
                 .setValue(HORIZONTAL_AXIS, axis)
-                .setValue(UP, connectionAbove)
-                .setValue(DOWN, connectionBelow)
                 .setValue(LEFT, connectionLeft)
                 .setValue(RIGHT, connectionRight);
     }
