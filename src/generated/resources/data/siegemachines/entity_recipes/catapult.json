@@ -11,7 +11,7 @@
         "Name": "nobullship:metal_beam",
         "Properties": {
           "down": [
-            "NONE"
+            "none"
           ],
           "horizontal_axis": [
             "x"
@@ -47,7 +47,7 @@
         "Name": "nobullship:wood_support_beam",
         "Properties": {
           "down": [
-            "NONE"
+            "none"
           ],
           "horizontal_axis": [
             "x"

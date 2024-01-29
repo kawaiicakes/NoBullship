@@ -268,7 +268,7 @@
             "z"
           ],
           "up": [
-            "PARALLEL"
+            "parallel"
           ],
           "vertical": [
             "true"
@@ -281,7 +281,7 @@
         "Name": "nobullship:wood_support_beam",
         "Properties": {
           "down": [
-            "PARALLEL"
+            "parallel"
           ],
           "horizontal_axis": [
             "z"
@@ -311,7 +311,7 @@
             "z"
           ],
           "up": [
-            "PARALLEL"
+            "parallel"
           ],
           "vertical": [
             "false"
@@ -366,13 +366,13 @@
         "Name": "nobullship:wood_support_beam",
         "Properties": {
           "down": [
-            "PARALLEL"
+            "parallel"
           ],
           "horizontal_axis": [
             "z"
           ],
           "up": [
-            "PARALLEL"
+            "parallel"
           ],
           "vertical": [
             "true"
@@ -417,7 +417,7 @@
         "Name": "nobullship:metal_beam",
         "Properties": {
           "down": [
-            "PERPENDICULAR"
+            "perpendicular"
           ],
           "horizontal_axis": [
             "x"
