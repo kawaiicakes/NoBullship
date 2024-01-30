@@ -225,12 +225,11 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
             throw new IllegalArgumentException(pSymbol + " is a reserved character!");
         }
 
-        if (this.hasSchematicBlock) {
-            LOGGER.error("You may not use more than one schematic block in a recipe!");
-            throw new IllegalArgumentException("You may not use more than one schematic block in a recipe!");
-        }
-
         if (block.equals(BlockInWorldPredicateBuilder.SCHEMATIC)) {
+            if (this.hasSchematicBlock) {
+                LOGGER.error("You may not use more than one schematic block in a recipe!");
+                throw new IllegalArgumentException("You may not use more than one schematic block in a recipe!");
+            }
             this.hasSchematicBlock = true;
         }
 
