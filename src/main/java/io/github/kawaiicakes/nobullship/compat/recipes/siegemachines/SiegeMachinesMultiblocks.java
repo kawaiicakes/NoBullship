@@ -355,8 +355,8 @@ public class SiegeMachinesMultiblocks {
                         .where('.', BlockInWorldPredicateBuilder.of(BlockTags.LOGS).requireProperty(AXIS, Direction.Axis.Z))
                         .where('^', BlockInWorldPredicateBuilder.of(BlockTags.LOGS).requireProperty(AXIS, Direction.Axis.Y))
                         .where('b', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(SOUTH, true))
-                        .where('l', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(EAST, true))
-                        .where('r', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(WEST, true))
+                        .where('l', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(EAST, true))
+                        .where('r', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(WEST, true))
                         .where('d', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(EAST, true).requireProperty(WEST, true))
                         .where('_', BlockInWorldPredicateBuilder.of(BlockTags.WOODEN_SLABS).requireProperty(SLAB_TYPE, SlabType.BOTTOM))
                         .where('<', woodWheel(Direction.EAST))
@@ -365,17 +365,17 @@ public class SiegeMachinesMultiblocks {
                         .where('c', xAxisMetalBeam())
                         .where('e', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(SOUTH, true).requireProperty(EAST, true))
                         .where('f', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(SOUTH, true).requireProperty(WEST, true))
-                        .where('g', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(EAST, true))
-                        .where('h', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(WEST, true))
+                        .where('g', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(WEST, true))
+                        .where('h', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(EAST, true))
                         .where('i', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(NORTH, true))
                         .where('j', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(WEST, true))
                         .where('k', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(EAST, true))
-                        .where('m', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, true).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(UP, BeamConnection.PARALLEL))
-                        .where('n', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, true).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(DOWN, BeamConnection.PARALLEL))
+                        .where('m', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, true).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(DOWN, BeamConnection.PARALLEL))
+                        .where('n', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, true).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(UP, BeamConnection.PARALLEL))
                         .where('o', BlockInWorldPredicateBuilder.of(Blocks.BARREL).requireProperty(FACING, Direction.UP).requireProperty(FACING, Direction.DOWN))
                         .where('p', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, false).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(UP, BeamConnection.PARALLEL))
                         .where('q', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, true).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z))
-                        .where('s', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(SOUTH, true).requireProperty(WEST, true).requireProperty(EAST, true))
+                        .where('s', BlockInWorldPredicateBuilder.of(INDUSTRIAL_WOOD_POLYBEAM_BLOCK.get()).requireProperty(NORTH, true).requireProperty(WEST, true).requireProperty(EAST, true))
                         .where('t', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(VERTICAL, true).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(DOWN, BeamConnection.PARALLEL).requireProperty(UP, BeamConnection.PARALLEL))
                         .where('u', BlockInWorldPredicateBuilder.of(BlockTags.WOODEN_TRAPDOORS).requireProperty(BlockStateProperties.FACING, Direction.WEST).requireProperty(OPEN, true).requireProperty(HALF, Half.BOTTOM))
                         .where('v', BlockInWorldPredicateBuilder.of(BlockTags.WOODEN_TRAPDOORS).requireProperty(BlockStateProperties.FACING, Direction.EAST).requireProperty(OPEN, true).requireProperty(HALF, Half.BOTTOM))
@@ -432,7 +432,7 @@ public class SiegeMachinesMultiblocks {
                                 "   n n   ",
                                 "   m m   ",
                                 "   m m   ",
-                                " kd. .dj "
+                                " hd. .dg "
                         )
                         .aisle(
                                 "         ",
@@ -451,7 +451,7 @@ public class SiegeMachinesMultiblocks {
                                 "         ",
                                 "         ",
                                 "         ",
-                                "   m m   ",
+                                "   n n   ",
                                 "   q q   ",
                                 "   pop   ",
                                 "    o    ",
@@ -459,6 +459,7 @@ public class SiegeMachinesMultiblocks {
                                 " i b_b i "
                         )
                         .aisle(
+                                "    y    ",
                                 "    y    ",
                                 "    y    ",
                                 "    y    ",
@@ -476,7 +477,6 @@ public class SiegeMachinesMultiblocks {
                                 "   q^q   ",
                                 "   t^t   ",
                                 "   u v   ",
-                                "   q q   ",
                                 "   tot   ",
                                 "   qoq   ",
                                 "   q q   ",
@@ -499,7 +499,7 @@ public class SiegeMachinesMultiblocks {
                                 "         ",
                                 "         ",
                                 "         ",
-                                "   n n   ",
+                                "   m m   ",
                                 "   q q   ",
                                 "   pop   ",
                                 "    o    ",
@@ -552,7 +552,7 @@ public class SiegeMachinesMultiblocks {
                                 "         ",
                                 "   m m   ",
                                 "   m m   ",
-                                "kh ._. gj"
+                                "kg ._. hj"
                         )
                         .aisle(
                                 "         ",

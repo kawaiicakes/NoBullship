@@ -194,10 +194,10 @@
       "block": {
         "Name": "nobullship:simple_wood_beam",
         "Properties": {
-          "east": [
+          "south": [
             "true"
           ],
-          "south": [
+          "west": [
             "true"
           ]
         }
@@ -207,10 +207,10 @@
       "block": {
         "Name": "nobullship:simple_wood_beam",
         "Properties": {
-          "south": [
+          "east": [
             "true"
           ],
-          "west": [
+          "south": [
             "true"
           ]
         }
@@ -262,7 +262,7 @@
           "east": [
             "true"
           ],
-          "south": [
+          "north": [
             "true"
           ]
         }
@@ -272,11 +272,11 @@
       "block": {
         "Name": "nobullship:wood_support_beam",
         "Properties": {
+          "down": [
+            "parallel"
+          ],
           "horizontal_axis": [
             "z"
-          ],
-          "up": [
-            "parallel"
           ],
           "vertical": [
             "true"
@@ -288,11 +288,11 @@
       "block": {
         "Name": "nobullship:wood_support_beam",
         "Properties": {
-          "down": [
-            "parallel"
-          ],
           "horizontal_axis": [
             "z"
+          ],
+          "up": [
+            "parallel"
           ],
           "vertical": [
             "true"
@@ -344,7 +344,7 @@
       "block": {
         "Name": "nobullship:industrial_wood_polybeam",
         "Properties": {
-          "south": [
+          "north": [
             "true"
           ],
           "west": [
@@ -360,7 +360,7 @@
           "east": [
             "true"
           ],
-          "south": [
+          "north": [
             "true"
           ],
           "west": [
@@ -526,7 +526,7 @@
       "   n n   ",
       "   m m   ",
       "   m m   ",
-      " kd. .dj "
+      " hd. .dg "
     ],
     "layer10": [
       "         ",
@@ -641,7 +641,7 @@
       "         ",
       "         ",
       "         ",
-      "   m m   ",
+      "   n n   ",
       "   q q   ",
       "   pop   ",
       "    o    ",
@@ -649,6 +649,7 @@
       " i b_b i "
     ],
     "layer3": [
+      "    y    ",
       "    y    ",
       "    y    ",
       "    y    ",
@@ -666,7 +667,6 @@
       "   q^q   ",
       "   t^t   ",
       "   u v   ",
-      "   q q   ",
       "   tot   ",
       "   qoq   ",
       "   q q   ",
@@ -689,7 +689,7 @@
       "         ",
       "         ",
       "         ",
-      "   n n   ",
+      "   m m   ",
       "   q q   ",
       "   pop   ",
       "    o    ",
@@ -742,7 +742,7 @@
       "         ",
       "   m m   ",
       "   m m   ",
-      "kh ._. gj"
+      "kg ._. hj"
     ],
     "layer7": [
       "         ",
