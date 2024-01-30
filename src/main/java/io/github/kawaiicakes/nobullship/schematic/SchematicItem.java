@@ -196,6 +196,11 @@ public class SchematicItem extends Item {
                 Math.max((int) (recipeSize * Config.COOLDOWN_MULTIPLIER.get()), 20 * (Config.MINIMUM_COOLDOWN.get()).intValue()),
                 20 * Config.MAXIMUM_COOLDOWN.get().intValue()
         );
+        if (recipe != null && recipe.hasSchematicBlock()) {
+            int tempTicks = cooldownTimeTicks;
+            cooldownTimeTicks = Math.min(tempTicks, 15);
+        }
+
         pContext.getPlayer().getCooldowns().addCooldown(this, cooldownTimeTicks);
         manager.incrementGlobalCooldown(cooldownTimeTicks);
 
