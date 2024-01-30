@@ -94,6 +94,14 @@
         }
       }
     },
+    "C": {
+      "blockstate": {
+        "Name": "nobullship:schematic_block",
+        "Properties": {
+          "facing": "north"
+        }
+      }
+    },
     "^": {
       "tag": {
         "Name": "minecraft:logs",
@@ -686,7 +694,7 @@
       "   pop   ",
       "    o    ",
       "         ",
-      "i  b_b  i"
+      "i  bCb  i"
     ],
     "layer5": [
       "         ",
