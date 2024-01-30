@@ -386,6 +386,7 @@ public class SiegeMachinesMultiblocks {
                         .where('A', BlockInWorldPredicateBuilder.of(WOOD_SUPPORT_BEAM_BLOCK.get()).requireProperty(FullLengthBeamBlock.HORIZONTAL_AXIS, Direction.Axis.Z).requireProperty(VERTICAL, true).requireProperty(RIGHT, true))
                         .where('B', xAxisWoodBeam().requireProperty(VERTICAL, false))
                         .where('C', BlockInWorldPredicateBuilder.SCHEMATIC)
+                        .where('D', BlockInWorldPredicateBuilder.of(SIMPLE_WOOD_BEAM_BLOCK.get()).requireProperty(BlockStateProperties.DOWN, true))
                         .aisle(
                                 "         ",
                                 "         ",
@@ -459,7 +460,7 @@ public class SiegeMachinesMultiblocks {
                                 " i b_b i "
                         )
                         .aisle(
-                                "    y    ",
+                                "    D    ",
                                 "    y    ",
                                 "    y    ",
                                 "    y    ",

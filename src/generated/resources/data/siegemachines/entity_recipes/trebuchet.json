@@ -102,6 +102,16 @@
         }
       }
     },
+    "D": {
+      "block": {
+        "Name": "nobullship:simple_wood_beam",
+        "Properties": {
+          "down": [
+            "true"
+          ]
+        }
+      }
+    },
     "^": {
       "tag": {
         "Name": "minecraft:logs",
@@ -649,7 +659,7 @@
       " i b_b i "
     ],
     "layer3": [
-      "    y    ",
+      "    D    ",
       "    y    ",
       "    y    ",
       "    y    ",
