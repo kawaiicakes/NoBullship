@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "no_bs_schematic-block",
+  "key": {
+    "o": {
+      "item": "nobullship:schematic"
+    },
+    "0": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    " 0 ",
+    "0o0",
+    " 0 "
+  ],
+  "result": {
+    "count": 4,
+    "item": "nobullship:schematic_block"
+  }
+}

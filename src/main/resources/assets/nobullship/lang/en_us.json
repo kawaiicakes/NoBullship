@@ -19,6 +19,7 @@
   "block.nobullship.simple_metal_beam": "Metal Polybeam",
   "block.nobullship.industrial_wood_polybeam": "Industrial Wood Polybeam",
   "block.nobullship.industrial_metal_polybeam": "Industrial Metal Polybeam",
+  "block.nobullship.schematic_block": "Schematic Block",
 
   "sounds.nobullship.construct_success": "[Construction sounds]",
   "sounds.nobullship.construct_expended": "[Paper tearing]",

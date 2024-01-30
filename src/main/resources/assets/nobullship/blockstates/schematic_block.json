@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "nobullship:block/schematic_block"
+    },
+    "facing=south": {
+      "model": "nobullship:block/schematic_block",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "nobullship:block/schematic_block",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "nobullship:block/schematic_block",
+      "y": 90
+    }
+  }
+}

@@ -79,6 +79,8 @@ public class Registry {
             .of(Material.METAL)
             .sound(SoundType.METAL)
             .strength(5.6F, 6.6F)));
+    public static final RegistryObject<Block> SCHEMATIC_BLOCK
+            = BLOCK_REGISTRY.register("schematic_block", SchematicBlock::new);
     public static final RegistryObject<BlockEntityType<MultiblockWorkshopBlockEntity>> WORKSHOP_BLOCK_ENTITY
             = BLOCK_ENTITY_REGISTRY.register("workshop", () -> BlockEntityType.Builder.of(MultiblockWorkshopBlockEntity::new, WORKSHOP_BLOCK.get()).build(null));
     public static final RegistryObject<BlockItem> WILDCARD_ITEM
@@ -125,6 +127,11 @@ public class Registry {
             = ITEM_REGISTRY.register(
             "industrial_metal_polybeam",
             () -> new BlockItem(INDUSTRIAL_METAL_POLYBEAM_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
+    public static final RegistryObject<BlockItem> SCHEMATIC_BLOCK_ITEM
+            = ITEM_REGISTRY.register(
+            "schematic_block",
+            () -> new BlockItem(SCHEMATIC_BLOCK.get(), new Item.Properties().tab(NO_BULLSHIP_TAB))
     );
     public static final RegistryObject<Item> PITCH_ITEM
             = ITEM_REGISTRY.register(
