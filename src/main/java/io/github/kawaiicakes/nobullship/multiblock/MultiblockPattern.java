@@ -11,21 +11,22 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.Property;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC_BLOCK;
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
 public class MultiblockPattern extends BlockPattern {
@@ -125,6 +126,17 @@ public class MultiblockPattern extends BlockPattern {
         }
 
         return null;
+    }
+
+    @Nullable
+    public BlockPatternMatch findExact(LevelReader pLevel, BlockPos pPos) {
+        LoadingCache<BlockPos, BlockInWorld> loadingcache = createLevelCache(pLevel, false);
+        BlockState blockAt = pLevel.getBlockState(pPos);
+        if (!blockAt.is(SCHEMATIC_BLOCK.get()) || !this.patternContains(blockAt)) return null;
+        Direction direction = blockAt.getValue(HORIZONTAL_FACING);
+        // TODO: implement correct pos
+        BlockPos offsetPos = pPos;
+        return this.matches(offsetPos, direction, Direction.UP, loadingcache);
     }
 
     /**

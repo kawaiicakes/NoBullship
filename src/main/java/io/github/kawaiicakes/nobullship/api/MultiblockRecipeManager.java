@@ -202,7 +202,13 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             }
         }
 
-        BlockPattern.BlockPatternMatch match = pattern.find(level, pos);
+        BlockPattern.BlockPatternMatch match;
+        if (!recipe.hasSchematicBlock()) {
+            match = pattern.find(level, pos);
+        } else {
+            match = pattern.findExact(level, pos);
+        }
+
         if (match == null) {
             level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
             Objects.requireNonNull(((ServerPlayer) context.getPlayer()))

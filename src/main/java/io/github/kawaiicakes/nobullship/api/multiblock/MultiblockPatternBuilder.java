@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC_BLOCK_ITEM;
+
 public class MultiblockPatternBuilder extends BlockPatternBuilder {
     protected static final Logger LOGGER = LogUtils.getLogger();
     protected List<ICondition> conditions = new ArrayList<>();
@@ -43,6 +45,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
     protected CompoundTag nbt;
     @Nullable
     protected NonNullList<ItemStack> requisites;
+    protected boolean hasSchematicBlock = false;
 
     /**
      * This constructor is only intended to be accessed by subclassing types. This is so the static <code>#of</code>
@@ -185,6 +188,12 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
      */
     public void save(Consumer<FinishedMultiblockRecipe> consumer, ResourceLocation id) {
         this.currentConditions.add(conditions.toArray(new ICondition[currentConditions.size()]));
+        if (this.hasSchematicBlock) {
+            if (this.totalBlocks().stream().anyMatch(stack -> stack.is(SCHEMATIC_BLOCK_ITEM.get()) && stack.getCount() > 1)) {
+                LOGGER.error("You may not use more than one schematic block in a recipe!");
+                throw new IllegalArgumentException("You may not use more than one schematic block in a recipe!");
+            }
+        }
         consumer.accept(new Result(id, this.currentConditions, this.resultingEntityName, this.result, this.nbt, this.pattern, this.requisites, this.lookupSimple, this.height, this.width));
     }
 
@@ -214,6 +223,15 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         if (pSymbol == ' ' || pSymbol == '$') {
             LOGGER.error("{} is a reserved character!", pSymbol);
             throw new IllegalArgumentException(pSymbol + " is a reserved character!");
+        }
+
+        if (this.hasSchematicBlock) {
+            LOGGER.error("You may not use more than one schematic block in a recipe!");
+            throw new IllegalArgumentException("You may not use more than one schematic block in a recipe!");
+        }
+
+        if (block.equals(BlockInWorldPredicateBuilder.SCHEMATIC)) {
+            this.hasSchematicBlock = true;
         }
 
         this.lookupSimple.put(String.valueOf(pSymbol), block);

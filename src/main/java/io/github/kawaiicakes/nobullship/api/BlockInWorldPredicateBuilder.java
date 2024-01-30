@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC_BLOCK;
 import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
 
 /**
@@ -38,6 +39,8 @@ import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
  */
 public class BlockInWorldPredicateBuilder {
     private static final Logger LOGGER = LogUtils.getLogger();
+    public static final BlockInWorldPredicateBuilder SCHEMATIC
+            = BlockInWorldPredicateBuilder.of(SCHEMATIC_BLOCK.get().defaultBlockState());
 
     @Nullable
     protected Block block;

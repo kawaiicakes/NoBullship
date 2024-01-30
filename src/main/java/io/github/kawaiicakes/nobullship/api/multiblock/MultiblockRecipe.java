@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC_BLOCK_ITEM;
+
 /**
  * Bears no relation to <code>FinishedMultiblockRecipe</code>. Simply an immutable data carrier intended to cache
  * multiblock recipes.
@@ -37,7 +39,8 @@ public record MultiblockRecipe(
         MultiblockPattern recipe,
         ResourceLocation result,
         @Nullable CompoundTag nbt,
-        @Nullable ImmutableList<ItemStack> requisites
+        @Nullable ImmutableList<ItemStack> requisites,
+        boolean hasSchematicBlock
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();
     @Override
@@ -105,6 +108,8 @@ public record MultiblockRecipe(
             toReturn.put("requisites", requisiteList);
         }
 
+        toReturn.putBoolean("hasSchematicBlock", this.hasSchematicBlock);
+
         return toReturn;
     }
 
@@ -137,12 +142,15 @@ public record MultiblockRecipe(
             deserializedRequisites = builder.build();
         }
 
+        boolean hasSchematicBlock = nbt.getBoolean("hasSchematicBlock");
+
         return new MultiblockRecipe(
                 name,
                 pattern,
                 new ResourceLocation(stringNbt.getAsString()),
                 resultNbt,
-                deserializedRequisites
+                deserializedRequisites,
+                hasSchematicBlock
         );
     }
 
@@ -179,6 +187,9 @@ public record MultiblockRecipe(
                 nbt = (CompoundTag) JsonOps.INSTANCE.convertTo(NbtOps.INSTANCE, jsonResult.get("nbt"));
             }
 
+            byte schematicBlockChars = 0;
+            Character schematicChar = null;
+
             MultiblockPatternBuilder builder = MultiblockPatternBuilder.of(result);
 
             for (Map.Entry<String, JsonElement> keyEntry : jsonKeys.entrySet()) {
@@ -187,9 +198,23 @@ public record MultiblockRecipe(
                     return null;
                 }
 
-                builder.where(keyEntry.getKey().charAt(0), BlockInWorldPredicateBuilder.fromJson(keyEntry.getValue().getAsJsonObject()));
+                BlockInWorldPredicateBuilder definitionForChar = BlockInWorldPredicateBuilder.fromJson(keyEntry.getValue().getAsJsonObject());
+
+                if (schematicBlockChars > 1) {
+                    LOGGER.error("You may not define two characters as being both schematic blocks!");
+                    return null;
+                }
+
+                if ((definitionForChar.isForBlock() || definitionForChar.isForBlockState())
+                        && definitionForChar.getItemized().equals(SCHEMATIC_BLOCK_ITEM.get().getDefaultInstance())) {
+                    schematicBlockChars++;
+                    schematicChar = keyEntry.getKey().charAt(0);
+                }
+
+                builder.where(keyEntry.getKey().charAt(0), definitionForChar);
             }
 
+            byte numberOfSchematicBlocks = 0;
             for (int i = jsonRecipe.size() - 1; i >= 0 ; i--) {
                 JsonArray aisle = jsonRecipe.getAsJsonArray("layer" + i);
                 if (aisle.isEmpty()) return null;
@@ -198,6 +223,18 @@ public record MultiblockRecipe(
                 aisle.forEach(element -> strings.add(element.getAsString()));
 
                 builder.aisle(strings.toArray(String[]::new));
+
+                if (schematicChar == null) continue;
+                for (String string : strings) {
+                    for (char blockChar : string.toCharArray()) {
+                        if (numberOfSchematicBlocks > 1) {
+                            LOGGER.error("You may not use more than one schematic block in a recipe!");
+                            return null;
+                        }
+                        if (blockChar != schematicChar) continue;
+                        numberOfSchematicBlocks++;
+                    }
+                }
             }
 
             NonNullList<ItemStack> requisites;
@@ -210,7 +247,7 @@ public record MultiblockRecipe(
                 toReturnRequisites = ImmutableList.copyOf(requisites);
             }
 
-            return new MultiblockRecipe(name, builder.build(), result, nbt, toReturnRequisites);
+            return new MultiblockRecipe(name, builder.build(), result, nbt, toReturnRequisites, schematicChar != null);
         } catch (RuntimeException e) {
             LOGGER.error("An error occurred during deserialization of BlockInWorldPredicate from JSON!", e);
             LOGGER.error(e.getMessage());
