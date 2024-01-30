@@ -804,7 +804,7 @@ public class BlockInWorldPredicateBuilder {
     }
 
     public ItemStack getItemized() {
-        if (this.block != null) {
+        if (this.matchType.equals(MatchType.BLOCK) && this.block != null) {
             if (this.blockEntityNbtDataStrict == null) return this.block.asItem().getDefaultInstance();
 
             CompoundTag ogTag = this.block.asItem().getDefaultInstance().getOrCreateTag().copy();
@@ -827,6 +827,18 @@ public class BlockInWorldPredicateBuilder {
             ogTag.merge(blockEntityTag);
 
             ItemStack toReturn = this.block.asItem().getDefaultInstance();
+            toReturn.setTag(ogTag);
+            return toReturn;
+        } else if (this.matchType.equals(MatchType.BLOCKSTATE) && this.blockState != null) {
+            if (this.blockEntityNbtDataStrict == null) return this.blockState.getBlock().asItem().getDefaultInstance();
+
+            CompoundTag ogTag = this.blockState.getBlock().asItem().getDefaultInstance().getOrCreateTag().copy();
+
+            CompoundTag blockEntityTag = new CompoundTag();
+            blockEntityTag.put("BlockEntityTag", this.getNaiveNbt());
+            ogTag.merge(blockEntityTag);
+
+            ItemStack toReturn = this.blockState.getBlock().asItem().getDefaultInstance();
             toReturn.setTag(ogTag);
             return toReturn;
         } else {

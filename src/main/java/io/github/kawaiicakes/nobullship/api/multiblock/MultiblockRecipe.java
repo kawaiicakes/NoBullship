@@ -206,7 +206,7 @@ public record MultiblockRecipe(
                 }
 
                 if ((definitionForChar.isForBlock() || definitionForChar.isForBlockState())
-                        && definitionForChar.getItemized().equals(SCHEMATIC_BLOCK_ITEM.get().getDefaultInstance())) {
+                        && definitionForChar.getItemized().is(SCHEMATIC_BLOCK_ITEM.get())) {
                     schematicBlockChars++;
                     schematicChar = keyEntry.getKey().charAt(0);
                 }
