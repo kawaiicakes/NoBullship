@@ -232,15 +232,16 @@ public record MultiblockRecipe(
                 if (schematicChar == null) continue;
                 int j = 0;
                 for (String string : strings) {
-                    int k = 0;
+                    int k = -1;
                     for (char blockChar : string.toCharArray()) {
+                        k++;
                         if (numberOfSchematicBlocks > 1) {
                             LOGGER.error("You may not use more than one schematic block in a recipe!");
                             return null;
                         }
                         if (blockChar != schematicChar) continue;
                         numberOfSchematicBlocks++;
-                        schematicBlockOffset[0] = k++;
+                        schematicBlockOffset[0] = k;
                         schematicBlockOffset[1] = j;
                         schematicBlockOffset[2] = i;
                     }
