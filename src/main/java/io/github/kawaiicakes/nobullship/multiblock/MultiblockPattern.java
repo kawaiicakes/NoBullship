@@ -129,13 +129,13 @@ public class MultiblockPattern extends BlockPattern {
     }
 
     @Nullable
-    public BlockPatternMatch findExact(LevelReader pLevel, BlockPos pPos) {
+    public BlockPatternMatch findExact(LevelReader pLevel, BlockPos pPos, int[] schematicBlockOffset) {
+        if (schematicBlockOffset.length != 3) return null;
         LoadingCache<BlockPos, BlockInWorld> loadingcache = createLevelCache(pLevel, false);
         BlockState blockAt = pLevel.getBlockState(pPos);
         if (!blockAt.is(SCHEMATIC_BLOCK.get()) || !this.patternContains(blockAt)) return null;
         Direction direction = blockAt.getValue(HORIZONTAL_FACING);
-        // TODO: implement correct pos
-        BlockPos offsetPos = pPos;
+        BlockPos offsetPos = translateAndRotate(pPos, direction, Direction.UP, schematicBlockOffset[0], schematicBlockOffset[1], schematicBlockOffset[2]);
         return this.matches(offsetPos, direction, Direction.UP, loadingcache);
     }
 

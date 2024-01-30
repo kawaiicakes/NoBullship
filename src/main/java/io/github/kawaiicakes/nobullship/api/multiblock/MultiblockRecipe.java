@@ -40,7 +40,8 @@ public record MultiblockRecipe(
         ResourceLocation result,
         @Nullable CompoundTag nbt,
         @Nullable ImmutableList<ItemStack> requisites,
-        boolean hasSchematicBlock
+        boolean hasSchematicBlock,
+        int[] schematicBlockOffset
 ) {
     private static final Logger LOGGER = LogUtils.getLogger();
     @Override
@@ -109,6 +110,7 @@ public record MultiblockRecipe(
         }
 
         toReturn.putBoolean("hasSchematicBlock", this.hasSchematicBlock);
+        toReturn.putIntArray("schematicBlockOffset", this.schematicBlockOffset);
 
         return toReturn;
     }
@@ -143,6 +145,7 @@ public record MultiblockRecipe(
         }
 
         boolean hasSchematicBlock = nbt.getBoolean("hasSchematicBlock");
+        int[] schematicBlockOffset = nbt.getIntArray("schematicBlockOffset");
 
         return new MultiblockRecipe(
                 name,
@@ -150,7 +153,8 @@ public record MultiblockRecipe(
                 new ResourceLocation(stringNbt.getAsString()),
                 resultNbt,
                 deserializedRequisites,
-                hasSchematicBlock
+                hasSchematicBlock,
+                schematicBlockOffset
         );
     }
 
@@ -215,6 +219,7 @@ public record MultiblockRecipe(
             }
 
             byte numberOfSchematicBlocks = 0;
+            int[] schematicBlockOffset = new int[3];
             for (int i = jsonRecipe.size() - 1; i >= 0 ; i--) {
                 JsonArray aisle = jsonRecipe.getAsJsonArray("layer" + i);
                 if (aisle.isEmpty()) return null;
@@ -225,7 +230,9 @@ public record MultiblockRecipe(
                 builder.aisle(strings.toArray(String[]::new));
 
                 if (schematicChar == null) continue;
+                int j = 0;
                 for (String string : strings) {
+                    int k = 0;
                     for (char blockChar : string.toCharArray()) {
                         if (numberOfSchematicBlocks > 1) {
                             LOGGER.error("You may not use more than one schematic block in a recipe!");
@@ -233,7 +240,11 @@ public record MultiblockRecipe(
                         }
                         if (blockChar != schematicChar) continue;
                         numberOfSchematicBlocks++;
+                        schematicBlockOffset[0] = k++;
+                        schematicBlockOffset[1] = j;
+                        schematicBlockOffset[2] = i;
                     }
+                    j++;
                 }
             }
 
@@ -247,7 +258,7 @@ public record MultiblockRecipe(
                 toReturnRequisites = ImmutableList.copyOf(requisites);
             }
 
-            return new MultiblockRecipe(name, builder.build(), result, nbt, toReturnRequisites, schematicChar != null);
+            return new MultiblockRecipe(name, builder.build(), result, nbt, toReturnRequisites, schematicChar != null, schematicBlockOffset);
         } catch (RuntimeException e) {
             LOGGER.error("An error occurred during deserialization of BlockInWorldPredicate from JSON!", e);
             LOGGER.error(e.getMessage());

@@ -206,7 +206,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         if (!recipe.hasSchematicBlock()) {
             match = pattern.find(level, pos);
         } else {
-            match = pattern.findExact(level, pos);
+            match = pattern.findExact(level, pos, recipe.schematicBlockOffset());
         }
 
         if (match == null) {
