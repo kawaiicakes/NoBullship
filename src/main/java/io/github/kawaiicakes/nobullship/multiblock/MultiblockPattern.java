@@ -135,7 +135,7 @@ public class MultiblockPattern extends BlockPattern {
         BlockState blockAt = pLevel.getBlockState(pPos);
         if (!blockAt.is(SCHEMATIC_BLOCK.get()) || !this.patternContains(blockAt)) return null;
         Direction direction = blockAt.getValue(HORIZONTAL_FACING);
-        BlockPos offsetPos = translateAndRotate(pPos, direction, Direction.UP, schematicBlockOffset[0], schematicBlockOffset[1], schematicBlockOffset[2]);
+        BlockPos offsetPos = translateAndRotate(pPos, direction, Direction.UP, -schematicBlockOffset[0], -schematicBlockOffset[1], -schematicBlockOffset[2]);
         return this.matches(offsetPos, direction, Direction.UP, loadingcache);
     }
 

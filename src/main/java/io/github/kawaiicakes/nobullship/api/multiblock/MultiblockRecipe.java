@@ -241,9 +241,9 @@ public record MultiblockRecipe(
                         }
                         if (blockChar != schematicChar) continue;
                         numberOfSchematicBlocks++;
-                        schematicBlockOffset[0] = k;
+                        schematicBlockOffset[0] = (string.length() - 1) - k;
                         schematicBlockOffset[1] = j;
-                        schematicBlockOffset[2] = i;
+                        schematicBlockOffset[2] = (jsonRecipe.size() - 1) - i;
                     }
                     j++;
                 }

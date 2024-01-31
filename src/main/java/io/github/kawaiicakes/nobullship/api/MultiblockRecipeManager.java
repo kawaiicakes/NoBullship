@@ -242,9 +242,6 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         double xPos;
         double zPos;
 
-        LOGGER.info("Forwards: {}", match.getForwards());
-        LOGGER.info("Match pos: {}", posForSpawn.toShortString());
-
         Direction forwardsDirection = match.getForwards();
 
         switch (forwardsDirection) {
