@@ -59,6 +59,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     public static final Component FAIL2 = Component.translatable("chat.nobullship.fail2").withStyle(RED);
     public static final Component FAIL3 = Component.translatable("chat.nobullship.fail3").withStyle(RED);
     public static final Component FAIL4 = Component.translatable("chat.nobullship.fail4").withStyle(RED);
+    public static final Component FAIL5 = Component.translatable("chat.nobullship.fail5").withStyle(RED);
     protected static MultiblockRecipeManager INSTANCE = null;
 
     protected int globalCooldownTime = 0;
@@ -162,149 +163,159 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     public boolean trySpawn(@Nullable MultiblockRecipe recipe, UseOnContext context) throws RuntimeException {
         // TODO: Fake player compat & config whether fake players can use this schematic...
         if (!(context.getLevel() instanceof ServerLevel level)) return false;
-        if (recipe == null) {
-            level.playSound(null, context.getClickedPos(), CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
-            Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
-                    .sendSystemMessage(FAIL3, true);
-            return false;
-        }
-
-        if (Config.DISABLE_GLOBAL_COOLDOWN.get() && this.globalCooldownTime > this.maxGlobalCooldownTime) {
-            level.playSound(null, context.getClickedPos(), CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
-            Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
-                    .sendSystemMessage(FAIL4, true);
-            return false;
-        }
-
-        MultiblockPattern pattern = recipe.recipe();
-        ResourceLocation resultLocation = recipe.result();
-        CompoundTag nbt = recipe.nbt();
-
         BlockPos pos = context.getClickedPos();
-
-        Player player = context.getPlayer();
-
-        ImmutableList<ItemStack> requisites = null;
-
         try {
-             requisites = SchematicItem.yoinkSummedRequisites(context.getItemInHand());
-        } catch (IllegalArgumentException ignored) {}
+            if (recipe == null) {
+                level.playSound(null, context.getClickedPos(), CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
+                Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
+                        .sendSystemMessage(FAIL3, true);
+                return false;
+            }
 
-        if (requisites != null && !requisites.isEmpty()) {
-            if (player != null && !player.isCreative()) {
-                List<ItemStack> summedContents = getSummedContents(player.getInventory().items);
-                if (!compareSummedContents(requisites, summedContents)) {
-                    level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
-                    Objects.requireNonNull(((ServerPlayer) player))
-                            .sendSystemMessage(FAIL2, true);
-                    return false;
+            if (Config.DISABLE_GLOBAL_COOLDOWN.get() && this.globalCooldownTime > this.maxGlobalCooldownTime) {
+                level.playSound(null, context.getClickedPos(), CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
+                Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
+                        .sendSystemMessage(FAIL4, true);
+                return false;
+            }
+
+            MultiblockPattern pattern = recipe.recipe();
+            ResourceLocation resultLocation = recipe.result();
+            CompoundTag nbt = recipe.nbt();
+
+            Player player = context.getPlayer();
+
+            ImmutableList<ItemStack> requisites = null;
+
+            try {
+                requisites = SchematicItem.yoinkSummedRequisites(context.getItemInHand());
+            } catch (IllegalArgumentException ignored) {
+            }
+
+            if (requisites != null && !requisites.isEmpty()) {
+                if (player != null && !player.isCreative()) {
+                    List<ItemStack> summedContents = getSummedContents(player.getInventory().items);
+                    if (!compareSummedContents(requisites, summedContents)) {
+                        level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
+                        Objects.requireNonNull(((ServerPlayer) player))
+                                .sendSystemMessage(FAIL2, true);
+                        return false;
+                    }
                 }
             }
-        }
 
-        BlockPattern.BlockPatternMatch match;
-        if (!recipe.hasSchematicBlock()) {
-            match = pattern.find(level, pos);
-        } else {
-            match = pattern.findExact(level, pos, recipe.schematicBlockOffset());
-        }
+            BlockPattern.BlockPatternMatch match;
+            if (!recipe.hasSchematicBlock()) {
+                match = pattern.find(level, pos);
+            } else {
+                match = pattern.findExact(level, pos, recipe.schematicBlockOffset());
+            }
 
-        if (match == null) {
+            if (match == null) {
+                level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
+                Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
+                        .sendSystemMessage(FAIL, true);
+                return false;
+            }
+
+            for (int i = 0; i < pattern.getDepth(); ++i) {
+                for (int j = 0; j < pattern.getWidth(); ++j) {
+                    for (int k = 0; k < pattern.getHeight(); ++k) {
+                        if (pattern.getPattern()[i][k][j].equals(BlockInWorldPredicate.WILDCARD)) continue;
+                        BlockInWorld blockinworld = match.getBlock(j, k, i);
+                        level.setBlock(blockinworld.getPos(), Blocks.AIR.defaultBlockState(), 2);
+                        level.levelEvent(2001, blockinworld.getPos(), Block.getId(blockinworld.getState()));
+                    }
+                }
+            }
+
+            level.playSound(null, pos, CONSTRUCT_SUCCESS.get(), SoundSource.PLAYERS, 0.77F, 1.0F);
+            level.sendParticles(LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 7, 0.2, 0.2, 0.2, 0.3);
+
+            removeItemsFromPlayer(player, level, context, pos, requisites);
+
+            if (nbt == null) nbt = new CompoundTag();
+            nbt.putString("id", resultLocation.toString());
+
+            boolean matchWidthIsEven = (match.getWidth() ^ 1) > match.getWidth();
+            boolean matchDepthIsEven = (match.getDepth() ^ 1) > match.getDepth();
+
+            BlockPos posForSpawn = match.getBlock(match.getWidth() / 2, match.getHeight() - 1, match.getDepth() / 2).getPos();
+
+            double xPos;
+            double zPos;
+
+            Direction forwardsDirection = match.getForwards();
+
+            switch (forwardsDirection) {
+                case NORTH -> {
+                    xPos = matchWidthIsEven ? posForSpawn.getX() : posForSpawn.getX() + 0.5;
+                    zPos = matchDepthIsEven ? posForSpawn.getZ() + 1.0 : posForSpawn.getZ() + 0.5;
+                }
+                case SOUTH -> {
+                    xPos = matchWidthIsEven ? posForSpawn.getX() + 1.0 : posForSpawn.getX() + 0.5;
+                    zPos = matchDepthIsEven ? posForSpawn.getZ() : posForSpawn.getZ() + 0.5;
+                }
+                case EAST -> {
+                    xPos = matchDepthIsEven ? posForSpawn.getX() : posForSpawn.getX() + 0.5;
+                    zPos = matchWidthIsEven ? posForSpawn.getZ() : posForSpawn.getZ() + 0.5;
+                }
+                case WEST -> {
+                    xPos = matchDepthIsEven ? posForSpawn.getX() + 1.0 : posForSpawn.getX() + 0.5;
+                    zPos = matchWidthIsEven ? posForSpawn.getZ() + 1.0 : posForSpawn.getZ() + 0.5;
+                }
+                default -> {
+                    xPos = posForSpawn.getX();
+                    zPos = posForSpawn.getZ();
+                }
+            }
+
+            double finalXPos = xPos;
+            double finalZPos = zPos;
+            Entity entity = EntityType.loadEntityRecursive(nbt, level, (entityType) -> {
+                entityType.moveTo(finalXPos, (double) posForSpawn.getY() + 0.05D, finalZPos, entityType.getYRot(), entityType.getXRot());
+                return entityType;
+            });
+
+            if (entity == null) {
+                LOGGER.error("Unable to spawn entity {}!", resultLocation);
+                throw new RuntimeException("Unable to spawn entity " + resultLocation + "!");
+            } else {
+                float yRot = match.getForwards().toYRot();
+                entity.setYRot(yRot);
+
+                if (entity instanceof Mob mob) {
+                    if (!ForgeEventFactory.doSpecialSpawn(mob, level, (float) entity.getX(), (float) entity.getY(), (float) entity.getZ(), null, MobSpawnType.MOB_SUMMONED)) {
+                        mob.setYBodyRot(yRot);
+                        mob.setYHeadRot(yRot);
+                        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null, null);
+                    }
+                }
+
+                if (!level.tryAddFreshEntityWithPassengers(entity)) {
+                    throw new IllegalArgumentException("Entity " + entity.getName() + " has a duplicate UUID!");
+                }
+            }
+
+            // This doesn't seem to do anything on the server... is this intended for the client?
+            for (int i1 = 0; i1 < pattern.getDepth(); ++i1) {
+                for (int j1 = 0; j1 < pattern.getWidth(); ++j1) {
+                    for (int k1 = 0; k1 < pattern.getHeight(); ++k1) {
+                        if (pattern.getPattern()[i1][k1][j1].equals(BlockInWorldPredicate.WILDCARD)) continue;
+                        BlockInWorld blockInWorld = match.getBlock(j1, k1, i1);
+                        level.blockUpdated(blockInWorld.getPos(), Blocks.AIR);
+                    }
+                }
+            }
+
+            return true;
+        } catch (RuntimeException e) {
+            LOGGER.error("Exception while trying to check recipe!", e);
             level.playSound(null, pos, CONSTRUCT_FAILED.get(), SoundSource.PLAYERS, 0.78F, 1.0F);
             Objects.requireNonNull(((ServerPlayer) context.getPlayer()))
-                    .sendSystemMessage(FAIL, true);
+                    .sendSystemMessage(FAIL5, true);
             return false;
         }
-
-        for (int i = 0; i < pattern.getDepth(); ++i) {
-            for (int j = 0; j < pattern.getWidth(); ++j) {
-                for (int k = 0; k < pattern.getHeight(); ++k) {
-                    BlockInWorld blockinworld = match.getBlock(j, k, i);
-                    level.setBlock(blockinworld.getPos(), Blocks.AIR.defaultBlockState(), 2);
-                    level.levelEvent(2001, blockinworld.getPos(), Block.getId(blockinworld.getState()));
-                }
-            }
-        }
-
-        level.playSound(null, pos, CONSTRUCT_SUCCESS.get(), SoundSource.PLAYERS, 0.77F, 1.0F);
-        level.sendParticles(LARGE_SMOKE, pos.getX(), pos.getY(), pos.getZ(), 7, 0.2, 0.2, 0.2, 0.3);
-
-        removeItemsFromPlayer(player, level, context, pos, requisites);
-
-        if (nbt == null) nbt = new CompoundTag();
-        nbt.putString("id", resultLocation.toString());
-
-        boolean matchWidthIsEven = (match.getWidth() ^ 1) > match.getWidth();
-        boolean matchDepthIsEven = (match.getDepth() ^ 1) > match.getDepth();
-
-        BlockPos posForSpawn = match.getBlock(match.getWidth() / 2, match.getHeight() - 1, match.getDepth() / 2).getPos();
-
-        double xPos;
-        double zPos;
-
-        Direction forwardsDirection = match.getForwards();
-
-        switch (forwardsDirection) {
-            case NORTH -> {
-                xPos = matchWidthIsEven ? posForSpawn.getX() : posForSpawn.getX() + 0.5;
-                zPos = matchDepthIsEven ? posForSpawn.getZ() + 1.0 : posForSpawn.getZ() + 0.5;
-            }
-            case SOUTH -> {
-                xPos = matchWidthIsEven ? posForSpawn.getX() + 1.0 : posForSpawn.getX() + 0.5;
-                zPos = matchDepthIsEven ? posForSpawn.getZ() : posForSpawn.getZ() + 0.5;
-            }
-            case EAST -> {
-                xPos = matchDepthIsEven ? posForSpawn.getX() : posForSpawn.getX() + 0.5;
-                zPos = matchWidthIsEven ? posForSpawn.getZ() : posForSpawn.getZ() + 0.5;
-            }
-            case WEST -> {
-                xPos = matchDepthIsEven ? posForSpawn.getX() + 1.0 : posForSpawn.getX() + 0.5;
-                zPos = matchWidthIsEven ? posForSpawn.getZ() + 1.0 : posForSpawn.getZ() + 0.5;
-            }
-            default -> {
-                xPos = posForSpawn.getX();
-                zPos = posForSpawn.getZ();
-            }
-        }
-
-        double finalXPos = xPos;
-        double finalZPos = zPos;
-        Entity entity = EntityType.loadEntityRecursive(nbt, level, (entityType) -> {
-            entityType.moveTo(finalXPos, (double)posForSpawn.getY() + 0.05D, finalZPos, entityType.getYRot(), entityType.getXRot());
-            return entityType;
-        });
-
-        if (entity == null) {
-            LOGGER.error("Unable to spawn entity {}!", resultLocation);
-            throw new RuntimeException("Unable to spawn entity " + resultLocation + "!");
-        } else {
-            float yRot = match.getForwards().toYRot();
-            entity.setYRot(yRot);
-
-            if (entity instanceof Mob mob) {
-                if (!ForgeEventFactory.doSpecialSpawn(mob, level, (float)entity.getX(), (float)entity.getY(), (float)entity.getZ(), null, MobSpawnType.MOB_SUMMONED)) {
-                    mob.setYBodyRot(yRot);
-                    mob.setYHeadRot(yRot);
-                    mob.finalizeSpawn(level, level.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null, null);
-                }
-            }
-
-            if (!level.tryAddFreshEntityWithPassengers(entity)) {
-                throw new IllegalArgumentException("Entity " + entity.getName() + " has a duplicate UUID!");
-            }
-        }
-
-        // This doesn't seem to do anything on the server... is this intended for the client?
-        for (int i1 = 0; i1 < pattern.getDepth(); ++i1) {
-            for (int j1 = 0; j1 < pattern.getWidth(); ++j1) {
-                for (int k1 = 0; k1 < pattern.getHeight(); ++k1) {
-                    BlockInWorld blockInWorld = match.getBlock(j1, k1, i1);
-                    level.blockUpdated(blockInWorld.getPos(), Blocks.AIR);
-                }
-            }
-        }
-
-        return true;
     }
 
     public void incrementGlobalCooldown(int ticks) {
