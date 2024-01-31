@@ -33,11 +33,11 @@
       "block": {
         "Name": "nobullship:wood_support_beam",
         "Properties": {
+          "down": [
+            "parallel"
+          ],
           "horizontal_axis": [
             "z"
-          ],
-          "up": [
-            "parallel"
           ],
           "vertical": [
             "true"

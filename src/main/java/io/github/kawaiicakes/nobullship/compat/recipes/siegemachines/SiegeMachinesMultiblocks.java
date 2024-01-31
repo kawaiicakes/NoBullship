@@ -298,7 +298,7 @@ public class SiegeMachinesMultiblocks {
 
         RECIPES.put(ezRl("ballista"),
                 builder("ballista")
-                        .where('|', zAxisWoodBeam().requireProperty(VERTICAL, true).requireProperty(UP, BeamConnection.PARALLEL))
+                        .where('|', zAxisWoodBeam().requireProperty(VERTICAL, true).requireProperty(DOWN, BeamConnection.PARALLEL))
                         .where('-', zAxisWoodBeam().requireProperty(VERTICAL, false))
                         .where('o', woodWheel(Direction.DOWN))
                         .aisle(
