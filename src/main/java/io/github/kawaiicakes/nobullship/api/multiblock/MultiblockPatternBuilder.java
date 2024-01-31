@@ -34,6 +34,15 @@ import java.util.function.Predicate;
 
 import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC_BLOCK_ITEM;
 
+/**
+ * When building a recipe, either in JSON or using this builder, a couple assumptions must be made.
+ * You must assume you are facing north, and that the "front" of the recipe is also facing north.
+ * You must assume you are looking at the "rear" of this recipe. With this in mind, the vanilla
+ * {@link net.minecraft.world.level.block.state.pattern.BlockPattern.BlockPatternMatch} class defines a special <code>BlockPos</code> -
+ * in a field {@link net.minecraft.world.level.block.state.pattern.BlockPattern.BlockPatternMatch#frontTopLeft} - where the pattern is measured and matches from. Despite this name, under the assumptions made here, this
+ * <code>BlockPos</code> actually represents the topmost, leftmost, *closest* (or otherwise, rear) block. You must bear
+ * this in mind when proceeding with work here to avoid confusion.
+ */
 public class MultiblockPatternBuilder extends BlockPatternBuilder {
     protected static final Logger LOGGER = LogUtils.getLogger();
     protected List<ICondition> conditions = new ArrayList<>();
