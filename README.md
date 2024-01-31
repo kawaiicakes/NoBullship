@@ -55,6 +55,9 @@ This mod is intended for modpackers to use & configure; however, it will come wi
 ![Build!](2023-12-07_21.04.59.png)
 
 ## Features
+- Configurable drop prevention, even for hard-coded drops (e.g. Simple Planes planes)
+- Packaged support for select mods! Read below!
+- Aesthetic building blocks and miscellaneous "component" items to enhance your recipes & provide more variety for modpackers!
 - JEI compatibility for the Schematic Workshop!
 - [Straight-forward datapack creation for multiblock & schematic recipes](https://github.com/kawaiicakes/NoBullship/wiki)
 - Multiblocks may require extra items in the inventory to make!
@@ -62,21 +65,24 @@ This mod is intended for modpackers to use & configure; however, it will come wi
 - Supports block tags!
 - Compatible with nearly any mod!
 - Lots of config options!
+- "Schematic Block" permitting quick performance for huge recipes (think over 10x5x5)
 
 ___
 
 # 📝 In-Development Features
 
 - JEI compatibility for multiblocks themselves
-- Support for rendering block entities with NBT data in the workshop schematic previews
 - NBT structure support; convert NBT structures to/from multiblock recipes!
-- "Structure block" permitting reasonable performance for huge recipes (think over 20x20x20)
-- Configurable drop prevention, even for hard-coded drops (e.g. Simple Planes planes)
 - Configurable drops of blocks from multiblock recipe on entity death
-- Cleaner API
-- Packaged support for select mods! Read below!
-- Miscellaneous custom blocks & items for use with this mod! Stuff like nails, wooden beams, etc.
 - Miscellaneous improvements and bug fixes
+- Research table mechanic!
+
+---
+
+# 🤝 Compatibility
+This mod features bundled recipes for all entities from the following mods!
+- [Medieval Siege Engines](https://www.curseforge.com/minecraft/mc-mods/medieval-siege-machines)
+- [Diamond Star Combat](https://www.curseforge.com/minecraft/mc-mods/diamond-star-combat)
 
 ---
 
@@ -105,6 +111,8 @@ Further thanks for the nails, circuit, plank, and lens goes to [Milkyfur!](https
 Credit to **blackbirdantlion** on Discord for the lovely GUI texture. I've modified it a bit as I am reusing it from another project I am working on, which I have permission to do. You may find his Twitter [here](https://twitter.com/BlackbirdieAnt).
 
 I also want to thank [embeddedt](https://github.com/embeddedt), his Discord community members and [1whohears](https://github.com/1whohears) for miscellaneous advising.
+
+The palette for the wood polybeams, support beam, and wheel were taken from [Medieval Siege Engines](https://www.curseforge.com/minecraft/mc-mods/medieval-siege-machines). This was done to allow the compat to look nicer. 
 
 Also, I want to commend Kaupenjoe for his free Forge tutorials on YouTube to brief me on how some things work lol
 
