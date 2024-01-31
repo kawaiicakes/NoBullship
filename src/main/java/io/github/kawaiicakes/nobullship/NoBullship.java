@@ -1,11 +1,8 @@
 package io.github.kawaiicakes.nobullship;
 
-import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
-import io.github.kawaiicakes.nobullship.api.NoBullshipBlockTags;
-import io.github.kawaiicakes.nobullship.api.NoBullshipItemTags;
+import io.github.kawaiicakes.nobullship.api.*;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeProvider;
-import io.github.kawaiicakes.nobullship.api.NoBullshipRecipeProvider;
 import io.github.kawaiicakes.nobullship.event.BullshipEvents;
 import io.github.kawaiicakes.nobullship.multiblock.SchematicRenderer;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
@@ -124,7 +121,9 @@ public class NoBullship
 
     @SubscribeEvent
     public void addReloadListener(AddReloadListenerEvent event) {
-        event.addListener(new MultiblockRecipeManager(event.getConditionContext()));
+        MultiblockRecipeManager multiblockRecipeManager = new MultiblockRecipeManager(event.getConditionContext());
+        event.addListener(new NbtMultiblockResourceListener(multiblockRecipeManager));
+        event.addListener(multiblockRecipeManager);
     }
 
     @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)

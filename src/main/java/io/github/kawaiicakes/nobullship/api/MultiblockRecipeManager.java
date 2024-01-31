@@ -395,6 +395,11 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         }
     }
 
+    public void addRecipes(Map<ResourceLocation, MultiblockRecipe> multiblockRecipeMap) {
+        if (this.recipes == null) this.recipes = new HashMap<>();
+        this.recipes.putAll(multiblockRecipeMap);
+    }
+
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> pObject, ResourceManager pResourceManager, ProfilerFiller pProfiler) {
         ImmutableMap.Builder<ResourceLocation, MultiblockRecipe> builder = ImmutableMap.builder();
@@ -414,7 +419,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
             }
         }
 
-        this.recipes = builder.build();
+        this.addRecipes(builder.build());
 
         List<ResourceLocation> whiteList = Config.DROP_WHITELIST.get().stream().map(ResourceLocation::new).toList();
         List<ResourceLocation> blackList = Config.DROP_BLACKLIST.get().stream().map(ResourceLocation::new).toList();
