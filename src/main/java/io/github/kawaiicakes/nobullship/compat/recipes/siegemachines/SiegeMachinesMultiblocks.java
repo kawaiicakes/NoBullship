@@ -349,6 +349,25 @@ public class SiegeMachinesMultiblocks {
                         .addRequisite(mortarLeather)
         );
 
+        ItemStack trebuchetLadders = LADDER.getDefaultInstance();
+        ItemStack trebuchetSupport = WOOD_SUPPORT_BEAM_ITEM.get().getDefaultInstance();
+        ItemStack trebuchetNails = NAILS_ITEM.get().getDefaultInstance();
+        ItemStack trebuchetIron = IRON_INGOT.getDefaultInstance();
+        ItemStack trebuchetGravel = GRAVEL.getDefaultInstance();
+        ItemStack trebuchetLeads = LEAD.getDefaultInstance();
+        ItemStack trebuchetLeather = LEATHER.getDefaultInstance();
+        ItemStack trebuchetSticks = STICK.getDefaultInstance();
+        ItemStack trebuchetHooks = TRIPWIRE_HOOK.getDefaultInstance();
+
+        trebuchetLadders.setCount(4);
+        trebuchetSupport.setCount(6);
+        trebuchetNails.setCount(64);
+        trebuchetIron.setCount(30);
+        trebuchetGravel.setCount(32);
+        trebuchetLeads.setCount(24);
+        trebuchetLeather.setCount(14);
+        trebuchetSticks.setCount(8);
+
         RECIPES.put(ezRl("trebuchet"),
                 builder("trebuchet")
                         .where('-', BlockInWorldPredicateBuilder.of(BlockTags.LOGS).requireProperty(AXIS, Direction.Axis.X))
@@ -723,7 +742,15 @@ public class SiegeMachinesMultiblocks {
                                 "         ",
                                 "   ldr   "
                         )
-
+                        .addRequisite(trebuchetLadders)
+                        .addRequisite(trebuchetSupport)
+                        .addRequisite(trebuchetNails)
+                        .addRequisite(trebuchetIron)
+                        .addRequisite(trebuchetGravel)
+                        .addRequisite(trebuchetLeads)
+                        .addRequisite(trebuchetLeather)
+                        .addRequisite(trebuchetSticks)
+                        .addRequisite(trebuchetHooks)
         );
     }
 }

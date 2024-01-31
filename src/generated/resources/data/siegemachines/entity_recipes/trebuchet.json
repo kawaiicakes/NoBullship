@@ -827,6 +827,43 @@
       "   ^_^   "
     ]
   },
+  "requisites": [
+    {
+      "count": 4,
+      "item": "minecraft:ladder"
+    },
+    {
+      "count": 6,
+      "item": "nobullship:wood_support_beam"
+    },
+    {
+      "count": 64,
+      "item": "nobullship:nails"
+    },
+    {
+      "count": 30,
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "count": 32,
+      "item": "minecraft:gravel"
+    },
+    {
+      "count": 24,
+      "item": "minecraft:lead"
+    },
+    {
+      "count": 14,
+      "item": "minecraft:leather"
+    },
+    {
+      "count": 8,
+      "item": "minecraft:stick"
+    },
+    {
+      "item": "minecraft:tripwire_hook"
+    }
+  ],
   "result": {
     "entity": "siegemachines:trebuchet"
   }
