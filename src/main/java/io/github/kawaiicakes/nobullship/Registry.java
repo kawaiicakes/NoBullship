@@ -2,6 +2,7 @@ package io.github.kawaiicakes.nobullship;
 
 import com.mojang.serialization.Codec;
 import io.github.kawaiicakes.nobullship.block.*;
+import io.github.kawaiicakes.nobullship.multiblock.MagicWandItem;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlock;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.multiblock.screen.EmptyMenu;
@@ -157,6 +158,11 @@ public class Registry {
             = ITEM_REGISTRY.register(
             "wood_plank",
             () -> new Item(new Item.Properties().tab(NO_BULLSHIP_TAB))
+    );
+    public static final RegistryObject<Item> MAGIC_WAND_ITEM
+            = ITEM_REGISTRY.register(
+            "magic_wand",
+            MagicWandItem::new
     );
     public static final RegistryObject<MenuType<MultiblockWorkshopMenu>> WORKSHOP_MENU
             = MENU_REGISTRY.register("workshop_menu", () -> IForgeMenuType.create(MultiblockWorkshopMenu::new));

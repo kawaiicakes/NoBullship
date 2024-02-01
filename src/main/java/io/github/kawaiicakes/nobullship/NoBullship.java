@@ -1,5 +1,7 @@
 package io.github.kawaiicakes.nobullship;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.kawaiicakes.nobullship.api.*;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipeProvider;
 import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeProvider;
@@ -12,15 +14,21 @@ import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacke
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
 import io.github.kawaiicakes.nobullship.particle.ItemMarker;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
@@ -132,6 +140,24 @@ public class NoBullship
         public static void onClientLevelTick(TickEvent.LevelTickEvent event) {
             if (!event.level.isClientSide || !event.phase.equals(TickEvent.Phase.START)) return;
             SchematicRenderer.BlockIngredient.tickRandomSeedChange();
+        }
+
+        @SubscribeEvent
+        public static void onLevelRender(RenderLevelStageEvent event) {
+            if (Minecraft.getInstance().player == null) return;
+            if (!event.getStage().equals(RenderLevelStageEvent.Stage.AFTER_PARTICLES)) return;
+
+            ItemStack itemInHand = Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND);
+            CompoundTag itemTag = itemInHand.getOrCreateTag();
+            if (!itemInHand.is(MAGIC_WAND_ITEM.get()) || !itemTag.contains("pos1") || !itemTag.contains("pos2")) return;
+
+            PoseStack poseStack = event.getPoseStack();
+            VertexConsumer buffer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.lines());
+
+            int[] pos1 = itemTag.getIntArray("pos1");
+            int[] pos2 = itemTag.getIntArray("pos2");
+
+            LevelRenderer.renderLineBox(poseStack, buffer, pos1[0], pos1[1], pos1[2], pos2[0], pos2[1], pos2[2], 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
         }
     }
 

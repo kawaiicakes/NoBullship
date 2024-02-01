@@ -6,6 +6,7 @@
   "item.nobullship.wood_plank": "Laminated Wood Plank",
   "item.nobullship.circuit": "Circuit Board",
   "item.nobullship.nails": "Nails",
+  "item.nobullship.magic_wand": "Magic Wand",
 
   "itemGroup.nobullship_tab": "No Bullship!",
 
@@ -30,6 +31,9 @@
   "chat.nobullship.fail3": "There is a problem with the recipe JSON!",
   "chat.nobullship.fail4": "Global usage of schematics is currently on cooldown!",
   "chat.nobullship.fail5": "Exception during check! Contact the mod author!",
+  "chat.nobullship.pos1": "Position 1 set as %1$s.",
+  "chat.nobullship.pos2": "Position 2 set as %1$s.",
+  "chat.nobullship.clear_pos": "Cleared positions!",
 
   "tooltip.nobullship.blank_schematic": "Schematic is blank.",
   "tooltip.nobullship.filled_schematic": "Contains %1$s.",

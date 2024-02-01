@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
@@ -15,6 +16,7 @@ import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import org.jetbrains.annotations.Nullable;
@@ -156,6 +158,78 @@ public record MultiblockRecipe(
                 hasSchematicBlock,
                 schematicBlockOffset
         );
+    }
+
+    /**
+     * Returns a <code>MultiblockRecipe</code> built from the kind of NBT used in vanilla structure NBTs.
+     */
+    @Nullable
+    public static MultiblockRecipe fromRawNbt(CompoundTag nbt, ResourceLocation resultId) {
+        try {
+            if (!(nbt.get("size") instanceof IntArrayTag sizeTag))
+                throw new IllegalArgumentException("Passed NBT is malformed!");
+            if (!(nbt.get("blocks") instanceof ListTag blocksTag))
+                throw new IllegalArgumentException("Passed NBT is malformed!");
+            if (!(nbt.get("palette") instanceof ListTag paletteTag))
+                throw new IllegalArgumentException("Passed NBT is malformed!");
+            if (sizeTag.size() < 3)
+                throw new IllegalArgumentException("Passed NBT is malformed!");
+            if (blocksTag.getElementType() != Tag.TAG_COMPOUND)
+                throw new IllegalArgumentException("Passed NBT is malformed!");
+            if (paletteTag.getElementType() != Tag.TAG_COMPOUND)
+                throw new IllegalArgumentException("Passed NBT is malformed!");
+
+            MultiblockPatternBuilder patternBuilder = MultiblockPatternBuilder.of(resultId);
+
+            List<Pair<Character, BlockState>> orderedMappedPalette = new ArrayList<>(paletteTag.size());
+            for (Tag rawBlockStateTag : paletteTag) {
+                if (!(rawBlockStateTag instanceof CompoundTag blockStateTag))
+                    throw new IllegalArgumentException("Passed NBT is malformed!");
+
+                int index = paletteTag.indexOf(rawBlockStateTag);
+                char ch = Character.forDigit(index, 8);
+                BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, blockStateTag).getOrThrow(false, LOGGER::error);
+
+                orderedMappedPalette.add(index, Pair.of(ch, blockState));
+                patternBuilder.where(ch, BlockInWorldPredicateBuilder.of(blockState));
+            }
+
+            int[][][] pattern = new int[sizeTag.get(0).getAsInt()][sizeTag.get(1).getAsInt()][sizeTag.get(2).getAsInt()];
+            for (Tag rawPatternTag : blocksTag) {
+                if (!(rawPatternTag instanceof CompoundTag patternTag))
+                    throw new IllegalArgumentException("Passed NBT is malformed!");
+                if (!(patternTag.get("state") instanceof IntTag intTag))
+                    throw new IllegalArgumentException("Passed NBT is malformed!");
+                if (!(patternTag.get("pos") instanceof IntArrayTag intArrayTag))
+                    throw new IllegalArgumentException("Passed NBT is malformed!");
+                if (intArrayTag.size() < 3)
+                    throw new IllegalArgumentException("Passed NBT is malformed!");
+
+                int patternX = intArrayTag.get(0).getAsInt();
+                int patternY = intArrayTag.get(1).getAsInt();
+                int patternZ = intArrayTag.get(2).getAsInt();
+
+                pattern[patternX][patternY][patternZ] = intTag.getAsInt();
+            }
+
+            for (int depth = 0; depth < sizeTag.get(2).getAsInt(); depth++) {
+                String[] yList = new String[sizeTag.get(1).getAsInt()];
+                for (int height = 0; height < sizeTag.get(1).getAsInt(); height++) {
+                    char[] chars = new char[sizeTag.get(0).getAsInt()];
+                    for (int width = 0; width < sizeTag.get(0).getAsInt(); width++) {
+                        chars[width] = orderedMappedPalette.get(pattern[width][height][depth]).getFirst();
+                    }
+                    yList[height] = (new String(chars));
+                }
+                patternBuilder.aisle(yList);
+            }
+
+            return new MultiblockRecipe(null, patternBuilder.build(), resultId, null, null, patternBuilder.hasSchematicBlock, new int[3]);
+
+        } catch (RuntimeException e) {
+            LOGGER.error("Error creating recipe from raw NBT!", e);
+            return null;
+        }
     }
 
     /**
