@@ -205,7 +205,8 @@ public record MultiblockRecipe(
                     throw new IllegalArgumentException("Passed NBT is malformed!");
 
                 int index = paletteTag.indexOf(rawBlockStateTag);
-                char ch = Character.forDigit(index, 8);
+                char ch = (char) index;
+                if (ch == ' ' || ch == '$') ch = (char) (0xFFFF - index);
                 BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, blockStateTag).getOrThrow(false, LOGGER::error);
 
                 orderedMappedPalette.add(index, Pair.of(ch, blockState));
@@ -255,7 +256,7 @@ public record MultiblockRecipe(
                     for (int width = 0; width < size[0]; width++) {
                         chars[width] = orderedMappedPalette.get(pattern[width][height][depth]).getFirst();
                     }
-                    yList[height] = (new String(chars));
+                    yList[(size[1] - 1) - height] = (new String(chars));
                 }
                 patternBuilder.aisle(yList);
             }
