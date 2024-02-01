@@ -166,18 +166,36 @@ public record MultiblockRecipe(
     @Nullable
     public static MultiblockRecipe fromRawNbt(CompoundTag nbt, ResourceLocation resultId) {
         try {
-            if (!(nbt.get("size") instanceof IntArrayTag sizeTag))
-                throw new IllegalArgumentException("Passed NBT is malformed!");
             if (!(nbt.get("blocks") instanceof ListTag blocksTag))
                 throw new IllegalArgumentException("Passed NBT is malformed!");
             if (!(nbt.get("palette") instanceof ListTag paletteTag))
-                throw new IllegalArgumentException("Passed NBT is malformed!");
-            if (sizeTag.size() < 3)
                 throw new IllegalArgumentException("Passed NBT is malformed!");
             if (blocksTag.getElementType() != Tag.TAG_COMPOUND)
                 throw new IllegalArgumentException("Passed NBT is malformed!");
             if (paletteTag.getElementType() != Tag.TAG_COMPOUND)
                 throw new IllegalArgumentException("Passed NBT is malformed!");
+
+            int[] size = new int[3];
+
+            if (nbt.get("size") instanceof IntArrayTag sizeTag) {
+                if (sizeTag.size() < 3)
+                    throw new IllegalArgumentException("Passed NBT is malformed!");
+
+                for (int i = 0; i < sizeTag.size(); i++) {
+                    size[i] = sizeTag.getAsIntArray()[i];
+                }
+            } else if (nbt.get("size") instanceof ListTag sizeTag) {
+                if (sizeTag.size() < 3)
+                    throw new IllegalArgumentException("Passed NBT is malformed!");
+                if (sizeTag.getElementType() != IntTag.TAG_INT)
+                    throw new IllegalArgumentException("Passed NBT is malformed!");
+
+                for (int i = 0; i < sizeTag.size(); i++) {
+                    size[i] = sizeTag.getInt(i);
+                }
+            } else {
+                throw new IllegalArgumentException("Passed NBT is malformed!");
+            }
 
             MultiblockPatternBuilder patternBuilder = MultiblockPatternBuilder.of(resultId);
 
@@ -194,29 +212,47 @@ public record MultiblockRecipe(
                 patternBuilder.where(ch, BlockInWorldPredicateBuilder.of(blockState));
             }
 
-            int[][][] pattern = new int[sizeTag.get(0).getAsInt()][sizeTag.get(1).getAsInt()][sizeTag.get(2).getAsInt()];
+            int[][][] pattern = new int[size[0]][size[1]][size[2]];
             for (Tag rawPatternTag : blocksTag) {
                 if (!(rawPatternTag instanceof CompoundTag patternTag))
                     throw new IllegalArgumentException("Passed NBT is malformed!");
                 if (!(patternTag.get("state") instanceof IntTag intTag))
                     throw new IllegalArgumentException("Passed NBT is malformed!");
-                if (!(patternTag.get("pos") instanceof IntArrayTag intArrayTag))
-                    throw new IllegalArgumentException("Passed NBT is malformed!");
-                if (intArrayTag.size() < 3)
-                    throw new IllegalArgumentException("Passed NBT is malformed!");
 
-                int patternX = intArrayTag.get(0).getAsInt();
-                int patternY = intArrayTag.get(1).getAsInt();
-                int patternZ = intArrayTag.get(2).getAsInt();
+                int[] pos = new int[3];
+
+                if (patternTag.get("pos") instanceof IntArrayTag posTag) {
+                    if (posTag.size() < 3)
+                        throw new IllegalArgumentException("Passed NBT is malformed!");
+
+                    for (int i = 0; i < posTag.size(); i++) {
+                        pos[i] = posTag.getAsIntArray()[i];
+                    }
+                } else if (patternTag.get("pos") instanceof ListTag posTag) {
+                    if (posTag.size() < 3)
+                        throw new IllegalArgumentException("Passed NBT is malformed!");
+                    if (posTag.getElementType() != IntTag.TAG_INT)
+                        throw new IllegalArgumentException("Passed NBT is malformed!");
+
+                    for (int i = 0; i < posTag.size(); i++) {
+                        pos[i] = posTag.getInt(i);
+                    }
+                } else {
+                    throw new IllegalArgumentException("Passed NBT is malformed!");
+                }
+
+                int patternX = pos[0];
+                int patternY = pos[1];
+                int patternZ = pos[2];
 
                 pattern[patternX][patternY][patternZ] = intTag.getAsInt();
             }
 
-            for (int depth = 0; depth < sizeTag.get(2).getAsInt(); depth++) {
-                String[] yList = new String[sizeTag.get(1).getAsInt()];
-                for (int height = 0; height < sizeTag.get(1).getAsInt(); height++) {
-                    char[] chars = new char[sizeTag.get(0).getAsInt()];
-                    for (int width = 0; width < sizeTag.get(0).getAsInt(); width++) {
+            for (int depth = 0; depth < size[2]; depth++) {
+                String[] yList = new String[size[1]];
+                for (int height = 0; height < size[1]; height++) {
+                    char[] chars = new char[size[0]];
+                    for (int width = 0; width < size[0]; width++) {
                         chars[width] = orderedMappedPalette.get(pattern[width][height][depth]).getFirst();
                     }
                     yList[height] = (new String(chars));
