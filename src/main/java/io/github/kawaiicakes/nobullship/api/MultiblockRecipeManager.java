@@ -396,11 +396,19 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
     }
 
     public void addRecipes(Map<ResourceLocation, MultiblockRecipe> multiblockRecipeMap) {
-        if (this.recipes == null) this.recipes = new HashMap<>();
         // hmm, today I will make a new method to add recipes to the MultiblockRecipeManager
         // surely I will not encounter any concurrent modification issues or race conditions
         // :clueless:
-        this.recipes.putAll(multiblockRecipeMap);
+        ImmutableMap.Builder<ResourceLocation, MultiblockRecipe> builder = ImmutableMap.builder();
+
+        if (this.recipes == null || this.recipes.isEmpty()) {
+            this.recipes = ImmutableMap.copyOf(multiblockRecipeMap);
+        } else {
+            builder.putAll(this.recipes);
+            builder.putAll(multiblockRecipeMap);
+
+            this.recipes = builder.build();
+        }
 
         List<ResourceLocation> whiteList = Config.DROP_WHITELIST.get().stream().map(ResourceLocation::new).toList();
         List<ResourceLocation> blackList = Config.DROP_BLACKLIST.get().stream().map(ResourceLocation::new).toList();
