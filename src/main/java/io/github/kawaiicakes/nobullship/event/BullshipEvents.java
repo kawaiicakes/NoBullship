@@ -14,7 +14,7 @@ public class BullshipEvents {
         if (!Config.DISABLE_DROP.get()) return;
         if (!(event.getEntity() instanceof ItemEntity itemEntity)) return;
         ResourceLocation resultLocation = new ResourceLocation(itemEntity.getItem().getItem().toString());
-        if (!MultiblockRecipeManager.getInstance().isValidResultLocation(resultLocation)) return;
+        if (!MultiblockRecipeManager.getInstance().isBlacklistedResult(resultLocation)) return;
         event.setCanceled(true);
     }
 }

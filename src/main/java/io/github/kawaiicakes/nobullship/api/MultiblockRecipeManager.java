@@ -70,7 +70,7 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
      * A map available on the serverside containing the recipe id as a key.
      */
     private Map<ResourceLocation, MultiblockRecipe> recipes = ImmutableMap.of();
-    private LinkedList<ResourceLocation> resultNameCache;
+    private LinkedList<ResourceLocation> blacklistedNameCache;
 
     public MultiblockRecipeManager() {
         this(ICondition.IContext.EMPTY);
@@ -91,14 +91,14 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         List<ResourceLocation> whiteList = packet.whiteList;
         List<ResourceLocation> blackList = packet.blackList;
 
-        this.resultNameCache = this.recipes
+        this.blacklistedNameCache = this.recipes
                 .values()
                 .stream()
                 .map(MultiblockRecipe::result)
                 .filter(location -> !whiteList.contains(location))
                 .collect(Collectors.toCollection(LinkedList::new));
 
-        this.resultNameCache.addAll(blackList);
+        this.blacklistedNameCache.addAll(blackList);
     }
 
     public Map<ResourceLocation, MultiblockRecipe> getRecipes() {
@@ -110,12 +110,12 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
      * Uses a <code>LinkedList</code> whose most recent access becomes the first element to decrease time spent
      * iterating.
      */
-    public boolean isValidResultLocation(ResourceLocation entityId) {
-        if (this.resultNameCache.contains(entityId)) {
-            if (this.resultNameCache.getFirst().equals(entityId)) return true;
+    public boolean isBlacklistedResult(ResourceLocation entityId) {
+        if (this.blacklistedNameCache.contains(entityId)) {
+            if (this.blacklistedNameCache.getFirst().equals(entityId)) return true;
 
-            this.resultNameCache.removeFirstOccurrence(entityId);
-            this.resultNameCache.addFirst(entityId);
+            this.blacklistedNameCache.removeFirstOccurrence(entityId);
+            this.blacklistedNameCache.addFirst(entityId);
             return true;
         }
         return false;
@@ -397,7 +397,36 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
 
     public void addRecipes(Map<ResourceLocation, MultiblockRecipe> multiblockRecipeMap) {
         if (this.recipes == null) this.recipes = new HashMap<>();
+        // hmm, today I will make a new method to add recipes to the MultiblockRecipeManager
+        // surely I will not encounter any concurrent modification issues or race conditions
+        // :clueless:
         this.recipes.putAll(multiblockRecipeMap);
+
+        List<ResourceLocation> whiteList = Config.DROP_WHITELIST.get().stream().map(ResourceLocation::new).toList();
+        List<ResourceLocation> blackList = Config.DROP_BLACKLIST.get().stream().map(ResourceLocation::new).toList();
+
+        if (this.blacklistedNameCache == null) {
+            this.blacklistedNameCache = this.recipes
+                    .values()
+                    .stream()
+                    .map(MultiblockRecipe::result)
+                    .filter((scrutinized) -> !whiteList.contains(scrutinized))
+                    .collect(Collectors.toCollection(LinkedList::new));
+        } else {
+            this.blacklistedNameCache.addAll(
+                    multiblockRecipeMap
+                    .values()
+                    .stream()
+                    .map(MultiblockRecipe::result)
+                    .filter((scrutinized) -> !whiteList.contains(scrutinized))
+                    .collect(Collectors.toCollection(LinkedList::new))
+            );
+        }
+
+        for (ResourceLocation blacklisted : blackList) {
+            if (this.blacklistedNameCache.contains(blacklisted)) continue;
+            this.blacklistedNameCache.add(blacklisted);
+        }
     }
 
     @Override
@@ -420,18 +449,6 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
         }
 
         this.addRecipes(builder.build());
-
-        List<ResourceLocation> whiteList = Config.DROP_WHITELIST.get().stream().map(ResourceLocation::new).toList();
-        List<ResourceLocation> blackList = Config.DROP_BLACKLIST.get().stream().map(ResourceLocation::new).toList();
-
-        this.resultNameCache = this.recipes
-                .values()
-                .stream()
-                .map(MultiblockRecipe::result)
-                .filter(whiteList::contains)
-                .collect(Collectors.toCollection(LinkedList::new));
-
-        this.resultNameCache.addAll(blackList);
 
         LOGGER.info("Loaded {} recipes", recipes.size());
     }

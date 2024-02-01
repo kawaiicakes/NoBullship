@@ -73,8 +73,8 @@ public class NbtMultiblockResourceListener extends SimplePreparableReloadListene
                 if (inputStream != null) {
                     inputStream.close();
                 }
-            } catch (IllegalArgumentException | IOException | JsonParseException jsonparseexception) {
-                LOGGER.error("Couldn't parse data file {} from {}", fullResourceId, resourceId, jsonparseexception);
+            } catch (IllegalArgumentException | IOException parseException) {
+                LOGGER.error("Couldn't parse data file {} from {}", fullResourceId, resourceId, parseException );
             }
         }
 
@@ -90,20 +90,15 @@ public class NbtMultiblockResourceListener extends SimplePreparableReloadListene
             if (recipeId.getPath().startsWith("_")) continue;
 
             try {
-                /* TODO
                 MultiblockRecipe deserializedRecipe
-                        = MultiblockRecipe.fromRawNbt(entry.getValue());
+                        = MultiblockRecipe.fromRawNbt(entry.getValue(), recipeId);
                 if (deserializedRecipe == null) continue;
 
                 builder.put(recipeId, deserializedRecipe);
-
-                 */
             } catch (IllegalArgumentException | JsonParseException jsonParseException) {
                 LOGGER.error("Parsing error loading recipe {}", recipeId, jsonParseException);
             }
         }
-
-        // FIXME: consider MultiblockRecipeManager$resultNameCache
 
         this.multiblockRecipeManager.addRecipes(builder.build());
     }
