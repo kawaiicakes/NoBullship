@@ -246,7 +246,7 @@ public record MultiblockRecipe(
                 int patternY = pos[1];
                 int patternZ = pos[2];
 
-                pattern[patternX][patternY][patternZ] = intTag.getAsInt();
+                pattern[patternX][(size[1] - 1) - patternY][(size[2] - 1) - patternZ] = intTag.getAsInt();
             }
 
             for (int depth = 0; depth < size[2]; depth++) {
@@ -256,7 +256,7 @@ public record MultiblockRecipe(
                     for (int width = 0; width < size[0]; width++) {
                         chars[width] = orderedMappedPalette.get(pattern[width][height][depth]).getFirst();
                     }
-                    yList[(size[1] - 1) - height] = (new String(chars));
+                    yList[height] = (new String(chars));
                 }
                 patternBuilder.aisle(yList);
             }
