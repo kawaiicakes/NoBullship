@@ -1,5 +1,8 @@
 package io.github.kawaiicakes.nobullship.multiblock;
 
+import io.github.kawaiicakes.nobullship.multiblock.screen.SaveSelectionScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
@@ -9,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -37,10 +41,6 @@ public class MagicWandItem extends Item {
             return InteractionResult.SUCCESS;
         }
 
-        if (context.getHitResult().getType().equals(HitResult.Type.MISS)) {
-            return InteractionResult.SUCCESS;
-        }
-
         if (stack.getOrCreateTag().getIntArray("pos1").length < 3) {
             stack.addTagElement("pos1", new IntArrayTag(new int[]{clickedPos.getX(), clickedPos.getY(), clickedPos.getZ()}));
             if (context.getPlayer() instanceof ServerPlayer serverPlayer) {
@@ -58,7 +58,6 @@ public class MagicWandItem extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
-        if (pLevel.isClientSide) return InteractionResultHolder.success(pPlayer.getItemInHand(pUsedHand));
         return InteractionResultHolder.fail(pPlayer.getItemInHand(pUsedHand));
     }
 }

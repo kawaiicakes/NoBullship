@@ -55,6 +55,8 @@
   "gui.nobullship.view_data": "View full data (This feature has not been added yet!)",
   "gui.nobullship.empty_block_entity": "Block Entity",
   "gui.nobullship.proxy_screen": "Nobody here but us chickens!",
+  "gui.nobullship.schematic_saver": "Schematic Saver",
+  "gui.nobullship.open_selection": "Open Magic Wand selection screen",
 
   "config.nobullship.cooldown": "The multiplier on cooldown times for schematics.",
   "config.nobullship.min_cooldown": "The minimum cooldown time possible in seconds.",
@@ -65,5 +67,7 @@
   "config.nobullship.raw_drops_percent": "The percentage of blocks that will be dropped if an entity is destroyed. Ignored if raw_drops is disabled.",
   "config.nobullship.drop_whitelist": "Acts as a whitelist for drops if an item you needed was removed by default_drops.",
   "config.nobullship.drop_blacklist": "Acts as a blacklist for drops if an item was missed by default_drops.",
-  "config.nobullship.drop_rates": "If raw_drops is enabled, this allows overrides of specific drop rates."
+  "config.nobullship.drop_rates": "If raw_drops is enabled, this allows overrides of specific drop rates.",
+
+  "key.categories.no_bullship": "No Bullship! Controls"
 }
