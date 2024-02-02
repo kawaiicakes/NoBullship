@@ -25,6 +25,7 @@
   "sounds.nobullship.construct_success": "[Construction sounds]",
   "sounds.nobullship.construct_expended": "[Paper tearing]",
   "sounds.nobullship.construct_failed": "[Boowhomp :(]",
+  "sounds.nobullship.ligma": "It's so sad that Steve Jobs died of ligma...",
 
   "chat.nobullship.fail": "Construction failed! Schematic is not built properly!",
   "chat.nobullship.fail2": "You do not have enough items!",
@@ -39,6 +40,10 @@
   "tooltip.nobullship.filled_schematic": "Contains %1$s.",
   "tooltip.nobullship.items": "Required items:",
   "tooltip.nobullship.remaining_uses": "Remaining usages:",
+  "tooltip.nobullship.magic_wand1": "[Right-Click] to set positions",
+  "tooltip.nobullship.magic_wand2": "[Shift + Right-Click] to clear positions",
+  "tooltip.nobullship.magic_wand3": "[R] to open selection screen",
+  "tooltip.nobullship.magic_wand4": "A weapon to slay gods.",
 
   "gui.nobullship.requisites": "View requisite items",
   "gui.nobullship.nbt_viewer": "View block NBT data",
@@ -74,5 +79,8 @@
   "config.nobullship.drop_blacklist": "Acts as a blacklist for drops if an item was missed by default_drops.",
   "config.nobullship.drop_rates": "If raw_drops is enabled, this allows overrides of specific drop rates.",
 
-  "key.categories.no_bullship": "No Bullship! Controls"
+  "key.categories.no_bullship": "No Bullship! Controls",
+
+  "death.attack.ligma": "%1$s didn't know who Steve Jobs was",
+  "death.attack.ligma.item": "%2$s used %3$s to turn %1$s into Arby's"
 }

@@ -16,5 +16,15 @@
     "sounds": [
       "nobullship:construct_failed"
     ]
+  },
+  "ligma": {
+    "subtitle": "sounds.nobullship.ligma",
+    "sounds": [
+      "nobullship:ligma1",
+      "nobullship:ligma2",
+      "nobullship:ligma3",
+      "nobullship:ligma4",
+      "nobullship:ligma5"
+    ]
   }
 }
