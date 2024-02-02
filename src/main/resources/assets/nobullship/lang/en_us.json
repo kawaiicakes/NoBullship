@@ -57,6 +57,11 @@
   "gui.nobullship.proxy_screen": "Nobody here but us chickens!",
   "gui.nobullship.schematic_saver": "Schematic Saver",
   "gui.nobullship.open_selection": "Open Magic Wand selection screen",
+  "gui.nobullship.empty_pos": "You must specify two positions for a selection!",
+  "gui.nobullship.save_json": "Save selection as a JSON multiblock recipe.",
+  "gui.nobullship.save_nbt": "Save selection as an NBT multiblock recipe.",
+  "gui.nobullship.json": "Save as JSON",
+  "gui.nobullship.nbt": "Save as NBT",
 
   "config.nobullship.cooldown": "The multiplier on cooldown times for schematics.",
   "config.nobullship.min_cooldown": "The minimum cooldown time possible in seconds.",

@@ -55,6 +55,7 @@ This mod is intended for modpackers to use & configure; however, it will come wi
 ![Build!](2023-12-07_21.04.59.png)
 
 ## Features
+- NBT structure support; convert NBT structures to multiblock recipes!
 - Configurable drop prevention, even for hard-coded drops (e.g. Simple Planes planes)
 - Packaged support for select mods! Read below!
 - Aesthetic building blocks and miscellaneous "component" items to enhance your recipes & provide more variety for modpackers!
@@ -72,7 +73,6 @@ ___
 # 📝 In-Development Features
 
 - JEI compatibility for multiblocks themselves
-- NBT structure support; convert NBT structures to/from multiblock recipes!
 - Configurable drops of blocks from multiblock recipe on entity death
 - Miscellaneous improvements and bug fixes
 - Research table mechanic!

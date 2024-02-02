@@ -1,6 +1,7 @@
 package io.github.kawaiicakes.nobullship;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.kawaiicakes.nobullship.api.*;
@@ -16,11 +17,14 @@ import io.github.kawaiicakes.nobullship.network.ClientboundUpdateNoBullshipPacke
 import io.github.kawaiicakes.nobullship.network.NoBullshipPackets;
 import io.github.kawaiicakes.nobullship.particle.ItemMarker;
 import io.github.kawaiicakes.nobullship.schematic.SchematicItem;
+import net.minecraft.client.Camera;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.BlockTagsProvider;
 import net.minecraft.nbt.CompoundTag;
@@ -28,11 +32,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -141,8 +143,15 @@ public class NoBullship
         event.addListener(multiblockRecipeManager);
     }
 
+    @SubscribeEvent
+    public static void onCameraSetup(ViewportEvent.ComputeCameraAngles event) {
+        ClientEvents.CAMERA_ROLL = event.getRoll();
+    }
+
     @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ClientEvents {
+        protected static float CAMERA_ROLL;
+
         @SubscribeEvent
         public static void onClientLevelTick(TickEvent.LevelTickEvent event) {
             if (!event.level.isClientSide || !event.phase.equals(TickEvent.Phase.START)) return;
@@ -168,13 +177,46 @@ public class NoBullship
             CompoundTag itemTag = itemInHand.getOrCreateTag();
             if (!itemInHand.is(MAGIC_WAND_ITEM.get()) || !itemTag.contains("pos1") || !itemTag.contains("pos2")) return;
 
-            PoseStack poseStack = event.getPoseStack();
-            VertexConsumer buffer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.lines());
-
             int[] pos1 = itemTag.getIntArray("pos1");
             int[] pos2 = itemTag.getIntArray("pos2");
 
-            LevelRenderer.renderLineBox(poseStack, buffer, pos1[0], pos1[1], pos1[2], pos2[0], pos2[1], pos2[2], 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
+            BlockPos arbitraryStartPos = new BlockPos(pos1[0], pos1[1], pos1[2]);
+
+            Vec3i vec3i = new Vec3i(pos2[0] - pos1[0], pos2[1] - pos1[1], pos2[2] - pos1[2]);
+
+            double d0 = arbitraryStartPos.getX();
+            double d1 = arbitraryStartPos.getZ();
+            double d2 = vec3i.getX();
+            double d3 = vec3i.getZ();
+            double d4 = d2 < 0.0D ? d0 + 1.0D : d0;
+            double d5 = arbitraryStartPos.getY();
+            double d6 = d3 < 0.0D ? d1 + 1.0D : d1;
+            double d7 = d4 + d2;
+            double d8 = d5 + (double) vec3i.getY();
+            double d9 = d6 + d3;
+
+            PoseStack poseStack = event.getPoseStack();
+
+            poseStack.pushPose();
+            RenderSystem.enableDepthTest();
+            VertexConsumer buffer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.lines());
+            Camera camera = event.getCamera();
+            Vec3 cameraPos = camera.getPosition();
+
+            // -56 -61 -14 turns into -112 -122 -28??
+            // FIXME: this is a mess. it renders but 'floats' around when looking from different angles.
+            poseStack.translate(56, 61, 14);
+
+            // poseStack.mulPose(Vector3f.ZP.rotationDegrees(CAMERA_ROLL));
+
+            // poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
+            // poseStack.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot() + 180.0F));
+
+            poseStack.translate(arbitraryStartPos.getX() - cameraPos.x(), arbitraryStartPos.getY() - cameraPos.y(), arbitraryStartPos.getZ() - cameraPos.z());
+            LevelRenderer.renderLineBox(poseStack, buffer, d4, d5, d6, d7, d8, d9, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
+
+            RenderSystem.disableDepthTest();
+            poseStack.popPose();
         }
     }
 
