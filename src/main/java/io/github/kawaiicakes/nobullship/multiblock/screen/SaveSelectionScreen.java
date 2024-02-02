@@ -16,7 +16,7 @@ public class SaveSelectionScreen extends Screen {
     protected final BlockPos pos1;
     @Nullable
     protected final BlockPos pos2;
-    protected final EditBox selectionName;
+    protected EditBox selectionName;
 
     public SaveSelectionScreen(ItemStack wandItem) {
         super(Component.translatable("gui.nobullship.schematic_saver"));
@@ -34,16 +34,15 @@ public class SaveSelectionScreen extends Screen {
             this.pos2 = null;
         }
         this.font = Minecraft.getInstance().font;
-        this.selectionName = new EditBox(this.font, this.width / 2 - 152, 40, 300, 20, Component.translatable("structure_block.structure_name")) {
-            public boolean charTyped(char pCodePoint, int pModifiers) {
-                return SaveSelectionScreen.this.isValidCharacterForName(this.getValue(), pCodePoint, this.getCursorPosition()) && super.charTyped(pCodePoint, pModifiers);
-            }
-        };
     }
 
     @Override
     protected void init() {
-        this.addRenderableWidget(this.selectionName);
+        this.selectionName = this.addRenderableWidget(new EditBox(this.font, this.width / 2 - 152, 40, 300, 20, Component.translatable("structure_block.structure_name")) {
+            public boolean charTyped(char pCodePoint, int pModifiers) {
+                return SaveSelectionScreen.this.isValidCharacterForName(this.getValue(), pCodePoint, this.getCursorPosition()) && super.charTyped(pCodePoint, pModifiers);
+            }
+        });
     }
 
     @Override
