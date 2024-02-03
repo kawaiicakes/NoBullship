@@ -1,7 +1,6 @@
 package io.github.kawaiicakes.nobullship;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.kawaiicakes.nobullship.api.*;
@@ -34,7 +33,10 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.settings.IKeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.data.ExistingFileHelper;
@@ -143,15 +145,8 @@ public class NoBullship
         event.addListener(multiblockRecipeManager);
     }
 
-    @SubscribeEvent
-    public static void onCameraSetup(ViewportEvent.ComputeCameraAngles event) {
-        ClientEvents.CAMERA_ROLL = event.getRoll();
-    }
-
     @Mod.EventBusSubscriber(modid = MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
     public static class ClientEvents {
-        protected static float CAMERA_ROLL;
-
         @SubscribeEvent
         public static void onClientLevelTick(TickEvent.LevelTickEvent event) {
             if (!event.level.isClientSide || !event.phase.equals(TickEvent.Phase.START)) return;
@@ -171,51 +166,43 @@ public class NoBullship
         @SubscribeEvent
         public static void onLevelRender(RenderLevelStageEvent event) {
             if (Minecraft.getInstance().player == null) return;
-            if (!event.getStage().equals(RenderLevelStageEvent.Stage.AFTER_PARTICLES)) return;
+            if (Minecraft.getInstance().level == null) return;
+            if (!event.getStage().equals(RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS)) return;
 
             ItemStack itemInHand = Minecraft.getInstance().player.getItemInHand(InteractionHand.MAIN_HAND);
+            if (!itemInHand.is(MAGIC_WAND_ITEM.get())) return;
+
             CompoundTag itemTag = itemInHand.getOrCreateTag();
-            if (!itemInHand.is(MAGIC_WAND_ITEM.get()) || !itemTag.contains("pos1") || !itemTag.contains("pos2")) return;
+            if (!itemTag.contains("pos1") || !itemTag.contains("pos2")) return;
 
-            int[] pos1 = itemTag.getIntArray("pos1");
-            int[] pos2 = itemTag.getIntArray("pos2");
+            int[] pos1Arr = itemTag.getIntArray("pos1");
+            int[] pos2Arr = itemTag.getIntArray("pos2");
 
-            BlockPos arbitraryStartPos = new BlockPos(pos1[0], pos1[1], pos1[2]);
+            BlockPos minPos = new BlockPos(Math.min(pos1Arr[0], pos2Arr[0]) - 1, Math.min(pos1Arr[1], pos2Arr[1]) - 1, Math.min(pos1Arr[2], pos2Arr[2]) - 1);
+            BlockPos maxPos = new BlockPos(Math.max(pos1Arr[0], pos2Arr[0]), Math.max(pos1Arr[1], pos2Arr[1]), Math.max(pos1Arr[2], pos2Arr[2]));
 
-            Vec3i vec3i = new Vec3i(pos2[0] - pos1[0], pos2[1] - pos1[1], pos2[2] - pos1[2]);
+            Vec3i enclosingSize = maxPos.subtract(minPos);
 
-            double d0 = arbitraryStartPos.getX();
-            double d1 = arbitraryStartPos.getZ();
-            double d2 = vec3i.getX();
-            double d3 = vec3i.getZ();
-            double d4 = d2 < 0.0D ? d0 + 1.0D : d0;
-            double d5 = arbitraryStartPos.getY();
-            double d6 = d3 < 0.0D ? d1 + 1.0D : d1;
+            double d0 = 1.0D;
+            double d2 = enclosingSize.getX();
+            double d3 = enclosingSize.getZ();
+            double d4 = d2 < 0.0D ? d0 * 2 : d0;
+            double d6 = d3 < 0.0D ? d0 * 2 : d0;
             double d7 = d4 + d2;
-            double d8 = d5 + (double) vec3i.getY();
+            double d8 = d0 + (double) enclosingSize.getY();
             double d9 = d6 + d3;
 
             PoseStack poseStack = event.getPoseStack();
+            LevelRenderer levelRenderer = event.getLevelRenderer();
 
-            poseStack.pushPose();
-            RenderSystem.enableDepthTest();
-            VertexConsumer buffer = Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(RenderType.lines());
             Camera camera = event.getCamera();
             Vec3 cameraPos = camera.getPosition();
 
-            // -56 -61 -14 turns into -112 -122 -28??
-            // FIXME: this is a mess. it renders but 'floats' around when looking from different angles.
-            poseStack.translate(56, 61, 14);
+            VertexConsumer consumer = levelRenderer.renderBuffers.bufferSource().getBuffer(RenderType.lines());
 
-            // poseStack.mulPose(Vector3f.ZP.rotationDegrees(CAMERA_ROLL));
-
-            // poseStack.mulPose(Vector3f.XP.rotationDegrees(camera.getXRot()));
-            // poseStack.mulPose(Vector3f.YP.rotationDegrees(camera.getYRot() + 180.0F));
-
-            poseStack.translate(arbitraryStartPos.getX() - cameraPos.x(), arbitraryStartPos.getY() - cameraPos.y(), arbitraryStartPos.getZ() - cameraPos.z());
-            LevelRenderer.renderLineBox(poseStack, buffer, d4, d5, d6, d7, d8, d9, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
-
-            RenderSystem.disableDepthTest();
+            poseStack.pushPose();
+            poseStack.translate((double) minPos.getX() - cameraPos.x(), (double) minPos.getY() - cameraPos.y(), (double) minPos.getZ() - cameraPos.z());
+            LevelRenderer.renderLineBox(poseStack, consumer, d4, 1.0D, d6, d7, d8, d9, 0.9F, 0.9F, 0.9F, 1.0F, 0.5F, 0.5F, 0.5F);
             poseStack.popPose();
         }
     }
