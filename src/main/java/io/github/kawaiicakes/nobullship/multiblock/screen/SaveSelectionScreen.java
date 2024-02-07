@@ -1,22 +1,46 @@
 package io.github.kawaiicakes.nobullship.multiblock.screen;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
+import net.minecraft.FileUtil;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.EmptyBlockGetter;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.multiblock.screen.RequisiteScreen.CLOSE_MSG;
 
 public class SaveSelectionScreen extends Screen {
+    protected static final Logger LOGGER = LogUtils.getLogger();
     public static final Component NAME_LABEL = Component.translatable("structure_block.structure_name");
     public static final Component NEED_POS = Component.translatable("gui.nobullship.empty_pos");
+    public static final Component SAVE_ERROR = Component.translatable("gui.nobullship.save_error");
+    public static final Component BAD_NAME = Component.translatable("gui.nobullship.bad_name");
     public static final Component JSON_HOVER = Component.translatable("gui.nobullship.save_json");
     public static final Component JSON_MSG = Component.translatable("gui.nobullship.json");
     public static final Component NBT_HOVER = Component.translatable("gui.nobullship.save_nbt");
@@ -31,6 +55,7 @@ public class SaveSelectionScreen extends Screen {
     protected Button saveNbt;
     protected Button closeButton;
     protected boolean shouldDisplayResultMsg = false;
+    protected Component resultMsg = NEED_POS;
 
     public SaveSelectionScreen(ItemStack wandItem) {
         super(Component.translatable("gui.nobullship.schematic_saver"));
@@ -77,6 +102,7 @@ public class SaveSelectionScreen extends Screen {
                 JSON_MSG,
                 (button) -> {
                     this.shouldDisplayResultMsg = true;
+                    this.resultMsg = NEED_POS;
                     if (this.saveAsJson()) Minecraft.getInstance().setScreen(null);
                 },
                 ((pButton, pPoseStack, pMouseX, pMouseY) -> this.renderTooltip(pPoseStack, JSON_HOVER, pMouseX, pMouseY))
@@ -89,6 +115,7 @@ public class SaveSelectionScreen extends Screen {
                 NBT_MSG,
                 (button) -> {
                     this.shouldDisplayResultMsg = true;
+                    this.resultMsg = NEED_POS;
                     if (this.saveAsNbt()) Minecraft.getInstance().setScreen(null);
                 },
                 ((pButton, pPoseStack, pMouseX, pMouseY) -> this.renderTooltip(pPoseStack, NBT_HOVER, pMouseX, pMouseY))
@@ -116,7 +143,7 @@ public class SaveSelectionScreen extends Screen {
         drawCenteredString(pPoseStack, this.font, this.title, this.width / 2, 10, 16777215);
         drawString(pPoseStack, this.font, NAME_LABEL, this.width / 2 - 153, 30, 10526880);
         if (this.shouldDisplayResultMsg)
-            drawCenteredString(pPoseStack, this.font, NEED_POS, this.width / 2, 50, 16736352);
+            drawCenteredString(pPoseStack, this.font, this.resultMsg, this.width / 2, (this.height / 2) - 24, 16736352);
         this.selectionName.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
         super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
     }
@@ -132,34 +159,193 @@ public class SaveSelectionScreen extends Screen {
     }
 
     public boolean saveAsNbt() {
-        /*
-        String recipeId = this.selectionName.getValue();
-        // TODO: check StructureTemplateManager#save to see how to serialize to NBT and save to local disk. also complete this lol
-        BlockPos blockpos = this.getBlockPos().offset(this.structurePos);
-        StructureTemplateManager manager = serverlevel.getStructureManager();
-
-        StructureTemplate structuretemplate;
-        try {
-            structuretemplate = manager.getOrCreate(new ResourceLocation(this.selectionName.getValue()));
-        } catch (ResourceLocationException e) {
+        if (this.pos1 == null || this.pos2 == null) {
+            this.resultMsg = NEED_POS;
+            return false;
+        }
+        if (Minecraft.getInstance().level == null) {
+            this.resultMsg = NEED_POS;
             return false;
         }
 
-        structuretemplate.fillFromWorld(this.level, blockpos, this.structureSize, !this.ignoreEntities, Blocks.STRUCTURE_VOID);
-        structuretemplate.setAuthor(this.author);
+        ResourceLocation schematicNameAndResult;
 
         try {
-            return manager.save(this.structureName);
-        } catch (ResourceLocationException e) {
+            schematicNameAndResult = new ResourceLocation(this.selectionName.getValue());
+            if (schematicNameAndResult.getPath().contains("//"))
+                throw new ResourceLocationException("Invalid resource path: " + schematicNameAndResult);
+        } catch (RuntimeException e) {
+            LOGGER.error("Invalid name for schematic!", e);
+            this.resultMsg = BAD_NAME;
             return false;
         }
 
-         */
-        return true;
+        Path noBsSchematicsDir = FMLPaths.GAMEDIR.relative().resolve("bullship_schematics");
+
+        Path nbtFileParentPath = noBsSchematicsDir.resolve(schematicNameAndResult.getNamespace());
+
+        String nbtFileName = schematicNameAndResult.getPath() + ".nbt";
+
+        Path nbtFile;
+
+        try {
+            if (schematicNameAndResult.getPath().endsWith(".nbt") || schematicNameAndResult.getPath().isEmpty())
+                throw new InvalidPathException(nbtFileName, "empty resource name");
+        } catch (InvalidPathException e) {
+            LOGGER.error("Invalid name for schematic!", e);
+            this.resultMsg = BAD_NAME;
+            return false;
+        }
+
+        try {
+            nbtFile = FileUtil.createPathToResource(nbtFileParentPath, schematicNameAndResult.getPath(), ".nbt");
+
+            if (!nbtFile.startsWith(nbtFileParentPath) || !FileUtil.isPathNormalized(nbtFile) || !FileUtil.isPathPortable(nbtFile))
+                throw new ResourceLocationException("Invalid resource path: " + nbtFile);
+        } catch (InvalidPathException invalidpathexception) {
+            LOGGER.error("Invalid resource path: " + schematicNameAndResult.getPath(),invalidpathexception);
+            this.resultMsg = BAD_NAME;
+            return false;
+        }
+
+        // more thorough check here probably isn't necessary since the path points to the gamedir;
+        // how tf would someone manage to get in this far to run this code if the game's files haven't been generated yet?
+        try {
+            Files.createDirectories(Files.exists(nbtFileParentPath) ? nbtFileParentPath.toRealPath() : nbtFileParentPath);
+        } catch (IOException ioexception) {
+            LOGGER.error("Failed to create parent directory: {}", nbtFileParentPath);
+            this.resultMsg = SAVE_ERROR;
+            return false;
+        }
+
+        List<StructureTemplate.StructureBlockInfo> nbtBlocks = Lists.newArrayList();
+        List<StructureTemplate.StructureBlockInfo> normalBlocks = Lists.newArrayList();
+        List<StructureTemplate.StructureBlockInfo> specialBlocks = Lists.newArrayList();
+
+        for (BlockPos enclosed : BlockPos.betweenClosed(this.pos1, this.pos2)) {
+            BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(enclosed);
+            BlockPos relativeEnclosed = enclosed.subtract(this.pos1);
+            BlockState enclosedState = Minecraft.getInstance().level.getBlockState(enclosed);
+            StructureTemplate.StructureBlockInfo blockInfo;
+
+            if (blockEntity != null) {
+                blockInfo = new StructureTemplate.StructureBlockInfo(relativeEnclosed, enclosedState, blockEntity.saveWithId());
+            } else {
+                blockInfo = new StructureTemplate.StructureBlockInfo(relativeEnclosed, enclosedState, null);
+            }
+
+            // check is necessary; $nbt is actually nullable
+            //noinspection ConstantValue
+            if (blockInfo.nbt != null) {
+                nbtBlocks.add(blockInfo);
+            } else if (!blockInfo.state.getBlock().hasDynamicShape() && blockInfo.state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) {
+                normalBlocks.add(blockInfo);
+            } else {
+                specialBlocks.add(blockInfo);
+            }
+        }
+
+        Comparator<StructureTemplate.StructureBlockInfo> comparator = Comparator.<StructureTemplate.StructureBlockInfo>comparingInt(
+                        (info) -> info.pos.getY())
+                .thenComparingInt((info) -> info.pos.getX())
+                .thenComparingInt((info) -> info.pos.getZ());
+
+        //noinspection RedundantOperationOnEmptyContainer
+        normalBlocks.sort(comparator);
+        //noinspection RedundantOperationOnEmptyContainer
+        specialBlocks.sort(comparator);
+        nbtBlocks.sort(comparator);
+
+        List<StructureTemplate.StructureBlockInfo> infoList = Lists.newArrayList();
+        infoList.addAll(normalBlocks);
+        infoList.addAll(specialBlocks);
+        infoList.addAll(nbtBlocks);
+
+        StructureTemplate.Palette palette = new StructureTemplate.Palette(infoList);
+        StructureTemplate.SimplePalette simplePalette = new StructureTemplate.SimplePalette();
+
+        CompoundTag serializedSchematic = new CompoundTag();
+
+        ListTag blockListTag = new ListTag();
+        List<StructureTemplate.StructureBlockInfo> blockList = palette.blocks();
+
+        for (StructureTemplate.StructureBlockInfo blockInfo : blockList) {
+            CompoundTag blockData = new CompoundTag();
+            blockData.put("pos", this.newIntegerList(blockInfo.pos.getX(), blockInfo.pos.getY(), blockInfo.pos.getZ()));
+            int k = simplePalette.idFor(blockInfo.state);
+            blockData.putInt("state", k);
+            //noinspection ConstantValue
+            if (blockInfo.nbt != null) {
+                blockData.put("nbt", blockInfo.nbt);
+            }
+
+            blockListTag.add(blockData);
+        }
+
+        serializedSchematic.put("blocks", blockListTag);
+
+        ListTag paletteListTag = new ListTag();
+
+        for (BlockState blockstate : simplePalette) {
+            paletteListTag.add(NbtUtils.writeBlockState(blockstate));
+        }
+
+        serializedSchematic.put("palette", paletteListTag);
+
+        final Vec3i selectionSize = this.selectionSize();
+
+        // these are down here to try and give at least *some* functionality with vanilla if for some reason in the future
+        // someone tries loading a recipe into the actual world.
+        serializedSchematic.put("entities", new ListTag());
+        serializedSchematic.put("size", this.newIntegerList(selectionSize.getX(), selectionSize.getY(), selectionSize.getZ()));
+        serializedSchematic.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+
+        try {
+            OutputStream outputstream = new FileOutputStream(nbtFile.toFile());
+
+            try {
+                NbtIo.writeCompressed(serializedSchematic, outputstream);
+            } catch (Throwable e) {
+                try {
+                    outputstream.close();
+                } catch (Throwable throwable) {
+                    e.addSuppressed(throwable);
+                }
+
+                throw e;
+            }
+
+            outputstream.close();
+            return true;
+        } catch (Throwable e2) {
+            LOGGER.error("Error while saving!", e2);
+            this.resultMsg = SAVE_ERROR;
+            return false;
+        }
     }
 
     public boolean saveAsJson() {
         String recipeId = this.selectionName.getValue();
         return true;
+    }
+
+    public Vec3i selectionSize() {
+        if (this.pos1 == null || this.pos2 == null) throw new RuntimeException();
+
+        return new Vec3i(
+                this.pos2.getX() - this.pos1.getX() + 1,
+                this.pos2.getY() - this.pos1.getY() + 1,
+                this.pos2.getZ() - this.pos1.getZ() + 1
+        );
+    }
+
+    protected ListTag newIntegerList(int... pValues) {
+        ListTag toReturn = new ListTag();
+
+        for (int i : pValues) {
+            toReturn.add(IntTag.valueOf(i));
+        }
+
+        return toReturn;
     }
 }

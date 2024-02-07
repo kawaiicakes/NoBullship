@@ -67,6 +67,8 @@
   "gui.nobullship.save_nbt": "Save selection as an NBT multiblock recipe.",
   "gui.nobullship.json": "Save as JSON",
   "gui.nobullship.nbt": "Save as NBT",
+  "gui.nobullship.save_error": "Error while attempting to save! Check logs!",
+  "gui.nobullship.bad_name": "Bad name for schematic!",
 
   "config.nobullship.cooldown": "The multiplier on cooldown times for schematics.",
   "config.nobullship.min_cooldown": "The minimum cooldown time possible in seconds.",
