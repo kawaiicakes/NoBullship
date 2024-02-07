@@ -45,6 +45,7 @@ public class SaveSelectionScreen extends Screen {
     public static final Component JSON_MSG = Component.translatable("gui.nobullship.json");
     public static final Component NBT_HOVER = Component.translatable("gui.nobullship.save_nbt");
     public static final Component NBT_MSG = Component.translatable("gui.nobullship.nbt");
+    public static final Component SAVE_SUCCESS = Component.translatable("gui.nobullship.save_success");
 
     @Nullable
     protected final BlockPos pos1;
@@ -86,6 +87,8 @@ public class SaveSelectionScreen extends Screen {
 
     @Override
     protected void init() {
+        assert Minecraft.getInstance().player != null;
+
         this.selectionName = this.addWidget(new EditBox(this.font, this.width / 2 - 152, 40, 300, 20, Component.translatable("structure_block.structure_name")) {
             public boolean charTyped(char pCodePoint, int pModifiers) {
                 return SaveSelectionScreen.this.isValidCharacterForName(this.getValue(), pCodePoint, this.getCursorPosition()) && super.charTyped(pCodePoint, pModifiers);
@@ -104,6 +107,7 @@ public class SaveSelectionScreen extends Screen {
                     this.shouldDisplayResultMsg = true;
                     this.resultMsg = NEED_POS;
                     if (this.saveAsJson()) Minecraft.getInstance().setScreen(null);
+                    else Minecraft.getInstance().player.sendSystemMessage(SAVE_SUCCESS);
                 },
                 ((pButton, pPoseStack, pMouseX, pMouseY) -> this.renderTooltip(pPoseStack, JSON_HOVER, pMouseX, pMouseY))
         ));
@@ -117,6 +121,7 @@ public class SaveSelectionScreen extends Screen {
                     this.shouldDisplayResultMsg = true;
                     this.resultMsg = NEED_POS;
                     if (this.saveAsNbt()) Minecraft.getInstance().setScreen(null);
+                    else Minecraft.getInstance().player.sendSystemMessage(SAVE_SUCCESS);
                 },
                 ((pButton, pPoseStack, pMouseX, pMouseY) -> this.renderTooltip(pPoseStack, NBT_HOVER, pMouseX, pMouseY))
         ));
