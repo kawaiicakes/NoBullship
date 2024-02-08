@@ -205,8 +205,19 @@ public record MultiblockRecipe(
                     throw new IllegalArgumentException("Passed NBT is malformed!");
 
                 int index = paletteTag.indexOf(rawBlockStateTag);
-                char ch = (char) index;
-                if (ch == ' ' || ch == '$') ch = (char) (0xFFFF - index);
+                // skip C0 control codes
+                int charIndex = index + 33;
+                // skip "
+                if (charIndex >= 34) charIndex += 1;
+                // skip $
+                if (charIndex >= 36) charIndex += 1;
+                // skip '
+                if (charIndex >= 39) charIndex += 1;
+                // skip C1 control codes and DEL
+                if (charIndex >= 127) charIndex += 33;
+                // skip soft hyphen
+                if (charIndex >= 173) charIndex += 1;
+                char ch = (char) charIndex;
                 BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, blockStateTag).getOrThrow(false, LOGGER::error);
 
                 orderedMappedPalette.add(index, Pair.of(ch, blockState));
@@ -423,8 +434,19 @@ public record MultiblockRecipe(
                     throw new IllegalArgumentException("Passed NBT is malformed!");
 
                 int index = paletteTag.indexOf(rawBlockStateTag);
-                char ch = (char) index;
-                if (ch == ' ' || ch == '$') ch = (char) (0xFFFF - index);
+                // skip C0 control codes
+                int charIndex = index + 33;
+                // skip "
+                if (charIndex >= 34) charIndex += 1;
+                // skip $
+                if (charIndex >= 36) charIndex += 1;
+                // skip '
+                if (charIndex >= 39) charIndex += 1;
+                // skip C1 control codes and DEL
+                if (charIndex >= 127) charIndex += 33;
+                // skip soft hyphen
+                if (charIndex >= 173) charIndex += 1;
+                char ch = (char) charIndex;
                 BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, blockStateTag).getOrThrow(false, LOGGER::error);
 
                 orderedMappedPalette.add(index, Pair.of(ch, blockState));
