@@ -403,9 +403,9 @@ public class SaveSelectionScreen extends Screen {
 
         for (BlockPos enclosed : BlockPos.betweenClosed(this.pos1, this.pos2)) {
             BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(enclosed);
-            // XZ mirrored to "flip" orientation north
+            // X mirrored to "flip" orientation north
             BlockPos relativeEnclosed = new BlockPos(
-                    (selectionSize.getX() - (enclosed.getX() - this.pos1.getX())) - 1,
+                    enclosed.getX() - this.pos1.getX(),
                     enclosed.getY() - this.pos1.getY(),
                     (selectionSize.getZ() - (enclosed.getZ() - this.pos1.getZ())) - 1
             );
