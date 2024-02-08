@@ -229,8 +229,13 @@ public record MultiblockRecipe(
                     continue;
                 }
 
+                BlockInWorldPredicateBuilder paletteBlockBuilder = BlockInWorldPredicateBuilder.of(blockState);
+
+                if (!blockStateTag.getCompound("nbt").isEmpty())
+                    paletteBlockBuilder.requireStrictNbt(blockStateTag.getCompound("nbt"));
+
                 orderedMappedPalette.add(index, Pair.of(ch, blockState));
-                patternBuilder.where(ch, BlockInWorldPredicateBuilder.of(blockState));
+                patternBuilder.where(ch, paletteBlockBuilder);
             }
 
             int[][][] pattern = new int[size[0]][size[1]][size[2]];
@@ -467,8 +472,13 @@ public record MultiblockRecipe(
                     continue;
                 }
 
+                BlockInWorldPredicateBuilder paletteBlockBuilder = BlockInWorldPredicateBuilder.of(blockState);
+
+                if (!blockStateTag.getCompound("nbt").isEmpty())
+                    paletteBlockBuilder.requireStrictNbt(blockStateTag.getCompound("nbt"));
+
                 orderedMappedPalette.add(index, Pair.of(ch, blockState));
-                patternBuilder.where(ch, BlockInWorldPredicateBuilder.of(blockState));
+                patternBuilder.where(ch, paletteBlockBuilder);
             }
 
             int[][][] pattern = new int[size[0]][size[1]][size[2]];
