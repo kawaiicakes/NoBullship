@@ -75,8 +75,8 @@ public class SaveSelectionScreen extends Screen {
         }
 
         if (pos1Temp != null && pos2Temp != null) {
-            this.pos1 = new BlockPos(Math.min(pos1Temp[0], pos2Temp[0]), Math.min(pos1Temp[1], pos2Temp[1]), Math.min(pos1Temp[1], pos2Temp[1]));
-            this.pos2 = new BlockPos(Math.max(pos1Temp[0], pos2Temp[0]), Math.max(pos1Temp[1], pos2Temp[1]), Math.max(pos1Temp[1], pos2Temp[1]));
+            this.pos1 = new BlockPos(Math.min(pos1Temp[0], pos2Temp[0]), Math.min(pos1Temp[1], pos2Temp[1]), Math.min(pos1Temp[2], pos2Temp[2]));
+            this.pos2 = new BlockPos(Math.max(pos1Temp[0], pos2Temp[0]), Math.max(pos1Temp[1], pos2Temp[1]), Math.max(pos1Temp[2], pos2Temp[2]));
         } else {
             this.pos1 = null;
             this.pos2 = null;
