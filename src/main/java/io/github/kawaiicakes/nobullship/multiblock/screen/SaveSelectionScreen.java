@@ -106,8 +106,10 @@ public class SaveSelectionScreen extends Screen {
                 (button) -> {
                     this.shouldDisplayResultMsg = true;
                     this.resultMsg = NEED_POS;
-                    if (this.saveAsJson()) Minecraft.getInstance().setScreen(null);
-                    else Minecraft.getInstance().player.sendSystemMessage(SAVE_SUCCESS);
+                    if (this.saveAsJson()) {
+                        Minecraft.getInstance().setScreen(null);
+                        Minecraft.getInstance().player.sendSystemMessage(SAVE_SUCCESS);
+                    }
                 },
                 ((pButton, pPoseStack, pMouseX, pMouseY) -> this.renderTooltip(pPoseStack, JSON_HOVER, pMouseX, pMouseY))
         ));
@@ -120,8 +122,10 @@ public class SaveSelectionScreen extends Screen {
                 (button) -> {
                     this.shouldDisplayResultMsg = true;
                     this.resultMsg = NEED_POS;
-                    if (this.saveAsNbt()) Minecraft.getInstance().setScreen(null);
-                    else Minecraft.getInstance().player.sendSystemMessage(SAVE_SUCCESS);
+                    if (this.saveAsNbt()) {
+                        Minecraft.getInstance().setScreen(null);
+                        Minecraft.getInstance().player.sendSystemMessage(SAVE_SUCCESS);
+                    }
                 },
                 ((pButton, pPoseStack, pMouseX, pMouseY) -> this.renderTooltip(pPoseStack, NBT_HOVER, pMouseX, pMouseY))
         ));
