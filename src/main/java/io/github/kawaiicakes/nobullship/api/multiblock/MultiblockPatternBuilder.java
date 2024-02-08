@@ -203,7 +203,16 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
                 throw new IllegalArgumentException("You may not use more than one schematic block in a recipe!");
             }
         }
-        consumer.accept(new Result(id, this.currentConditions, this.resultingEntityName, this.result, this.nbt, this.pattern, this.requisites, this.lookupSimple, this.height, this.width));
+        consumer.accept(this.getResult(id));
+    }
+
+    @Nullable
+    public Result getResult(ResourceLocation id) {
+        try {
+            return new Result(id, this.currentConditions, this.resultingEntityName, this.result, this.nbt, this.pattern, this.requisites, this.lookupSimple, this.height, this.width);
+        } catch (RuntimeException ignored) {
+            return null;
+        }
     }
 
     /**

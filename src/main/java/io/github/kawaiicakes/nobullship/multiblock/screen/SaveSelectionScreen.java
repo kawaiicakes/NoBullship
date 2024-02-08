@@ -1,6 +1,10 @@
 package io.github.kawaiicakes.nobullship.multiblock.screen;
 
 import com.google.common.collect.Lists;
+import com.google.common.hash.Hashing;
+import com.google.common.hash.HashingOutputStream;
+import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockPatternBuilder;
@@ -17,6 +21,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -26,9 +31,8 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -36,6 +40,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import static io.github.kawaiicakes.nobullship.multiblock.screen.RequisiteScreen.CLOSE_MSG;
+import static net.minecraft.data.DataProvider.KEY_COMPARATOR;
 
 public class SaveSelectionScreen extends Screen {
     protected static final Logger LOGGER = LogUtils.getLogger();
@@ -390,13 +395,20 @@ public class SaveSelectionScreen extends Screen {
             return false;
         }
 
+        final Vec3i selectionSize = this.selectionSize();
+
         List<StructureTemplate.StructureBlockInfo> nbtBlocks = Lists.newArrayList();
         List<StructureTemplate.StructureBlockInfo> normalBlocks = Lists.newArrayList();
         List<StructureTemplate.StructureBlockInfo> specialBlocks = Lists.newArrayList();
 
         for (BlockPos enclosed : BlockPos.betweenClosed(this.pos1, this.pos2)) {
             BlockEntity blockEntity = Minecraft.getInstance().level.getBlockEntity(enclosed);
-            BlockPos relativeEnclosed = enclosed.subtract(this.pos1);
+            // XZ mirrored to "flip" orientation north
+            BlockPos relativeEnclosed = new BlockPos(
+                    (selectionSize.getX() - (enclosed.getX() - this.pos1.getX())) - 1,
+                    enclosed.getY() - this.pos1.getY(),
+                    (selectionSize.getZ() - (enclosed.getZ() - this.pos1.getZ())) - 1
+            );
             BlockState enclosedState = Minecraft.getInstance().level.getBlockState(enclosed);
             StructureTemplate.StructureBlockInfo blockInfo;
 
@@ -462,21 +474,40 @@ public class SaveSelectionScreen extends Screen {
         }
 
         serializedSchematic.put("palette", paletteListTag);
-
-        final Vec3i selectionSize = this.selectionSize();
         serializedSchematic.put("size", this.newIntegerList(selectionSize.getX(), selectionSize.getY(), selectionSize.getZ()));
 
-        MultiblockPatternBuilder builder = MultiblockRecipe.fromRawNbt(serializedSchematic, schematicNameAndResult.toString());
+        MultiblockPatternBuilder builder;
+        JsonObject jsonSchematic;
 
         try {
-            OutputStream outputstream = new FileOutputStream(jsonFilePath.toFile());
+            builder = MultiblockRecipe.fromRawNbt(serializedSchematic, schematicNameAndResult.toString());
+            if (builder == null) throw new RuntimeException("Unable to construct pattern builder!");
+            MultiblockPatternBuilder.Result result = builder.getResult(schematicNameAndResult);
+            if (result == null) throw new RuntimeException("Error instantiating pattern result!");
+            jsonSchematic = result.serializeRecipe();
+        } catch (RuntimeException e) {
+            LOGGER.error("Unable to create recipe!", e);
+            this.resultMsg = SAVE_ERROR;
+            return false;
+        }
 
+        try {
+            ByteArrayOutputStream byteOutput = new ByteArrayOutputStream();
+            // ignoring deprecation here because SHA-1 interoperability is desired (probably? lol)
+            //noinspection UnstableApiUsage,deprecation
+            HashingOutputStream hashOutput = new HashingOutputStream(Hashing.sha1(), byteOutput);
+
+            Writer writer = new OutputStreamWriter(hashOutput, StandardCharsets.UTF_8);
+            JsonWriter jsonWriter = new JsonWriter(writer);
+            jsonWriter.setSerializeNulls(false);
+            jsonWriter.setIndent("  ");
+            GsonHelper.writeValue(jsonWriter, jsonSchematic, KEY_COMPARATOR);
+            jsonWriter.close();
             try {
-                // FIXME
-                // NbtIo.writeCompressed(builder, outputstream);
+                Files.write(jsonFilePath, byteOutput.toByteArray());
             } catch (Throwable e) {
                 try {
-                    outputstream.close();
+                    byteOutput.close();
                 } catch (Throwable throwable) {
                     e.addSuppressed(throwable);
                 }
@@ -484,7 +515,7 @@ public class SaveSelectionScreen extends Screen {
                 throw e;
             }
 
-            outputstream.close();
+            byteOutput.close();
             return true;
         } catch (Throwable e2) {
             LOGGER.error("Error while saving!", e2);
