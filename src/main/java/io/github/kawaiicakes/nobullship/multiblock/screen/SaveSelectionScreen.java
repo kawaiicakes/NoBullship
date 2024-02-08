@@ -339,6 +339,7 @@ public class SaveSelectionScreen extends Screen {
         }
     }
 
+    // FIXME: for both #saveAsJson and #saveAsNbt, the data is checked for block nbt inside of the palette when passed to MultiblockRecipe#fromRawNbt. Minecraft stores this info in the actual block list. Make sure to add this data to the palette as well so it can be parsed!
     public boolean saveAsJson() {
         if (this.pos1 == null || this.pos2 == null) {
             this.resultMsg = NEED_POS;
