@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static io.github.kawaiicakes.nobullship.Registry.SCHEMATIC_BLOCK_ITEM;
+import static io.github.kawaiicakes.nobullship.Registry.WILDCARD_BLOCK;
 
 /**
  * Bears no relation to <code>FinishedMultiblockRecipe</code>. Simply an immutable data carrier intended to cache
@@ -220,6 +221,14 @@ public record MultiblockRecipe(
                 char ch = (char) charIndex;
                 BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, blockStateTag).getOrThrow(false, LOGGER::error);
 
+                if (blockState.isAir()) {
+                    orderedMappedPalette.add(index, Pair.of(' ', blockState));
+                    continue;
+                } else if (blockState.is(WILDCARD_BLOCK.get())) {
+                    orderedMappedPalette.add(index, Pair.of('$', blockState));
+                    continue;
+                }
+
                 orderedMappedPalette.add(index, Pair.of(ch, blockState));
                 patternBuilder.where(ch, BlockInWorldPredicateBuilder.of(blockState));
             }
@@ -265,7 +274,8 @@ public record MultiblockRecipe(
                 for (int height = 0; height < size[1]; height++) {
                     char[] chars = new char[size[0]];
                     for (int width = 0; width < size[0]; width++) {
-                        chars[width] = orderedMappedPalette.get(pattern[width][height][depth]).getFirst();
+                        int blockNumber = pattern[width][height][depth];
+                        chars[width] = orderedMappedPalette.get(blockNumber).getFirst();
                     }
                     yList[height] = (new String(chars));
                 }
@@ -448,6 +458,14 @@ public record MultiblockRecipe(
                 if (charIndex >= 173) charIndex += 1;
                 char ch = (char) charIndex;
                 BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, blockStateTag).getOrThrow(false, LOGGER::error);
+
+                if (blockState.isAir()) {
+                    orderedMappedPalette.add(index, Pair.of(' ', blockState));
+                    continue;
+                } else if (blockState.is(WILDCARD_BLOCK.get())) {
+                    orderedMappedPalette.add(index, Pair.of('$', blockState));
+                    continue;
+                }
 
                 orderedMappedPalette.add(index, Pair.of(ch, blockState));
                 patternBuilder.where(ch, BlockInWorldPredicateBuilder.of(blockState));
