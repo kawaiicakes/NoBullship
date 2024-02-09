@@ -35,8 +35,11 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.pattern.BlockPattern;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.Nullable;
@@ -223,7 +226,13 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                     for (int k = 0; k < pattern.getHeight(); ++k) {
                         if (pattern.getPattern()[i][k][j].equals(BlockInWorldPredicate.WILDCARD)) continue;
                         BlockInWorld blockinworld = match.getBlock(j, k, i);
-                        level.setBlock(blockinworld.getPos(), Blocks.AIR.defaultBlockState(), 2);
+
+                        BlockState replacementState = Blocks.AIR.defaultBlockState();
+                        if (blockinworld.getState().getBlock() instanceof SimpleWaterloggedBlock
+                                && blockinworld.getState().getValue(BlockStateProperties.WATERLOGGED).equals(true))
+                            replacementState = Blocks.WATER.defaultBlockState();
+
+                        level.setBlock(blockinworld.getPos(), replacementState, 2);
                         level.levelEvent(2001, blockinworld.getPos(), Block.getId(blockinworld.getState()));
                     }
                 }
@@ -303,7 +312,13 @@ public class MultiblockRecipeManager extends SimpleJsonResourceReloadListener {
                     for (int k1 = 0; k1 < pattern.getHeight(); ++k1) {
                         if (pattern.getPattern()[i1][k1][j1].equals(BlockInWorldPredicate.WILDCARD)) continue;
                         BlockInWorld blockInWorld = match.getBlock(j1, k1, i1);
-                        level.blockUpdated(blockInWorld.getPos(), Blocks.AIR);
+
+                        Block replacementBlock = Blocks.AIR;
+                        if (blockInWorld.getState().getBlock() instanceof SimpleWaterloggedBlock
+                                && blockInWorld.getState().getValue(BlockStateProperties.WATERLOGGED).equals(true))
+                            replacementBlock = Blocks.WATER;
+
+                        level.blockUpdated(blockInWorld.getPos(), replacementBlock);
                     }
                 }
             }
