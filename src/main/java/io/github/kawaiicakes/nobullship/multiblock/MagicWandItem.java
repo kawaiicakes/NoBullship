@@ -91,11 +91,6 @@ public class MagicWandItem extends Item {
     }
 
     @Override
-    public boolean canAttackBlock(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer) {
-        return !pPlayer.isCreative();
-    }
-
-    @Override
     public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced) {
         pTooltipComponents.add(INSTRUCTIONS1);
         pTooltipComponents.add(INSTRUCTIONS2);
