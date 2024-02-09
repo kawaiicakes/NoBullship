@@ -82,7 +82,7 @@
   "config.nobullship.drop_blacklist": "Acts as a blacklist for drops if an item was missed by default_drops.",
   "config.nobullship.drop_rates": "If raw_drops is enabled, this allows overrides of specific drop rates.",
 
-  "key.categories.no_bullship": "No Bullship! Controls",
+  "key.categories.no_bullship": "No Bullship!",
 
   "death.attack.ligma": "%1$s didn't know who Steve Jobs was",
   "death.attack.ligma.item": "%2$s used %3$s to turn %1$s into Arby's"
