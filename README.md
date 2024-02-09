@@ -82,7 +82,6 @@ ___
 # 🤝 Compatibility
 This mod features bundled recipes for all entities from the following mods!
 - [Medieval Siege Engines](https://www.curseforge.com/minecraft/mc-mods/medieval-siege-machines)
-- [Diamond Star Combat](https://www.curseforge.com/minecraft/mc-mods/diamond-star-combat)
 
 ---
 
