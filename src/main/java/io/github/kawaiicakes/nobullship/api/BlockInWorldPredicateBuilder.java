@@ -45,6 +45,8 @@ public class BlockInWorldPredicateBuilder {
     @Nullable
     protected Block block;
     @Nullable
+    protected ResourceLocation blockId;
+    @Nullable
     protected BlockState blockState;
     @Nullable
     protected TagKey<Block> blockTag;
@@ -54,6 +56,13 @@ public class BlockInWorldPredicateBuilder {
     protected CompoundTag blockEntityNbtData;
     @Nullable
     protected CompoundTag blockEntityNbtDataStrict;
+
+    protected BlockInWorldPredicateBuilder(ResourceLocation blockId) {
+        this.block = BLOCKS.getValue(blockId);
+        this.blockId = blockId;
+        this.blockTag = null;
+        this.matchType = MatchType.BLOCK;
+    }
 
     protected BlockInWorldPredicateBuilder(Block block) {
         this.block = block;
@@ -81,6 +90,13 @@ public class BlockInWorldPredicateBuilder {
      */
     public static BlockInWorldPredicateBuilder of(Block block) {
         return new BlockInWorldPredicateBuilder(block);
+    }
+
+    /**
+     * Returns a new <code>BlockInWorldPredicateBuilder</code> that matches for the block with the same passed ID.
+     */
+    public static BlockInWorldPredicateBuilder of(ResourceLocation blockId) {
+        return new BlockInWorldPredicateBuilder(blockId);
     }
 
     /**
@@ -225,7 +241,7 @@ public class BlockInWorldPredicateBuilder {
      * The passed NBT data will be merged into the existing.
      */
     public BlockInWorldPredicateBuilder requireStrictNbt(CompoundTag tag) {
-        if (!this.isForTag() && !(this.block instanceof EntityBlock)) throw new IllegalArgumentException(this.block + " cannot have a block entity, so it cannot have NBT data!");
+        if (!this.isForTag() && this.block != null && !(this.block instanceof EntityBlock)) throw new IllegalArgumentException(this.block + " cannot have a block entity, so it cannot have NBT data!");
         if (this.blockEntityNbtDataStrict == null) this.blockEntityNbtDataStrict = new CompoundTag();
         this.blockEntityNbtDataStrict.merge(tag);
         return this;
@@ -240,7 +256,7 @@ public class BlockInWorldPredicateBuilder {
      * of the contents.
      */
     public BlockInWorldPredicateBuilder requireNbt(CompoundTag tag) {
-        if (!this.isForTag() && !(this.block instanceof EntityBlock)) throw new IllegalArgumentException(this.block + " cannot have a block entity, so it cannot have NBT data!");
+        if (!this.isForTag() && this.block != null && !(this.block instanceof EntityBlock)) throw new IllegalArgumentException(this.block + " cannot have a block entity, so it cannot have NBT data!");
         if (this.blockEntityNbtData == null) this.blockEntityNbtData = new CompoundTag();
         this.blockEntityNbtData.merge(tag);
         return this;
@@ -262,10 +278,11 @@ public class BlockInWorldPredicateBuilder {
      * a requisite.
      */
     public BlockInWorldPredicate build() {
-        Block blockToArg = this.block;
+        Block blockToArg = this.isForBlock() ? this.block : null;
         BlockState stateToArg = this.isForBlockState() ? this.blockState : null;
-        if (this.isForTag()) blockToArg = null;
-        return new BlockInWorldPredicate(blockToArg, stateToArg, this.blockTag, this.properties, this.blockEntityNbtData, this.blockEntityNbtDataStrict);
+        TagKey<Block> tagToArg = this.isForTag() ? this.blockTag : null;
+        ResourceLocation idToArg = this.isForBlock() && this.block == null ? this.blockId : null;
+        return new BlockInWorldPredicate(blockToArg, stateToArg, tagToArg, idToArg, this.properties, this.blockEntityNbtData, this.blockEntityNbtDataStrict);
     }
 
     @Nullable
@@ -393,8 +410,10 @@ public class BlockInWorldPredicateBuilder {
                 propertyPairs.put(propertyEntry.getKey(), propertyValues);
             }
 
+            ResourceLocation registryId = BLOCKS.getKey(this.block) != null ? BLOCKS.getKey(this.block) : this.blockId;
+
             if (!propertyPairs.isEmpty()) toReturn.put("Properties", propertyPairs);
-            toReturn.putString("Name", Objects.requireNonNull(BLOCKS.getKey(this.block)).toString());
+            toReturn.putString("Name", Objects.requireNonNull(registryId).toString());
 
             return toReturn;
         } catch (RuntimeException e) {
@@ -460,7 +479,8 @@ public class BlockInWorldPredicateBuilder {
         }
 
         try {
-            block.addProperty("Name", Objects.requireNonNull(BLOCKS.getKey(this.block)).toString());
+            ResourceLocation registryId = BLOCKS.getKey(this.block) != null ? BLOCKS.getKey(this.block) : this.blockId;
+            block.addProperty("Name", Objects.requireNonNull(registryId).toString());
             toReturn.add("block", block);
             if (this.requiresNbt())
                 this.serializeNbtToJson(toReturn);
@@ -551,9 +571,8 @@ public class BlockInWorldPredicateBuilder {
             BlockInWorldPredicateBuilder toReturn;
 
             Block block = BLOCKS.getValue(new ResourceLocation(serializedPredicate.getString("Name")));
-            if (block == null) throw new IllegalArgumentException("Argument does not contain a valid block!");
-
-            toReturn = BlockInWorldPredicateBuilder.of(block);
+            if (block == null) toReturn = BlockInWorldPredicateBuilder.of(new ResourceLocation(serializedPredicate.getString("Name")));
+            else toReturn = BlockInWorldPredicateBuilder.of(block);
 
             CompoundTag propertiesTag = serializedPredicate.getCompound("Properties");
             for (String propertyString : propertiesTag.getAllKeys()) {
@@ -629,8 +648,8 @@ public class BlockInWorldPredicateBuilder {
             JsonObject blockAsJson = predicateObj.getAsJsonObject("block");
 
             Block block = BLOCKS.getValue(new ResourceLocation(blockAsJson.getAsJsonPrimitive("Name").getAsString()));
-            if (block == null) throw new RuntimeException("Block was null during deserialization!");
-            toReturn = BlockInWorldPredicateBuilder.of(block);
+            if (block == null) toReturn = BlockInWorldPredicateBuilder.of(new ResourceLocation(blockAsJson.getAsJsonPrimitive("Name").getAsString()));
+            else toReturn = BlockInWorldPredicateBuilder.of(block);
 
             JsonObject propertiesJson = blockAsJson.getAsJsonObject("Properties");
             if (propertiesJson == null) propertiesJson = new JsonObject();

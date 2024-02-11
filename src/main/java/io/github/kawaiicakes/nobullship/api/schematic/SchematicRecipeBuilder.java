@@ -2,8 +2,8 @@ package io.github.kawaiicakes.nobullship.api.schematic;
 
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
@@ -17,7 +17,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -28,8 +27,9 @@ public class SchematicRecipeBuilder {
     protected final ResourceLocation resultId;
     protected final List<String> pattern = new ArrayList<>();
     protected final Map<Character, Ingredient> key = new LinkedHashMap<>();
-    protected final NonNullList<ItemStack> shapeless = NonNullList.withSize(9, ItemStack.EMPTY);
-    protected final NonNullList<ItemStack> requisites = NonNullList.create();
+    protected final Map<Character, Pair<ResourceLocation, Boolean>> rlKey = new LinkedHashMap<>();
+    protected final NonNullList<CompoundTag> shapeless = NonNullList.withSize(9, new CompoundTag());
+    protected final NonNullList<CompoundTag> requisites = NonNullList.create();
     protected int maximumSchematicUsage;
     protected byte cursor = 0;
 
@@ -64,12 +64,27 @@ public class SchematicRecipeBuilder {
      * Adds a key to the shaped recipe pattern.
      */
     public SchematicRecipeBuilder defineShaped(Character pSymbol, Ingredient pIngredient) {
-        if (this.key.containsKey(pSymbol)) {
+        if (this.key.containsKey(pSymbol) || this.rlKey.containsKey(pSymbol)) {
             throw new IllegalArgumentException("Symbol '" + pSymbol + "' is already defined!");
-        } else if (pSymbol == ' ') {
-            throw new IllegalArgumentException("Symbol ' ' (whitespace) is reserved and cannot be defined");
+        } else if (pSymbol == ' ' || pSymbol == '$') {
+            throw new IllegalArgumentException("Symbol '" + pSymbol + "' is reserved and cannot be defined");
         } else {
             this.key.put(pSymbol, pIngredient);
+            return this;
+        }
+    }
+
+    /**
+     * Adds a key to the shaped recipe pattern, but defined using a <code>ResourceLocation</code>. Used by datagen
+     * to specify items which don't exist from a dependency.
+     */
+    public SchematicRecipeBuilder defineShaped(Character pSymbol, ResourceLocation pIngredientLocation, boolean isTag) {
+        if (this.key.containsKey(pSymbol) || this.rlKey.containsKey(pSymbol)) {
+            throw new IllegalArgumentException("Symbol '" + pSymbol + "' is already defined!");
+        } else if (pSymbol == ' ' || pSymbol == '$') {
+            throw new IllegalArgumentException("Symbol '" + pSymbol + "' is reserved and cannot be defined");
+        } else {
+            this.rlKey.put(pSymbol, Pair.of(pIngredientLocation, isTag));
             return this;
         }
     }
@@ -92,13 +107,33 @@ public class SchematicRecipeBuilder {
             throw new IllegalArgumentException("There may be at most 9 shapeless stacks!");
         }
 
-        this.shapeless.set(cursor++, requirement);
+        this.shapeless.set(cursor++, requirement.serializeNBT());
         return this;
+    }
+
+    public SchematicRecipeBuilder addShapeless(ResourceLocation itemId, int count, @Nullable CompoundTag tag) {
+        if (count < 1) throw new IllegalArgumentException("Count may not be less than 1!");
+        if (!this.shapeless.get(8).isEmpty()) {
+            throw new IllegalArgumentException("There may be at most 9 shapeless stacks!");
+        }
+
+        CompoundTag serializedItem = new CompoundTag();
+
+        serializedItem.putString("id", itemId.toString());
+        serializedItem.putInt("Count", count);
+        if (tag != null) serializedItem.put("tag", tag);
+
+        this.shapeless.set(cursor++, serializedItem);
+        return this;
+    }
+
+    public SchematicRecipeBuilder addShapeless(ResourceLocation itemId) {
+        return this.addShapeless(itemId, 1, null);
     }
 
     public SchematicRecipeBuilder addRequisite(ItemStack requisite) {
         if (requisite.isEmpty()) throw new IllegalArgumentException("Passed requisite may not be empty!");
-        this.requisites.add(requisite);
+        this.requisites.add(requisite.serializeNBT());
         return this;
     }
 
@@ -106,8 +141,23 @@ public class SchematicRecipeBuilder {
         if (requisites.stream().anyMatch(ItemStack::isEmpty)) {
             throw new IllegalArgumentException("Passed list has an empty item!");
         }
-        this.requisites.addAll(requisites);
+        this.requisites.addAll(requisites.stream().map(ItemStack::serializeNBT).toList());
         return this;
+    }
+
+    public SchematicRecipeBuilder addRequisite(ResourceLocation requisiteId, int count, @Nullable CompoundTag tag) {
+        CompoundTag serializedItem = new CompoundTag();
+
+        serializedItem.putString("id", requisiteId.toString());
+        serializedItem.putInt("Count", count);
+        if (tag != null) serializedItem.put("tag", tag);
+
+        this.requisites.add(serializedItem);
+        return this;
+    }
+
+    public SchematicRecipeBuilder addRequisite(ResourceLocation requisiteId) {
+        return this.addRequisite(requisiteId, 1, null);
     }
 
     public SchematicRecipeBuilder maxUsages(int maxUsages) {
@@ -118,7 +168,7 @@ public class SchematicRecipeBuilder {
 
     public void save(Consumer<FinishedRecipe> pFinishedRecipeConsumer, ResourceLocation pRecipeId) {
         this.ensureValid(pRecipeId);
-        pFinishedRecipeConsumer.accept(new Result(pRecipeId, this.resultId, this.pattern, this.key, this.shapeless, this.requisites, this.maximumSchematicUsage));
+        pFinishedRecipeConsumer.accept(new Result(pRecipeId, this.resultId, this.pattern, this.key, this.rlKey, this.shapeless, this.requisites, this.maximumSchematicUsage));
     }
 
     public void ensureValid(ResourceLocation pId) {
@@ -126,12 +176,13 @@ public class SchematicRecipeBuilder {
             throw new IllegalStateException("No pattern is defined for shaped component in recipe " + pId + "!");
         } else {
             Set<Character> set = Sets.newHashSet(this.key.keySet());
+            set.addAll(this.rlKey.keySet());
             set.remove(' ');
 
             for(String s : this.pattern) {
                 for(int i = 0; i < s.length(); ++i) {
                     char c0 = s.charAt(i);
-                    if (!this.key.containsKey(c0) && c0 != ' ') {
+                    if (!this.key.containsKey(c0) && !this.rlKey.containsKey(c0) && c0 != ' ') {
                         throw new IllegalStateException("Pattern in recipe " + pId + " uses undefined symbol '" + c0 + "'");
                     }
 
@@ -152,15 +203,17 @@ public class SchematicRecipeBuilder {
         protected final ResourceLocation resultId;
         protected final List<String> pattern;
         protected final Map<Character, Ingredient> key;
-        protected final NonNullList<ItemStack> shapeless;
-        protected final NonNullList<ItemStack> requisites;
+        protected final Map<Character, Pair<ResourceLocation, Boolean>> rlKey;
+        protected final NonNullList<CompoundTag> shapeless;
+        protected final NonNullList<CompoundTag> requisites;
         protected final int maximumSchematicUsage;
 
-        public Result(ResourceLocation id, ResourceLocation resultId, List<String> pattern, Map<Character, Ingredient> key, NonNullList<ItemStack> shapeless, NonNullList<ItemStack> requisites, int maximumSchematicUsage) {
+        public Result(ResourceLocation id, ResourceLocation resultId, List<String> pattern, Map<Character, Ingredient> key, Map<Character, Pair<ResourceLocation, Boolean>> rlKey,NonNullList<CompoundTag> shapeless, NonNullList<CompoundTag> requisites, int maximumSchematicUsage) {
             this.id = id;
             this.resultId = resultId;
             this.pattern = pattern;
             this.key = key;
+            this.rlKey = rlKey;
             this.shapeless = shapeless;
             this.requisites = requisites;
             this.maximumSchematicUsage = maximumSchematicUsage;
@@ -176,8 +229,19 @@ public class SchematicRecipeBuilder {
             declarason.addProperty("output_id", this.resultId.toString());
 
             JsonObject keyJson = new JsonObject();
-            for(Map.Entry<Character, Ingredient> entry : this.key.entrySet()) {
+            for (Map.Entry<Character, Ingredient> entry : this.key.entrySet()) {
                 keyJson.add(String.valueOf(entry.getKey()), entry.getValue().toJson());
+            }
+            for (Map.Entry<Character, Pair<ResourceLocation, Boolean>> entry : this.rlKey.entrySet()) {
+                JsonObject ingredientJson = new JsonObject();
+
+                if (entry.getValue().getSecond()) {
+                    ingredientJson.addProperty("tag", entry.getKey().toString());
+                } else {
+                    ingredientJson.addProperty("item", entry.getKey().toString());
+                }
+
+                keyJson.add(String.valueOf(entry.getKey()), ingredientJson);
             }
             declarason.add("key", keyJson);
 
@@ -190,25 +254,25 @@ public class SchematicRecipeBuilder {
             pJson.add("declaration", declarason);
 
             JsonArray shapelessJson = new JsonArray();
-            for (ItemStack item : this.shapeless) {
-                if (item.isEmpty()) continue;
+            for (CompoundTag itemTag : this.shapeless) {
                 JsonObject serializedItem = new JsonObject();
-                serializedItem.addProperty("item", Objects.requireNonNull(ForgeRegistries.ITEMS.getKey(item.getItem())).toString());
-                if (item.getCount() > 1) {
-                    serializedItem.addProperty("count", item.getCount());
-                }
-                if (item.hasTag()) {
-                    serializedItem.add("nbt", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, item.getOrCreateTag()).getOrThrow(false, LOGGER::error));
-                }
+                if (itemTag.getString("id").isEmpty()) throw new RuntimeException();
+                serializedItem.addProperty("item", itemTag.getString("id"));
+                if (itemTag.getInt("Count") > 0) serializedItem.addProperty("count", itemTag.getInt("Count"));
+                if (!itemTag.getCompound("tag").isEmpty()) serializedItem.add("nbt", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, itemTag.getCompound("tag")).getOrThrow(false, LOGGER::error));
                 shapelessJson.add(serializedItem);
             }
             pJson.add("shapeless_input", shapelessJson);
 
             if (!this.requisites.isEmpty()) {
                 JsonArray requisitesJson = new JsonArray();
-                for (ItemStack item : this.requisites) {
-                    JsonElement serialized = ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, item).get().orThrow();
-                    requisitesJson.add(serialized);
+                for (CompoundTag itemTag : this.requisites) {
+                    JsonObject serializedItem = new JsonObject();
+                    if (itemTag.getString("id").isEmpty()) throw new RuntimeException();
+                    serializedItem.addProperty("item", itemTag.getString("id"));
+                    if (itemTag.getInt("Count") > 0) serializedItem.addProperty("count", itemTag.getInt("Count"));
+                    if (!itemTag.getCompound("tag").isEmpty()) serializedItem.add("nbt", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, itemTag.getCompound("tag")).getOrThrow(false, LOGGER::error));
+                    requisitesJson.add(serializedItem);
                 }
                 pJson.add("requisites", requisitesJson);
             }

@@ -7,6 +7,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -31,7 +33,7 @@ import static io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern.CARD
  */
 public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
     protected static final Logger LOGGER = LogUtils.getLogger();
-    public static final BlockInWorldPredicate WILDCARD = new BlockInWorldPredicate(Blocks.AIR, null, null, null, null, null) {
+    public static final BlockInWorldPredicate WILDCARD = new BlockInWorldPredicate(Blocks.AIR, null, null, null, null, null, null) {
         @Override
         public BlockInWorldPredicate setFacing(Direction direction) {
             return this;
@@ -42,7 +44,7 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
             return !blockInWorld.getState().isAir();
         }
     };
-    public static final BlockInWorldPredicate AIR = new BlockInWorldPredicate(Blocks.AIR, null, null, null, null, null) {
+    public static final BlockInWorldPredicate AIR = new BlockInWorldPredicate(Blocks.AIR, null, null, null, null, null, null) {
         @Override
         public BlockInWorldPredicate setFacing(Direction direction) {
             return this;
@@ -62,6 +64,8 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
     @Nullable
     protected final TagKey<Block> blockTag;
     @Nullable
+    protected final ResourceLocation blockId;
+    @Nullable
     protected final Map<String, Set<String>> properties;
     @Nullable
     protected final CompoundTag blockEntityNbtData;
@@ -72,13 +76,14 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
      * Creates a new <code>BlockInWorldPredicate</code> facing the given direction. Any directional properties
      * will be rotated accordingly for the test.
      */
-    protected BlockInWorldPredicate(@Nullable Block block, @Nullable BlockState blockState, @Nullable TagKey<Block> blockTag, @Nullable Map<String, Set<String>> properties,
+    protected BlockInWorldPredicate(@Nullable Block block, @Nullable BlockState blockState, @Nullable TagKey<Block> blockTag, @Nullable ResourceLocation blockId, @Nullable Map<String, Set<String>> properties,
                                     @Nullable CompoundTag blockEntityNbtData, @Nullable CompoundTag blockEntityNbtDataStrict) {
         if (block == null && blockState == null && blockTag == null) throw new IllegalArgumentException("The block, blockstate, and block tag are all null!");
 
         this.block = block;
         this.blockState = blockState;
         this.blockTag = blockTag;
+        this.blockId = blockId;
         this.properties = properties;
         this.blockEntityNbtData = blockEntityNbtData;
         this.blockEntityNbtDataStrict = blockEntityNbtDataStrict;
@@ -111,8 +116,14 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
     protected Predicate<BlockInWorld> getBasic() {
         if (this.block != null) return BlockInWorld.hasState(state -> state.is(this.block));
         else if (this.blockState != null) return (blockInWorld) -> blockInWorld.getState().equals(this.blockState);
-        else //noinspection DataFlowIssue (making it to here implies blockTag is not null)
-            return (blockInWorld) -> blockInWorld.getState().is(this.blockTag);
+        else if (this.blockTag != null) return (blockInWorld) -> blockInWorld.getState().is(this.blockTag);
+        else if (this.blockId != null) return (blockInWorld) -> {
+            // exists in case for some reason the builder screws up and ends up leaving $block null
+            ResourceLocation rl = ForgeRegistries.BLOCKS.getKey(blockInWorld.getState().getBlock());
+            if (rl == null) return false;
+            return rl.equals(this.blockId);
+        };
+        else throw new RuntimeException();
     }
 
     protected static Predicate<BlockInWorld> checkProperties(@Nullable Map<String, Set<String>> properties, Direction facing) {

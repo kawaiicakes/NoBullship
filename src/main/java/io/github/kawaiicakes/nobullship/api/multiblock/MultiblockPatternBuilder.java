@@ -10,10 +10,7 @@ import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
@@ -54,6 +51,8 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
     protected CompoundTag nbt;
     @Nullable
     protected NonNullList<ItemStack> requisites;
+    @Nullable
+    protected NonNullList<CompoundTag> nbtRequisites;
     protected boolean hasSchematicBlock = false;
 
     /**
@@ -110,6 +109,31 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
     public MultiblockPatternBuilder setTagOfResult(CompoundTag tag) {
         this.nbt = tag;
         return this;
+    }
+
+    /**
+     * Adds an <code>ItemStack</code>, serialized from the passed info, that will be needed in the player's inventory
+     * to successfully construct a multiblock recipe.
+     */
+    public MultiblockPatternBuilder addRequisite(ResourceLocation resourceLocation, int count, @Nullable CompoundTag tag) {
+        if (count < 1) throw new IllegalArgumentException("Count may not be less than 1!");
+        if (this.nbtRequisites == null) this.nbtRequisites = NonNullList.createWithCapacity(1);
+
+        CompoundTag proxyItemTag = new CompoundTag();
+
+        proxyItemTag.putString("id", resourceLocation.toString());
+        proxyItemTag.putInt("Count", count);
+        if (tag != null) proxyItemTag.put("tag", tag);
+
+        return this;
+    }
+
+    /**
+     * Adds an <code>ItemStack</code>, serialized from the passed info, that will be needed in the player's inventory
+     * to successfully construct a multiblock recipe.
+     */
+    public MultiblockPatternBuilder addRequisite(ResourceLocation resourceLocation) {
+        return this.addRequisite(resourceLocation, 1, null);
     }
 
     /**
@@ -209,7 +233,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
     @Nullable
     public Result getResult(ResourceLocation id) {
         try {
-            return new Result(id, this.currentConditions, this.resultingEntityName, this.result, this.nbt, this.pattern, this.requisites, this.lookupSimple, this.height, this.width);
+            return new Result(id, this.currentConditions, this.resultingEntityName, this.result, this.nbt, this.pattern, this.requisites, this.nbtRequisites, this.lookupSimple, this.height, this.width);
         } catch (RuntimeException ignored) {
             return null;
         }
@@ -305,11 +329,13 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         protected final List<String[]> recipe;
         @Nullable
         protected final NonNullList<ItemStack> requisites;
+        @Nullable
+        protected final NonNullList<CompoundTag> nbtRequisites;
         protected final Map<String, BlockInWorldPredicateBuilder> lookup;
         protected final int height;
         protected final int width;
 
-        public Result(ResourceLocation id, List<ICondition[]> conditions, @Nullable String resultingEntityName, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, @Nullable NonNullList<ItemStack> requisites, Map<String, BlockInWorldPredicateBuilder> lookup, int height, int width) {
+        public Result(ResourceLocation id, List<ICondition[]> conditions, @Nullable String resultingEntityName, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, @Nullable NonNullList<ItemStack> requisites, @Nullable NonNullList<CompoundTag> nbtRequisites, Map<String, BlockInWorldPredicateBuilder> lookup, int height, int width) {
             this.conditions = conditions;
             this.id = id;
             this.resultingEntityName = resultingEntityName;
@@ -317,6 +343,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
             this.nbt = nbt;
             this.recipe = recipe;
             this.requisites = requisites;
+            this.nbtRequisites = nbtRequisites;
             this.lookup = lookup;
             this.height = height;
             this.width = width;
@@ -358,8 +385,8 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
             pJson.add("recipe", recipePattern);
             pJson.add("result", jsonResult);
 
+            JsonArray jsonRequisites = new JsonArray();
             if (this.requisites != null && !this.requisites.isEmpty()) {
-                JsonArray jsonRequisites = new JsonArray();
                 for (ItemStack item : this.requisites) {
                     JsonObject serialized = new JsonObject();
 
@@ -376,8 +403,25 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
 
                     jsonRequisites.add(serialized);
                 }
-                pJson.add("requisites", jsonRequisites);
             }
+
+            if (this.nbtRequisites != null) {
+                for (CompoundTag tag : this.nbtRequisites) {
+                    JsonObject serialized = new JsonObject();
+                    if (!(tag.get("id") instanceof StringTag) || !(tag.get("Count") instanceof IntTag)) {
+                        LOGGER.error("Invalid requisite passed, {}!", tag);
+                        continue;
+                    }
+
+                    serialized.addProperty("item", tag.getString("id"));
+                    serialized.addProperty("count", tag.getInt("Count"));
+                    if (tag.getCompound("tag").isEmpty()) continue;
+                    serialized.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, tag.getCompound("tag")));
+                }
+            }
+
+            if (jsonRequisites.isEmpty()) return;
+            pJson.add("requisites", jsonRequisites);
         }
 
         @Override
