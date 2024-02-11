@@ -415,8 +415,9 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
 
                     serialized.addProperty("item", tag.getString("item"));
                     serialized.addProperty("count", tag.getInt("count"));
-                    if (tag.getCompound("nbt").isEmpty()) continue;
-                    serialized.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, tag.getCompound("nbt")));
+                    if (!tag.getCompound("nbt").isEmpty()) serialized.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, tag.getCompound("nbt")));
+
+                    jsonRequisites.add(serialized);
                 }
             }
 
