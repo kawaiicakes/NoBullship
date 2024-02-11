@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -107,11 +108,20 @@ public class SchematicRecipeBuilder {
             throw new IllegalArgumentException("There may be at most 9 shapeless stacks!");
         }
 
-        this.shapeless.set(cursor++, requirement.serializeNBT());
+        CompoundTag serializedItem = new CompoundTag();
+
+        ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(requirement.getItem());
+        if (itemId == null) throw new IllegalArgumentException();
+
+        serializedItem.putString("item", itemId.toString());
+        serializedItem.putInt("count", requirement.getCount());
+        if (requirement.hasTag()) serializedItem.put("nbt", requirement.getOrCreateTag());
+
+        this.shapeless.set(cursor++, serializedItem);
         return this;
     }
 
-    public SchematicRecipeBuilder addShapeless(ResourceLocation itemId, int count, @Nullable CompoundTag tag) {
+    public SchematicRecipeBuilder addShapeless(ResourceLocation itemId, int count, @Nullable CompoundTag nbt) {
         if (count < 1) throw new IllegalArgumentException("Count may not be less than 1!");
         if (!this.shapeless.get(8).isEmpty()) {
             throw new IllegalArgumentException("There may be at most 9 shapeless stacks!");
@@ -119,9 +129,9 @@ public class SchematicRecipeBuilder {
 
         CompoundTag serializedItem = new CompoundTag();
 
-        serializedItem.putString("id", itemId.toString());
-        serializedItem.putInt("Count", count);
-        if (tag != null) serializedItem.put("tag", tag);
+        serializedItem.putString("item", itemId.toString());
+        serializedItem.putInt("count", count);
+        if (nbt != null) serializedItem.put("nbt", nbt);
 
         this.shapeless.set(cursor++, serializedItem);
         return this;
@@ -133,7 +143,16 @@ public class SchematicRecipeBuilder {
 
     public SchematicRecipeBuilder addRequisite(ItemStack requisite) {
         if (requisite.isEmpty()) throw new IllegalArgumentException("Passed requisite may not be empty!");
-        this.requisites.add(requisite.serializeNBT());
+        CompoundTag serializedItem = new CompoundTag();
+
+        ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(requisite.getItem());
+        if (itemId == null) throw new IllegalArgumentException();
+
+        serializedItem.putString("item", itemId.toString());
+        serializedItem.putInt("count", requisite.getCount());
+        if (requisite.hasTag()) serializedItem.put("nbt", requisite.getOrCreateTag());
+
+        this.requisites.add(serializedItem);
         return this;
     }
 
@@ -141,16 +160,24 @@ public class SchematicRecipeBuilder {
         if (requisites.stream().anyMatch(ItemStack::isEmpty)) {
             throw new IllegalArgumentException("Passed list has an empty item!");
         }
-        this.requisites.addAll(requisites.stream().map(ItemStack::serializeNBT).toList());
+        this.requisites.addAll(requisites.stream().map((stack) -> {
+            ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(stack.getItem());
+            if (itemId == null) throw new IllegalArgumentException();
+            CompoundTag serializedItem = new CompoundTag();
+            serializedItem.putString("item", itemId.toString());
+            serializedItem.putInt("count", stack.getCount());
+            if (stack.hasTag()) serializedItem.put("nbt", stack.getOrCreateTag());
+            return serializedItem;
+        }).toList());
         return this;
     }
 
-    public SchematicRecipeBuilder addRequisite(ResourceLocation requisiteId, int count, @Nullable CompoundTag tag) {
+    public SchematicRecipeBuilder addRequisite(ResourceLocation requisiteId, int count, @Nullable CompoundTag nbt) {
         CompoundTag serializedItem = new CompoundTag();
 
-        serializedItem.putString("id", requisiteId.toString());
-        serializedItem.putInt("Count", count);
-        if (tag != null) serializedItem.put("tag", tag);
+        serializedItem.putString("item", requisiteId.toString());
+        serializedItem.putInt("count", count);
+        if (nbt != null) serializedItem.put("nbt", nbt);
 
         this.requisites.add(serializedItem);
         return this;
@@ -255,11 +282,11 @@ public class SchematicRecipeBuilder {
 
             JsonArray shapelessJson = new JsonArray();
             for (CompoundTag itemTag : this.shapeless) {
+                if (itemTag.getString("item").isEmpty()) continue;
                 JsonObject serializedItem = new JsonObject();
-                if (itemTag.getString("id").isEmpty()) throw new RuntimeException();
-                serializedItem.addProperty("item", itemTag.getString("id"));
-                if (itemTag.getInt("Count") > 0) serializedItem.addProperty("count", itemTag.getInt("Count"));
-                if (!itemTag.getCompound("tag").isEmpty()) serializedItem.add("nbt", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, itemTag.getCompound("tag")).getOrThrow(false, LOGGER::error));
+                serializedItem.addProperty("item", itemTag.getString("item"));
+                if (itemTag.getInt("count") > 1) serializedItem.addProperty("count", itemTag.getInt("count"));
+                if (!itemTag.getCompound("nbt").isEmpty()) serializedItem.add("nbt", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, itemTag.getCompound("nbt")).getOrThrow(false, LOGGER::error));
                 shapelessJson.add(serializedItem);
             }
             pJson.add("shapeless_input", shapelessJson);
@@ -267,11 +294,11 @@ public class SchematicRecipeBuilder {
             if (!this.requisites.isEmpty()) {
                 JsonArray requisitesJson = new JsonArray();
                 for (CompoundTag itemTag : this.requisites) {
+                    if (itemTag.getString("item").isEmpty()) continue;
                     JsonObject serializedItem = new JsonObject();
-                    if (itemTag.getString("id").isEmpty()) throw new RuntimeException();
-                    serializedItem.addProperty("item", itemTag.getString("id"));
-                    if (itemTag.getInt("Count") > 0) serializedItem.addProperty("count", itemTag.getInt("Count"));
-                    if (!itemTag.getCompound("tag").isEmpty()) serializedItem.add("nbt", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, itemTag.getCompound("tag")).getOrThrow(false, LOGGER::error));
+                    serializedItem.addProperty("item", itemTag.getString("item"));
+                    if (itemTag.getInt("count") > 0) serializedItem.addProperty("count", itemTag.getInt("count"));
+                    if (!itemTag.getCompound("nbt").isEmpty()) serializedItem.add("nbt", CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, itemTag.getCompound("nbt")).getOrThrow(false, LOGGER::error));
                     requisitesJson.add(serializedItem);
                 }
                 pJson.add("requisites", requisitesJson);

@@ -121,9 +121,9 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
 
         CompoundTag proxyItemTag = new CompoundTag();
 
-        proxyItemTag.putString("id", resourceLocation.toString());
-        proxyItemTag.putInt("Count", count);
-        if (tag != null) proxyItemTag.put("tag", tag);
+        proxyItemTag.putString("item", resourceLocation.toString());
+        proxyItemTag.putInt("count", count);
+        if (tag != null) proxyItemTag.put("nbt", tag);
 
         return this;
     }
@@ -413,10 +413,10 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
                         continue;
                     }
 
-                    serialized.addProperty("item", tag.getString("id"));
-                    serialized.addProperty("count", tag.getInt("Count"));
-                    if (tag.getCompound("tag").isEmpty()) continue;
-                    serialized.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, tag.getCompound("tag")));
+                    serialized.addProperty("item", tag.getString("item"));
+                    serialized.addProperty("count", tag.getInt("count"));
+                    if (tag.getCompound("nbt").isEmpty()) continue;
+                    serialized.add("nbt", NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, tag.getCompound("nbt")));
                 }
             }
 
