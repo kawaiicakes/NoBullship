@@ -29,6 +29,8 @@ ___
 
 ## This mod is currently in beta and under active development! Please back up your worlds prior to and routinely following installation!
 
+![Ships!](bullshipping.png)
+
 </div>
 
 Are you a **modpack dev** who finds crafting planes, ships, cars and other such entities inside crafting tables boring?
@@ -46,13 +48,13 @@ This mod is intended for modpackers to use & configure; however, it will come wi
 
 ## Quick How-To
 1. Craft a schematic for the multiblock recipe you wish to make! 
-![Schematic for a boat](2023-12-07_21.02.38.png)
+![Schematic for a trebuchet](2024-02-09_17.57.58.png)
 2. Use the Workshop to display the recipe into the world!
-![Schematic preview in world](2023-12-07_21.03.35.png)
+![Schematic preview in world](2024-02-09_17.58.37.png)
 3. Build stuff just like you would for an Iron Golem (Note: sideways and upside-down building will not work)
-![Built multiblock](2023-12-07_21.04.11.png)
+![Built multiblock](2024-02-09_18.05.49.png)
 4. Right-click the multiblock with the schematic! 
-![Build!](2023-12-07_21.04.59.png)
+![Build!](2024-02-09_18.06.22.png)
 
 ## Features
 - Easily create new recipes with the Magic Wand item!
@@ -83,6 +85,7 @@ ___
 # 🤝 Compatibility
 This mod features bundled recipes for all entities from the following mods!
 - [Medieval Siege Engines](https://www.curseforge.com/minecraft/mc-mods/medieval-siege-machines)
+- [Small Ships](https://www.curseforge.com/minecraft/mc-mods/small-ships)
 
 ---
 
