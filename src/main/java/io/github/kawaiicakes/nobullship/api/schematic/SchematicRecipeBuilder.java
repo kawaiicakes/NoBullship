@@ -263,9 +263,9 @@ public class SchematicRecipeBuilder {
                 JsonObject ingredientJson = new JsonObject();
 
                 if (entry.getValue().getSecond()) {
-                    ingredientJson.addProperty("tag", entry.getKey().toString());
+                    ingredientJson.addProperty("tag", entry.getValue().getFirst().toString());
                 } else {
-                    ingredientJson.addProperty("item", entry.getKey().toString());
+                    ingredientJson.addProperty("item", entry.getValue().getFirst().toString());
                 }
 
                 keyJson.add(String.valueOf(entry.getKey()), ingredientJson);

@@ -16,7 +16,7 @@
               "item": "nobullship:wood_plank"
             },
             "^": {
-              "item": "^"
+              "item": "siegemachines:barrel"
             },
             "o": {
               "item": "nobullship:wood_wheel"
