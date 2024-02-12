@@ -1,6 +1,6 @@
-// 1.19.2	2024-02-10T19:49:13.3351305	Recipes
-008c6de79a4cafbef62667683a6187dcbd395bb9 data/siegemachines/recipes/ballista.json
-8c3219414447caaa0e62e09746ae77f5f15a2d01 data/siegemachines/recipes/battering_ram.json
-83307243dc49fb3ed5b3edd7d4d38152991372e4 data/siegemachines/recipes/catapult.json
-bfe64a4ffd836ffd935deddde8153512ac20c9fa data/siegemachines/recipes/mortar.json
-8cebf4bf61acc994f697b0332e2df6a061ec0193 data/siegemachines/recipes/trebuchet.json
+// 1.19.2	2024-02-11T19:39:09.5817909	Recipes
+008c6de79a4cafbef62667683a6187dcbd395bb9 data/siegemachines/recipes/ballista_schematic.json
+8c3219414447caaa0e62e09746ae77f5f15a2d01 data/siegemachines/recipes/battering_ram_schematic.json
+83307243dc49fb3ed5b3edd7d4d38152991372e4 data/siegemachines/recipes/catapult_schematic.json
+e3cc0b1a697fb43635f86ecef580ab16d51721ac data/siegemachines/recipes/mortar_schematic.json
+8cebf4bf61acc994f697b0332e2df6a061ec0193 data/siegemachines/recipes/trebuchet_schematic.json

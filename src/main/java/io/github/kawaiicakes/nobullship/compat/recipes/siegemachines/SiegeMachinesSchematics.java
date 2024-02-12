@@ -1,10 +1,8 @@
 package io.github.kawaiicakes.nobullship.compat.recipes.siegemachines;
 
-import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockPatternBuilder;
 import io.github.kawaiicakes.nobullship.api.schematic.SchematicRecipeBuilder;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -40,7 +38,7 @@ public class SiegeMachinesSchematics {
     }
 
     protected static void generateRecipes() {
-        RECIPES.put(ezRl("battering_ram"),
+        RECIPES.put(ezRl("battering_ram_schematic"),
                 builder("battering_ram")
                         .defineShaped('#', Ingredient.of(Items.LEATHER))
                         .defineShaped('-', Ingredient.of(ItemTags.LOGS))
@@ -52,7 +50,7 @@ public class SiegeMachinesSchematics {
                         .shapedPattern("o o")
         );
 
-        RECIPES.put(ezRl("catapult"),
+        RECIPES.put(ezRl("catapult_schematic"),
                 builder("catapult")
                         .defineShaped('-', Ingredient.of(ItemTags.LOGS))
                         .defineShaped('>', Ingredient.of(Items.IRON_BLOCK))
@@ -62,7 +60,7 @@ public class SiegeMachinesSchematics {
                         .shapedPattern("---")
         );
 
-        RECIPES.put(ezRl("ballista"),
+        RECIPES.put(ezRl("ballista_schematic"),
                 builder("ballista")
                         .defineShaped('^', Ingredient.of(CROSSBOW))
                         .defineShaped('-', Ingredient.of(WOOD_PLANK_ITEM.get()))
@@ -70,16 +68,16 @@ public class SiegeMachinesSchematics {
                         .shapedPattern("---")
         );
 
-        RECIPES.put(ezRl("mortar"),
+        RECIPES.put(ezRl("mortar_schematic"),
                 builder("mortar")
-                        .defineShaped('^', Ingredient.of(CAULDRON))
+                        .defineShaped('^', ezRl("barrel"), false)
                         .defineShaped('-', Ingredient.of(WOOD_PLANK_ITEM.get()))
                         .defineShaped('o', Ingredient.of(WOOD_WHEEL_ITEM.get()))
                         .shapedPattern(" ^ ")
                         .shapedPattern("-o-")
         );
 
-        RECIPES.put(ezRl("trebuchet"),
+        RECIPES.put(ezRl("trebuchet_schematic"),
                 builder("trebuchet")
                         .defineShaped('w', Ingredient.of(WOOD_SUPPORT_BEAM_ITEM.get()))
                         .defineShaped('l', Ingredient.of(LEAD))
