@@ -1,0 +1,60 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "smallships"
+        }
+      ],
+      "recipe": {
+        "type": "nobullship:schematic_workbench",
+        "declaration": {
+          "key": {
+            "O": {
+              "item": "smallships:sail"
+            },
+            "c": {
+              "item": "minecraft:chest"
+            },
+            "l": {
+              "item": "minecraft:lead"
+            },
+            "u": {
+              "item": "minecraft:jungle_boat"
+            }
+          },
+          "output_id": "smallships:jungle_galley",
+          "shaped_input": [
+            "lll",
+            "cOc",
+            "uuu"
+          ]
+        },
+        "requisites": [
+          {
+            "count": 1,
+            "item": "smallships:sail"
+          },
+          {
+            "count": 2,
+            "item": "minecraft:string"
+          },
+          {
+            "count": 8,
+            "item": "minecraft:wooden_shovel",
+            "nbt": {
+              "Damage": 0
+            }
+          },
+          {
+            "count": 3,
+            "item": "nobullship:pitch"
+          }
+        ],
+        "shapeless_input": []
+      }
+    }
+  ]
+}

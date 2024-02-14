@@ -1,16 +1,12 @@
 package io.github.kawaiicakes.nobullship.api.schematic;
 
 import io.github.kawaiicakes.nobullship.compat.recipes.siegemachines.SiegeMachinesSchematics;
+import io.github.kawaiicakes.nobullship.compat.recipes.smallships.SmallShipsSchematics;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.crafting.ConditionalRecipe;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 
 import java.util.function.Consumer;
-
-import static io.github.kawaiicakes.nobullship.Registry.SIMPLE_WOOD_BEAM_BLOCK;
 
 /**
  * Use this class to datagen schematic recipes. Works pretty much exactly like subclassing <code>RecipeProvider</code>
@@ -28,5 +24,6 @@ public class SchematicRecipeProvider extends RecipeProvider {
     @Override
     protected void buildCraftingRecipes(Consumer<FinishedRecipe> pFinishedRecipeConsumer) {
         SiegeMachinesSchematics.generateRecipes(pFinishedRecipeConsumer);
+        SmallShipsSchematics.generateRecipes(pFinishedRecipeConsumer);
     }
 }

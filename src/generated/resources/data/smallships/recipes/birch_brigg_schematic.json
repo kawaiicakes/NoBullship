@@ -1,0 +1,49 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "smallships"
+        }
+      ],
+      "recipe": {
+        "type": "nobullship:schematic_workbench",
+        "declaration": {
+          "key": {
+            "O": {
+              "item": "smallships:sail"
+            },
+            "l": {
+              "item": "minecraft:lead"
+            },
+            "u": {
+              "item": "minecraft:birch_chest_boat"
+            }
+          },
+          "output_id": "smallships:birch_brigg",
+          "shaped_input": [
+            "OlO",
+            "uuu"
+          ]
+        },
+        "requisites": [
+          {
+            "count": 2,
+            "item": "smallships:sail"
+          },
+          {
+            "count": 8,
+            "item": "minecraft:string"
+          },
+          {
+            "count": 3,
+            "item": "nobullship:pitch"
+          }
+        ],
+        "shapeless_input": []
+      }
+    }
+  ]
+}
