@@ -51,6 +51,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
     protected boolean hasShapedMatch;
     protected boolean matchHasRequisites;
     protected boolean multiblockUsesNbt;
+    protected int rot;
 
     public MultiblockWorkshopScreen(MultiblockWorkshopMenu pMenu, Inventory pPlayerInventory, Component pTitle) {
         super(pMenu, pPlayerInventory, pTitle);
@@ -230,18 +231,14 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         AABB entityHitbox = resultEntity.getBoundingBox();
         double longestSide = Math.max(entityHitbox.getXsize(), Math.max(entityHitbox.getYsize(), entityHitbox.getZsize()));
 
-        int entityHeightOffset = (int) (54 / (longestSide / 1.8));
-
         int scale = (int) (22 / (longestSide / 1.8));
 
-        float xAngle = (float) Math.atan(((x + 155) - pMouseX) / 40.0F);
-        float yAngle = (float) Math.atan(((y + 64 - entityHeightOffset) - pMouseY) / 40.0F);
-
+        if (this.rot > 35999) this.rot = 0;
         if (resultEntity instanceof LivingEntity livingResult) {
-            renderLivingEntity(x + 34, y + 64, scale, xAngle, yAngle, livingResult);
+            renderLivingEntity(x + 34, y + 64, scale, (float) this.rot++ / 100, livingResult);
             drawCenteredString(pPoseStack, this.font, nameForDisplay, this.width / 2, y - 16, 8453920);
         } else {
-            renderEntity(x + 34, y + 64, scale, xAngle, yAngle, resultEntity);
+            renderEntity(x + 34, y + 64, scale, (float) this.rot++ / 100, resultEntity);
             drawCenteredString(pPoseStack, this.font, nameForDisplay, this.width / 2, y - 16, 8453920);
         }
 
@@ -292,8 +289,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         this.menu.entity.renderedLayer = this.renderedLayer;
     }
 
-    // TODO: fix rendering entities (make them rotate on the y axis at a constant rate)
-    protected static void renderLivingEntity(int pPosX, int pPosY, int pScale, float angleXComponent, float angleYComponent, LivingEntity pLivingEntity) {
+    protected static void renderLivingEntity(int pPosX, int pPosY, int pScale, float angleYComponent, LivingEntity pLivingEntity) {
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
         posestack.translate(pPosX, pPosY, 1050.0D);
@@ -305,7 +301,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         posestack1.scale((float)pScale, (float)pScale, (float)pScale);
 
         Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
-        Quaternion quaternion1 = Vector3f.XP.rotationDegrees(angleYComponent * 20.0F);
+        Quaternion quaternion1 = Vector3f.YP.rotationDegrees((angleYComponent + 18000) * 20.0F);
         quaternion.mul(quaternion1);
         posestack1.mulPose(quaternion);
 
@@ -315,9 +311,8 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         float f5 = pLivingEntity.yHeadRotO;
         float f6 = pLivingEntity.yHeadRot;
 
-        pLivingEntity.yBodyRot = 180.0F + angleXComponent * 20.0F;
-        pLivingEntity.setYRot(180.0F + angleXComponent * 40.0F);
-        pLivingEntity.setXRot(-angleYComponent * 20.0F);
+        pLivingEntity.yBodyRot = -(angleYComponent + 18000) * 20.0F;
+        pLivingEntity.setYRot(-(angleYComponent + 18000) * 20.0F);
         pLivingEntity.yHeadRot = pLivingEntity.getYRot();
         pLivingEntity.yHeadRotO = pLivingEntity.getYRot();
         Lighting.setupForEntityInInventory();
@@ -344,7 +339,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         Lighting.setupFor3DItems();
     }
 
-    protected static void renderEntity(int pPosX, int pPosY, int pScale, float angleXComponent, float angleYComponent, Entity pEntity) {
+    protected static void renderEntity(int pPosX, int pPosY, int pScale, float angleYComponent, Entity pEntity) {
         PoseStack posestack = RenderSystem.getModelViewStack();
         posestack.pushPose();
         posestack.translate(pPosX, pPosY, 1050.0D);
@@ -356,15 +351,14 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         posestack1.scale((float)pScale, (float)pScale, (float)pScale);
 
         Quaternion quaternion = Vector3f.ZP.rotationDegrees(180.0F);
-        Quaternion quaternion1 = Vector3f.XP.rotationDegrees(angleYComponent * 20.0F);
+        Quaternion quaternion1 = Vector3f.YP.rotationDegrees((angleYComponent + 18000) * 20.0F);
         quaternion.mul(quaternion1);
         posestack1.mulPose(quaternion);
 
         float yRot = pEntity.getYRot();
         float xRot = pEntity.getXRot();
 
-        pEntity.setYRot(180.0F + angleXComponent * 40.0F);
-        pEntity.setXRot(-angleYComponent * 20.0F);
+        pEntity.setYRot(-(angleYComponent + 18000) * 20.0F);
 
         Lighting.setupForEntityInInventory();
         EntityRenderDispatcher entityrenderdispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
