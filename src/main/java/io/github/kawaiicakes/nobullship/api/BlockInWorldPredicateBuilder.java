@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
+import io.github.kawaiicakes.nobullship.block.SchematicBlock;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -39,8 +40,70 @@ import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
  */
 public class BlockInWorldPredicateBuilder {
     private static final Logger LOGGER = LogUtils.getLogger();
+    /**
+     * The Schematic builder has methods which work, but don't really do anything. It's used (obviously) to tell recipes
+     * to use a schematic block. Since schematic blocks function under stringent, pre-defined requirements, it's not
+     * necessary to have a functioning builder.
+     */
     public static final BlockInWorldPredicateBuilder SCHEMATIC
-            = BlockInWorldPredicateBuilder.of(SCHEMATIC_BLOCK.get().defaultBlockState());
+            = new BlockInWorldPredicateBuilder() {
+        @Override
+        public JsonObject toJson() throws RuntimeException {
+            JsonObject toReturn = new JsonObject();
+
+            JsonElement blockstate;
+            try {
+                blockstate = BlockState.CODEC.encodeStart(JsonOps.INSTANCE, this.blockState).getOrThrow(false, LOGGER::error);
+                toReturn.add("blockstate", blockstate);
+            } catch (RuntimeException e) {
+                throw new RuntimeException(e);
+            }
+
+            return toReturn;
+        }
+
+        @Override
+        public CompoundTag toNbt() {
+            CompoundTag toReturn = new CompoundTag();
+            toReturn.put(this.matchType.getSerializedName(), this.serializeBlockStateToNbt());
+            return toReturn;
+        }
+
+        @Override
+        public BlockInWorldPredicate build() {
+            return new BlockInWorldPredicate(null, SCHEMATIC_BLOCK.get().defaultBlockState(), null, null, null, null, null);
+        }
+
+        @Override
+        public BlockInWorldPredicateBuilder requireProperties(Property<?> property, Set<Comparable<?>> value) {
+            return this;
+        }
+
+        @Override
+        public BlockInWorldPredicateBuilder requireProperties(String property, Set<String> values) {
+            return this;
+        }
+
+        @Override
+        public BlockInWorldPredicateBuilder requireNbt(CompoundTag tag) {
+            return this;
+        }
+
+        @Override
+        public BlockInWorldPredicateBuilder requireProperty(String property, String value) {
+            return this;
+        }
+
+        @Override
+        public BlockInWorldPredicateBuilder requireProperty(Property<?> property, Comparable<?> value) {
+            return this;
+        }
+
+        @Override
+        public BlockInWorldPredicateBuilder requireStrictNbt(CompoundTag tag) {
+            return this;
+        }
+    };
 
     @Nullable
     protected Block block;
@@ -56,6 +119,13 @@ public class BlockInWorldPredicateBuilder {
     protected CompoundTag blockEntityNbtData;
     @Nullable
     protected CompoundTag blockEntityNbtDataStrict;
+
+    protected BlockInWorldPredicateBuilder() {
+        this.block = SCHEMATIC_BLOCK.get();
+        this.blockState = SCHEMATIC_BLOCK.get().defaultBlockState();
+        this.blockTag = null;
+        this.matchType = MatchType.BLOCKSTATE;
+    }
 
     protected BlockInWorldPredicateBuilder(ResourceLocation blockId) {
         this.block = BLOCKS.getValue(blockId);
@@ -89,6 +159,7 @@ public class BlockInWorldPredicateBuilder {
      * Returns a new <code>BlockInWorldPredicateBuilder</code> that matches for the passed <code>Block</code>.
      */
     public static BlockInWorldPredicateBuilder of(Block block) {
+        if (block instanceof SchematicBlock) return SCHEMATIC;
         return new BlockInWorldPredicateBuilder(block);
     }
 
@@ -96,6 +167,7 @@ public class BlockInWorldPredicateBuilder {
      * Returns a new <code>BlockInWorldPredicateBuilder</code> that matches for the block with the same passed ID.
      */
     public static BlockInWorldPredicateBuilder of(ResourceLocation blockId) {
+        if (blockId.equals(new ResourceLocation("nobullship", "schematic_block"))) return SCHEMATIC;
         return new BlockInWorldPredicateBuilder(blockId);
     }
 
@@ -105,6 +177,7 @@ public class BlockInWorldPredicateBuilder {
      * of the rest of the builder.
      */
     public static BlockInWorldPredicateBuilder of(BlockState blockState) {
+        if (blockState.getBlock() instanceof SchematicBlock) return SCHEMATIC;
         return new BlockInWorldPredicateBuilder(blockState);
     }
 
@@ -571,6 +644,9 @@ public class BlockInWorldPredicateBuilder {
             BlockInWorldPredicateBuilder toReturn;
 
             Block block = BLOCKS.getValue(new ResourceLocation(serializedPredicate.getString("Name")));
+            if (serializedPredicate.getString("Name").equals("nobullship:schematic_block")) {
+                return SCHEMATIC;
+            }
             if (block == null) toReturn = BlockInWorldPredicateBuilder.of(new ResourceLocation(serializedPredicate.getString("Name")));
             else toReturn = BlockInWorldPredicateBuilder.of(block);
 
@@ -602,6 +678,9 @@ public class BlockInWorldPredicateBuilder {
     protected static BlockInWorldPredicateBuilder deserializeBlockStateFromNbt(CompoundTag serializedPredicate) throws RuntimeException {
         try {
             BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, serializedPredicate).getOrThrow(false, LOGGER::error);
+            if (blockState.getBlock() instanceof SchematicBlock) {
+                return SCHEMATIC;
+            }
             return BlockInWorldPredicateBuilder.of(blockState);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
@@ -647,6 +726,10 @@ public class BlockInWorldPredicateBuilder {
             BlockInWorldPredicateBuilder toReturn;
             JsonObject blockAsJson = predicateObj.getAsJsonObject("block");
 
+            if (blockAsJson.getAsJsonPrimitive("Name").getAsString().equals("nobullship:schematic_block")) {
+                return SCHEMATIC;
+            }
+
             Block block = BLOCKS.getValue(new ResourceLocation(blockAsJson.getAsJsonPrimitive("Name").getAsString()));
             if (block == null) toReturn = BlockInWorldPredicateBuilder.of(new ResourceLocation(blockAsJson.getAsJsonPrimitive("Name").getAsString()));
             else toReturn = BlockInWorldPredicateBuilder.of(block);
@@ -687,6 +770,11 @@ public class BlockInWorldPredicateBuilder {
             BlockState blockState = BlockState.CODEC.parse(
                     JsonOps.INSTANCE, blockStateAsJson).getOrThrow(false, LOGGER::error);
             toReturn = BlockInWorldPredicateBuilder.of(blockState);
+
+            if (blockState.getBlock() instanceof SchematicBlock) {
+                return SCHEMATIC;
+            }
+
             deserializeNbtFromJson(serializedPredicate, toReturn);
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
@@ -733,7 +821,7 @@ public class BlockInWorldPredicateBuilder {
 
     protected static void deserializeNbtFromJson(JsonElement root, BlockInWorldPredicateBuilder builder) throws RuntimeException {
         try {
-            JsonObject rootAsObj= root.getAsJsonObject();
+            JsonObject rootAsObj = root.getAsJsonObject();
             JsonElement nbtJson = rootAsObj.get("nbt");
             JsonElement nbtJsonStrict = rootAsObj.get("nbt_strict");
 
