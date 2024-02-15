@@ -44,7 +44,7 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
 
         @Override
         public boolean test(BlockInWorld blockInWorld) {
-            return !blockInWorld.getState().isAir();
+            return true;
         }
     };
     public static final BlockInWorldPredicate AIR = new BlockInWorldPredicate(Blocks.AIR, null, null, null, null, null, null) {
