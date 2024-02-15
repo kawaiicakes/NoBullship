@@ -7,6 +7,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.JsonOps;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
+import io.github.kawaiicakes.nobullship.api.RawBIWPredicateBuilder;
 import io.github.kawaiicakes.nobullship.multiblock.FinishedMultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.MultiblockPattern;
 import net.minecraft.core.NonNullList;
@@ -46,7 +47,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
     protected List<ICondition[]> currentConditions = new ArrayList<>();
     protected String resultingEntityName = null;
     protected final ResourceLocation result;
-    protected final Map<String, BlockInWorldPredicateBuilder> lookupSimple = new HashMap<>();
+    protected final Map<Character, RawBIWPredicateBuilder<?>> lookupSimple = new HashMap<>();
     @Nullable
     protected CompoundTag nbt;
     @Nullable
@@ -191,7 +192,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         NonNullList<ItemStack> toReturn = NonNullList.create();
 
         Map<Character, Integer> totalCount = new HashMap<>();
-        this.lookupSimple.keySet().forEach(key -> totalCount.put(key.charAt(0), 0));
+        this.lookupSimple.keySet().forEach(key -> totalCount.put(key, 0));
 
         for (String[] strings : this.pattern) {
             for (String string : strings) {
@@ -206,7 +207,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         totalCount.entrySet()
                 .stream()
                 .map(entry -> {
-                    ItemStack itemStack = this.lookupSimple.get(String.valueOf(entry.getKey())).getItemized();
+                    ItemStack itemStack = this.lookupSimple.get(entry.getKey()).getItemized();
                     itemStack.setCount(entry.getValue());
                     return itemStack;
                 })
@@ -261,7 +262,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
      *              is assigned to. The <code>BlockInWorldPredicateBuilder</code> allows for very fine
      *              control over defining the permitted block state(s).
      */
-    public MultiblockPatternBuilder where(char pSymbol, BlockInWorldPredicateBuilder block) {
+    public MultiblockPatternBuilder where(char pSymbol, RawBIWPredicateBuilder<?> block) {
         if (pSymbol == ' ' || pSymbol == '$') {
             LOGGER.error("{} is a reserved character!", pSymbol);
             throw new IllegalArgumentException(pSymbol + " is a reserved character!");
@@ -275,7 +276,7 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
             this.hasSchematicBlock = true;
         }
 
-        this.lookupSimple.put(String.valueOf(pSymbol), block);
+        this.lookupSimple.put(pSymbol, block);
         return (MultiblockPatternBuilder) super.where(pSymbol, block.build());
     }
 
@@ -305,13 +306,13 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         toReturn.put("pattern", patternTag);
 
         CompoundTag paletteTag = new CompoundTag();
-        for (Map.Entry<String, BlockInWorldPredicateBuilder> entry : this.lookupSimple.entrySet()) {
+        for (Map.Entry<Character, RawBIWPredicateBuilder<?>> entry : this.lookupSimple.entrySet()) {
             CompoundTag value = entry.getValue().toNbt();
             if (value == null) {
                 LOGGER.error("Unable to deserialize BlockInWorldPredicateBuilder to NBT!");
                 continue;
             }
-            paletteTag.put(entry.getKey(), value);
+            paletteTag.put(String.valueOf(entry.getKey()), value);
         }
         toReturn.put("palette", paletteTag);
 
@@ -331,11 +332,11 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         protected final NonNullList<ItemStack> requisites;
         @Nullable
         protected final NonNullList<CompoundTag> nbtRequisites;
-        protected final Map<String, BlockInWorldPredicateBuilder> lookup;
+        protected final Map<Character, RawBIWPredicateBuilder<?>> lookup;
         protected final int height;
         protected final int width;
 
-        public Result(ResourceLocation id, List<ICondition[]> conditions, @Nullable String resultingEntityName, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, @Nullable NonNullList<ItemStack> requisites, @Nullable NonNullList<CompoundTag> nbtRequisites, Map<String, BlockInWorldPredicateBuilder> lookup, int height, int width) {
+        public Result(ResourceLocation id, List<ICondition[]> conditions, @Nullable String resultingEntityName, ResourceLocation result, @Nullable CompoundTag nbt, List<String[]> recipe, @Nullable NonNullList<ItemStack> requisites, @Nullable NonNullList<CompoundTag> nbtRequisites, Map<Character, RawBIWPredicateBuilder<?>> lookup, int height, int width) {
             this.conditions = conditions;
             this.id = id;
             this.resultingEntityName = resultingEntityName;
@@ -352,9 +353,9 @@ public class MultiblockPatternBuilder extends BlockPatternBuilder {
         @Override
         public void serializeRecipeData(JsonObject pJson) {
             JsonObject keyMappings = new JsonObject();
-            for (Map.Entry<String, BlockInWorldPredicateBuilder> entry : this.lookup.entrySet()) {
+            for (Map.Entry<Character, RawBIWPredicateBuilder<?>> entry : this.lookup.entrySet()) {
                 try {
-                    keyMappings.add(entry.getKey(), entry.getValue().toJson());
+                    keyMappings.add(String.valueOf(entry.getKey()), entry.getValue().toJson());
                 } catch (RuntimeException e) {
                     LOGGER.error("Error serializing recipe!", e);
                     return;

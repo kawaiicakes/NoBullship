@@ -5,8 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.logging.LogUtils;
-import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
+import io.github.kawaiicakes.nobullship.api.RawBIWPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.multiblock.block.MultiblockWorkshopBlockEntity;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
@@ -88,14 +88,14 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
             LOGGER.error("Unable to set recipe {} as pattern for render is null or empty!", recipe.getId());
             return;
         }
-        Map<Character, BlockInWorldPredicateBuilder> predicateMap = MultiblockPattern.rawPaletteFromNbt(patternTag);
+        Map<Character, RawBIWPredicateBuilder<?>> predicateMap = MultiblockPattern.rawPaletteFromNbt(patternTag);
         if (predicateMap == null || predicateMap.isEmpty()) {
             LOGGER.error("Unable to set recipe {} as palette is null or empty!", recipe.getId());
             return;
         }
 
         Map<Character, BlockIngredient> paletteMap = new HashMap<>();
-        for (Map.Entry<Character, BlockInWorldPredicateBuilder> stateEntry : predicateMap.entrySet()) {
+        for (Map.Entry<Character, RawBIWPredicateBuilder<?>> stateEntry : predicateMap.entrySet()) {
             paletteMap.put(stateEntry.getKey(), new BlockIngredient(stateEntry.getValue(), facing));
         }
 
@@ -386,7 +386,7 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         protected static int INCREMENT;
 
         @Nullable
-        protected final BlockInWorldPredicateBuilder biwPredicateBuilder;
+        protected final RawBIWPredicateBuilder<?> biwPredicateBuilder;
         protected final List<BlockState> validBlockStates;
         protected final Direction facing;
         protected Random seed;
@@ -394,11 +394,11 @@ public class SchematicRenderer implements BlockEntityRenderer<MultiblockWorkshop
         protected int randomIndex = 0;
         protected final boolean hasNbt;
 
-        public BlockIngredient(BlockInWorldPredicateBuilder builder, @Nullable Direction facing) {
+        public BlockIngredient(RawBIWPredicateBuilder<?> builder, @Nullable Direction facing) {
             this(builder, builder.getValidBlockstates(), facing, builder.requiresNbt());
         }
 
-        public BlockIngredient(@Nullable BlockInWorldPredicateBuilder biwPredicateBuilder, Set<BlockState> validBlockStates, @Nullable Direction facing, boolean hasNbt) {
+        public BlockIngredient(@Nullable RawBIWPredicateBuilder<?> biwPredicateBuilder, Set<BlockState> validBlockStates, @Nullable Direction facing, boolean hasNbt) {
             this.biwPredicateBuilder = biwPredicateBuilder;
             this.validBlockStates = validBlockStates.stream().toList();
             this.facing = facing == null ? Direction.NORTH : facing;

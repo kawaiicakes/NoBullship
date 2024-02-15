@@ -4,7 +4,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.mojang.logging.LogUtils;
 import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicate;
-import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
+import io.github.kawaiicakes.nobullship.api.RawBIWPredicateBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -32,7 +32,7 @@ import static net.minecraft.world.level.block.state.properties.BlockStatePropert
 public class MultiblockPattern extends BlockPattern {
     protected static final Logger LOGGER = LogUtils.getLogger();
     public static final Direction[] CARDINAL = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
-    protected final ImmutableList<BlockInWorldPredicateBuilder> palette;
+    protected final ImmutableList<RawBIWPredicateBuilder<?>> palette;
     protected final ImmutableList<ItemStack> totalBlocks;
     @Nullable
     protected CompoundTag serializedPattern;
@@ -40,7 +40,7 @@ public class MultiblockPattern extends BlockPattern {
     /**
      * Serverside
      */
-    public MultiblockPattern(BlockInWorldPredicate[][][] pPattern, List<BlockInWorldPredicateBuilder> palette, NonNullList<ItemStack> totalBlocks, @Nullable CompoundTag serializedPattern) {
+    public MultiblockPattern(BlockInWorldPredicate[][][] pPattern, List<RawBIWPredicateBuilder<?>> palette, NonNullList<ItemStack> totalBlocks, @Nullable CompoundTag serializedPattern) {
         super(pPattern);
         this.palette = ImmutableList.copyOf(palette);
         this.totalBlocks = ImmutableList.copyOf(totalBlocks);
@@ -48,7 +48,7 @@ public class MultiblockPattern extends BlockPattern {
     }
 
     public boolean patternContains(BlockState state) {
-        for (BlockInWorldPredicateBuilder block : this.palette) {
+        for (RawBIWPredicateBuilder<?> block : this.palette) {
             for (BlockState blockState : block.getValidBlockstates()) {
                 if (state.is(blockState.getBlock())) return true;
             }
@@ -62,9 +62,9 @@ public class MultiblockPattern extends BlockPattern {
         return this.serializedPattern.copy();
     }
 
-    public ImmutableList<BlockInWorldPredicateBuilder> getPalette() {
-        ImmutableList.Builder<BlockInWorldPredicateBuilder> builder = ImmutableList.builder();
-        for (BlockInWorldPredicateBuilder state : this.palette) {
+    public ImmutableList<RawBIWPredicateBuilder<?>> getPalette() {
+        ImmutableList.Builder<RawBIWPredicateBuilder<?>> builder = ImmutableList.builder();
+        for (RawBIWPredicateBuilder<?> state : this.palette) {
             builder.add(state);
         }
         return builder.build();
@@ -167,7 +167,7 @@ public class MultiblockPattern extends BlockPattern {
             toReturn = new CompoundTag();
 
             ListTag paletteTag = new ListTag();
-            for (BlockInWorldPredicateBuilder block : this.palette) {
+            for (RawBIWPredicateBuilder<?> block : this.palette) {
                 paletteTag.add(block.toNbt());
             }
             toReturn.put("palette", paletteTag);
@@ -218,10 +218,10 @@ public class MultiblockPattern extends BlockPattern {
         }
 
         CompoundTag originalPaletteTag = serializedTag.getCompound("palette");
-        Map<String, BlockInWorldPredicateBuilder> paletteMap = new HashMap<>(originalPaletteTag.size());
+        Map<String, RawBIWPredicateBuilder<?>> paletteMap = new HashMap<>(originalPaletteTag.size());
         for (String key : originalPaletteTag.getAllKeys()) {
             CompoundTag tagAtKey = originalPaletteTag.getCompound(key);
-            BlockInWorldPredicateBuilder builder = BlockInWorldPredicateBuilder.fromNbt(tagAtKey);
+            RawBIWPredicateBuilder<?> builder = ;
             if (builder == null) {
                 LOGGER.error("Unable to deserialize BlockInWorldPredicate from NBT!");
                 return null;
@@ -250,11 +250,11 @@ public class MultiblockPattern extends BlockPattern {
             }
         }
 
-        NonNullList<BlockInWorldPredicateBuilder> paletteList = NonNullList.createWithCapacity(paletteTag.size());
+        NonNullList<RawBIWPredicateBuilder<?>> paletteList = NonNullList.createWithCapacity(paletteTag.size());
         try {
             for (Tag tag : paletteTag) {
                 CompoundTag deserialized = (CompoundTag) tag;
-                paletteList.add(BlockInWorldPredicateBuilder.fromNbt(deserialized));
+                paletteList.add();
             }
         } catch (RuntimeException e) {
             LOGGER.error("BlockState unable to be deserialized from NBT!", e);
@@ -300,11 +300,11 @@ public class MultiblockPattern extends BlockPattern {
     }
 
     @Nullable
-    public static Map<Character, BlockInWorldPredicateBuilder> rawPaletteFromNbt(CompoundTag paletteTag) {
+    public static Map<Character, RawBIWPredicateBuilder<?>> rawPaletteFromNbt(CompoundTag paletteTag) {
         CompoundTag originalPaletteTag = paletteTag.getCompound("palette");
         if (originalPaletteTag.isEmpty()) return null;
 
-        Map<Character, BlockInWorldPredicateBuilder> paletteMap = new HashMap<>(originalPaletteTag.size());
+        Map<Character, RawBIWPredicateBuilder<?>> paletteMap = new HashMap<>(originalPaletteTag.size());
         for (String key : originalPaletteTag.getAllKeys()) {
             CompoundTag tagAtKey = originalPaletteTag.getCompound(key);
             if (tagAtKey.isEmpty()) {
@@ -312,7 +312,7 @@ public class MultiblockPattern extends BlockPattern {
                 return null;
             }
 
-            BlockInWorldPredicateBuilder forPalette = BlockInWorldPredicateBuilder.fromNbt(tagAtKey);
+            RawBIWPredicateBuilder<?> forPalette = ;
             if (forPalette == null) {
                 LOGGER.error("Unable to deserialize block predicate for {}! Palette was disposed!", key);
                 return null;

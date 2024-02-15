@@ -37,7 +37,7 @@ import static net.minecraftforge.registries.ForgeRegistries.BLOCKS;
  * <code>BlockInWorld#getState()#is(Block)</code> is true. Check the documentation on the builder methods to see
  * what the possible criteria are.
  */
-public class BlockInWorldPredicateBuilder {
+public class BlockInWorldPredicateBuilder implements RawBIWPredicateBuilder<BlockInWorldPredicateBuilder> {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static final BlockInWorldPredicateBuilder SCHEMATIC
             = BlockInWorldPredicateBuilder.of(SCHEMATIC_BLOCK.get().defaultBlockState());
@@ -120,6 +120,7 @@ public class BlockInWorldPredicateBuilder {
      * key already exists, the passed value will be added to the <code>Set</code> of "allowed" values for that
      * property.
      */
+    @Override
     public BlockInWorldPredicateBuilder requireProperties(Property<?> property, Set<Comparable<?>> value) {
         if (this.matchType.equals(MatchType.BLOCKSTATE)) throw new UnsupportedOperationException("This builder is already looking for an exact match to the passed BlockState!");
         if (this.block != null) {
@@ -145,6 +146,7 @@ public class BlockInWorldPredicateBuilder {
      * key already exists, the passed value will be added to the <code>Set</code> of "allowed" values for that
      * property.
      */
+    @Override
     public BlockInWorldPredicateBuilder requireProperties(String property, Set<String> values) {
         if (this.matchType.equals(MatchType.BLOCKSTATE)) throw new UnsupportedOperationException("This builder is already looking for an exact match to the passed BlockState!");
         if (this.block != null) {
@@ -183,6 +185,7 @@ public class BlockInWorldPredicateBuilder {
      * key already exists, the passed value will be added to the <code>Set</code> of "allowed" values for that
      * property.
      */
+    @Override
     public BlockInWorldPredicateBuilder requireProperty(Property<?> property, Comparable<?> value) {
         if (this.matchType.equals(MatchType.BLOCKSTATE)) throw new UnsupportedOperationException("This builder is already looking for an exact match to the passed BlockState!");
         if (this.block != null) {
@@ -207,6 +210,7 @@ public class BlockInWorldPredicateBuilder {
      * key already exists, the passed value will be added to the <code>Set</code> of "allowed" values for that
      * property.
      */
+    @Override
     public BlockInWorldPredicateBuilder requireProperty(String property, String value) {
         if (this.matchType.equals(MatchType.BLOCKSTATE)) throw new UnsupportedOperationException("This builder is already looking for an exact match to the passed BlockState!");
         if (this.block != null) {
@@ -240,6 +244,7 @@ public class BlockInWorldPredicateBuilder {
      * Specifies the exact NBT data a <code>BlockEntity</code> must have to allow the built predicate to test true.
      * The passed NBT data will be merged into the existing.
      */
+    @Override
     public BlockInWorldPredicateBuilder requireStrictNbt(CompoundTag tag) {
         if (!this.isForTag() && this.block != null && !(this.block instanceof EntityBlock)) throw new IllegalArgumentException(this.block + " cannot have a block entity, so it cannot have NBT data!");
         if (this.blockEntityNbtDataStrict == null) this.blockEntityNbtDataStrict = new CompoundTag();
@@ -255,6 +260,7 @@ public class BlockInWorldPredicateBuilder {
      * the container meet or exceed the requirements stipulated by the passed NBT, without regard to the placement
      * of the contents.
      */
+    @Override
     public BlockInWorldPredicateBuilder requireNbt(CompoundTag tag) {
         if (!this.isForTag() && this.block != null && !(this.block instanceof EntityBlock)) throw new IllegalArgumentException(this.block + " cannot have a block entity, so it cannot have NBT data!");
         if (this.blockEntityNbtData == null) this.blockEntityNbtData = new CompoundTag();
@@ -265,6 +271,7 @@ public class BlockInWorldPredicateBuilder {
     /**
      * Returns an arbitrarily made copy of the NBT data this builder holds (if any exists).
      */
+    @Override
     public CompoundTag getNaiveNbt() {
         CompoundTag toReturn = new CompoundTag();
         if (this.getBlockEntityNbtData() != null) toReturn.merge(this.getBlockEntityNbtData());
@@ -277,6 +284,7 @@ public class BlockInWorldPredicateBuilder {
      * specified by this builder. This overload only works if there are no directional properties specified as
      * a requisite.
      */
+    @Override
     public BlockInWorldPredicate build() {
         Block blockToArg = this.isForBlock() ? this.block : null;
         BlockState stateToArg = this.isForBlockState() ? this.blockState : null;
@@ -285,6 +293,7 @@ public class BlockInWorldPredicateBuilder {
         return new BlockInWorldPredicate(blockToArg, stateToArg, tagToArg, idToArg, this.properties, this.blockEntityNbtData, this.blockEntityNbtDataStrict);
     }
 
+    @Override
     @Nullable
     public JsonObject toJson() throws RuntimeException {
         JsonObject toReturn;
@@ -329,6 +338,7 @@ public class BlockInWorldPredicateBuilder {
         }
     }
 
+    @Override
     @Nullable
     public CompoundTag toNbt() {
         CompoundTag toReturn = new CompoundTag();
@@ -759,6 +769,7 @@ public class BlockInWorldPredicateBuilder {
      * Returns a <code>Set</code> of all possible <code>BlockState</code>s satisfying this builder. This method is mainly used for the palette in the
      * <code>MultiblockPattern</code>.
      */
+    @Override
     public Set<BlockState> getValidBlockstates() {
         return switch (this.matchType) {
             case BLOCK -> {
@@ -822,6 +833,7 @@ public class BlockInWorldPredicateBuilder {
         }
     }
 
+    @Override
     public ItemStack getItemized() {
         if (this.matchType.equals(MatchType.BLOCK) && this.block != null) {
             if (this.blockEntityNbtDataStrict == null) return this.block.asItem().getDefaultInstance();
@@ -894,6 +906,7 @@ public class BlockInWorldPredicateBuilder {
     /**
      * Simple method indicating if this BIWPredicate contains NBT data.
      */
+    @Override
     public boolean requiresNbt() {
         return this.blockEntityNbtData != null || this.blockEntityNbtDataStrict != null;
     }

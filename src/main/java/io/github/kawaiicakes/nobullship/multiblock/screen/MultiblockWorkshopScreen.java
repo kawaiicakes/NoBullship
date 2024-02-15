@@ -5,8 +5,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
-import io.github.kawaiicakes.nobullship.api.BlockInWorldPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.MultiblockRecipeManager;
+import io.github.kawaiicakes.nobullship.api.RawBIWPredicateBuilder;
 import io.github.kawaiicakes.nobullship.api.multiblock.MultiblockRecipe;
 import io.github.kawaiicakes.nobullship.schematic.SchematicRecipe;
 import net.minecraft.client.Minecraft;
@@ -216,7 +216,7 @@ public class MultiblockWorkshopScreen extends AbstractContainerScreen<Multiblock
         }
 
         this.matchHasRequisites = resultRecipe.requisites() != null || matchingRecipe.get().getRequisites() != null;
-        this.multiblockUsesNbt = resultRecipe.recipe().getPalette().stream().anyMatch(BlockInWorldPredicateBuilder::requiresNbt);
+        this.multiblockUsesNbt = resultRecipe.recipe().getPalette().stream().anyMatch(RawBIWPredicateBuilder::requiresNbt);
 
         Entity resultEntity =
             MultiblockRecipeManager.getInstance().getEntityForRecipe(matchingRecipe.get().getResultId(), clientLevel);
