@@ -48,6 +48,7 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
 
     protected final IDrawable background;
     protected final IDrawable icon;
+    protected int rot;
 
     @Nullable
     protected SchematicRecipe currentRecipe;
@@ -160,18 +161,19 @@ public class SchematicRecipeCategory implements IRecipeCategory<SchematicRecipe>
      * Credit must be given to <a href="https://github.com/Mrbysco">Mrbysco</a>.
      * As of the time of writing, JEP is MIT licensed.
      */
-    public static void renderEntity(int x, int y, PoseStack stack, double scale, double yaw, Entity entity) {
+    public void renderEntity(int x, int y, PoseStack stack, double scale, double yaw, Entity entity) {
+        if (this.rot++ > 3599) this.rot = 0;
         stack.pushPose();
         stack.translate((float) x, (float) y, 50f);
         stack.scale((float) scale, (float) scale, (float) scale);
         stack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
         // Rotate entity
-        stack.mulPose(Vector3f.XP.rotationDegrees(((float) Math.atan((-40 / 40.0F))) * 10.0F));
+        stack.mulPose(Vector3f.YP.rotationDegrees(-((float) this.rot) / 100F * 10.0F));
 
-        entity.setYRot((float) -(yaw / 40.F) * 20.0F);
+        entity.setYRot(((float) -this.rot) / 100F * 20.0F);
 
         if (entity instanceof LivingEntity living) {
-            living.yBodyRot = (float) -(yaw / 40.F) * 20.0F;
+            living.yBodyRot = ((float) -this.rot) / 100F * 20.0F;
             living.yHeadRot = entity.getYRot();
             living.yHeadRotO = entity.getYRot();
         }
