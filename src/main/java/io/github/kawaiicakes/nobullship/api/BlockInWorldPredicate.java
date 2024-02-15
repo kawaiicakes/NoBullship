@@ -120,7 +120,7 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
         if (this.block != null) return BlockInWorld.hasState(state -> state.is(this.block));
         else if (this.blockState != null) return (blockInWorld) -> {
             // FIXME: this temporary fix for accepting visually-identical stairs
-            if (!this.blockState.is(BlockTags.STAIRS)) return blockInWorld.getState().equals(this.blockState);
+            if (!blockInWorld.getState().is(BlockTags.STAIRS)) return blockInWorld.getState().equals(this.blockState);
             if (this.blockState.equals(blockInWorld.getState())) return true;
 
             Direction currentFacing = blockInWorld.getState().getValue(StairBlock.FACING);
