@@ -1,0 +1,272 @@
+{
+  "key": {
+    "%": {
+      "blockstate": {
+        "Name": "minecraft:jungle_planks"
+      }
+    },
+    "&": {
+      "blockstate": {
+        "Name": "nobullship:schematic_block",
+        "Properties": {
+          "facing": "north"
+        }
+      }
+    },
+    ")": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "*": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "outer_left",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "+": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    ",": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "-": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    ".": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "outer_right",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "0": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "bottom",
+          "shape": "inner_right",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "1": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "2": {
+      "blockstate": {
+        "Name": "minecraft:jungle_slab",
+        "Properties": {
+          "type": "bottom",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "3": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "bottom",
+          "shape": "outer_right",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "4": {
+      "blockstate": {
+        "Name": "minecraft:jungle_fence",
+        "Properties": {
+          "east": "false",
+          "north": "true",
+          "north_east": "false",
+          "north_west": "false",
+          "south": "false",
+          "south_east": "false",
+          "south_west": "false",
+          "waterlogged": "false",
+          "west": "false"
+        }
+      }
+    },
+    "5": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "6": {
+      "blockstate": {
+        "Name": "minecraft:jungle_fence",
+        "Properties": {
+          "east": "false",
+          "north": "false",
+          "north_east": "false",
+          "north_west": "false",
+          "south": "false",
+          "south_east": "false",
+          "south_west": "false",
+          "waterlogged": "false",
+          "west": "false"
+        }
+      }
+    },
+    "7": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "bottom",
+          "shape": "inner_left",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "8": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "9": {
+      "blockstate": {
+        "Name": "minecraft:jungle_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "bottom",
+          "shape": "outer_left",
+          "waterlogged": "false"
+        }
+      }
+    }
+  },
+  "recipe": {
+    "layer0": [
+      "   ",
+      "   ",
+      " 2 ",
+      "$$$"
+    ],
+    "layer1": [
+      "   ",
+      "   ",
+      "359",
+      "$,$"
+    ],
+    "layer10": [
+      "   ",
+      " 6 ",
+      " 4 ",
+      "$$$"
+    ],
+    "layer2": [
+      "   ",
+      "   ",
+      "1 8",
+      "*%."
+    ],
+    "layer3": [
+      "   ",
+      "   ",
+      "1 8",
+      ")%-"
+    ],
+    "layer4": [
+      "   ",
+      "   ",
+      "2 2",
+      ")&-"
+    ],
+    "layer5": [
+      "   ",
+      "   ",
+      "2 2",
+      ")%-"
+    ],
+    "layer6": [
+      " 6 ",
+      " 6 ",
+      "262",
+      ")%-"
+    ],
+    "layer7": [
+      "   ",
+      "   ",
+      "2 2",
+      ")%-"
+    ],
+    "layer8": [
+      "   ",
+      "   ",
+      "1 8",
+      ")%-"
+    ],
+    "layer9": [
+      "   ",
+      "   ",
+      "057",
+      "$+$"
+    ]
+  },
+  "result": {
+    "entity": "smallships:jungle_galley"
+  }
+}

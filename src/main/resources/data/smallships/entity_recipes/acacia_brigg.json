@@ -1,0 +1,363 @@
+{
+  "key": {
+    "&": {
+      "blockstate": {
+        "Name": "minecraft:acacia_planks"
+      }
+    },
+    "(": {
+      "blockstate": {
+        "Name": "nobullship:schematic_block",
+        "Properties": {
+          "facing": "north"
+        }
+      }
+    },
+    "*": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "top",
+          "shape": "outer_right",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "+": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "true"
+        }
+      }
+    },
+    ",": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "outer_left",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "-": {
+      "blockstate": {
+        "Name": "nobullship:industrial_wood_polybeam",
+        "Properties": {
+          "down": "false",
+          "east": "false",
+          "north": "true",
+          "south": "false",
+          "up": "true",
+          "waterlogged": "true",
+          "west": "false"
+        }
+      }
+    },
+    ".": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "/": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "0": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "top",
+          "shape": "outer_left",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "1": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "outer_right",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "3": {
+      "blockstate": {
+        "Name": "minecraft:acacia_slab",
+        "Properties": {
+          "type": "bottom",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "4": {
+      "blockstate": {
+        "Name": "minecraft:acacia_trapdoor",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "open": "true",
+          "powered": "false",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "5": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "bottom",
+          "shape": "inner_right",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "6": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "7": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "bottom",
+          "shape": "inner_right",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "8": {
+      "blockstate": {
+        "Name": "nobullship:industrial_wood_polybeam",
+        "Properties": {
+          "down": "true",
+          "east": "false",
+          "north": "false",
+          "south": "false",
+          "up": "true",
+          "waterlogged": "false",
+          "west": "false"
+        }
+      }
+    },
+    "9": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    ":": {
+      "blockstate": {
+        "Name": "minecraft:acacia_fence",
+        "Properties": {
+          "east": "false",
+          "north": "false",
+          "north_east": "false",
+          "north_west": "false",
+          "south": "false",
+          "south_east": "false",
+          "south_west": "false",
+          "waterlogged": "false",
+          "west": "false"
+        }
+      }
+    },
+    ";": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "<": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "=": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "bottom",
+          "shape": "inner_left",
+          "waterlogged": "false"
+        }
+      }
+    },
+    ">": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "?": {
+      "blockstate": {
+        "Name": "minecraft:acacia_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "bottom",
+          "shape": "inner_left",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "@": {
+      "blockstate": {
+        "Name": "nobullship:industrial_wood_polybeam",
+        "Properties": {
+          "down": "true",
+          "east": "false",
+          "north": "false",
+          "south": "false",
+          "up": "false",
+          "waterlogged": "false",
+          "west": "false"
+        }
+      }
+    },
+    "A": {
+      "blockstate": {
+        "Name": "nobullship:wood_support_beam",
+        "Properties": {
+          "down": "none",
+          "horizontal_axis": "z",
+          "left": "false",
+          "right": "false",
+          "up": "none",
+          "vertical": "false",
+          "waterlogged": "false"
+        }
+      }
+    }
+  },
+  "recipe": {
+    "layer0": [
+      "     ",
+      "  A  ",
+      "     ",
+      "$$$$$"
+    ],
+    "layer1": [
+      "     ",
+      "  A  ",
+      "     ",
+      "$$$$$"
+    ],
+    "layer10": [
+      "     ",
+      "     ",
+      " 59= ",
+      "$+&/$"
+    ],
+    "layer11": [
+      "     ",
+      "  @  ",
+      " 484 ",
+      "$$-$$"
+    ],
+    "layer2": [
+      "     ",
+      "  A  ",
+      "     ",
+      "$$$$$"
+    ],
+    "layer3": [
+      "     ",
+      "  3  ",
+      "  <  ",
+      "$$$$$"
+    ],
+    "layer4": [
+      "     ",
+      "     ",
+      " 7;? ",
+      "$$.$$"
+    ],
+    "layer5": [
+      "  :  ",
+      "  :  ",
+      " 3:3 ",
+      "$+&/$"
+    ],
+    "layer6": [
+      "     ",
+      "     ",
+      "3   3",
+      ",&&&1"
+    ],
+    "layer7": [
+      "     ",
+      "     ",
+      "3   3",
+      "+&(&/"
+    ],
+    "layer8": [
+      "     ",
+      "     ",
+      "3   3",
+      "*&&&0"
+    ],
+    "layer9": [
+      "  :  ",
+      "  :  ",
+      " 6:> ",
+      "$+&/$"
+    ]
+  },
+  "result": {
+    "entity": "smallships:acacia_brigg"
+  }
+}

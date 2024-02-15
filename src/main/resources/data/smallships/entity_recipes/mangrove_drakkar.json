@@ -1,0 +1,318 @@
+{
+  "key": {
+    "&": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_planks"
+      }
+    },
+    "(": {
+      "blockstate": {
+        "Name": "nobullship:schematic_block",
+        "Properties": {
+          "facing": "north"
+        }
+      }
+    },
+    "*": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "top",
+          "shape": "outer_right",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "+": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "true"
+        }
+      }
+    },
+    ",": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "outer_left",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "-": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_fence",
+        "Properties": {
+          "east": "true",
+          "north": "true",
+          "north_east": "false",
+          "north_west": "false",
+          "south": "false",
+          "south_east": "false",
+          "south_west": "false",
+          "waterlogged": "true",
+          "west": "true"
+        }
+      }
+    },
+    ".": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "/": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "top",
+          "shape": "outer_left",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "0": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "1": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "outer_right",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "3": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_trapdoor",
+        "Properties": {
+          "facing": "west",
+          "half": "bottom",
+          "open": "true",
+          "powered": "false",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "4": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_slab",
+        "Properties": {
+          "type": "bottom",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "5": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "6": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "bottom",
+          "shape": "inner_left",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "7": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_fence",
+        "Properties": {
+          "east": "false",
+          "north": "true",
+          "north_east": "false",
+          "north_west": "false",
+          "south": "false",
+          "south_east": "false",
+          "south_west": "false",
+          "waterlogged": "false",
+          "west": "false"
+        }
+      }
+    },
+    "8": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "9": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_fence",
+        "Properties": {
+          "east": "false",
+          "north": "false",
+          "north_east": "false",
+          "north_west": "false",
+          "south": "false",
+          "south_east": "false",
+          "south_west": "false",
+          "waterlogged": "false",
+          "west": "false"
+        }
+      }
+    },
+    ":": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    ";": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "<": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "bottom",
+          "shape": "inner_right",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "=": {
+      "blockstate": {
+        "Name": "minecraft:mangrove_trapdoor",
+        "Properties": {
+          "facing": "east",
+          "half": "bottom",
+          "open": "true",
+          "powered": "false",
+          "waterlogged": "false"
+        }
+      }
+    }
+  },
+  "recipe": {
+    "layer0": [
+      "     ",
+      "     ",
+      "  :  ",
+      "$$$$$"
+    ],
+    "layer1": [
+      "     ",
+      "     ",
+      "  4  ",
+      "$$$$$"
+    ],
+    "layer10": [
+      "     ",
+      "     ",
+      " 484 ",
+      "$*&/$"
+    ],
+    "layer11": [
+      "     ",
+      "     ",
+      "  7  ",
+      "$$-$$"
+    ],
+    "layer2": [
+      "     ",
+      "     ",
+      "  8  ",
+      "$$.$$"
+    ],
+    "layer3": [
+      "     ",
+      "     ",
+      " 6 < ",
+      "$,&1$"
+    ],
+    "layer4": [
+      "     ",
+      "     ",
+      " 5 ; ",
+      "$+&0$"
+    ],
+    "layer5": [
+      "     ",
+      "     ",
+      "34 4=",
+      "$+(0$"
+    ],
+    "layer6": [
+      "     ",
+      "     ",
+      "34 4=",
+      "$+&0$"
+    ],
+    "layer7": [
+      "  9  ",
+      "  9  ",
+      "3494=",
+      "$+&0$"
+    ],
+    "layer8": [
+      "     ",
+      "     ",
+      "34 4=",
+      "$+&0$"
+    ],
+    "layer9": [
+      "     ",
+      "     ",
+      "34 4=",
+      "$+&0$"
+    ]
+  },
+  "result": {
+    "entity": "smallships:mangrove_drakkar"
+  }
+}

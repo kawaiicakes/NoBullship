@@ -1,0 +1,204 @@
+{
+  "key": {
+    "%": {
+      "blockstate": {
+        "Name": "minecraft:spruce_planks"
+      }
+    },
+    ")": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "*": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "+": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "true"
+        }
+      }
+    },
+    ",": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "true"
+        }
+      }
+    },
+    "-": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "bottom",
+          "shape": "inner_right",
+          "waterlogged": "false"
+        }
+      }
+    },
+    ".": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "/": {
+      "blockstate": {
+        "Name": "minecraft:spruce_slab",
+        "Properties": {
+          "type": "bottom",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "0": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "1": {
+      "blockstate": {
+        "Name": "minecraft:spruce_slab",
+        "Properties": {
+          "type": "top",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "3": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "4": {
+      "blockstate": {
+        "Name": "minecraft:spruce_fence",
+        "Properties": {
+          "east": "false",
+          "north": "false",
+          "north_east": "false",
+          "north_west": "false",
+          "south": "false",
+          "south_east": "false",
+          "south_west": "false",
+          "waterlogged": "false",
+          "west": "false"
+        }
+      }
+    },
+    "5": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "6": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "bottom",
+          "shape": "inner_right",
+          "waterlogged": "false"
+        }
+      }
+    },
+    "7": {
+      "blockstate": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "east",
+          "half": "bottom",
+          "shape": "straight",
+          "waterlogged": "false"
+        }
+      }
+    }
+  },
+  "recipe": {
+    "layer0": [
+      " 4 ",
+      " 5 ",
+      "$$$"
+    ],
+    "layer1": [
+      "   ",
+      "1/1",
+      "$+$"
+    ],
+    "layer2": [
+      "   ",
+      "0 0",
+      ")%,"
+    ],
+    "layer3": [
+      "   ",
+      "/ /",
+      ")%,"
+    ],
+    "layer4": [
+      " 4 ",
+      "/4/",
+      ")%,"
+    ],
+    "layer5": [
+      "   ",
+      ". 7",
+      ")%,"
+    ],
+    "layer6": [
+      "   ",
+      "-36",
+      "$*$"
+    ]
+  },
+  "result": {
+    "entity": "smallships:spruce_cog"
+  }
+}
