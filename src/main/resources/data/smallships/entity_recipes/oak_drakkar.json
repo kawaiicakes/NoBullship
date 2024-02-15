@@ -6,11 +6,8 @@
       }
     },
     "(": {
-      "blockstate": {
-        "Name": "nobullship:schematic_block",
-        "Properties": {
-          "facing": "north"
-        }
+      "block": {
+        "Name": "nobullship:schematic_block"
       }
     },
     "*": {
@@ -313,6 +310,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:oak_drakkar"
+    "entity": "smallships:drakkar",
+    "nbt": {
+      "Type": "oak"
+    }
   }
 }

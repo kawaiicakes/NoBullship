@@ -199,6 +199,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:acacia_cog"
+    "entity": "smallships:cog",
+    "nbt": {
+      "Type": "acacia"
+    }
   }
 }

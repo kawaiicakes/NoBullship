@@ -267,6 +267,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:dark_oak_galley"
+    "entity": "smallships:galley",
+    "nbt": {
+      "Type": "dark_oak"
+    }
   }
 }

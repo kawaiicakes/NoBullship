@@ -313,6 +313,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:spruce_drakkar"
+    "entity": "smallships:drakkar",
+    "nbt": {
+      "Type": "spruce"
+    }
   }
 }

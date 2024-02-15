@@ -199,6 +199,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:dark_oak_cog"
+    "entity": "smallships:cog",
+    "nbt": {
+      "Type": "dark_oak"
+    }
   }
 }

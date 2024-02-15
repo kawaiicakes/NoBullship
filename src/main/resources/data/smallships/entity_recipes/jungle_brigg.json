@@ -358,6 +358,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:jungle_brigg"
+    "entity": "smallships:brigg",
+    "nbt": {
+      "Type": "jungle"
+    }
   }
 }

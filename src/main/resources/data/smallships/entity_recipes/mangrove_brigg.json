@@ -358,6 +358,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:mangrove_brigg"
+    "entity": "smallships:brigg",
+    "nbt": {
+      "Type": "mangrove"
+    }
   }
 }

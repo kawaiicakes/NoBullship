@@ -267,6 +267,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:birch_galley"
+    "entity": "smallships:galley",
+    "nbt": {
+      "Type": "birch"
+    }
   }
 }

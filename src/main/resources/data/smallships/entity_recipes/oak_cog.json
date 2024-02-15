@@ -199,6 +199,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:oak_cog"
+    "entity": "smallships:cog",
+    "nbt": {
+      "Type": "oak"
+    }
   }
 }

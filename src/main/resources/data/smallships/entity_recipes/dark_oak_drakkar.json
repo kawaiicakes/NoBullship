@@ -313,6 +313,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:dark_oak_drakkar"
+    "entity": "smallships:drakkar",
+    "nbt": {
+      "Type": "dark_oak"
+    }
   }
 }

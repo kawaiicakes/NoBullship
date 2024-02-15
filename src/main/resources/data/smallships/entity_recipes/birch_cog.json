@@ -199,6 +199,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:birch_cog"
+    "entity": "smallships:cog",
+    "nbt": {
+      "Type": "birch"
+    }
   }
 }

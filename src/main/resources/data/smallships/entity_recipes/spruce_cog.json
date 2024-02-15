@@ -199,6 +199,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:spruce_cog"
+    "entity": "smallships:cog",
+    "nbt": {
+      "Type": "spruce"
+    }
   }
 }

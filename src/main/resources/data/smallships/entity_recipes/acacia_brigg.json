@@ -358,6 +358,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:acacia_brigg"
+    "entity": "smallships:brigg",
+    "nbt": {
+      "Type": "acacia"
+    }
   }
 }

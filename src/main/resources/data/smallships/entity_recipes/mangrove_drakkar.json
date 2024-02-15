@@ -313,6 +313,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:mangrove_drakkar"
+    "entity": "smallships:drakkar",
+    "nbt": {
+      "Type": "mangrove"
+    }
   }
 }

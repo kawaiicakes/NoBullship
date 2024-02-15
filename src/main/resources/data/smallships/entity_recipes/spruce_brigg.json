@@ -358,6 +358,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:spruce_brigg"
+    "entity": "smallships:brigg",
+    "nbt": {
+      "Type": "spruce"
+    }
   }
 }

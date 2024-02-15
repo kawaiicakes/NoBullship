@@ -267,6 +267,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:acacia_galley"
+    "entity": "smallships:galley",
+    "nbt": {
+      "Type": "acacia"
+    }
   }
 }

@@ -199,6 +199,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:jungle_cog"
+    "entity": "smallships:cog",
+    "nbt": {
+      "Type": "jungle"
+    }
   }
 }

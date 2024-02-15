@@ -267,6 +267,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:jungle_galley"
+    "entity": "smallships:galley",
+    "nbt": {
+      "Type": "jungle"
+    }
   }
 }

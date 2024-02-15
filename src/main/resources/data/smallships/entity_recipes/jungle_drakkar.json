@@ -313,6 +313,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:jungle_drakkar"
+    "entity": "smallships:drakkar",
+    "nbt": {
+      "Type": "jungle"
+    }
   }
 }

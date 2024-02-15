@@ -267,6 +267,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:spruce_galley"
+    "entity": "smallships:galley",
+    "nbt": {
+      "Type": "spruce"
+    }
   }
 }

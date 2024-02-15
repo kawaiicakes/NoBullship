@@ -313,6 +313,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:birch_drakkar"
+    "entity": "smallships:drakkar",
+    "nbt": {
+      "Type": "birch"
+    }
   }
 }

@@ -358,6 +358,9 @@
     ]
   },
   "result": {
-    "entity": "smallships:oak_brigg"
+    "entity": "smallships:brigg",
+    "nbt": {
+      "Type": "oak"
+    }
   }
 }
