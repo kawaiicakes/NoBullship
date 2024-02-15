@@ -8,15 +8,18 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -115,7 +118,31 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
 
     protected Predicate<BlockInWorld> getBasic() {
         if (this.block != null) return BlockInWorld.hasState(state -> state.is(this.block));
-        else if (this.blockState != null) return (blockInWorld) -> blockInWorld.getState().equals(this.blockState);
+        else if (this.blockState != null) return (blockInWorld) -> {
+            // FIXME: this temporary fix for accepting visually-identical stairs
+            if (!this.blockState.is(BlockTags.STAIRS)) return blockInWorld.getState().equals(this.blockState);
+            if (this.blockState.equals(blockInWorld.getState())) return true;
+
+            Direction currentFacing = blockInWorld.getState().getValue(StairBlock.FACING);
+            StairsShape currentShape = blockInWorld.getState().getValue(StairBlock.SHAPE);
+
+            if (currentShape.equals(StairsShape.STRAIGHT)) return false;
+
+            Direction newFacing = getNewStairsFacing(currentShape, currentFacing);
+            StairsShape newShape = switch (currentShape) {
+                case STRAIGHT -> throw new RuntimeException();
+                case INNER_LEFT -> StairsShape.INNER_RIGHT;
+                case INNER_RIGHT -> StairsShape.INNER_LEFT;
+                case OUTER_LEFT -> StairsShape.OUTER_RIGHT;
+                case OUTER_RIGHT -> StairsShape.OUTER_LEFT;
+            };
+
+            BlockState identicalCounterpart = blockInWorld.getState();
+            identicalCounterpart = identicalCounterpart.setValue(StairBlock.FACING, newFacing);
+            identicalCounterpart = identicalCounterpart.setValue(StairBlock.SHAPE, newShape);
+
+            return this.blockState.equals(identicalCounterpart);
+        };
         else if (this.blockTag != null) return (blockInWorld) -> blockInWorld.getState().is(this.blockTag);
         else if (this.blockId != null) return (blockInWorld) -> {
             // exists in case for some reason the builder screws up and ends up leaving $block null
@@ -247,6 +274,26 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
             case WEST -> Rotation.CLOCKWISE_90;
             case EAST -> Rotation.COUNTERCLOCKWISE_90;
             default -> Rotation.NONE;
+        };
+    }
+
+    public static Direction getNewStairsFacing(StairsShape shape, Direction oldFacing) {
+        return switch (shape) {
+            case STRAIGHT -> throw new IllegalArgumentException();
+            case INNER_LEFT, OUTER_LEFT -> switch (oldFacing) {
+                case NORTH -> Direction.WEST;
+                case SOUTH -> Direction.EAST;
+                case WEST -> Direction.SOUTH;
+                case EAST -> Direction.NORTH;
+                default -> oldFacing;
+            };
+            case INNER_RIGHT, OUTER_RIGHT -> switch (oldFacing) {
+                case NORTH -> Direction.EAST;
+                case SOUTH -> Direction.WEST;
+                case WEST -> Direction.NORTH;
+                case EAST -> Direction.SOUTH;
+                default -> oldFacing;
+            };
         };
     }
 }
