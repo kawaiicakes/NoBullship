@@ -158,11 +158,12 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
 
         Rotation rotationToNorth = rotationToNorth(facing);
 
-        // FIXME: this temporary fix for accepting visually-identical stairs
         return (block) -> {
             // I don't know if this cast is fine...
             BlockState rotatedState = block.getState().rotate((LevelAccessor) block.getLevel(), block.getPos(), rotationToNorth);
 
+            // FIXME: intended temp fix for accepting visually-identical stairs; doesn't work and adds "ghosts" to accepted property values
+            /*
             if (rotatedState.getBlock() instanceof StairBlock) {
                 if (properties.containsKey("facing") && properties.containsKey("shape") && properties.get("facing").size() == 1 && properties.get("shape").size() == 1) {
                     Direction currentFacing = block.getState().getValue(StairBlock.FACING);
@@ -218,6 +219,7 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
                     }
                 }
             }
+             */
 
             for (Map.Entry<String, Set<String>> entry : properties.entrySet()) {
                 Property<?> propertyOfBlockInWorld;
