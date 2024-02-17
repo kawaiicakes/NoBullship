@@ -105,9 +105,9 @@
       "block": {
         "Name": "minecraft:mangrove_fence",
         "Properties": {
-          "east": "false",
-          "north": "false",
-          "west": "false"
+          "east": ["false"],
+          "north": ["false"],
+          "west": ["false"]
         }
       }
     },
