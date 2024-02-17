@@ -17,9 +17,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "north",
-          "half": "top",
-          "shape": "outer_right"
+          "facing": ["north"],
+          "half": ["top"],
+          "shape": ["outer_right"]
         }
       }
     },
@@ -27,9 +27,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "east",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["east"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -37,9 +37,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "outer_left"
+          "facing": ["south"],
+          "half": ["top"],
+          "shape": ["outer_left"]
         }
       }
     },
@@ -47,12 +47,12 @@
       "block": {
         "Name": "nobullship:industrial_wood_polybeam",
         "Properties": {
-          "down": "false",
-          "east": "false",
-          "north": "true",
-          "south": "false",
-          "up": "true",
-          "west": "false"
+          "down": ["false"],
+          "east": ["false"],
+          "north": ["true"],
+          "south": ["false"],
+          "up": ["true"],
+          "west": ["false"]
         }
       }
     },
@@ -60,9 +60,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["south"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -70,9 +70,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "west",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["west"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -80,9 +80,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "north",
-          "half": "top",
-          "shape": "outer_left"
+          "facing": ["north"],
+          "half": ["top"],
+          "shape": ["outer_left"]
         }
       }
     },
@@ -90,9 +90,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "outer_right"
+          "facing": ["south"],
+          "half": ["top"],
+          "shape": ["outer_right"]
         }
       }
     },
@@ -100,7 +100,7 @@
       "block": {
         "Name": "minecraft:mangrove_slab",
         "Properties": {
-          "type": "bottom"
+          "type": ["bottom"]
         }
       }
     },
@@ -108,9 +108,9 @@
       "block": {
         "Name": "minecraft:mangrove_trapdoor",
         "Properties": {
-          "facing": "south",
-          "open": "true",
-          "powered": "false"
+          "facing": ["south"],
+          "open": ["true"],
+          "powered": ["false"]
         }
       }
     },
@@ -118,9 +118,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "bottom",
-          "shape": "inner_right"
+          "facing": ["south"],
+          "half": ["bottom"],
+          "shape": ["inner_right"]
         }
       }
     },
@@ -128,9 +128,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "west",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["west"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -138,9 +138,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "west",
-          "half": "bottom",
-          "shape": "inner_right"
+          "facing": ["west"],
+          "half": ["bottom"],
+          "shape": ["inner_right"]
         }
       }
     },
@@ -148,12 +148,12 @@
       "block": {
         "Name": "nobullship:industrial_wood_polybeam",
         "Properties": {
-          "down": "true",
-          "east": "false",
-          "north": "false",
-          "south": "false",
-          "up": "true",
-          "west": "false"
+          "down": ["true"],
+          "east": ["false"],
+          "north": ["false"],
+          "south": ["false"],
+          "up": ["true"],
+          "west": ["false"]
         }
       }
     },
@@ -161,9 +161,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["south"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -181,9 +181,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "north",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["north"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -191,9 +191,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["south"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -201,9 +201,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "bottom",
-          "shape": "inner_left"
+          "facing": ["south"],
+          "half": ["bottom"],
+          "shape": ["inner_left"]
         }
       }
     },
@@ -211,9 +211,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "east",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["east"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -221,9 +221,9 @@
       "block": {
         "Name": "minecraft:mangrove_stairs",
         "Properties": {
-          "facing": "east",
-          "half": "bottom",
-          "shape": "inner_left"
+          "facing": ["east"],
+          "half": ["bottom"],
+          "shape": ["inner_left"]
         }
       }
     },

@@ -9,9 +9,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "east",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["east"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -19,9 +19,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "north",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["north"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -29,9 +29,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["south"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -39,9 +39,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "west",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["west"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -49,9 +49,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "bottom",
-          "shape": "inner_right"
+          "facing": ["south"],
+          "half": ["bottom"],
+          "shape": ["inner_right"]
         }
       }
     },
@@ -59,9 +59,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "west",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["west"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -69,7 +69,7 @@
       "block": {
         "Name": "minecraft:oak_slab",
         "Properties": {
-          "type": "bottom"
+          "type": ["bottom"]
         }
       }
     },
@@ -77,9 +77,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "north",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["north"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -87,7 +87,7 @@
       "block": {
         "Name": "minecraft:oak_slab",
         "Properties": {
-          "type": "top"
+          "type": ["top"]
         }
       }
     },
@@ -95,9 +95,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["south"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -105,10 +105,10 @@
       "block": {
         "Name": "minecraft:oak_fence",
         "Properties": {
-          "east": "false",
-          "north": "false",
-          "south": "false",
-          "west": "false"
+          "east": ["false"],
+          "north": ["false"],
+          "south": ["false"],
+          "west": ["false"]
         }
       }
     },
@@ -116,9 +116,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["south"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -126,9 +126,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "east",
-          "half": "bottom",
-          "shape": "inner_right"
+          "facing": ["east"],
+          "half": ["bottom"],
+          "shape": ["inner_right"]
         }
       }
     },
@@ -136,9 +136,9 @@
       "block": {
         "Name": "minecraft:oak_stairs",
         "Properties": {
-          "facing": "east",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["east"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     }

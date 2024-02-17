@@ -17,9 +17,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "east",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["east"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -27,9 +27,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "outer_left"
+          "facing": ["south"],
+          "half": ["top"],
+          "shape": ["outer_left"]
         }
       }
     },
@@ -37,9 +37,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "north",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["north"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -47,9 +47,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["south"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -57,9 +57,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "west",
-          "half": "top",
-          "shape": "straight"
+          "facing": ["west"],
+          "half": ["top"],
+          "shape": ["straight"]
         }
       }
     },
@@ -67,9 +67,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "outer_right"
+          "facing": ["south"],
+          "half": ["top"],
+          "shape": ["outer_right"]
         }
       }
     },
@@ -77,9 +77,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "bottom",
-          "shape": "inner_right"
+          "facing": ["south"],
+          "half": ["bottom"],
+          "shape": ["inner_right"]
         }
       }
     },
@@ -87,9 +87,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "west",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["west"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -97,7 +97,7 @@
       "block": {
         "Name": "minecraft:acacia_slab",
         "Properties": {
-          "type": "bottom"
+          "type": ["bottom"]
         }
       }
     },
@@ -105,9 +105,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "east",
-          "half": "bottom",
-          "shape": "outer_right"
+          "facing": ["east"],
+          "half": ["bottom"],
+          "shape": ["outer_right"]
         }
       }
     },
@@ -115,10 +115,10 @@
       "block": {
         "Name": "minecraft:acacia_fence",
         "Properties": {
-          "east": "false",
-          "north": "true",
-          "south": "false",
-          "west": "false"
+          "east": ["false"],
+          "north": ["true"],
+          "south": ["false"],
+          "west": ["false"]
         }
       }
     },
@@ -126,9 +126,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["south"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -136,10 +136,10 @@
       "block": {
         "Name": "minecraft:acacia_fence",
         "Properties": {
-          "east": "false",
-          "north": "false",
-          "south": "false",
-          "west": "false"
+          "east": ["false"],
+          "north": ["false"],
+          "south": ["false"],
+          "west": ["false"]
         }
       }
     },
@@ -147,9 +147,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "south",
-          "half": "bottom",
-          "shape": "inner_left"
+          "facing": ["south"],
+          "half": ["bottom"],
+          "shape": ["inner_left"]
         }
       }
     },
@@ -157,9 +157,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "east",
-          "half": "bottom",
-          "shape": "straight"
+          "facing": ["east"],
+          "half": ["bottom"],
+          "shape": ["straight"]
         }
       }
     },
@@ -167,9 +167,9 @@
       "block": {
         "Name": "minecraft:acacia_stairs",
         "Properties": {
-          "facing": "west",
-          "half": "bottom",
-          "shape": "outer_left"
+          "facing": ["west"],
+          "half": ["bottom"],
+          "shape": ["outer_left"]
         }
       }
     }
