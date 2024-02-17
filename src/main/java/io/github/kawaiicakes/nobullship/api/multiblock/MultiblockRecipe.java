@@ -219,7 +219,7 @@ public record MultiblockRecipe(
                 // skip soft hyphen
                 if (charIndex >= 173) charIndex += 1;
                 char ch = (char) charIndex;
-                BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, blockStateTag).getOrThrow(false, LOGGER::error);
+                BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, blockStateTag).getOrThrow(true, LOGGER::error);
 
                 if (blockState.isAir()) {
                     orderedMappedPalette.add(index, Pair.of(' ', blockState));
@@ -462,7 +462,7 @@ public record MultiblockRecipe(
                 // skip soft hyphen
                 if (charIndex >= 173) charIndex += 1;
                 char ch = (char) charIndex;
-                BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, blockStateTag).getOrThrow(false, LOGGER::error);
+                BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, blockStateTag).getOrThrow(true, LOGGER::error);
 
                 if (blockState.isAir()) {
                     orderedMappedPalette.add(index, Pair.of(' ', blockState));

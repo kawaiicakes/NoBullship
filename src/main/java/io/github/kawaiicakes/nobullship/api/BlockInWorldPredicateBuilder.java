@@ -53,7 +53,7 @@ public class BlockInWorldPredicateBuilder {
 
             JsonElement blockstate;
             try {
-                blockstate = BlockState.CODEC.encodeStart(JsonOps.INSTANCE, this.blockState).getOrThrow(false, LOGGER::error);
+                blockstate = BlockState.CODEC.encodeStart(JsonOps.INSTANCE, this.blockState).getOrThrow(true, LOGGER::error);
                 toReturn.add("blockstate", blockstate);
             } catch (RuntimeException e) {
                 throw new RuntimeException(e);
@@ -498,7 +498,7 @@ public class BlockInWorldPredicateBuilder {
 
     protected CompoundTag serializeBlockStateToNbt() throws RuntimeException {
         try {
-            return (CompoundTag) BlockState.CODEC.encodeStart(NbtOps.INSTANCE, this.blockState).getOrThrow(false, LOGGER::error);
+            return (CompoundTag) BlockState.CODEC.encodeStart(NbtOps.INSTANCE, this.blockState).getOrThrow(true, LOGGER::error);
         } catch (ClassCastException e) {
             LOGGER.error("Unable to cast serialized blockstate NBT to CompoundTag!", e);
             throw new RuntimeException(e);
@@ -570,7 +570,7 @@ public class BlockInWorldPredicateBuilder {
 
         JsonElement blockstate;
         try {
-            blockstate = BlockState.CODEC.encodeStart(JsonOps.INSTANCE, this.blockState).getOrThrow(false, LOGGER::error);
+            blockstate = BlockState.CODEC.encodeStart(JsonOps.INSTANCE, this.blockState).getOrThrow(true, LOGGER::error);
             toReturn.add("blockstate", blockstate);
             if (this.requiresNbt())
                 this.serializeNbtToJson(toReturn);
@@ -677,7 +677,7 @@ public class BlockInWorldPredicateBuilder {
 
     protected static BlockInWorldPredicateBuilder deserializeBlockStateFromNbt(CompoundTag serializedPredicate) throws RuntimeException {
         try {
-            BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, serializedPredicate).getOrThrow(false, LOGGER::error);
+            BlockState blockState = BlockState.CODEC.parse(NbtOps.INSTANCE, serializedPredicate).getOrThrow(true, LOGGER::error);
             if (blockState.getBlock() instanceof SchematicBlock) {
                 return SCHEMATIC;
             }
@@ -768,7 +768,7 @@ public class BlockInWorldPredicateBuilder {
         try {
             blockStateAsJson = serializedPredicate.getAsJsonObject().get("blockstate");
             BlockState blockState = BlockState.CODEC.parse(
-                    JsonOps.INSTANCE, blockStateAsJson).getOrThrow(false, LOGGER::error);
+                    JsonOps.INSTANCE, blockStateAsJson).getOrThrow(true, LOGGER::error);
             toReturn = BlockInWorldPredicateBuilder.of(blockState);
 
             if (blockState.getBlock() instanceof SchematicBlock) {
