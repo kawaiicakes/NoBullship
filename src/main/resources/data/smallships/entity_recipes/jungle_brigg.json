@@ -14,40 +14,37 @@
       }
     },
     "*": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "north",
           "half": "top",
-          "shape": "outer_right",
-          "waterlogged": "true"
+          "shape": "outer_right"
         }
       }
     },
     "+": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "east",
           "half": "top",
-          "shape": "straight",
-          "waterlogged": "true"
+          "shape": "straight"
         }
       }
     },
     ",": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "south",
           "half": "top",
-          "shape": "outer_left",
-          "waterlogged": "true"
+          "shape": "outer_left"
         }
       }
     },
     "-": {
-      "blockstate": {
+      "block": {
         "Name": "nobullship:industrial_wood_polybeam",
         "Properties": {
           "down": "false",
@@ -55,111 +52,100 @@
           "north": "true",
           "south": "false",
           "up": "true",
-          "waterlogged": "true",
           "west": "false"
         }
       }
     },
     ".": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "south",
           "half": "top",
-          "shape": "straight",
-          "waterlogged": "true"
+          "shape": "straight"
         }
       }
     },
     "/": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "west",
           "half": "top",
-          "shape": "straight",
-          "waterlogged": "true"
+          "shape": "straight"
         }
       }
     },
     "0": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "north",
           "half": "top",
-          "shape": "outer_left",
-          "waterlogged": "true"
+          "shape": "outer_left"
         }
       }
     },
     "1": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "south",
           "half": "top",
-          "shape": "outer_right",
-          "waterlogged": "true"
+          "shape": "outer_right"
         }
       }
     },
     "3": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_slab",
         "Properties": {
-          "type": "bottom",
-          "waterlogged": "false"
+          "type": "bottom"
         }
       }
     },
     "4": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_trapdoor",
         "Properties": {
           "facing": "south",
-          "half": "top",
           "open": "true",
-          "powered": "false",
-          "waterlogged": "false"
+          "powered": "false"
         }
       }
     },
     "5": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "south",
           "half": "bottom",
-          "shape": "inner_right",
-          "waterlogged": "false"
+          "shape": "inner_right"
         }
       }
     },
     "6": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "west",
           "half": "bottom",
-          "shape": "straight",
-          "waterlogged": "false"
+          "shape": "straight"
         }
       }
     },
     "7": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "west",
           "half": "bottom",
-          "shape": "inner_right",
-          "waterlogged": "false"
+          "shape": "inner_right"
         }
       }
     },
     "8": {
-      "blockstate": {
+      "block": {
         "Name": "nobullship:industrial_wood_polybeam",
         "Properties": {
           "down": "true",
@@ -167,90 +153,77 @@
           "north": "false",
           "south": "false",
           "up": "true",
-          "waterlogged": "false",
           "west": "false"
         }
       }
     },
     "9": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "south",
           "half": "bottom",
-          "shape": "straight",
-          "waterlogged": "false"
+          "shape": "straight"
         }
       }
     },
     ":": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_fence",
         "Properties": {
           "east": "false",
           "north": "false",
-          "north_east": "false",
-          "north_west": "false",
-          "south": "false",
-          "south_east": "false",
-          "south_west": "false",
-          "waterlogged": "false",
           "west": "false"
         }
       }
     },
     ";": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "north",
           "half": "bottom",
-          "shape": "straight",
-          "waterlogged": "false"
+          "shape": "straight"
         }
       }
     },
     "<": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "south",
           "half": "top",
-          "shape": "straight",
-          "waterlogged": "false"
+          "shape": "straight"
         }
       }
     },
     "=": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "south",
           "half": "bottom",
-          "shape": "inner_left",
-          "waterlogged": "false"
+          "shape": "inner_left"
         }
       }
     },
     ">": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "east",
           "half": "bottom",
-          "shape": "straight",
-          "waterlogged": "false"
+          "shape": "straight"
         }
       }
     },
     "?": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:jungle_stairs",
         "Properties": {
           "facing": "east",
           "half": "bottom",
-          "shape": "inner_left",
-          "waterlogged": "false"
+          "shape": "inner_left"
         }
       }
     },
@@ -295,18 +268,6 @@
       "  A  ",
       "     ",
       "$$$$$"
-    ],
-    "layer10": [
-      "     ",
-      "     ",
-      " 59= ",
-      "$+&/$"
-    ],
-    "layer11": [
-      "     ",
-      "  @  ",
-      " 484 ",
-      "$$-$$"
     ],
     "layer2": [
       "     ",
@@ -355,6 +316,18 @@
       "  :  ",
       " 6:> ",
       "$+&/$"
+    ],
+    "layer10": [
+      "     ",
+      "     ",
+      " 59= ",
+      "$+&/$"
+    ],
+    "layer11": [
+      "     ",
+      "  @  ",
+      " 484 ",
+      "$$-$$"
     ]
   },
   "result": {

@@ -6,234 +6,198 @@
       }
     },
     "(": {
-      "blockstate": {
-        "Name": "nobullship:schematic_block",
-        "Properties": {
-          "facing": "north"
-        }
+      "block": {
+        "Name": "nobullship:schematic_block"
       }
     },
     "*": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:spruce_stairs",
         "Properties": {
           "facing": "north",
           "half": "top",
-          "shape": "outer_right",
-          "waterlogged": "true"
+          "shape": "outer_right"
         }
       }
     },
     "+": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:spruce_stairs",
         "Properties": {
           "facing": "east",
           "half": "top",
-          "shape": "straight",
-          "waterlogged": "true"
+          "shape": "straight"
         }
       }
     },
     ",": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:spruce_stairs",
         "Properties": {
           "facing": "south",
           "half": "top",
-          "shape": "outer_left",
-          "waterlogged": "true"
+          "shape": "outer_left"
         }
       }
     },
     "-": {
-      "blockstate": {
-        "Name": "minecraft:spruce_fence",
-        "Properties": {
-          "east": "true",
-          "north": "true",
-          "north_east": "false",
-          "north_west": "false",
-          "south": "false",
-          "south_east": "false",
-          "south_west": "false",
-          "waterlogged": "true",
-          "west": "true"
-        }
-      }
-    },
-    ".": {
-      "blockstate": {
-        "Name": "minecraft:spruce_stairs",
-        "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "straight",
-          "waterlogged": "true"
-        }
-      }
-    },
-    "/": {
-      "blockstate": {
-        "Name": "minecraft:spruce_stairs",
-        "Properties": {
-          "facing": "north",
-          "half": "top",
-          "shape": "outer_left",
-          "waterlogged": "true"
-        }
-      }
-    },
-    "0": {
-      "blockstate": {
-        "Name": "minecraft:spruce_stairs",
-        "Properties": {
-          "facing": "west",
-          "half": "top",
-          "shape": "straight",
-          "waterlogged": "true"
-        }
-      }
-    },
-    "1": {
-      "blockstate": {
-        "Name": "minecraft:spruce_stairs",
-        "Properties": {
-          "facing": "south",
-          "half": "top",
-          "shape": "outer_right",
-          "waterlogged": "true"
-        }
-      }
-    },
-    "3": {
-      "blockstate": {
-        "Name": "minecraft:spruce_trapdoor",
-        "Properties": {
-          "facing": "west",
-          "half": "bottom",
-          "open": "true",
-          "powered": "false",
-          "waterlogged": "false"
-        }
-      }
-    },
-    "4": {
-      "blockstate": {
-        "Name": "minecraft:spruce_slab",
-        "Properties": {
-          "type": "bottom",
-          "waterlogged": "false"
-        }
-      }
-    },
-    "5": {
-      "blockstate": {
-        "Name": "minecraft:spruce_stairs",
-        "Properties": {
-          "facing": "west",
-          "half": "bottom",
-          "shape": "straight",
-          "waterlogged": "false"
-        }
-      }
-    },
-    "6": {
-      "blockstate": {
-        "Name": "minecraft:spruce_stairs",
-        "Properties": {
-          "facing": "north",
-          "half": "bottom",
-          "shape": "inner_left",
-          "waterlogged": "false"
-        }
-      }
-    },
-    "7": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:spruce_fence",
         "Properties": {
           "east": "false",
           "north": "true",
-          "north_east": "false",
-          "north_west": "false",
           "south": "false",
-          "south_east": "false",
-          "south_west": "false",
-          "waterlogged": "false",
+          "west": "false"
+        }
+      }
+    },
+    ".": {
+      "block": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "straight"
+        }
+      }
+    },
+    "/": {
+      "block": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "top",
+          "shape": "outer_left"
+        }
+      }
+    },
+    "0": {
+      "block": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "top",
+          "shape": "straight"
+        }
+      }
+    },
+    "1": {
+      "block": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "south",
+          "half": "top",
+          "shape": "outer_right"
+        }
+      }
+    },
+    "3": {
+      "block": {
+        "Name": "minecraft:spruce_trapdoor",
+        "Properties": {
+          "facing": "west",
+          "open": "true",
+          "powered": "false"
+        }
+      }
+    },
+    "4": {
+      "block": {
+        "Name": "minecraft:spruce_slab",
+        "Properties": {
+          "type": "bottom"
+        }
+      }
+    },
+    "5": {
+      "block": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "west",
+          "half": "bottom",
+          "shape": "straight"
+        }
+      }
+    },
+    "6": {
+      "block": {
+        "Name": "minecraft:spruce_stairs",
+        "Properties": {
+          "facing": "north",
+          "half": "bottom",
+          "shape": "inner_left"
+        }
+      }
+    },
+    "7": {
+      "block": {
+        "Name": "minecraft:spruce_fence",
+        "Properties": {
+          "east": "false",
+          "north": "true",
+          "south": "false",
           "west": "false"
         }
       }
     },
     "8": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:spruce_stairs",
         "Properties": {
           "facing": "south",
           "half": "bottom",
-          "shape": "straight",
-          "waterlogged": "false"
+          "shape": "straight"
         }
       }
     },
     "9": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:spruce_fence",
         "Properties": {
           "east": "false",
           "north": "false",
-          "north_east": "false",
-          "north_west": "false",
           "south": "false",
-          "south_east": "false",
-          "south_west": "false",
-          "waterlogged": "false",
           "west": "false"
         }
       }
     },
     ":": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:spruce_stairs",
         "Properties": {
           "facing": "south",
           "half": "top",
-          "shape": "straight",
-          "waterlogged": "false"
+          "shape": "straight"
         }
       }
     },
     ";": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:spruce_stairs",
         "Properties": {
           "facing": "east",
           "half": "bottom",
-          "shape": "straight",
-          "waterlogged": "false"
+          "shape": "straight"
         }
       }
     },
     "<": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:spruce_stairs",
         "Properties": {
           "facing": "north",
           "half": "bottom",
-          "shape": "inner_right",
-          "waterlogged": "false"
+          "shape": "inner_right"
         }
       }
     },
     "=": {
-      "blockstate": {
+      "block": {
         "Name": "minecraft:spruce_trapdoor",
         "Properties": {
           "facing": "east",
-          "half": "bottom",
           "open": "true",
-          "powered": "false",
-          "waterlogged": "false"
+          "powered": "false"
         }
       }
     }
