@@ -159,67 +159,9 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
         Rotation rotationToNorth = rotationToNorth(facing);
 
         return (block) -> {
+            boolean toReturn = true;
             // I don't know if this cast is fine...
             BlockState rotatedState = block.getState().rotate((LevelAccessor) block.getLevel(), block.getPos(), rotationToNorth);
-
-            // FIXME: intended temp fix for accepting visually-identical stairs; doesn't work and adds "ghosts" to accepted property values
-            /*
-            if (rotatedState.getBlock() instanceof StairBlock) {
-                if (properties.containsKey("facing") && properties.containsKey("shape") && properties.get("facing").size() == 1 && properties.get("shape").size() == 1) {
-                    Direction currentFacing = block.getState().getValue(StairBlock.FACING);
-                    StairsShape currentShape = block.getState().getValue(StairBlock.SHAPE);
-                    if (!currentShape.equals(StairsShape.STRAIGHT)) {
-                        Map<String, Set<String>> stairProperties = new HashMap<>(properties);
-
-                        Direction newFacing = getNewStairsFacing(currentShape, currentFacing);
-                        StairsShape newShape = switch (currentShape) {
-                            case STRAIGHT -> throw new RuntimeException();
-                            case INNER_LEFT -> StairsShape.INNER_RIGHT;
-                            case INNER_RIGHT -> StairsShape.INNER_LEFT;
-                            case OUTER_LEFT -> StairsShape.OUTER_RIGHT;
-                            case OUTER_RIGHT -> StairsShape.OUTER_LEFT;
-                        };
-
-                        stairProperties.get("facing").add(newFacing.getSerializedName());
-                        stairProperties.get("shape").add(newShape.getSerializedName());
-
-                        for (Map.Entry<String, Set<String>> entry : stairProperties.entrySet()) {
-                            Property<?> propertyOfBlockInWorld;
-
-                            try {
-                                propertyOfBlockInWorld = rotatedState.getValues()
-                                        .keySet()
-                                        .stream()
-                                        .filter(property -> property.getName().equals(entry.getKey()))
-                                        .findFirst()
-                                        .orElseThrow();
-                            } catch (IllegalArgumentException | NoSuchElementException e) {
-                                // These errors are expected if the property is not found in the blockstate. No message is necessary
-                                return false;
-                            } catch (RuntimeException e) {
-                                LOGGER.error("Unexpected error while checking properties!", e);
-                                LOGGER.error(e.getMessage());
-                                return false;
-                            }
-
-                            String valueAtPropertyOfBlockInWorld;
-                            try {
-                                valueAtPropertyOfBlockInWorld = rotatedState.getValue(propertyOfBlockInWorld).toString();
-                            } catch (RuntimeException e) {
-                                LOGGER.error("Exception encountered!", e);
-                                LOGGER.error("Error while determining value at property {} of block {}!", entry.getKey(), block.getPos());
-                                LOGGER.error(e.getMessage());
-                                return false;
-                            }
-
-                            if (!entry.getValue().contains(valueAtPropertyOfBlockInWorld)) return false;
-                        }
-
-                        return true;
-                    }
-                }
-            }
-             */
 
             for (Map.Entry<String, Set<String>> entry : properties.entrySet()) {
                 Property<?> propertyOfBlockInWorld;
@@ -250,10 +192,71 @@ public class BlockInWorldPredicate implements Predicate<BlockInWorld> {
                     return false;
                 }
 
-                if (!entry.getValue().contains(valueAtPropertyOfBlockInWorld)) return false;
+                if (!entry.getValue().contains(valueAtPropertyOfBlockInWorld)) {
+                    toReturn = false;
+                    break;
+                }
             }
 
-            return true;
+            // FIXME: intended temp fix for accepting visually-identical stairs
+            if (!toReturn && block.getState().getBlock() instanceof StairBlock && !rotatedState.getValue(StairBlock.SHAPE).equals(StairsShape.STRAIGHT)) {
+                StairsShape oldShape = rotatedState.getValue(StairBlock.SHAPE);
+                Direction oldFacing = rotatedState.getValue(StairBlock.FACING);
+
+                StairsShape newShape = switch (oldShape) {
+                    case STRAIGHT -> throw new RuntimeException();
+                    case INNER_LEFT -> StairsShape.INNER_RIGHT;
+                    case INNER_RIGHT -> StairsShape.INNER_LEFT;
+                    case OUTER_LEFT -> StairsShape.OUTER_RIGHT;
+                    case OUTER_RIGHT -> StairsShape.OUTER_LEFT;
+                };
+                Direction newFacing = getNewStairsFacing(oldShape, oldFacing);
+
+                for (Map.Entry<String, Set<String>> entry : properties.entrySet()) {
+                    Property<?> propertyOfBlockInWorld;
+
+                    try {
+                        propertyOfBlockInWorld = rotatedState.getValues()
+                                .keySet()
+                                .stream()
+                                .filter(property -> property.getName().equals(entry.getKey()))
+                                .findFirst()
+                                .orElseThrow();
+                    } catch (IllegalArgumentException | NoSuchElementException e) {
+                        // These errors are expected if the property is not found in the blockstate. No message is necessary
+                        return false;
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Unexpected error while checking properties!", e);
+                        LOGGER.error(e.getMessage());
+                        return false;
+                    }
+
+                    String valueAtPropertyOfBlockInWorld;
+                    try {
+                        if (propertyOfBlockInWorld.getName().equals("facing")) {
+                            valueAtPropertyOfBlockInWorld = newFacing.getSerializedName();
+                        } else if (propertyOfBlockInWorld.getName().equals("shape")) {
+                            valueAtPropertyOfBlockInWorld = newShape.getSerializedName();
+                        } else {
+                            valueAtPropertyOfBlockInWorld = rotatedState.getValue(propertyOfBlockInWorld).toString();
+                        }
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Exception encountered!", e);
+                        LOGGER.error("Error while determining value at property {} of block {}!", entry.getKey(), block.getPos());
+                        LOGGER.error(e.getMessage());
+                        return false;
+                    }
+
+                    if (!entry.getValue().contains(valueAtPropertyOfBlockInWorld)) {
+                        toReturn = false;
+                        break;
+                    }
+
+                    toReturn = true;
+                }
+            }
+
+            return toReturn;
         };
     }
 
