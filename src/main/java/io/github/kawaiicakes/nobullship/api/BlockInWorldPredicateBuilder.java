@@ -71,7 +71,7 @@ public class BlockInWorldPredicateBuilder {
 
         @Override
         public BlockInWorldPredicate build() {
-            return new BlockInWorldPredicate(null, SCHEMATIC_BLOCK.get().defaultBlockState(), null, null, null, null, null);
+            return new BlockInWorldPredicate(SCHEMATIC_BLOCK.get(), null, null, null, null, null, null);
         }
 
         @Override
