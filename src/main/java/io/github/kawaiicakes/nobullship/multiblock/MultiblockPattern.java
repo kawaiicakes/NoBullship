@@ -82,13 +82,18 @@ public class MultiblockPattern extends BlockPattern {
     @Nullable
     @Override
     protected BlockPattern.BlockPatternMatch matches(BlockPos pPos, Direction pFinger, Direction pThumb, LoadingCache<BlockPos, BlockInWorld> pCache) {
-        for(int i = 0; i < this.width; ++i) {
-            for(int j = 0; j < this.height; ++j) {
-                for(int k = 0; k < this.depth; ++k) {
-                    boolean hasMatchAt = ((BlockInWorldPredicate) this.pattern[k][j][i]).setFacing(pFinger).test(pCache.getUnchecked(translateAndRotate(pPos, pFinger, pThumb, i, j, k)));
-                    if (!hasMatchAt) return null;
+        try {
+            for (int i = 0; i < this.width; ++i) {
+                for (int j = 0; j < this.height; ++j) {
+                    for (int k = 0; k < this.depth; ++k) {
+                        boolean hasMatchAt = ((BlockInWorldPredicate) this.pattern[k][j][i]).setFacing(pFinger).test(pCache.getUnchecked(translateAndRotate(pPos, pFinger, pThumb, i, j, k)));
+                        if (!hasMatchAt) return null;
+                    }
                 }
             }
+        } catch (RuntimeException e) {
+            LOGGER.error("Exception while testing block predicates against world:", e);
+            return null;
         }
 
         return new BlockPattern.BlockPatternMatch(pPos, pFinger, pThumb, pCache, this.width, this.height, this.depth);
